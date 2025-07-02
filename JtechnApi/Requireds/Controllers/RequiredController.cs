@@ -1,4 +1,5 @@
 ﻿
+using JtechnApi.Requireds.Models;
 using JtechnApi.Requireds.Repositories;
 using JtechnApi.Shares.Connects;
 using Microsoft.AspNetCore.Mvc;
@@ -32,8 +33,14 @@ namespace JtechnApi.Controllers
         public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 50)
         {
             var result = await repo.GetPaginatedAsync(page, pageSize);
-          
+
             return Ok(result);
+        }
+        [HttpPost]
+        [Route("create")]
+        public async Task<IActionResult> Create([FromForm] RequiredDto RequiredDto)
+        { 
+            
         }
     }
 }

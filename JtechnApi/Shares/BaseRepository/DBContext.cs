@@ -1,0 +1,61 @@
+﻿using JtechnApi.Accessorys.Models;
+using JtechnApi.Departments.Models;
+using JtechnApi.Employees.Models;
+using JtechnApi.Exams.Models;
+using JtechnApi.ProductionPlans.Models;
+using JtechnApi.Requireds.Models;
+using JtechnApi.Umesens.Models;
+using JtechnApi.UploadDatas.Models;
+using JtechnApi.Users.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace JtechnApi.Shares.BaseRepository
+{
+    public class DBContext : DbContext
+    {
+        public DbSet<Exam> Exam { get; set; }
+        public DbSet<Admin> Admin { get; set; }
+        public DbSet<Department> Department { get; set; }
+        public DbSet<Employee> Employee { get; set; }
+        public DbSet<EmployeeDepartment> EmployeeDepartment { get; set; }
+        public DbSet<ProductionPlan> ProductionPlan { get; set; }
+        public DbSet<SignatureSubmission> SignatureSubmission { get; set; }
+        public DbSet<Umesen> Umesen { get; set; }
+        public DbSet<UploadData> UploadData { get; set; }
+        public DbSet<Accessory> Accessory { get; set; }
+        public DbSet<Required> Required { get; set; }
+        public DbSet<TempRequired> TempRequired { get; set; }
+        public DBContext(DbContextOptions<DBContext> options) : base(options)
+        {
+
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuider)
+        {
+            modelBuider.Entity<Department>()
+                .HasIndex(d => d.Id)
+                .IsUnique();
+            modelBuider.Entity<Required>()
+                .HasOne(r => r.Department)
+                .WithMany(d => d.Requireds)
+                .HasForeignKey(r => r.Required_department_id)
+                .HasPrincipalKey(d => d.Id);
+            modelBuider.Entity<Required>()
+                .HasOne(ez => ez.Employee)
+                .WithMany(d => d.Requireds)
+                .HasForeignKey(e => e.Created_by)
+                .HasPrincipalKey(d => d.Id);
+            modelBuider.Entity<Required>()
+                .HasOne(e => e.Accessory)
+                .WithOne(p => p.Required)
+                .HasPrincipalKey<Required>(e => e.Code)        // 👈 dùng Code làm "khóa chính logic"
+                .HasForeignKey<Accessory>(p => p.Code); // 👈 khóa ngoại tùy chỉnh
+            modelBuider.Entity<SignatureSubmission>()
+                .HasOne(d => d.Required)
+                .WithMany(d => d.SignatureSubmissions)
+                .HasForeignKey(e => e.Required_id)
+                .HasPrincipalKey(d => d.Id);
+          
+        }
+    }
+}

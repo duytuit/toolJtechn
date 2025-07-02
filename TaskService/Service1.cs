@@ -3,6 +3,7 @@ using MailKit.Net.Imap;
 using MailKit.Security;
 using MimeKit;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.ServiceProcess;
 using System.Text;
@@ -96,6 +97,7 @@ namespace TaskService
                      subject.StartsWith("FW:", StringComparison.OrdinalIgnoreCase) ||
                      subject.StartsWith("RE:", StringComparison.OrdinalIgnoreCase))) continue;
                 // Đọc đính kèm
+                List<string> path_files = new List<string>();
                 foreach (var attachment in message.Attachments)
                 {
                     var rawFileName = attachment.ContentDisposition?.FileName ?? attachment.ContentType.Name;
@@ -111,7 +113,7 @@ namespace TaskService
                             part.Content.DecodeTo(stream);
                             var savePath = Path.Combine(directoryPath, rawFileName);
                             File.WriteAllBytes(savePath, stream.ToArray());
-
+                            path_files.Add(rawFileName);
                             WriteLog($"Đã lưu file đính kèm: {rawFileName}");
                         }
                     }

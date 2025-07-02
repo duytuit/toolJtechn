@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LampWarningAgvDap", "LampWa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pdftopng", "pdftopng\pdftopng.csproj", "{7ABA6C33-7EFA-4A9F-AC0E-33444C26D6E8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesignLabel", "DesignLabel\DesignLabel.csproj", "{CAFBD4E8-0785-4447-A64F-5EF3C1D38E02}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +93,10 @@ Global
 		{7ABA6C33-7EFA-4A9F-AC0E-33444C26D6E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7ABA6C33-7EFA-4A9F-AC0E-33444C26D6E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7ABA6C33-7EFA-4A9F-AC0E-33444C26D6E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAFBD4E8-0785-4447-A64F-5EF3C1D38E02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAFBD4E8-0785-4447-A64F-5EF3C1D38E02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAFBD4E8-0785-4447-A64F-5EF3C1D38E02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAFBD4E8-0785-4447-A64F-5EF3C1D38E02}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

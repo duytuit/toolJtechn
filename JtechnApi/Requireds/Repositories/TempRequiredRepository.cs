@@ -70,8 +70,8 @@ namespace JtechnApi.Requireds.Repositories
             {
                 throw new ArgumentNullException(nameof(tempRequired), "TempRequired cannot be null");
             }
-            tempRequired.Created_at = DateTime.UtcNow;
-            tempRequired.Updated_at = DateTime.UtcNow;
+            tempRequired.Created_at = DateTime.Now;
+            tempRequired.Updated_at = DateTime.Now;
             _context.TempRequired.Add(tempRequired);
             _context.SaveChanges();
 
@@ -86,7 +86,7 @@ namespace JtechnApi.Requireds.Repositories
                 return Task.FromResult(false);
             }
 
-            tempRequired.Deleted_at = DateTime.UtcNow; // Soft delete
+            tempRequired.Deleted_at = DateTime.Now; // Soft delete
             _context.TempRequired.Update(tempRequired);
             _context.SaveChanges();
 
@@ -110,7 +110,7 @@ namespace JtechnApi.Requireds.Repositories
             existingTempRequired.Code_nv = tempRequired.Code_nv;
             existingTempRequired.Content = tempRequired.Content;
             existingTempRequired.Status = tempRequired.Status;
-            existingTempRequired.Updated_at = DateTime.UtcNow;
+            existingTempRequired.Updated_at = DateTime.Now;
             // Update other properties as needed
             _context.TempRequired.Update(existingTempRequired);
             _context.SaveChanges();

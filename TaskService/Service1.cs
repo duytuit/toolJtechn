@@ -2,9 +2,11 @@
 using MailKit.Net.Imap;
 using MailKit.Security;
 using MimeKit;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.ServiceProcess;
 using System.Text;
 using System.Timers;
@@ -15,6 +17,7 @@ namespace TaskService
     {
         private Timer timer;
         private ImapClient client;
+        private static readonly HttpClient __client = new HttpClient(); // dùng 1 lần cho cả app
         private readonly string imapServer = "jtechanoi.com.vn";
         private readonly int imapPort = 993;
         private readonly string username = "cam-002@jtechanoi.com.vn";
@@ -36,7 +39,7 @@ namespace TaskService
 
                 WriteLog("Đã kết nối IMAP.");
 
-                timer = new Timer(1 * 60 * 1000); // 5 phút
+                timer = new Timer(5 * 60 * 1000); // 5 phút
                 timer.Elapsed += Timer_Elapsed;
                 timer.AutoReset = true;
                 timer.Start();
@@ -72,7 +75,7 @@ namespace TaskService
             }
         }
 
-        private void ReadEmail()
+        private async void ReadEmail()
         {
             if (client?.IsConnected != true)
             {
@@ -89,15 +92,17 @@ namespace TaskService
             {
                 var message = inbox.GetMessage(i);
                 if (message.Date.Date != today) continue;
+
                 if (!message.From.ToString().ToLower().Contains("qlsx")) continue;
 
-                var subject = message.Subject?.Trim();
-                if (!string.IsNullOrEmpty(subject) &&
-                    (subject.StartsWith("Fwd:", StringComparison.OrdinalIgnoreCase) ||
-                     subject.StartsWith("FW:", StringComparison.OrdinalIgnoreCase) ||
-                     subject.StartsWith("RE:", StringComparison.OrdinalIgnoreCase))) continue;
+               // var subject = message.Subject?.Trim();
+                //if (!string.IsNullOrEmpty(subject) &&
+                //    (subject.StartsWith("Fwd:", StringComparison.OrdinalIgnoreCase) ||
+                //     subject.StartsWith("FW:", StringComparison.OrdinalIgnoreCase) ||
+                //     subject.StartsWith("RE:", StringComparison.OrdinalIgnoreCase))) continue;
                 // Đọc đính kèm
                 List<string> path_files = new List<string>();
+                string content = null;
                 foreach (var attachment in message.Attachments)
                 {
                     var rawFileName = attachment.ContentDisposition?.FileName ?? attachment.ContentType.Name;
@@ -117,10 +122,30 @@ namespace TaskService
                             WriteLog($"Đã lưu file đính kèm: {rawFileName}");
                         }
                     }
-                  
-                }
-                WriteLog($"Email từ {message.From} - Chủ đề: {message.Subject}");
+                    if (!string.IsNullOrEmpty(message.TextBody))
+                    {
+                        content = message.TextBody;
+                    }
+                    else if (!string.IsNullOrEmpty(message.HtmlBody))
+                    {
+                        content = message.HtmlBody;
+                    }
 
+                }
+                // Tạo dữ liệu form
+                var formData = new[]
+                {
+                    new KeyValuePair<string, string>("Code", message.From.ToString()),
+                    new KeyValuePair<string, string>("Title", message.Subject),
+                    new KeyValuePair<string, string>("Content",content ?? ""),
+                    new KeyValuePair<string, string>("Attach",  path_files.Count > 0 ? JsonConvert.SerializeObject(path_files) : content ?? ""),
+                    new KeyValuePair<string, string>("Created_client",message.Date.ToString("yyyy-MM-dd HH:mm:ss")),
+                };
+                var _content = new FormUrlEncodedContent(formData);
+                var response = await __client.PostAsync("http://192.168.207.6:8080/Required/task/create", _content);
+                response.EnsureSuccessStatusCode();
+                string result = await response.Content.ReadAsStringAsync();
+                WriteLog($"Email từ {message.From} - Chủ đề: {message.Subject}");
             }
         }
 

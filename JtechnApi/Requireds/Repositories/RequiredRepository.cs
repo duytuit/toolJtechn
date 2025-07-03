@@ -3,6 +3,7 @@ using JtechnApi.Requireds.Models;
 using JtechnApi.Shares;
 using JtechnApi.Shares.BaseRepository;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,13 +28,22 @@ namespace JtechnApi.Requireds.Repositories
             _context = context;
         }
 
-        public async Task<PaginatedResult<Required>> GetPaginatedAsync(int page, int pageSize)
+        public async Task<PaginatedResult<Required>> GetPaginatedAsync(RequestRequiredDto RequestRequiredDto,int page, int pageSize)
         {
             // var totalItems = await _context.Required.CountAsync();
-            var query_required = _context.Required.AsQueryable();
-            //query_required.OrderBy(c => c.Id);
-            query_required.Where(u => u.Deleted_at == null);
-            var requireds = await query_required.Skip((page - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
+            var _query = _context.Required.AsQueryable();
+            _query.Where(u => u.Deleted_at == null);
+
+            if (RequestRequiredDto.Status.HasValue)
+            {   
+                _query = _query.Where(u => u.Status == RequestRequiredDto.Status);
+            }
+            if (RequestRequiredDto.From_type.HasValue)
+            {   
+                _query = _query.Where(u => u.From_type == RequestRequiredDto.From_type);
+            }
+
+            var requireds = await _query.Skip((page - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
 
             var signatureSubmissionIds = requireds.Select(c => c.Id).ToList();
             var employeeIds = requireds.Select(c => c.Created_by).ToList();
@@ -80,18 +90,31 @@ namespace JtechnApi.Requireds.Repositories
                 Items = result
             };
         }
-        public Task<Required> CreateTempRequiredAsync(Required required)
+         public Task<Required> CreateRequiredAsync(Required required)
         {
             if (required == null)
             {
                 throw new ArgumentNullException(nameof(required), "required cannot be null");
             }
-            required.Created_at = DateTime.UtcNow;
-            required.Updated_at = DateTime.UtcNow;
+            required.Created_at = DateTime.Now;
+            required.Updated_at = DateTime.Now;
             _context.Required.Add(required);
             _context.SaveChanges();
 
             return Task.FromResult(required);
+        }
+        public Task<Required> CheckDuplicateTitle(string title, int from_type, DateTime? created_client)
+        {
+            var _query = _context.Required.AsQueryable();
+            _query.Where(u => u.Deleted_at == null);
+            _query = _query.Where(u => u.From_type == from_type);
+            _query = _query.Where(u => u.Title == title);
+            if (created_client.HasValue)
+            {
+                _query = _query.Where(u => u.Created_client == created_client.Value);
+            }
+            var required = _query.FirstOrDefaultAsync();
+            return required;
         }
     }
 }

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
 	  <TargetFramework>netcoreapp3.1</TargetFramework>
-      <PublishReadyToRun>true</PublishReadyToRun>
+      <PublishReadyToRun>false</PublishReadyToRun>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +14,8 @@
     <PackageReference Include="MySqlConnector" Version="0.59.2" />
     <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.100" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.2.6" />
+    <PackageReference Include="Serilog.AspNetCore" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="SixLabors.Fonts" Version="1.0.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="2.1.10" />
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0" />
@@ -22,7 +24,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Update="web.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>

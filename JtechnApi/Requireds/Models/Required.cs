@@ -15,6 +15,8 @@ namespace JtechnApi.Requireds.Models
         [Key]
         [Column("id")]
         public int Id { get; set; }
+        [Column("title")]
+        public string Title { get; set; }
 
         [Column("code_required")]
         public string Code_required { get; set; }
@@ -62,6 +64,8 @@ namespace JtechnApi.Requireds.Models
         public DateTime? Updated_at { get; set; }
         [Column("deleted_at")]
         public DateTime? Deleted_at { get; set; }
+        [Column("created_client")]
+        public DateTime? Created_client { get; set; }
         [Column("content_form")]
         public string Content_form { get; set; }
         [Column("usage_status")]

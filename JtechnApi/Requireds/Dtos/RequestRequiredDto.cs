@@ -12,6 +12,7 @@ namespace JtechnApi.Requireds.Models
         public string Code_nv { get; set; }
         public string Department { get; set; }
         public string Content { get; set; }
+        public int? From_type { get; set; }
         public int? Size { get; set; }
         public int Usage_status { get; set; }
         public double Quantity { get; set; }

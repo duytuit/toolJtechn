@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Threading.Tasks;
 using JtechnApi.Requireds.Models;
 using JtechnApi.Shares;
@@ -8,6 +9,8 @@ namespace JtechnApi.Requireds.Repositories
 {
     public interface IRequiredRepository : IBaseRepository<Required>
     {
-        Task<PaginatedResult<Required>> GetPaginatedAsync(int page, int pageSize);
+        Task<PaginatedResult<Required>> GetPaginatedAsync(RequestRequiredDto RequestRequiredDto, int page, int pageSize);
+        Task<Required> CreateRequiredAsync(Required required);
+        Task<Required> CheckDuplicateTitle(string title, int from_type, DateTime? created_client);
     }
 }

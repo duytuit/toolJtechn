@@ -7,7 +7,7 @@ namespace JtechnApi.Shares
 {
     public static class Helper
     {
-        public static string FormTypeJobs(int type)
+        public static string ConfigFormType(int type)
         {
             object result = null;
             switch (type)

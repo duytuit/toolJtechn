@@ -32,6 +32,17 @@ namespace JtechnApi.Shares.BaseRepository
 
         protected override void OnModelCreating(ModelBuilder modelBuider)
         {
+            modelBuider.Entity<Employee>().HasQueryFilter(e => e.Deleted_at == null);
+            modelBuider.Entity<TempRequired>().HasQueryFilter(e => e.Deleted_at == null);
+            modelBuider.Entity<Required>().HasQueryFilter(e => e.Deleted_at == null);
+            modelBuider.Entity<Exam>().HasQueryFilter(e => e.Deleted_at == null);
+            modelBuider.Entity<Accessory>().HasQueryFilter(e => e.Deleted_at == null);
+            modelBuider.Entity<SignatureSubmission>().HasQueryFilter(e => e.Deleted_at == null);
+            modelBuider.Entity<UploadData>().HasQueryFilter(e => e.Deleted_at == null);
+            modelBuider.Entity<ProductionPlan>().HasQueryFilter(e => e.Deleted_at == null);
+            modelBuider.Entity<Umesen>().HasQueryFilter(e => e.Deleted_at == null);
+            modelBuider.Entity<Department>().HasQueryFilter(e => e.Deleted_at == null);
+            modelBuider.Entity<EmployeeDepartment>().HasQueryFilter(e => e.Deleted_at == null);
             modelBuider.Entity<Department>()
                 .HasIndex(d => d.Id)
                 .IsUnique();

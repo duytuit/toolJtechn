@@ -37,17 +37,42 @@ namespace JtechnApi.Controllers
         public async Task<IActionResult> Get([FromQuery] int page = 1, int pageSize = 50, [FromQuery] RequestRequiredDto RequestRequiredDto = null)
         {
             var result = await repo.GetPaginatedAsync(RequestRequiredDto, page, pageSize);
-            if (result == null || result.Items.Count == 0)
+            if (result == null || result.TotalItems == 0)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
-            }   
+            }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet]
+        [Route("task")]
+        public async Task<IActionResult> GetTask([FromQuery] int page = 1, int pageSize = 50, [FromQuery] RequestRequiredDto RequestRequiredDto = null)
+        {
+
+            if (RequestRequiredDto.Fields != null && RequestRequiredDto.Fields.Trim() != "")
+            {
+                // Nếu có trường Fields, gọi GetObjectTaskAsync
+                var result = await repo.GetObjectTaskAsync(RequestRequiredDto, page, pageSize);
+                if (result == null || result.TotalItems == 0)
+                {
+                    return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+                }
+                return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+            }
+            else
+            {
+                var result = await repo.GetTaskAsync(RequestRequiredDto, page, pageSize);
+                if (result == null || result.TotalItems == 0)
+                {
+                    return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+                }
+                return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+            }
         }
         [HttpPost]
         [Route("task/create")]
         public async Task<IActionResult> Create([FromForm] TaskRequiredDto TaskRequiredDto)
         {
-            
+
             int rs_check = await repo.CheckDuplicateTitle(TaskRequiredDto.Title, RequiredRepository.from_type_task, TaskRequiredDto.Created_client);
             if (rs_check > 0)
             {
@@ -85,6 +110,16 @@ namespace JtechnApi.Controllers
             {
                 return ApiResponseResult<object>(false, "Thêm mới thất bại", null);
             }
+        }
+        [HttpGet("task/{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            Required required = await repo.show(id);
+            if (required == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult<object>(true, "Lấy dữ liệu thành công", required);
         }
     }
 }

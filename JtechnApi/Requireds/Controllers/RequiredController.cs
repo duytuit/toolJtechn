@@ -48,8 +48,8 @@ namespace JtechnApi.Controllers
         public async Task<IActionResult> Create([FromForm] TaskRequiredDto TaskRequiredDto)
         {
             
-            Required rs_check = await repo.CheckDuplicateTitle(TaskRequiredDto.Title, RequiredRepository.from_type_task, TaskRequiredDto.Created_client);
-            if (rs_check != null)
+            int rs_check = await repo.CheckDuplicateTitle(TaskRequiredDto.Title, RequiredRepository.from_type_task, TaskRequiredDto.Created_client);
+            if (rs_check > 0)
             {
                 return ApiResponseResult<object>(false, "Tiêu đề đã tồn tại", null);
             }

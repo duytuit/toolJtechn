@@ -11,6 +11,6 @@ namespace JtechnApi.Requireds.Repositories
     {
         Task<PaginatedResult<Required>> GetPaginatedAsync(RequestRequiredDto RequestRequiredDto, int page, int pageSize);
         Task<Required> CreateRequiredAsync(Required required);
-        Task<Required> CheckDuplicateTitle(string title, int from_type, DateTime? created_client);
+        Task<int> CheckDuplicateTitle(string title, int from_type, DateTime? created_client);
     }
 }

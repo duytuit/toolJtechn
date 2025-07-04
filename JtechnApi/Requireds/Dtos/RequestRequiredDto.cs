@@ -19,7 +19,7 @@ namespace JtechnApi.Requireds.Models
         public int Type { get; set; }
         public int Print { get; set; }
         public string Pc_name { get; set; }
-        public int? Status { get; set; } = null;
+        public int? Status { get; set; }
         public DateTime? Created_at { get; set; } = null;
         public DateTime? Updated_at { get; set; } = null;    
         public DateTime? Deleted_at { get; set; } = null;

@@ -9,6 +9,7 @@ using System.IO;
 using System.Net.Http;
 using System.ServiceProcess;
 using System.Text;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace TaskService
@@ -52,7 +53,7 @@ namespace TaskService
             }
         }
 
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        private async void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             var now = DateTime.Now.TimeOfDay;
             var start = new TimeSpan(7, 0, 0);  // 07:00
@@ -62,7 +63,7 @@ namespace TaskService
             {
                 try
                 {
-                    ReadEmail();
+                    await ReadEmail();
                 }
                 catch (Exception ex)
                 {
@@ -75,7 +76,7 @@ namespace TaskService
             }
         }
 
-        private async void ReadEmail()
+        private async Task ReadEmail()
         {
             if (client?.IsConnected != true)
             {
@@ -122,29 +123,38 @@ namespace TaskService
                             WriteLog($"Đã lưu file đính kèm: {rawFileName}");
                         }
                     }
-                    if (!string.IsNullOrEmpty(message.TextBody))
-                    {
-                        content = message.TextBody;
-                    }
-                    else if (!string.IsNullOrEmpty(message.HtmlBody))
-                    {
-                        content = message.HtmlBody;
-                    }
-
+                    //if (!string.IsNullOrEmpty(message.TextBody))
+                    //{
+                     //content = message.TextBody;
+                    //}
+                   
+                    //if (!string.IsNullOrEmpty(message.HtmlBody))
+                    //{}
                 }
-                // Tạo dữ liệu form
-                var formData = new[]
+                content = message.HtmlBody;
+                string attachValue = path_files.Count > 0 ? JsonConvert.SerializeObject(path_files) : null;
+
+                var form = new MultipartFormDataContent();
+                // Giả sử bạn đang gửi 2 dữ liệu: taskName và nội dung HTML lớn
+                form.Add(new StringContent(content?? ""), "Content");
+                form.Add(new StringContent(message.From.ToString()), "Code");
+                form.Add(new StringContent(message.Subject), "Title");
+                form.Add(new StringContent(attachValue ?? ""), "Attach");
+                form.Add(new StringContent(message.Date.ToString("yyyy-MM-dd HH:mm:ss")), "Created_client");
+
+                try
                 {
-                    new KeyValuePair<string, string>("Code", message.From.ToString()),
-                    new KeyValuePair<string, string>("Title", message.Subject),
-                    new KeyValuePair<string, string>("Content",content ?? ""),
-                    new KeyValuePair<string, string>("Attach",  path_files.Count > 0 ? JsonConvert.SerializeObject(path_files) : content ?? ""),
-                    new KeyValuePair<string, string>("Created_client",message.Date.ToString("yyyy-MM-dd HH:mm:ss")),
-                };
-                var _content = new FormUrlEncodedContent(formData);
-                var response = await __client.PostAsync("http://192.168.207.6:8080/Required/task/create", _content);
-                response.EnsureSuccessStatusCode();
-                string result = await response.Content.ReadAsStringAsync();
+                    var response = await __client.PostAsync("http://192.168.207.6:8080/Required/task/create", form);
+                    string result = await response.Content.ReadAsStringAsync();
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        WriteLog($"Phản hồi từ server: {result}{JsonConvert.SerializeObject(form)}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    WriteLog("Lỗi khi gửi API: " + ex.ToString() + JsonConvert.SerializeObject(form));
+                }
                 WriteLog($"Email từ {message.From} - Chủ đề: {message.Subject}");
             }
         }

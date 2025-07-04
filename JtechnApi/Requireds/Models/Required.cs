@@ -81,7 +81,7 @@ namespace JtechnApi.Requireds.Models
         public string Location { get; set; }
 
         [Column("quantity_detail")]
-        public int? Quantity_detail { get; set; }
+        public double? Quantity_detail { get; set; }
 
         [Column("pc_name")]
         public string Pc_name { get; set; }

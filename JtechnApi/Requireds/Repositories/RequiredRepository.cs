@@ -32,7 +32,7 @@ namespace JtechnApi.Requireds.Repositories
         {
             // var totalItems = await _context.Required.CountAsync();
             var _query = _context.Required.AsQueryable();
-            _query.Where(u => u.Deleted_at == null);
+             _query = _query.Where(u => u.Deleted_at == null);
 
             if (RequestRequiredDto.Status.HasValue)
             {   
@@ -42,14 +42,13 @@ namespace JtechnApi.Requireds.Repositories
             {   
                 _query = _query.Where(u => u.From_type == RequestRequiredDto.From_type);
             }
-
+            int totalItems = await _query.CountAsync();
             var requireds = await _query.Skip((page - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
 
             var signatureSubmissionIds = requireds.Select(c => c.Id).ToList();
             var employeeIds = requireds.Select(c => c.Created_by).ToList();
             var accessoryIds = requireds.Select(c => c.Code).ToList();
             var departmentIds = requireds.Select(c => c.Required_department_id).ToList();
-
 
             var signatureSubmissions = await _context.SignatureSubmission
                     .Where(p => signatureSubmissionIds.Contains(p.Id))
@@ -70,7 +69,7 @@ namespace JtechnApi.Requireds.Repositories
                  .Where(p => departmentIds.Contains(p.Id))
                  .AsNoTracking()
                  .ToListAsync();
-
+          
             var result = new List<Required>();
 
             foreach (var required in requireds)
@@ -81,12 +80,11 @@ namespace JtechnApi.Requireds.Repositories
                 required.Department = departments.Where(p => p.Id == required.Required_department_id).FirstOrDefault();
                 result.Add(required);
             }
-
             return new PaginatedResult<Required>
             {
-                //CurrentPage = page,
-                //TotalPages = (int)Math.Ceiling((double)totalItems / pageSize),
-                //TotalItems = totalItems,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling((double)totalItems / pageSize),
+                TotalItems = totalItems,
                 Items = result
             };
         }
@@ -103,17 +101,17 @@ namespace JtechnApi.Requireds.Repositories
 
             return Task.FromResult(required);
         }
-        public Task<Required> CheckDuplicateTitle(string title, int from_type, DateTime? created_client)
+        public Task<int> CheckDuplicateTitle(string title, int from_type, DateTime? created_client)
         {
             var _query = _context.Required.AsQueryable();
-            _query.Where(u => u.Deleted_at == null);
+            _query = _query.Where(u => u.Deleted_at == null);
             _query = _query.Where(u => u.From_type == from_type);
             _query = _query.Where(u => u.Title == title);
             if (created_client.HasValue)
             {
-                _query = _query.Where(u => u.Created_client == created_client.Value);
+                _query = _query.Where(u => u.Created_client == created_client);
             }
-            var required = _query.FirstOrDefaultAsync();
+            var required = _query.CountAsync();
             return required;
         }
     }

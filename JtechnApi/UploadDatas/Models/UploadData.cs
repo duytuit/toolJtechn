@@ -50,9 +50,9 @@ namespace JtechnApi.UploadDatas.Models
         public DateTime? Deleted_at { get; set; }
 
         [Column("created_by")]
-        public string? Created_by { get; set; }
+        public string Created_by { get; set; }
         [Column("updated_by")]
-        public string? Updated_by { get; set; }
+        public string Updated_by { get; set; }
 
 
     }

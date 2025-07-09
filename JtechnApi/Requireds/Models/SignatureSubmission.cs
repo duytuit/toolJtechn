@@ -15,7 +15,7 @@ namespace JtechnApi.Requireds.Models
         [Column("required_id")]
         public int Required_id { get; set; }
         [Column("department_id")]
-        public int? Department_id { get; set; }
+        public int Department_id { get; set; }
         [Column("content")]
         public string Content { get; set; }
         [Column("positions")]
@@ -28,14 +28,12 @@ namespace JtechnApi.Requireds.Models
         public int? Status { get; set; }
         [Column("type")]
         public int? Type { get; set; }
-
         [Column("created_at")]
         public DateTime? Created_at { get; set; }
         [Column("updated_at")]
         public DateTime? Updated_at { get; set; }
         [Column("deleted_at")]
         public DateTime? Deleted_at { get; set; }
-        public Required Required { get; set; }
 
     }
 }

@@ -79,7 +79,6 @@ namespace JtechnApi.Exams.Models
         
         [Column("newbie")]
         public int? Newbie { get; set; } = 0;
-        public Employee Employee { get; set; }
     }
 
 }

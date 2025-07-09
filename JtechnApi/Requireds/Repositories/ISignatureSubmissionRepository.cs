@@ -9,5 +9,6 @@ namespace JtechnApi.Requireds.Repositories
     public interface ISignatureSubmissionRepository : IBaseRepository<SignatureSubmission>
     {
         Task<PaginatedResult<SignatureSubmission>> GetPaginatedAsync(int page, int pageSize);
+        Task<SignatureSubmission> CreateSignatureSubmissiondAsync(SignatureSubmission SignatureSubmission);
     }
 }

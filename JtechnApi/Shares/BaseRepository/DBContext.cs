@@ -43,30 +43,6 @@ namespace JtechnApi.Shares.BaseRepository
             modelBuider.Entity<Umesen>().HasQueryFilter(e => e.Deleted_at == null);
             modelBuider.Entity<Department>().HasQueryFilter(e => e.Deleted_at == null);
             modelBuider.Entity<EmployeeDepartment>().HasQueryFilter(e => e.Deleted_at == null);
-            modelBuider.Entity<Department>()
-                .HasIndex(d => d.Id)
-                .IsUnique();
-            modelBuider.Entity<Required>()
-                .HasOne(r => r.Department)
-                .WithMany(d => d.Requireds)
-                .HasForeignKey(r => r.Required_department_id)
-                .HasPrincipalKey(d => d.Id);
-            modelBuider.Entity<Required>()
-                .HasOne(ez => ez.Employee)
-                .WithMany(d => d.Requireds)
-                .HasForeignKey(e => e.Created_by)
-                .HasPrincipalKey(d => d.Id);
-            modelBuider.Entity<Required>()
-                .HasOne(e => e.Accessory)
-                .WithOne(p => p.Required)
-                .HasPrincipalKey<Required>(e => e.Code)        // 👈 dùng Code làm "khóa chính logic"
-                .HasForeignKey<Accessory>(p => p.Code); // 👈 khóa ngoại tùy chỉnh
-            modelBuider.Entity<SignatureSubmission>()
-                .HasOne(d => d.Required)
-                .WithMany(d => d.SignatureSubmissions)
-                .HasForeignKey(e => e.Required_id)
-                .HasPrincipalKey(d => d.Id);
-          
-        }
+        }           
     }
 }

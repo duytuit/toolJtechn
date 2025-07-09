@@ -1,15 +1,22 @@
 ﻿
-using JtechnApi.Requireds.Models;
-using JtechnApi.Requireds.Repositories;
-using JtechnApi.Shares;
-using JtechnApi.Shares.Connects;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
+using JtechnApi.Employees.Dtos;
+using JtechnApi.Employees.Models;
+using JtechnApi.Employees.Repositories;
+using JtechnApi.Requireds.Models;
+using JtechnApi.Requireds.Repositories;
+using JtechnApi.Shares;
+using JtechnApi.Shares.BaseRepository;
+using JtechnApi.Shares.Connects;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace JtechnApi.Controllers
 {
@@ -21,12 +28,18 @@ namespace JtechnApi.Controllers
         private readonly ConnectionStrings con;
         private readonly IRequiredRepository repo;
         private readonly ILogger<ProductionPlanController> _logger;
+        private readonly IEmployeeRepository _emp;
+        private readonly ISignatureSubmissionRepository _signature;
+        private readonly DBContext _context;
 
-        public RequiredController(ILogger<ProductionPlanController> logger, ConnectionStrings c, IRequiredRepository r)
+        public RequiredController(ILogger<ProductionPlanController> logger, ConnectionStrings c, IRequiredRepository r, IEmployeeRepository emp, ISignatureSubmissionRepository signature, DBContext context)
         {
             _logger = logger;
             con = c;
             repo = r;
+            _emp = emp;
+            _signature = signature;
+            _context = context;
         }
 
         /// <summary>
@@ -45,13 +58,13 @@ namespace JtechnApi.Controllers
         }
         [HttpGet]
         [Route("task")]
-        public async Task<IActionResult> GetTask([FromQuery] int page = 1, int pageSize = 50, [FromQuery] RequestRequiredDto RequestRequiredDto = null)
+        public async Task<IActionResult> GetTask(CancellationToken cancellationToken,[FromQuery] int page = 1, int pageSize = 50, [FromQuery] RequestRequiredDto RequestRequiredDto = null )
         {
 
             if (RequestRequiredDto.Fields != null && RequestRequiredDto.Fields.Trim() != "")
             {
                 // Nếu có trường Fields, gọi GetObjectTaskAsync
-                var result = await repo.GetObjectTaskAsync(RequestRequiredDto, page, pageSize);
+                var result = await repo.GetObjectTaskAsync(RequestRequiredDto, page, pageSize, cancellationToken);
                 if (result == null || result.TotalItems == 0)
                 {
                     return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
@@ -79,14 +92,39 @@ namespace JtechnApi.Controllers
                 return ApiResponseResult<object>(false, "Tiêu đề đã tồn tại", null);
             }
             string requireCode = "R_" + DateTime.Now.ToString("yyyyMMddHHmmss");
-            var fromDeptJson = JsonSerializer.Deserialize<JsonElement>(Helper.ConfigFormType(1)).EnumerateArray().FirstOrDefault().GetProperty("to_dept");
-            string jsonArray = JsonSerializer.Serialize(fromDeptJson);
+
+            var firstDict = Helper.ConfigFormType(1);
+            var mergedUsers = new List<string>();
+            if (firstDict != null && firstDict.Count > 0)
+            {
+                var firstItem = firstDict[0];
+
+                foreach (var pair in firstItem)
+                {
+                    if (pair.Key.StartsWith("user_") && pair.Value is List<string> users)
+                    {
+                        mergedUsers.AddRange(users);
+                    }
+                }
+
+                // Loại bỏ trùng lặp nếu cần
+                mergedUsers = mergedUsers.Distinct().ToList();
+            }
+
+            List<SelectEmployeeDto> rs_users = await _emp.GetByListCode(mergedUsers);
+
+            var Content_form = new{info_users = rs_users};
+            
+            var toDeptJson = firstDict.FirstOrDefault()?.Where(pair => pair.Key == "to_dept")
+                .Select(pair => pair.Value as List<int>)
+                .FirstOrDefault() ?? new List<int>();
+            string jsonArray = JsonSerializer.Serialize(toDeptJson);
             Required required = new Required
             {
                 Code_required = requireCode,
                 Code = TaskRequiredDto.Code, // email from user
                 Content = TaskRequiredDto.Content,
-                Content_form = TaskRequiredDto.Content_form,
+                Content_form =  JsonSerializer.Serialize(Content_form),
                 Attach = TaskRequiredDto.Attach,
                 Title = TaskRequiredDto.Title,
                 From_type = RequiredRepository.from_type_task,
@@ -101,12 +139,28 @@ namespace JtechnApi.Controllers
                 Status = 0,
                 Created_client = TaskRequiredDto.Created_client,
             };
+          
             var result = await repo.CreateRequiredAsync(required);
+            foreach (var user in rs_users)
+            {
+                SignatureSubmission signatureSubmission = new SignatureSubmission
+                {
+                    Required_id = result.Id,
+                    Department_id = user.SelectEmployeeDepartmentDto.Department_id,
+                    Content = "",
+                    Positions = 0,
+                    Approve_id = JsonSerializer.Serialize(new List<int> { user.Id }),
+                    Signature_id = user.Id,
+                    Status = 0, // Chưa duyệt
+
+                };
+                var signatureResult = await _signature.CreateSignatureSubmissiondAsync(signatureSubmission);
+            }
+           
             if (result != null)
             {
                 return ApiResponseResult<object>(true, "Thêm mới thành công", result);
-            }
-            else
+            }else
             {
                 return ApiResponseResult<object>(false, "Thêm mới thất bại", null);
             }

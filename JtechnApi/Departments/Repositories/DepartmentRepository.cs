@@ -18,16 +18,6 @@ namespace JtechnApi.Departments.Repositories
             _context = context;
         }
 
-        public bool Any(Expression<Func<Department, bool>> expression)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Delete(Department entity)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<PaginatedResult<Department>> GetPaginatedAsync(int page, int pageSize)
         {
             var totalItems = await _context.Department.CountAsync();
@@ -45,26 +35,6 @@ namespace JtechnApi.Departments.Repositories
                 TotalItems = totalItems,
                 Items = items
             };
-        }
-
-        public IEnumerable<Department> List(Expression<Func<Department, bool>> expression)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Department Save(Department entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Department Update(Department entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<PaginatedResult<Department>> IDepartmentRepository.GetPaginatedAsync(int page, int pageSize)
-        {
-            throw new NotImplementedException();
         }
     }
 }

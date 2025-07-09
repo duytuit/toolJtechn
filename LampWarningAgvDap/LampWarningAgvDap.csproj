@@ -35,27 +35,6 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Advantech.Adam">
-      <HintPath>..\ProgramCalculatorCut\bin\Debug\Advantech.Adam.dll</HintPath>
-    </Reference>
-    <Reference Include="Advantech.Common">
-      <HintPath>..\ProgramCalculatorCut\bin\Debug\Advantech.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="Advantech.Graph">
-      <HintPath>..\ProgramCalculatorCut\bin\Debug\Advantech.Graph.dll</HintPath>
-    </Reference>
-    <Reference Include="Advantech.Protocol">
-      <HintPath>..\ProgramCalculatorCut\bin\Debug\Advantech.Protocol.dll</HintPath>
-    </Reference>
-    <Reference Include="ModbusRTU">
-      <HintPath>..\ProgramCalculatorCut\bin\Debug\ModbusRTU.dll</HintPath>
-    </Reference>
-    <Reference Include="NModbus">
-      <HintPath>..\ProgramCalculatorCut\bin\Debug\NModbus.dll</HintPath>
-    </Reference>
-    <Reference Include="NModbus.Serial">
-      <HintPath>..\ProgramCalculatorCut\bin\Debug\NModbus.Serial.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -106,10 +85,6 @@
     <ProjectReference Include="..\Library\AdamLibrary\AdamLibrary.csproj">
       <Project>{108c8a23-ab31-4bd8-ae18-8f6318df96c0}</Project>
       <Name>AdamLibrary</Name>
-    </ProjectReference>
-    <ProjectReference Include="C:\Users\admin\Downloads\websocket-sharp-master\websocket-sharp-master\websocket-sharp\WebSocketSharp.CustomHeaders.CustomHttpServer.csproj">
-      <Project>{61c37a81-d876-4237-a340-b2ab27dccf05}</Project>
-      <Name>WebSocketSharp.CustomHeaders.CustomHttpServer</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

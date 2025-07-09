@@ -35,10 +35,17 @@ namespace JtechnApi.Requireds.Repositories
                 Items = items
             };
         }
-
-        Task<PaginatedResult<SignatureSubmission>> ISignatureSubmissionRepository.GetPaginatedAsync(int page, int pageSize)
+        public Task<SignatureSubmission> CreateSignatureSubmissiondAsync(SignatureSubmission SignatureSubmission)
         {
-            throw new NotImplementedException();
-        }
+            if (SignatureSubmission == null)
+            {
+                throw new ArgumentNullException(nameof(SignatureSubmission), "SignatureSubmission cannot be null");
+            }
+             SignatureSubmission.Created_at = DateTime.Now;
+             SignatureSubmission.Updated_at = DateTime.Now;
+            _context.SignatureSubmission.Add(SignatureSubmission);
+            _context.SaveChanges();
+            return Task.FromResult(SignatureSubmission);
+         }
     }
 }

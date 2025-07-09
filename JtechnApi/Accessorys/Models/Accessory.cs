@@ -44,6 +44,5 @@ namespace JtechnApi.Accessorys.Models
         public int? Type { get; set; }
         [Column("note_type")]
         public string Note_type { get; set; }
-        public Required Required { get; set; }
     }
 }

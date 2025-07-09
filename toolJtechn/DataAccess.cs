@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace toolJtechn
 {
@@ -12,6 +8,7 @@ namespace toolJtechn
     {
         public static String ConnectionString = "SERVER=192.168.207.6\\SQLEXPRESS; Uid=sa;Pwd=Jtechn@1234;Database=STOCKMANAGEMENT";
         public SqlConnection con = new SqlConnection(ConnectionString);
+
         public DataTable RunQuery(string str)
         {
             OpenConnect();

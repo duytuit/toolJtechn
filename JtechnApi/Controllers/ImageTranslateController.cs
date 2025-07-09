@@ -20,7 +20,7 @@ namespace JtechnApi.Controllers
     [Route("[controller]")]
     public class ImageTranslateController: Controller
     {
-        private readonly ILogger<ImageTranslateController> _logger;
+        //private readonly ILogger<ImageTranslateController> _logger;
 
         private readonly DeepLSettings _deepLSettings;
         private readonly IHttpClientFactory _httpClientFactory;

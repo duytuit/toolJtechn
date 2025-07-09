@@ -7,9 +7,9 @@ namespace JtechnApi.Shares
 {
     public static class Helper
     {
-        public static string ConfigFormType(int type)
+        public static List<Dictionary<string, object>>  ConfigFormType(int type)
         {
-            object result = null;
+            var result = new List<Dictionary<string, object>>();
             switch (type)
             {
                 case 1:
@@ -24,6 +24,12 @@ namespace JtechnApi.Shares
                                         ["confirm_to_dept"] = 2,
                                         ["confirm_by_from_dept"] = new List<int> { 3 },
                                         ["confirm_by_to_dept"] = new List<int> { 4, 5 },
+                                        ["user_cat"] = new List<string> { "240929" },
+                                        ["user_dap"] = new List<string> { "130764" },
+                                        ["user_cam"] = new List<string> { "130206"},
+                                        ["user_buredo"] = new List<string> { "140511"},
+                                        ["user_laprap"] = new List<string> { "10281" },
+                                        ["user_kiemtra"] = new List<string> { "131078"},
                                         ["data_table"] = new Dictionary<string, string>
                                         {
                                             ["code"] = "",
@@ -61,11 +67,10 @@ namespace JtechnApi.Shares
                     break;
 
                 default:
-                    result = new { error = "Unknown type" };
+                    result = new List<Dictionary<string, object>>();
                     break;
             }
-
-            return JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result;
         }
     }
 }

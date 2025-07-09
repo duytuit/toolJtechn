@@ -15,11 +15,11 @@ namespace JtechnApi.Employees.Models
         public int Id { get; set; }
 
         [Column("employee_id")]
-        public int? Employee_id { get; set; }
+        public int Employee_id { get; set; }
         [Column("department_id")]
-        public int? Department_id { get; set; }
+        public int Department_id { get; set; }
         [Column("positions")]
-        public int? Positions { get; set; }
+        public int Positions { get; set; }
 
         [Column("unit_id")]
         public int? Unit_id { get; set; }
@@ -31,7 +31,7 @@ namespace JtechnApi.Employees.Models
         public int? Process_id { get; set; }
 
         [Column("permissions")]
-        public string permissions { get; set; }
+        public string Permissions { get; set; }
 
         [Column("created_by")]
         public int? Created_by { get; set; }
@@ -45,7 +45,6 @@ namespace JtechnApi.Employees.Models
         public DateTime? Updated_at { get; set; }
         [Column("deleted_at")]
         public DateTime? Deleted_at { get; set; }
-        public Employee Employee { get; set; }
 
     }
 }

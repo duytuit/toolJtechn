@@ -71,8 +71,6 @@ namespace JtechnApi.Employees.Models
         public DateTime? Updated_at { get; set; }
         [Column("deleted_at")]
         public DateTime? Deleted_at { get; set; }
-        public ICollection<EmployeeDepartment> EmployeeDepartments { get; set; }
-        public ICollection<Required> Requireds { get; set; }
 
     }
 }

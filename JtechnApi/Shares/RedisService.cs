@@ -1,5 +1,7 @@
 using StackExchange.Redis;
 using System;
+using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace JtechnApi.Shares
@@ -7,49 +9,71 @@ namespace JtechnApi.Shares
     public class RedisService
     {
         private readonly IDatabase _redisDb;
+        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = false
+        };
 
         public RedisService(IConnectionMultiplexer redis)
         {
             _redisDb = redis.GetDatabase();
         }
 
-        /// <summary>
-        /// Set key-value với optional expire
-        /// </summary>
-        public async Task SetAsync(string key, string value, TimeSpan? expires = null)
+        public async Task SetAsync(string key, string value, TimeSpan? expires = null, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             await _redisDb.StringSetAsync(key, value, expires);
         }
 
-        /// <summary>
-        /// Get value theo key
-        /// </summary>
-        public async Task<string> GetAsync(string key)
+        public async Task<string> GetAsync(string key, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             return await _redisDb.StringGetAsync(key);
         }
 
-        /// <summary>
-        /// Kiểm tra key có tồn tại không
-        /// </summary>
-        public async Task<bool> ExistsAsync(string key)
+        public async Task SetAsync<T>(string key, T value, TimeSpan? expires = null, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            var json = JsonSerializer.Serialize(value, _jsonOptions);
+            await _redisDb.StringSetAsync(key, json, expires);
+        }
+
+        public async Task<T> GetAsync<T>(string key, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var json = await _redisDb.StringGetAsync(key);
+            return json.HasValue ? JsonSerializer.Deserialize<T>(json, _jsonOptions) : default;
+        }
+
+        public async Task<bool> SetIfNotExistsAsync(string key, string value, TimeSpan? expires = null, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return await _redisDb.StringSetAsync(key, value, expires, When.NotExists);
+        }
+
+        public async Task<(bool Found, string Value)> TryGetAsync(string key, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var value = await _redisDb.StringGetAsync(key);
+            return (value.HasValue, value);
+        }
+
+        public async Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
             return await _redisDb.KeyExistsAsync(key);
         }
 
-        /// <summary>
-        /// Xoá key
-        /// </summary>
-        public async Task<bool> RemoveAsync(string key)
+        public async Task<bool> RemoveAsync(string key, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             return await _redisDb.KeyDeleteAsync(key);
         }
 
-        /// <summary>
-        /// Cập nhật expire cho key
-        /// </summary>
-        public async Task<bool> ExpireAsync(string key, TimeSpan expires)
+        public async Task<bool> ExpireAsync(string key, TimeSpan expires, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             return await _redisDb.KeyExpireAsync(key, expires);
         }
     }

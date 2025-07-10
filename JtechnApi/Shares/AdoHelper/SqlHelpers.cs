@@ -11,17 +11,17 @@ namespace JtechnApi.Shares.AdoHelper
     public static class SqlHelpers
     {
         public static async Task<MySqlCommand> BuildBaseCommandAsync(
-     MySqlConnection connection,
-     string tableName,
-     string[] fields,
-     int? skip = null,
-     int? take = null,
-     Dictionary<string, object> whereEquals = null,
-     Dictionary<string, string> whereLikes = null,
-     Dictionary<string, IEnumerable<object>> whereInList = null,
-     List<(string Field, DateTime From, DateTime To)> dateRangeList = null,
-     List<string> orderByList = null,
-     CancellationToken cancellationToken = default)
+         MySqlConnection connection,
+         string tableName,
+         string[] fields,
+         int? skip = null,
+         int? take = null,
+         Dictionary<string, object> whereEquals = null,
+         Dictionary<string, string> whereLikes = null,
+         Dictionary<string, IEnumerable<object>> whereInList = null,
+         List<(string Field, DateTime From, DateTime To)> dateRangeList = null,
+         List<string> orderByList = null,
+         CancellationToken cancellationToken = default)
         {
             var cmd = new MySqlCommand();
             cmd.Connection = connection;
@@ -96,8 +96,8 @@ namespace JtechnApi.Shares.AdoHelper
             // Compose final parts
             string whereClause = whereClauses.Count > 0 ? "WHERE " + string.Join(" AND ", whereClauses) : "";
             string orderClause = (orderByList != null && orderByList.Count > 0) ? "ORDER BY " + string.Join(", ", orderByList) : "";
-            string pagingClause = (take.HasValue ? $"LIMIT {take.Value}" : "") +
-                                  (skip.HasValue ? $" OFFSET {skip.Value}" : "");
+            string pagingClause =(take.HasValue ? $"LIMIT {Math.Min(take.Value, 1000)}" : "") +
+                                 (skip.HasValue ? $" OFFSET {skip.Value}" : "");
 
             string fieldList = string.Join(", ", fields);
 
@@ -157,6 +157,69 @@ namespace JtechnApi.Shares.AdoHelper
                 result.Add((ExpandoObject)row);
             }
             return result;
+        }
+        public static async Task<int> ExecuteCountCommandAsync(
+        MySqlConnection conn,
+        string tableName,
+        Dictionary<string, object> whereEquals = null,
+        Dictionary<string, string> whereLikes = null,
+        Dictionary<string, IEnumerable<object>> whereInList = null,
+        List<(string Field, DateTime From, DateTime To)> dateRangeList = null,
+        CancellationToken cancellationToken = default)
+        {
+            var whereClauses = new List<string>();
+            var cmd = conn.CreateCommand();
+
+            if (whereEquals != null)
+            {
+                foreach (var kv in whereEquals)
+                {
+                    var paramName = $"@eq_{kv.Key}";
+                    whereClauses.Add($"`{kv.Key}` = {paramName}");
+                    cmd.Parameters.AddWithValue(paramName, kv.Value);
+                }
+            }
+
+            if (whereLikes != null)
+            {
+                foreach (var kv in whereLikes)
+                {
+                    var paramName = $"@like_{kv.Key}";
+                    whereClauses.Add($"`{kv.Key}` LIKE {paramName}");
+                    cmd.Parameters.AddWithValue(paramName, $"%{kv.Value}%");
+                }
+            }
+
+            if (whereInList != null)
+            {
+                foreach (var kv in whereInList)
+                {
+                    var paramNames = kv.Value.Select((v, i) => $"@in_{kv.Key}_{i}").ToList();
+                    whereClauses.Add($"`{kv.Key}` IN ({string.Join(", ", paramNames)})");
+
+                    int index = 0;
+                    foreach (var val in kv.Value)
+                        cmd.Parameters.AddWithValue(paramNames[index++], val);
+                }
+            }
+
+            if (dateRangeList != null)
+            {
+                foreach (var range in dateRangeList)
+                {
+                    var fromParam = $"@from_{range.Field}";
+                    var toParam = $"@to_{range.Field}";
+                    whereClauses.Add($"`{range.Field}` BETWEEN {fromParam} AND {toParam}");
+                    cmd.Parameters.AddWithValue(fromParam, range.From);
+                    cmd.Parameters.AddWithValue(toParam, range.To);
+                }
+            }
+
+            var whereSql = whereClauses.Count > 0 ? $"WHERE {string.Join(" AND ", whereClauses)}" : "";
+            cmd.CommandText = $"SELECT COUNT(*) FROM `{tableName}` {whereSql}";
+
+            var result = await cmd.ExecuteScalarAsync(cancellationToken);
+            return Convert.ToInt32(result);
         }
     }
 

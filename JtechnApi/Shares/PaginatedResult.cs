@@ -11,5 +11,6 @@ namespace JtechnApi.Shares
         public int TotalPages { get; set; }
         public int TotalItems { get; set; }
         public List<T> Items { get; set; }
+        public Dictionary<string, object> Extra { get; set; } = new Dictionary<string, object>();
     }
 }

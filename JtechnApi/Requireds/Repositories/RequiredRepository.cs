@@ -38,9 +38,9 @@ namespace JtechnApi.Requireds.Repositories
         private readonly DBContext _context;
         private readonly ILogger<RequiredRepository> _logger;
         private readonly IEmployeeRepository _emp;
-        private readonly IDistributedCache _redis;
+        private readonly RedisService _redis;
         private readonly IConfiguration _configuration;
-        public RequiredRepository(DBContext context, ILogger<RequiredRepository> logger, IEmployeeRepository emp, IDistributedCache redis, IConfiguration configuration) : base(context)
+        public RequiredRepository(DBContext context, ILogger<RequiredRepository> logger, IEmployeeRepository emp, RedisService redis, IConfiguration configuration) : base(context)
         {
             _context = context;
             _logger = logger;
@@ -147,78 +147,84 @@ namespace JtechnApi.Requireds.Repositories
         }
         public async Task<PaginatedResult<object>> GetObjectTaskAsync(RequestRequiredDto dto, int page, int pageSize, CancellationToken cancellationToken)
         {
-            var query = _context.Required.AsQueryable();
-
-            // Filtering conditions
+            var whereEquals = new Dictionary<string, object>();
+            var whereLikes = new Dictionary<string, string>();
+            var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
+            var orderByList = new List<string> { "id DESC"};
             if (dto.Status.HasValue)
-                query = query.Where(u => u.Status == dto.Status);
+                whereEquals["status"] = dto.Status.Value;
 
             if (!string.IsNullOrWhiteSpace(dto.Code))
-                query = query.Where(u => u.Code == dto.Code);
+                whereEquals[dto.Code.ToLower()] = dto.Code;
 
             if (!string.IsNullOrWhiteSpace(dto.Title))
-                query = query.Where(u => u.Title.Contains(dto.Title));
+                whereLikes["title"] = dto.Title;
 
             if (!string.IsNullOrWhiteSpace(dto.Code_nv))
-                query = query.Where(u => u.Code.Contains(dto.Code_nv));
+                whereLikes["code"] = dto.Code_nv;
 
             if (dto.From_type.HasValue)
-                query = query.Where(u => u.From_type == dto.From_type);
+                whereEquals["from_type"] = dto.From_type.Value;
 
             if (dto.Created_client.HasValue)
-                query = query.Where(u => u.Created_client == dto.Created_client);
+                whereEquals["created_client"] = dto.Created_client.Value;
 
             if (dto.From_date.HasValue && dto.To_date.HasValue)
-                query = query.WhereDateInRange(u => u.Created_at.Value, dto.From_date.Value, dto.To_date.Value);
-
-            int totalItems = await query.CountAsync();
-            //var departments = await _context.Department.AsNoTracking().Select($"new ({"id,code,name,status,permissions"})").ToDynamicListAsync();
-
-            var results = await AdoRelationQuery.WithRelationsAdoAsync(
-                         _configuration.GetConnectionString("DefaultConnection"),
-                         "requireds",
-                         new[] { "id", "required_department_id" },
-                         offset: 0,
-                         limit: 10,
-                         relations: new List<AdoRelation>
-                         {
-                            new AdoRelation
+                whereDateRange.Add(("created_at", dto.From_date.Value, dto.To_date.Value));
+            var departments = await _context.Department.AsNoTracking().Select($"new ({"id,code,name,status,permissions"})").ToDynamicListAsync();
+            dynamic results = await AdoRelationQuery.WithRelationsAdoAsync(
+                        _configuration.GetConnectionString("DefaultConnection"),
+                        "requireds",
+                        new[] { "id", "required_department_id" },
+                        offset: 0,
+                        limit: 10,
+                        whereEquals: whereEquals,
+                        whereLikes: whereLikes,
+                        dateRangeList: whereDateRange,
+                        orderByList: orderByList,      
+                        relations: new List<AdoRelation>
+                        {
+                        new AdoRelation
+                        {
+                            Name = "signature_submissions",
+                            Table = "signature_submissions",
+                            Columns = new[] { "id", "required_id", "department_id" },
+                            ParentKey = "id",
+                            ForeignKey = "required_id",
+                            KeyName = "required_id",
+                            IsCollection = true,
+                            SubRelations = new List<AdoRelation>
                             {
-                                Name = "signature_submissions",
-                                Table = "signature_submissions",
-                                Columns = new[] { "id", "required_id", "department_id" },
-                                ParentKey = "id",
-                                ForeignKey = "required_id",
-                                KeyName = "required_id",
-                                IsCollection = true,
-                                SubRelations = new List<AdoRelation>
+                                new AdoRelation
                                 {
-                                    new AdoRelation
-                                    {
-                                        Name = "department",
-                                        Table = "departments",
-                                        Columns = new[] { "id", "name" },
-                                        ParentKey = "department_id",
-                                        ForeignKey = "id",
-                                        KeyName = "id",
-                                        IsCollection = false
-                                    }
+                                    Name = "department",
+                                    Table = "departments",
+                                    Columns = new[] { "id", "name" },
+                                    ParentKey = "department_id",
+                                    ForeignKey = "id",
+                                    KeyName = "id",
+                                    IsCollection = false
                                 }
                             }
-                         },
-                         redisCache: _redis,
-                         "abc",
-                         TimeSpan.FromSeconds(100),
-                         cancellationToken: cancellationToken
-                     );
-
-            return new PaginatedResult<object>
+                        }
+                        },
+                        redisCache: _redis,
+                        includeCount:true,
+                        cancellationToken: cancellationToken
+                    );
+            int totalItems = results.Count;
+            var objectList = new List<object>();
+            objectList.AddRange(results.Data);
+            var _results = new PaginatedResult<object>
             {
                 CurrentPage = page,
                 TotalPages = (int)Math.Ceiling((double)totalItems / pageSize),
                 TotalItems = totalItems,
-                Items = results.Cast<object>().ToList()
+                Items = objectList,
             };
+            // Gán thêm dữ liệu phụ
+            _results.Extra["departments"] = departments;
+            return _results;
         }
 
         public Task<Required> CreateRequiredAsync(Required required)

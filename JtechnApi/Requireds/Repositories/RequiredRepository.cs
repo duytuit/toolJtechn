@@ -171,7 +171,7 @@ namespace JtechnApi.Requireds.Repositories
 
             if (dto.From_date.HasValue && dto.To_date.HasValue)
                 whereDateRange.Add(("created_at", dto.From_date.Value, dto.To_date.Value));
-            var departments = await _context.Department.AsNoTracking().Select($"new ({"id,code,name,status,permissions"})").ToDynamicListAsync();
+           // var departments = await _context.Department.AsNoTracking().Select($"new ({"id,code,name,status,permissions"})").ToDynamicListAsync();
             dynamic results = await AdoRelationQuery.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "requireds",
@@ -193,19 +193,6 @@ namespace JtechnApi.Requireds.Repositories
                             ForeignKey = "required_id",
                             KeyName = "required_id",
                             IsCollection = true,
-                            SubRelations = new List<AdoRelation>
-                            {
-                                new AdoRelation
-                                {
-                                    Name = "department",
-                                    Table = "departments",
-                                    Columns = new[] { "id", "name" },
-                                    ParentKey = "department_id",
-                                    ForeignKey = "id",
-                                    KeyName = "id",
-                                    IsCollection = false
-                                }
-                            }
                         }
                         },
                         redisCache: _redis,
@@ -222,9 +209,6 @@ namespace JtechnApi.Requireds.Repositories
                 TotalItems = totalItems,
                 Items = objectList,
             };
-            // Gán thêm dữ liệu phụ
-            _results.Extra["departments"] = departments;
-            departments = null;
             objectList = null;
             results = null;
             whereEquals?.Clear(); whereLikes?.Clear(); whereDateRange?.Clear(); orderByList?.Clear();

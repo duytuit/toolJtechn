@@ -4,24 +4,38 @@ using System.Threading.Tasks;
 using Oracle.ManagedDataAccess.Client;
 using System.Data;
 using JtechnApi.Shares;
+using System.Text.Json;
+using JtechnApi.Shares.BaseRepository;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
+using JtechnApi.Departments.Repositories;
+using JtechnApi.Employees.Repositories;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace JtechnApi.Controllers
 {
     [ApiController]
     [Route("/")] // <-- Root path
-    public class HomeController : Controller
+    public class HomeController : BaseApiController
     {
         private readonly OracleConnection _conn_oracle;
         private readonly ILogger<HomeController> _logger;
-
-        // Inject từ DI
+        private readonly DBContext _context;
         private readonly RedisService _redisService;
+        private readonly IDepartmentRepository _dept;
+        private readonly IEmployeeRepository _emp;
+        
+        private readonly IEmployeeDepartmentRepository _emp_dept;
 
-        public HomeController(ILogger<HomeController> logger, OracleConnection conn_oracle, RedisService redisService)
+        public HomeController(ILogger<HomeController> logger, OracleConnection conn_oracle, RedisService redisService, DBContext context, IDepartmentRepository dept, IEmployeeRepository emp,IEmployeeDepartmentRepository emp_dept)
         {
             _logger = logger;
             _conn_oracle = conn_oracle;
             _redisService = redisService;
+            _dept = dept;
+            _emp = emp;
+            _emp_dept = emp_dept;
         }
 
         /// <summary>
@@ -35,25 +49,39 @@ namespace JtechnApi.Controllers
             //var value = _redisService.GetAsync("jtec_hn_database_update_AsyncKTNQ");
             //return value.Result ?? "No value found in Redis";
         }
-       //public IActionResult Index()
-       //{
-       //    var cmd = _conn_oracle.CreateCommand();
-       //    cmd.CommandText = "SELECT 場所c,棚番 FROM TAD_Z60M WHERE 品目C = 'W FLRY-B0.5RB'";
-       //
-       //    var reader = cmd.ExecuteReader();
-       //    var table = new DataTable();
-       //    table.Load(reader);
-       //    // Duyệt từng dòng (nếu muốn hiển thị)
-       //    foreach (DataRow row in table.Rows)
-       //    {
-       //        var i= row;
-       //    }
-       //
-       //    DataAccess ac = new DataAccess();
-       //    ViewData["Message"] = "Chào mừng đến Web API + View";
-       //    string querry = "SELECT TOP 10 [id] FROM[SmartManagement].[dbo].[Control_ProgramPlug_Visualize]";
-       //    var dt = ac.RunQuery(querry);
-       //    return View();
-       //}
+        //public IActionResult Index()
+        //{
+        //    var cmd = _conn_oracle.CreateCommand();
+        //    cmd.CommandText = "SELECT 場所c,棚番 FROM TAD_Z60M WHERE 品目C = 'W FLRY-B0.5RB'";
+        //
+        //    var reader = cmd.ExecuteReader();
+        //    var table = new DataTable();
+        //    table.Load(reader);
+        //    // Duyệt từng dòng (nếu muốn hiển thị)
+        //    foreach (DataRow row in table.Rows)
+        //    {
+        //        var i= row;
+        //    }
+        //
+        //    DataAccess ac = new DataAccess();
+        //    ViewData["Message"] = "Chào mừng đến Web API + View";
+        //    string querry = "SELECT TOP 10 [id] FROM[SmartManagement].[dbo].[Control_ProgramPlug_Visualize]";
+        //    var dt = ac.RunQuery(querry);
+        //    return View();
+        //}
+        [HttpGet("config/jtechn")]
+        public async Task<IActionResult> GetConfig([FromQuery] int type = 1, string emps=null)
+        {
+            var dept = await _dept.GetAllAsync();
+            var emp = await _emp.GetAll();
+            var numbers = new List<int>();
+            var emp_dept = new object();
+            if (emps != null && emps != "")
+            {
+                 numbers = emps.Split(',').Select(int.Parse).ToList();
+                 emp_dept = await _emp_dept.GetListByIdEmp(numbers);
+            }
+            return ApiResponseResult<object>(true, "Lấy dữ liệu ok", new { config = Helper.ConfigRequiredByType(1), department = dept,emp_dept = emp_dept, emp = emp });
+        }
     }
 }

@@ -155,13 +155,13 @@ namespace JtechnApi.Requireds.Repositories
                 whereEquals["status"] = dto.Status.Value;
 
             if (!string.IsNullOrWhiteSpace(dto.Code))
-                whereEquals[dto.Code.ToLower()] = dto.Code;
+                whereLikes["code"] = dto.Code;
 
             if (!string.IsNullOrWhiteSpace(dto.Title))
                 whereLikes["title"] = dto.Title;
 
             if (!string.IsNullOrWhiteSpace(dto.Code_nv))
-                whereLikes["code"] = dto.Code_nv;
+                whereLikes["code_nv"] = dto.Code_nv;
 
             if (dto.From_type.HasValue)
                 whereEquals["from_type"] = dto.From_type.Value;
@@ -224,6 +224,10 @@ namespace JtechnApi.Requireds.Repositories
             };
             // Gán thêm dữ liệu phụ
             _results.Extra["departments"] = departments;
+            departments = null;
+            objectList = null;
+            results = null;
+            whereEquals?.Clear(); whereLikes?.Clear(); whereDateRange?.Clear(); orderByList?.Clear();
             return _results;
         }
 

@@ -12,5 +12,6 @@ namespace JtechnApi.Employees.Repositories
         Task<PaginatedResult<Employee>> GetPaginatedAsync(int page, int pageSize);
         Task<Employee> GetByCode(string code);
         Task<List<SelectEmployeeDto>> GetByListCode(List<string> codes);
+        Task<object> GetAll();
     }
 }

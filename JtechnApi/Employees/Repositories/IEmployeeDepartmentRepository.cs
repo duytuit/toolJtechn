@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using JtechnApi.Employees.Models;
 using JtechnApi.Shares;
@@ -9,5 +10,6 @@ namespace JtechnApi.Employees.Repositories
     public interface IEmployeeDepartmentRepository : IBaseRepository<EmployeeDepartment>
     {
         Task<PaginatedResult<EmployeeDepartment>> GetPaginatedAsync(int page, int pageSize);
+        Task<object> GetListByIdEmp(List<int> id_emps);
     }
 }

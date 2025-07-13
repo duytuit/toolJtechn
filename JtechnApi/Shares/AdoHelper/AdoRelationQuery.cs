@@ -79,7 +79,7 @@ namespace JtechnApi.Shares.AdoHelper
                 }
             }
 
-            var baseCmd = await SqlHelpers.BuildBaseCommandAsync(
+            using var baseCmd = await SqlHelpers.BuildBaseCommandAsync(
                 conn, tableName, columns, offset, limit,
                 whereEquals, whereLikes, whereInList, dateRangeList, orderByList, cancellationToken);
 

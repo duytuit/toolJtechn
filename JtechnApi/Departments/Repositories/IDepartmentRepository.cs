@@ -8,5 +8,6 @@ namespace JtechnApi.Departments.Repositories
     public interface IDepartmentRepository : IBaseRepository<Department>
     {
         Task<PaginatedResult<Department>> GetPaginatedAsync(int page, int pageSize);
+        Task<object> GetAllAsync();
     }
 }

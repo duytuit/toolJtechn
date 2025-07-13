@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using System.Linq.Dynamic.Core;
 
 namespace JtechnApi.Departments.Repositories
 {
@@ -35,6 +36,10 @@ namespace JtechnApi.Departments.Repositories
                 TotalItems = totalItems,
                 Items = items
             };
+        }
+        public async Task<object> GetAllAsync()
+        {
+            return  await _context.Department.AsNoTracking().Select("new (id, code, name, status, permissions)").ToDynamicListAsync();
         }
     }
 }

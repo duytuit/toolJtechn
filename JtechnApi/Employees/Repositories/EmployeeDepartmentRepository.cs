@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Linq.Dynamic.Core;
+using System.Collections.Generic;
 
 namespace JtechnApi.Employees.Repositories
 {
@@ -33,6 +35,10 @@ namespace JtechnApi.Employees.Repositories
                 TotalItems = totalItems,
                 Items = items
             };
+        }
+        public async Task<object> GetListByIdEmp(List<int> id_emps)
+        {
+            return  await _context.EmployeeDepartment.AsNoTracking().Where(u=> id_emps.Contains(u.Employee_id)).Select("new (id, employee_id, department_id, positions, permissions)").ToDynamicListAsync();
         }
 
     }

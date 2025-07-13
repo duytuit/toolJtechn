@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Linq.Dynamic.Core;
 
 namespace JtechnApi.Employees.Repositories
 {
@@ -53,7 +54,7 @@ namespace JtechnApi.Employees.Repositories
                 return new List<SelectEmployeeDto>();
             }
             var EmployeeDepartmentIds = _emps.Select(c => c.Id).ToList();
-             List<SelectEmployeeDepartmentDto> emp_depts = await _context.EmployeeDepartment.Where(p => EmployeeDepartmentIds.Contains(p.Employee_id)).Select(e => new SelectEmployeeDepartmentDto
+            List<SelectEmployeeDepartmentDto> emp_depts = await _context.EmployeeDepartment.Where(p => EmployeeDepartmentIds.Contains(p.Employee_id)).Select(e => new SelectEmployeeDepartmentDto
             {
                 Id = e.Id,
                 Employee_id = e.Employee_id,
@@ -81,6 +82,10 @@ namespace JtechnApi.Employees.Repositories
                     First_name = e.First_name,
                 })
                 .FirstOrDefaultAsync();
+        }
+        public async Task<object> GetAll()
+        {
+            return  await _context.Employee.AsNoTracking().Select("new (id, code, first_name,last_name, status)").ToDynamicListAsync();
         }
     }
 }

@@ -150,7 +150,7 @@ namespace JtechnApi.Requireds.Repositories
             var whereEquals = new Dictionary<string, object>();
             var whereLikes = new Dictionary<string, string>();
             var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
-            var orderByList = new List<string> { "id DESC"};
+            var orderByList = new List<string> { "id DESC" };
             if (dto.Status.HasValue)
                 whereEquals["status"] = dto.Status.Value;
 
@@ -171,7 +171,7 @@ namespace JtechnApi.Requireds.Repositories
 
             if (dto.From_date.HasValue && dto.To_date.HasValue)
                 whereDateRange.Add(("created_at", dto.From_date.Value, dto.To_date.Value));
-           // var departments = await _context.Department.AsNoTracking().Select($"new ({"id,code,name,status,permissions"})").ToDynamicListAsync();
+            // var departments = await _context.Department.AsNoTracking().Select($"new ({"id,code,name,status,permissions"})").ToDynamicListAsync();
             dynamic results = await AdoRelationQuery.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "requireds",
@@ -181,7 +181,7 @@ namespace JtechnApi.Requireds.Repositories
                         whereEquals: whereEquals,
                         whereLikes: whereLikes,
                         dateRangeList: whereDateRange,
-                        orderByList: orderByList,      
+                        orderByList: orderByList,
                         relations: new List<AdoRelation>
                         {
                         new AdoRelation
@@ -196,7 +196,7 @@ namespace JtechnApi.Requireds.Repositories
                         }
                         },
                         redisCache: _redis,
-                        includeCount:true,
+                        includeCount: true,
                         cancellationToken: cancellationToken
                     );
             int totalItems = results.Count;
@@ -228,6 +228,17 @@ namespace JtechnApi.Requireds.Repositories
 
             return Task.FromResult(required);
         }
+        public Task<Required> UpdateRequiredAsync(Required required)
+        {
+            if (required == null)
+            {
+                throw new ArgumentNullException(nameof(required), "TempRequired cannot be null");
+            }
+            required.Updated_at = DateTime.Now;
+            _context.Required.Update(required);
+            _context.SaveChanges();
+            return Task.FromResult(required);
+        }
         public Task<int> CheckDuplicateTitle(string title, int from_type, DateTime? created_client)
         {
             var _query = _context.Required.AsQueryable();
@@ -248,7 +259,6 @@ namespace JtechnApi.Requireds.Repositories
             {
                 return null;
             }
-            //required.Departments = await _context.Department.AsNoTracking().Select($"new ({"id,code,name,status,permissions"})").ToDynamicListAsync();
             return required;
         }
     }

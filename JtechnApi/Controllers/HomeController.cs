@@ -12,6 +12,11 @@ using JtechnApi.Departments.Repositories;
 using JtechnApi.Employees.Repositories;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Serilog.Events;
+using System.IO;
+using System;
 
 namespace JtechnApi.Controllers
 {
@@ -25,10 +30,9 @@ namespace JtechnApi.Controllers
         private readonly RedisService _redisService;
         private readonly IDepartmentRepository _dept;
         private readonly IEmployeeRepository _emp;
-        
         private readonly IEmployeeDepartmentRepository _emp_dept;
 
-        public HomeController(ILogger<HomeController> logger, OracleConnection conn_oracle, RedisService redisService, DBContext context, IDepartmentRepository dept, IEmployeeRepository emp,IEmployeeDepartmentRepository emp_dept)
+        public HomeController(ILogger<HomeController> logger, OracleConnection conn_oracle, RedisService redisService, DBContext context, IDepartmentRepository dept, IEmployeeRepository emp, IEmployeeDepartmentRepository emp_dept)
         {
             _logger = logger;
             _conn_oracle = conn_oracle;
@@ -70,7 +74,7 @@ namespace JtechnApi.Controllers
         //    return View();
         //}
         [HttpGet("config/jtechn")]
-        public async Task<IActionResult> GetConfig([FromQuery] int type = 1, string emps=null)
+        public async Task<IActionResult> GetConfig([FromQuery] int type = 1, string emps = null)
         {
             var dept = await _dept.GetAllAsync();
             var emp = await _emp.GetAll();
@@ -78,10 +82,43 @@ namespace JtechnApi.Controllers
             var emp_dept = new object();
             if (emps != null && emps != "")
             {
-                 numbers = emps.Split(',').Select(int.Parse).ToList();
-                 emp_dept = await _emp_dept.GetListByIdEmp(numbers);
+                numbers = emps.Split(',').Select(int.Parse).ToList();
+                emp_dept = await _emp_dept.GetListByIdEmp(numbers);
             }
-            return ApiResponseResult<object>(true, "Lấy dữ liệu ok", new { config = Helper.ConfigRequiredByType(1), department = dept,emp_dept = emp_dept, emp = emp });
+            return ApiResponseResult<object>(true, "Lấy dữ liệu ok", new { config = Helper.ConfigRequiredByType(1), department = dept, emp_dept = emp_dept, emp = emp });
         }
+        // POST api/upload/single
+        [HttpPost("upload/single")]
+        public async Task<IActionResult> UploadSingle(IFormFile file)
+        {
+             var result = await Helper.ProcessFileAsync(file);
+            if (result.Success)
+                return Ok(result);
+            else
+                return BadRequest("Có lỗi xảy ra.");
+        }
+
+        // POST api/upload/multiple
+        [HttpPost("upload/multiple")]
+        public async Task<IActionResult> UploadMultiple([FromForm] IFormFile[] files)
+        {
+           if (files == null || files.Length == 0)
+            return BadRequest(new { success = false, message = "Không có file nào." });
+
+            var tasks = files.Select(file => Helper.ProcessFileAsync(file));
+            var results = await Task.WhenAll(tasks);
+
+            var success = results.Where(r => r.Success).ToList();
+            var failed  = results.Where(r => !r.Success).ToList();
+
+            if (failed.Count == 0)
+                return Ok(success);
+
+            return StatusCode(207, new { success, failed }); // Multi-Status
+        }
+
+        /* ---------- helper ---------- */
+       
     }
+
 }

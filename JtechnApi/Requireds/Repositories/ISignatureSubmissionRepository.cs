@@ -10,5 +10,6 @@ namespace JtechnApi.Requireds.Repositories
     {
         Task<PaginatedResult<SignatureSubmission>> GetPaginatedAsync(int page, int pageSize);
         Task<SignatureSubmission> CreateSignatureSubmissiondAsync(SignatureSubmission SignatureSubmission);
+        Task<SignatureSubmission> FindByRequired(int required_id, int dept_id, int Signature_id);
     }
 }

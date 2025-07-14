@@ -1,15 +1,20 @@
 
 
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.IO;
 using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace JtechnApi.Shares
 {
     public static class Helper
     {
-        public static List<Dictionary<string, object>>  ConfigFormType(int type)
+      
+        public static List<Dictionary<string, object>> ConfigFormType(int type)
         {
             var result = new List<Dictionary<string, object>>();
             switch (type)
@@ -89,18 +94,34 @@ namespace JtechnApi.Shares
                         confirm_to_dept = 2,
                         confirm_by_from_dept = new List<int> { 3 },
                         confirm_by_to_dept = new List<int> { 4, 5 },
-                        emp_dept =  new[]
+                        emp_dept = new[]
                                     {
                                         new {
-                                            id_dept = 2,
+                                            id_dept = 5,
+                                            code_emp = new List<int> { 240929, 240923 }
+                                        },
+                                        new {
+                                            id_dept = 7,
+                                            code_emp = new List<int> { 240930, 240931 }
+                                        },
+                                        new {
+                                            id_dept = 4,
                                             code_emp = new List<int> { 240929, 240923 }
                                         },
                                         new {
                                             id_dept = 3,
                                             code_emp = new List<int> { 240930, 240931 }
+                                        },
+                                        new {
+                                            id_dept = 2,
+                                            code_emp = new List<int> { 240929, 240923 }
+                                        },
+                                        new {
+                                            id_dept = 6,
+                                            code_emp = new List<int> { 240930, 240931 }
                                         }
                                     }
-                        };
+                    };
                     break;
                 case 2:
                     result = new
@@ -134,5 +155,52 @@ namespace JtechnApi.Shares
             }
             return result;
         }
+        public static async Task<UploadResult> ProcessFileAsync(IFormFile file)
+        {
+            long _fileSizeLimit = 50 * 1024 * 1024;            // 50 MB
+            string[] _permittedExtensions = { ".jpg", ".png", ".pdf" ,".xls",".xlsx"};
+            if (file == null || file.Length == 0)
+                return new UploadResult(false, "File rỗng.");
+
+            if (file.Length > _fileSizeLimit)
+                return new UploadResult(false, "File quá lớn (max 50 MB).");
+
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            bool found = Array.IndexOf(_permittedExtensions, ext) >= 0;
+            if (!found)
+                return new UploadResult(false, $"Không hỗ trợ định dạng {ext}.");
+
+            // Thư mục : wwwroot/uploads/yyyy/MM
+            // UNC gốc – dùng chuỗi verbatim @"" để đỡ phải gấp đôi \\
+            const string UNC_ROOT = @"\\192.168.207.6\jtecdata\JTEC_PD_PROGAM\CMSWeb\jtecweb\public\public\assets\files";
+
+            // uploads\<yyyy>\<MM>
+            var folder = Path.Combine(UNC_ROOT);
+
+            // tạo thư mục (nếu chưa có)
+            Directory.CreateDirectory(folder);
+            string date_file = DateTime.Now.ToString("yyyyMMdd-HHmmss") + "-";
+            var filePath = Path.Combine(folder, date_file+file.FileName);
+
+            await using var stream = new FileStream(filePath, FileMode.Create);
+            await file.CopyToAsync(stream);
+
+            var relativePath ="public/assets/files/"+date_file+file.FileName; // dùng cho URL
+
+            return new UploadResult(true, "OK", $"{relativePath}");
+        }
     }
+        public class UploadResult
+        {
+            public bool Success { get; set; }
+            public string Message { get; set; }
+            public string Path { get; set; }
+
+            public UploadResult(bool success, string message=null, string path=null)
+            {
+                Success = success;
+                Message = message;
+                Path = path;
+            }
+        }
 }

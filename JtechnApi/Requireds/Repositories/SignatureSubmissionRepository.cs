@@ -41,11 +41,20 @@ namespace JtechnApi.Requireds.Repositories
             {
                 throw new ArgumentNullException(nameof(SignatureSubmission), "SignatureSubmission cannot be null");
             }
-             SignatureSubmission.Created_at = DateTime.Now;
-             SignatureSubmission.Updated_at = DateTime.Now;
+            SignatureSubmission.Created_at = DateTime.Now;
+            SignatureSubmission.Updated_at = DateTime.Now;
             _context.SignatureSubmission.Add(SignatureSubmission);
             _context.SaveChanges();
             return Task.FromResult(SignatureSubmission);
+        }
+        public async Task<SignatureSubmission> FindByRequired(int required_id, int dept_id, int Signature_id)
+        {
+             SignatureSubmission _signatureSubmission = await _context.SignatureSubmission.AsQueryable().Where(u => u.Id == required_id && u.Department_id == dept_id && u.Signature_id == Signature_id).FirstOrDefaultAsync();
+            if (_signatureSubmission == null)
+            {
+                return null;
+            }
+            return _signatureSubmission;
          }
     }
 }

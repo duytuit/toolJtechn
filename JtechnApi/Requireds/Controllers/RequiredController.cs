@@ -16,6 +16,8 @@ using JtechnApi.Shares;
 using JtechnApi.Shares.BaseRepository;
 using JtechnApi.Shares.Connects;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace JtechnApi.Controllers
@@ -30,6 +32,7 @@ namespace JtechnApi.Controllers
         private readonly ILogger<ProductionPlanController> _logger;
         private readonly IEmployeeRepository _emp;
         private readonly ISignatureSubmissionRepository _signature;
+       // private readonly IDbContextTransaction  _dbcontext;
         private readonly DBContext _context;
 
         public RequiredController(ILogger<ProductionPlanController> logger, ConnectionStrings c, IRequiredRepository r, IEmployeeRepository emp, ISignatureSubmissionRepository signature, DBContext context)
@@ -40,6 +43,7 @@ namespace JtechnApi.Controllers
             _emp = emp;
             _signature = signature;
             _context = context;
+           // _dbcontext = dbContext;
         }
 
         /// <summary>
@@ -81,9 +85,112 @@ namespace JtechnApi.Controllers
                 return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
             }
         }
+        // [HttpPost]
+        // [Route("task/create")]
+        // public async Task<IActionResult> Create([FromForm] TaskRequiredDto TaskRequiredDto)
+        // {
+
+        //     int rs_check = await repo.CheckDuplicateTitle(TaskRequiredDto.Title, RequiredRepository.from_type_task, TaskRequiredDto.Created_client);
+        //     if (rs_check > 0)
+        //     {
+        //         return ApiResponseResult<object>(false, "Tiêu đề đã tồn tại", null);
+        //     }
+        //     string requireCode = "R_" + DateTime.Now.ToString("yyyyMMddHHmmss");
+
+        //     var firstDict = Helper.ConfigFormType(1);
+        //     var mergedUsers = new List<string>();
+        //     if (firstDict != null && firstDict.Count > 0)
+        //     {
+        //         var firstItem = firstDict[0];
+
+        //         foreach (var pair in firstItem)
+        //         {
+        //             if (pair.Key.StartsWith("user_") && pair.Value is List<string> users)
+        //             {
+        //                 mergedUsers.AddRange(users);
+        //             }
+        //         }
+
+        //         // Loại bỏ trùng lặp nếu cần
+        //         mergedUsers = mergedUsers.Distinct().ToList();
+        //     }
+
+        //     List<SelectEmployeeDto> rs_users = await _emp.GetByListCode(mergedUsers);
+
+        //     var Content_form = new{info_users = rs_users};
+            
+        //     var toDeptJson = firstDict.FirstOrDefault()?.Where(pair => pair.Key == "to_dept")
+        //         .Select(pair => pair.Value as List<int>)
+        //         .FirstOrDefault() ?? new List<int>();
+        //     string jsonArray = JsonSerializer.Serialize(toDeptJson);
+        //     Required required = new Required
+        //     {
+        //         Code_required = requireCode,
+        //         Code = TaskRequiredDto.Code, // email from user
+        //         Content = TaskRequiredDto.Content,
+        //         Content_form =  JsonSerializer.Serialize(Content_form),
+        //         Attach = TaskRequiredDto.Attach,
+        //         Title = TaskRequiredDto.Title,
+        //         From_type = RequiredRepository.from_type_task,
+        //         Required_department_id = 0,
+        //         Receiving_department_ids = jsonArray,
+        //         Type = 0,
+        //         Order = 0,
+        //         Quantity = 0,
+        //         Unit_price = 0,
+        //         Size = 0,
+        //         Usage_status = 0,
+        //         Status = 0,
+        //         Created_client = TaskRequiredDto.Created_client,
+        //     };
+       
+        //       /* 1️⃣  Lấy execution‑strategy */
+        //     var strategy = _context.Database.CreateExecutionStrategy();
+
+        //     /* 2️⃣  Thực thi toàn bộ trong strategy.Execute */
+        //     return strategy.Execute(() =>
+        //     {
+        //         using var tx = _context.Database.BeginTransaction();  // sync
+        //         try
+        //         {
+        //             var result = repo.CreateRequiredAsync(required);
+        //             foreach (var user in rs_users)
+        //             {
+        //                 SignatureSubmission signatureSubmission = new SignatureSubmission
+        //                 {
+        //                     Required_id = result.Id,
+        //                     Department_id = user.SelectEmployeeDepartmentDto.Department_id,
+        //                     Content = "",
+        //                     Positions = 0,
+        //                     Approve_id = JsonSerializer.Serialize(new List<int> { user.Id }),
+        //                     Signature_id = user.Id,
+        //                     Status = 0, // Chưa duyệt
+
+        //                 };
+        //                 var signatureResult = _signature.CreateSignatureSubmissiondAsync(signatureSubmission);
+        //             }
+        //             tx.Commit();
+        //             if (result != null)
+        //             {
+        //                 return ApiResponseResult<object>(true, "Thêm mới thành công", result);
+        //             }
+        //             else
+        //             {
+        //                 return ApiResponseResult<object>(false, "Thêm mới thất bại", null);
+        //             }
+        //         }
+        //         catch (Exception ex)
+        //         {
+        //             tx.Rollback();
+        //             _logger.LogError(ex, "Lỗi thêm mới Required");
+        //             return ApiResponseResult<object>(false, "Thêm mới thất bại", null);
+        //         }
+              
+        //     });
+        // }
         [HttpPost]
         [Route("task/create")]
-        public async Task<IActionResult> Create([FromForm] TaskRequiredDto TaskRequiredDto)
+        public async Task<IActionResult> CreateTask([FromForm] TaskRequiredDto TaskRequiredDto)
         {
 
             int rs_check = await repo.CheckDuplicateTitle(TaskRequiredDto.Title, RequiredRepository.from_type_task, TaskRequiredDto.Created_client);
@@ -92,41 +199,18 @@ namespace JtechnApi.Controllers
                 return ApiResponseResult<object>(false, "Tiêu đề đã tồn tại", null);
             }
             string requireCode = "R_" + DateTime.Now.ToString("yyyyMMddHHmmss");
+            //List<SelectEmployeeDto> rs_users = await _emp.GetByListCode(mergedUsers);
 
-            var firstDict = Helper.ConfigFormType(1);
-            var mergedUsers = new List<string>();
-            if (firstDict != null && firstDict.Count > 0)
-            {
-                var firstItem = firstDict[0];
+            dynamic config = Helper.ConfigRequiredByType(1);
+            string jsonArray = JsonSerializer.Serialize(config.to_dept);
 
-                foreach (var pair in firstItem)
-                {
-                    if (pair.Key.StartsWith("user_") && pair.Value is List<string> users)
-                    {
-                        mergedUsers.AddRange(users);
-                    }
-                }
-
-                // Loại bỏ trùng lặp nếu cần
-                mergedUsers = mergedUsers.Distinct().ToList();
-            }
-
-            List<SelectEmployeeDto> rs_users = await _emp.GetByListCode(mergedUsers);
-
-            var Content_form = new{info_users = rs_users};
-            
-            var toDeptJson = firstDict.FirstOrDefault()?.Where(pair => pair.Key == "to_dept")
-                .Select(pair => pair.Value as List<int>)
-                .FirstOrDefault() ?? new List<int>();
-            string jsonArray = JsonSerializer.Serialize(toDeptJson);
             Required required = new Required
             {
                 Code_required = requireCode,
-                Code = TaskRequiredDto.Code, // email from user
+                Code = TaskRequiredDto.Code, // mã sản phẩm
                 Content = TaskRequiredDto.Content,
-                Content_form =  JsonSerializer.Serialize(Content_form),
                 Attach = TaskRequiredDto.Attach,
-                Title = TaskRequiredDto.Title,
+                Title = TaskRequiredDto.Code,
                 From_type = RequiredRepository.from_type_task,
                 Required_department_id = 0,
                 Receiving_department_ids = jsonArray,
@@ -139,31 +223,145 @@ namespace JtechnApi.Controllers
                 Status = 0,
                 Created_client = TaskRequiredDto.Created_client,
             };
-          
-            var result = await repo.CreateRequiredAsync(required);
-            foreach (var user in rs_users)
-            {
-                SignatureSubmission signatureSubmission = new SignatureSubmission
-                {
-                    Required_id = result.Id,
-                    Department_id = user.SelectEmployeeDepartmentDto.Department_id,
-                    Content = "",
-                    Positions = 0,
-                    Approve_id = JsonSerializer.Serialize(new List<int> { user.Id }),
-                    Signature_id = user.Id,
-                    Status = 0, // Chưa duyệt
+       
+              /* 1️⃣  Lấy execution‑strategy */
+            var strategy = _context.Database.CreateExecutionStrategy();
 
-                };
-                var signatureResult = await _signature.CreateSignatureSubmissiondAsync(signatureSubmission);
-            }
-           
-            if (result != null)
+            /* 2️⃣  Thực thi toàn bộ trong strategy.Execute */
+            return strategy.Execute(() =>
             {
-                return ApiResponseResult<object>(true, "Thêm mới thành công", result);
-            }else
+                using var tx = _context.Database.BeginTransaction();  // sync
+                try
+                {
+                    var result = repo.CreateRequiredAsync(required);
+                    
+                    var empDepts = JsonSerializer.Deserialize<Dictionary<int, List<JsonElement>>>(TaskRequiredDto.Emp_depts);
+
+                    foreach (var key in empDepts.Keys.ToList())
+                    {
+                        foreach (var item in empDepts[key].Where(e => e.ValueKind != JsonValueKind.Null).ToList())
+                        {
+                            // Nếu mỗi item là object có "value" là mã nhân viên
+                            var value = item.GetProperty("value").GetString();
+
+                            if (int.TryParse(value, out var intId))
+                            {
+                                var existing = _signature.FindByRequired(result.Result.Id, key, intId);
+                                if (existing.Result != null) continue;
+
+                                var sig = new SignatureSubmission
+                                {
+                                    Required_id = result.Result.Id,
+                                    Department_id = key,
+                                    Approve_id = JsonSerializer.Serialize(new List<int> { intId }),
+                                    Signature_id = intId,
+                                    Status = 0,
+                                    Content = "",
+                                    Positions = 0,
+                                };
+
+                                _signature.CreateSignatureSubmissiondAsync(sig);
+                            }
+                        }
+                    }
+                    tx.Commit();
+                    if (result != null)
+                    {
+                        return ApiResponseResult(true, "Thêm mới thành công", result.Result);
+                    }
+                    else
+                    {
+                        return ApiResponseResult<object>(false, "Thêm mới thất bại", null);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    tx.Rollback();
+                    _logger.LogError(ex, "Đã xảy ra lỗi khi thêm mới");
+                    return ApiResponseResult<object>(false, "Thêm mới thất bại", null);
+                }
+              
+            });
+        }
+        [HttpPost]
+        [Route("task/update/{id}")]
+        public async Task<IActionResult> UpdateTask([FromForm] TaskRequiredDto TaskRequiredDto)
+        {
+
+            Required _required = await repo.show(TaskRequiredDto.Id);
+            if (_required == null)
             {
-                return ApiResponseResult<object>(false, "Thêm mới thất bại", null);
+                return ApiResponseResult<object>(false, "Công việc không tồn tại", null);
             }
+            _required.Content = TaskRequiredDto.Content;
+            _required.Attach = TaskRequiredDto.Attach;
+            _required.Title = TaskRequiredDto.Title;
+            _required.Required_department_id = 0;
+       
+              /* 1️⃣  Lấy execution‑strategy */
+            var strategy = _context.Database.CreateExecutionStrategy();
+
+            /* 2️⃣  Thực thi toàn bộ trong strategy.Execute */
+            return strategy.Execute(() =>
+            {
+                using var tx = _context.Database.BeginTransaction();  // sync
+                try
+                {
+                    var result = repo.UpdateRequiredAsync(_required);
+                    
+                    // Deserialize chính xác kiểu dữ liệu
+                    var empDepts = JsonSerializer.Deserialize<Dictionary<int, List<JsonElement>>>(TaskRequiredDto.Emp_depts);
+
+                    foreach (var key in empDepts.Keys.ToList())
+                    {
+                        foreach (var item in empDepts[key].Where(e => e.ValueKind != JsonValueKind.Null).ToList())
+                        {
+                            // Lấy giá trị "value" trong object
+                            if (!item.TryGetProperty("value", out var valueProp)) continue;
+
+                            var valueStr = valueProp.GetString();
+                            if (!int.TryParse(valueStr, out int signatureId))
+                                continue;
+
+                            // Kiểm tra nếu đã tồn tại
+                            var _sig = _signature.FindByRequired(result.Result.Id, key, signatureId);
+                            if (_sig.Result != null)
+                            {
+                                continue;
+                            }
+
+                            var signatureSubmission = new SignatureSubmission
+                            {
+                                Required_id = result.Result.Id,
+                                Department_id = key,
+                                Content = "",
+                                Positions = 0,
+                                Approve_id = JsonSerializer.Serialize(new List<int> { signatureId }),
+                                Signature_id = signatureId,
+                                Status = 0
+                            };
+
+                             _signature.CreateSignatureSubmissiondAsync(signatureSubmission);
+                        }
+                    }
+                    tx.Commit();
+                    if (result != null)
+                    {
+                        return ApiResponseResult(true, "Cập nhật thành công", result.Result);
+                    }
+                    else
+                    {
+                        return ApiResponseResult<object>(false, "Cập nhật thất bại", null);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    tx.Rollback();
+                    _logger.LogError(ex, "Đã xảy ra lỗi khi cập nhật");
+                    return ApiResponseResult<object>(false, "Cập nhật thất bại", null);
+                }
+              
+            });
         }
         [HttpGet("task/{id}")]
         public async Task<IActionResult> GetById(int id)

@@ -19,6 +19,7 @@ namespace JtechnApi.Shares.AdoHelper
          Dictionary<string, object> whereEquals = null,
          Dictionary<string, string> whereLikes = null,
          Dictionary<string, IEnumerable<object>> whereInList = null,
+         List<(string Sql, object[] Params)> whereCustom = null,
          List<(string Field, DateTime From, DateTime To)> dateRangeList = null,
          List<string> orderByList = null,
          CancellationToken cancellationToken = default)
@@ -78,7 +79,32 @@ namespace JtechnApi.Shares.AdoHelper
                     whereClauses.Add($"{kvp.Key} IN ({string.Join(", ", paramNames)})");
                 }
             }
+            // WHERE Custom
+            if (whereCustom != null)
+            {
+                int customIndex = 0;
+                foreach (var (sql, paramValues) in whereCustom)
+                {
+                    var parts = sql.Split('?');
+                    var sqlWithParams = "";
 
+                    for (int i = 0; i < paramValues.Length; i++)
+                    {
+                        string paramName = $"@customParam_{customIndex}";
+                        cmd.Parameters.AddWithValue(paramName, paramValues[i]);
+                        sqlWithParams += parts[i] + paramName;
+                        customIndex++;
+                    }
+
+                    // Add the last part if exists
+                    if (parts.Length > paramValues.Length)
+                    {
+                        sqlWithParams += parts.Last();
+                    }
+
+                    whereClauses.Add(sqlWithParams);
+                }
+            }
             // WHERE Date Range
             if (dateRangeList != null)
             {
@@ -164,6 +190,7 @@ namespace JtechnApi.Shares.AdoHelper
         Dictionary<string, object> whereEquals = null,
         Dictionary<string, string> whereLikes = null,
         Dictionary<string, IEnumerable<object>> whereInList = null,
+        List<(string Sql, object[] Params)> whereCustom = null,
         List<(string Field, DateTime From, DateTime To)> dateRangeList = null,
         CancellationToken cancellationToken = default)
         {
@@ -202,7 +229,31 @@ namespace JtechnApi.Shares.AdoHelper
                         cmd.Parameters.AddWithValue(paramNames[index++], val);
                 }
             }
+            if (whereCustom != null)
+            {
+                int customIndex = 0;
+                foreach (var (sql, paramValues) in whereCustom)
+                {
+                    var parts = sql.Split('?');
+                    var sqlWithParams = "";
 
+                    for (int i = 0; i < paramValues.Length; i++)
+                    {
+                        string paramName = $"@customParam_{customIndex}";
+                        cmd.Parameters.AddWithValue(paramName, paramValues[i]);
+                        sqlWithParams += parts[i] + paramName;
+                        customIndex++;
+                    }
+
+                    // Add the last part if exists
+                    if (parts.Length > paramValues.Length)
+                    {
+                        sqlWithParams += parts.Last();
+                    }
+
+                    whereClauses.Add(sqlWithParams);
+                }
+            }
             if (dateRangeList != null)
             {
                 foreach (var range in dateRangeList)

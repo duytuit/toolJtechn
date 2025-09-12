@@ -9,14 +9,14 @@ namespace JtechnApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class DepartmentController : ControllerBase
+    public class KTNQController : ControllerBase
     {
 
         private readonly ConnectionStrings con;
         private readonly IDepartmentRepository repo;
-        private readonly ILogger<DepartmentController> _logger;
+        private readonly ILogger<KTNQController> _logger;
 
-        public DepartmentController(ILogger<DepartmentController> logger, ConnectionStrings c, IDepartmentRepository r)
+        public KTNQController(ILogger<KTNQController> logger, ConnectionStrings c, IDepartmentRepository r)
         {
             _logger = logger;
             con = c;

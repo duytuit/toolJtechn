@@ -8,7 +8,7 @@ namespace JtechnApi.Departments
     {
         public static IServiceCollection AddDepartmentsModule(this IServiceCollection services)
         {
-            services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+            services.AddScoped<IDepartmentRepository, Repository>();
             return services;
         }
     }

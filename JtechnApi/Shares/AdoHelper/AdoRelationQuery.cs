@@ -46,6 +46,7 @@ namespace JtechnApi.Shares.AdoHelper
         Dictionary<string, object> whereEquals = null,
         Dictionary<string, string> whereLikes = null,
         Dictionary<string, IEnumerable<object>> whereInList = null,
+        List<(string Sql, object[] Params)> whereCustom = null,
         List<(string Field, DateTime From, DateTime To)> dateRangeList = null,
         List<string> orderByList = null,
         IEnumerable<AdoRelation> relations = null,
@@ -64,7 +65,7 @@ namespace JtechnApi.Shares.AdoHelper
             if (includeCount)
             {
                 count = await SqlHelpers.ExecuteCountCommandAsync(
-                                      conn, tableName, whereEquals, whereLikes, whereInList, dateRangeList, cancellationToken);
+                                      conn, tableName, whereEquals, whereLikes, whereInList, whereCustom, dateRangeList, cancellationToken);
             }
 
             // Kiểm tra Redis cache
@@ -81,7 +82,7 @@ namespace JtechnApi.Shares.AdoHelper
 
             using var baseCmd = await SqlHelpers.BuildBaseCommandAsync(
                 conn, tableName, columns, offset, limit,
-                whereEquals, whereLikes, whereInList, dateRangeList, orderByList, cancellationToken);
+                whereEquals, whereLikes, whereInList, whereCustom, dateRangeList, orderByList, cancellationToken);
 
             var baseList = (await SqlHelpers.ExecuteQueryAsync(baseCmd, cancellationToken))
                 .Cast<IDictionary<string, object>>().ToList();

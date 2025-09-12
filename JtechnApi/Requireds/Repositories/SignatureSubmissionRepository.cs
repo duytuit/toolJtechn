@@ -4,6 +4,7 @@ using JtechnApi.Shares;
 using JtechnApi.Shares.BaseRepository;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -49,12 +50,46 @@ namespace JtechnApi.Requireds.Repositories
         }
         public async Task<SignatureSubmission> FindByRequired(int required_id, int dept_id, int Signature_id)
         {
-             SignatureSubmission _signatureSubmission = await _context.SignatureSubmission.AsQueryable().Where(u => u.Id == required_id && u.Department_id == dept_id && u.Signature_id == Signature_id).FirstOrDefaultAsync();
+            SignatureSubmission _signatureSubmission = await _context.SignatureSubmission.AsQueryable().Where(u => u.Id == required_id && u.Department_id == dept_id && u.Signature_id == Signature_id).FirstOrDefaultAsync();
             if (_signatureSubmission == null)
             {
                 return null;
             }
             return _signatureSubmission;
-         }
+        }
+        public async Task<SignatureSubmission> FindByRequiredV2(int required_id, int Signature_id)
+        {
+            SignatureSubmission _signatureSubmission = await _context.SignatureSubmission.AsQueryable().Where(u => u.Id == required_id && u.Signature_id == Signature_id).FirstOrDefaultAsync();
+            if (_signatureSubmission == null)
+            {
+                return null;
+            }
+            return _signatureSubmission;
+        }
+        public Task<bool> Delete(int id)
+        {
+            var signatureSubmission = _context.SignatureSubmission.Where(x => x.Id == id).FirstOrDefault();
+            if (signatureSubmission == null)
+            {
+                return Task.FromResult(false);
+            }
+            signatureSubmission.Deleted_at = DateTime.Now; // Soft delete
+            _context.SignatureSubmission.Update(signatureSubmission);
+            _context.SaveChanges();
+            return Task.FromResult(true);
+        }
+        public async Task<SignatureSubmission> show(int id)
+        {
+            SignatureSubmission _sig = await _context.SignatureSubmission.AsQueryable().Where(u => u.Id == id).FirstOrDefaultAsync();
+            if (_sig == null)
+            {
+                return null;
+            }
+            return _sig;
+        }
+        public async Task<List<SignatureSubmission>> getbyRequired(int id)
+        {
+            return await _context.SignatureSubmission.AsQueryable().Where(u => u.Required_id == id).ToListAsync();
+        }
     }
 }

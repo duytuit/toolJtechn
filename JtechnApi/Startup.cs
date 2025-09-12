@@ -90,6 +90,7 @@ namespace JtechnApi
             {
                 options.Filters.Add<ValidateModelFilter>();
             });
+            services.AddHttpContextAccessor();
             services.AddControllersWithViews(); // 👈 hỗ trợ cả View + API
             services.AddAccessorysModule();
             services.AddDepartmentsModule();

@@ -17,6 +17,8 @@ using Microsoft.AspNetCore.Http;
 using Serilog.Events;
 using System.IO;
 using System;
+using JtechnApi.UploadKTNQ.Dtos;
+using JtechnApi.UploadKTNQ.Models;
 
 namespace JtechnApi.Controllers
 {
@@ -87,6 +89,12 @@ namespace JtechnApi.Controllers
             }
             return ApiResponseResult<object>(true, "Lấy dữ liệu ok", new { config = Helper.ConfigRequiredByType(1), department = dept, emp_dept = emp_dept, emp = emp });
         }
+        [HttpGet("config/jtechn/workGroup")]
+        public async Task<IActionResult> GetWorkGroup([FromQuery] int type = 1, string emps = null)
+        {
+            var emp = await _emp.GetAll();
+            return ApiResponseResult<object>(true, "Lấy dữ liệu ok", new { config = Helper.ConfigRequiredByType(2), emp = emp });
+        }
         // POST api/upload/single
         [HttpPost("upload/single")]
         public async Task<IActionResult> UploadSingle(IFormFile file)
@@ -116,9 +124,41 @@ namespace JtechnApi.Controllers
 
             return StatusCode(207, new { success, failed }); // Multi-Status
         }
-
+        [HttpPost("upload/ktnq")]
+        public async Task<IActionResult> UploadKTNQ([FromForm] AddKTNQDto AddKTNQDto)
+        {
+            KTNQ check_ktnq = await _context.KTNQ.FirstOrDefaultAsync(x => x.Code == AddKTNQDto.Code);
+            if (check_ktnq != null)
+            {
+                return ApiResponseResult<object>(false, "Mã KTNQ đã tồn tại", null);
+            }
+            KTNQ kTNQ = new KTNQ
+            {
+                Code = AddKTNQDto.Code,
+                Content = AddKTNQDto.Content,
+                Created_at = DateTime.Now,
+                Updated_at = DateTime.Now
+            };
+            _context.KTNQ.Add(kTNQ);
+            await _context.SaveChangesAsync();  
+            return ApiResponseResult<object>(true, "Thêm KTNQ thành công", kTNQ);
+        }
+        [HttpGet("upload/ktnq/code")]
+        public async Task<IActionResult> GetKTNQ([FromQuery] string code)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                return ApiResponseResult<object>(false, "Mã KTNQ không được để trống", null);
+            }
+            var ktnq = await _context.KTNQ.FirstOrDefaultAsync(x => x.Code == code);
+            if (ktnq == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy KTNQ với mã: " + code, null);
+            }
+            return ApiResponseResult<object>(true, "Lấy KTNQ thành công", ktnq);
+        }
         /* ---------- helper ---------- */
-       
+
     }
 
 }

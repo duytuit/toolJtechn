@@ -247,10 +247,14 @@ namespace asyncDataSoltec
 						
 			}
 			DateTime now = DateTime.Now;
-			foreach (Record_st item in set)
+			var distinctSet = new HashSet<Record_st>(
+				set.GroupBy(r => new { r._no, r._date })
+				   .Select(g => g.Last())
+			);
+			foreach (Record_st item in distinctSet)
             {
 				string jsonString = JsonConvert.SerializeObject(item, Formatting.Indented);
-				string InsertData = string.Format("INSERT INTO  [STOCKMANAGEMENT].[dbo].[ReportSeltec_DAP] ([data],[machine],[warning],[good],[bad],[peak],[meas],[T1],[T2],[T3],[TD],[shift],[created_at],[no],[data_date]) VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}','{11}','{12}','{13}','{14}');", jsonString, Machine, item._warning.ToString(), item._good.ToString(), item._bad.ToString(), item._peak.ToString(), item._meas.ToString(), item._T1.ToString(), item._T2.ToString(), item._T3.ToString(), item._TD.ToString(), item._shift.ToString(), now, item._no, item._date);
+				string InsertData = string.Format("INSERT INTO  [STOCKMANAGEMENT].[dbo].[ReportSeltec_DAP] ([data],[machine],[warning],[good],[bad],[peak],[meas],[T1],[T2],[T3],[TD],[shift],[data_date],[no],[created_at]) VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}','{11}','{12}','{13}','{14}');", jsonString, Machine, item._warning.ToString(), item._good.ToString(), item._bad.ToString(), item._peak.ToString(), item._meas.ToString(), item._T1.ToString(), item._T2.ToString(), item._T3.ToString(), item._TD.ToString(), item._shift.ToString(), now, item._no, item._date);
 				ac.RunQuery(InsertData);
 			}
 			
@@ -613,7 +617,7 @@ namespace asyncDataSoltec
 						//_list.Add(record_st);
 						string jsonString = JsonConvert.SerializeObject(record_st, Formatting.Indented);
 						DateTime now = DateTime.Now;
-						string InsertData = string.Format("INSERT INTO  [STOCKMANAGEMENT].[dbo].[temp_report_seltec_dap] ([data],[machine],[warning],[good],[bad],[peak],[meas],[T1],[T2],[T3],[TD],[shift],[created_at],[no],[data_date]) VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}','{11}','{12}','{13}','{14}');", jsonString, Machine, record_st._warning.ToString(), record_st._good.ToString(), record_st._bad.ToString(), record_st._peak.ToString(), record_st._meas.ToString(), record_st._T1.ToString(), record_st._T2.ToString(), record_st._T3.ToString(), record_st._TD.ToString(), record_st._shift.ToString(), now, record_st._no, record_st._date);
+						string InsertData = string.Format("INSERT INTO  [STOCKMANAGEMENT].[dbo].[temp_report_seltec_dap] ([data],[machine],[warning],[good],[bad],[peak],[meas],[T1],[T2],[T3],[TD],[shift],[data_date],[no],[created_at]) VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}','{11}','{12}','{13}','{14}');", jsonString, Machine, record_st._warning.ToString(), record_st._good.ToString(), record_st._bad.ToString(), record_st._peak.ToString(), record_st._meas.ToString(), record_st._T1.ToString(), record_st._T2.ToString(), record_st._T3.ToString(), record_st._TD.ToString(), record_st._shift.ToString(), now, record_st._no, record_st._date);
 						ac.RunQuery(InsertData);
 						continue;
 					}

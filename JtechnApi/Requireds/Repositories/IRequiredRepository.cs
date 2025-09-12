@@ -12,10 +12,12 @@ namespace JtechnApi.Requireds.Repositories
     {
         Task<PaginatedResult<Required>> GetPaginatedAsync(RequestRequiredDto RequestRequiredDto, int page, int pageSize);
         Task<PaginatedResult<Required>> GetTaskAsync(RequestRequiredDto RequestRequiredDto, int page, int pageSize);
-        Task<PaginatedResult<object>> GetObjectTaskAsync(RequestRequiredDto RequestRequiredDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<PaginatedResultVue<object>> GetObjectTaskAsync(RequestRequiredDto RequestRequiredDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<Required> CreateRequiredAsync(Required required);
         Task<Required> UpdateRequiredAsync(Required required);
         Task<int> CheckDuplicateTitle(string title, int from_type, DateTime? created_client);
         Task<Required> show(int id);
+        Task<object> detail(int id);
+        Task<bool> DeleteRequiredAsync(int id);
     }
 }

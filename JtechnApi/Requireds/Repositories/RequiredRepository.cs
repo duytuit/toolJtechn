@@ -145,12 +145,12 @@ namespace JtechnApi.Requireds.Repositories
                 Items = result
             };
         }
-        public async Task<PaginatedResult<object>> GetObjectTaskAsync(RequestRequiredDto dto, int page, int pageSize, CancellationToken cancellationToken)
+        public async Task<PaginatedResultVue<object>> GetObjectTaskAsync(RequestRequiredDto dto, int page, int pageSize, CancellationToken cancellationToken)
         {
             var whereEquals = new Dictionary<string, object>();
             var whereLikes = new Dictionary<string, string>();
             var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
-            var orderByList = new List<string> { "id DESC" };
+            var orderByList = new List<string> { "id Desc" };
             if (dto.Status.HasValue)
                 whereEquals["status"] = dto.Status.Value;
 
@@ -175,9 +175,9 @@ namespace JtechnApi.Requireds.Repositories
             dynamic results = await AdoRelationQuery.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "requireds",
-                        new[] { "id", "required_department_id" },
-                        offset: 0,
-                        limit: 10,
+                        new[] { "id", "code_required","code","content","attach","receiving_department_ids","required_department_id","status","from_type" ,"date_completed","created_by","completed_by","updated_by","created_at","updated_at","content_form","type","confirm_form"},
+                        offset: (page - 1) * pageSize,
+                        limit: pageSize,
                         whereEquals: whereEquals,
                         whereLikes: whereLikes,
                         dateRangeList: whereDateRange,
@@ -188,7 +188,7 @@ namespace JtechnApi.Requireds.Repositories
                         {
                             Name = "signature_submissions",
                             Table = "signature_submissions",
-                            Columns = new[] { "id", "required_id", "department_id" },
+                            Columns = new[] { "id", "required_id", "department_id" ,"status","content","positions","approve_id","signature_id","created_at","updated_at","type"},
                             ParentKey = "id",
                             ForeignKey = "required_id",
                             KeyName = "required_id",
@@ -202,12 +202,13 @@ namespace JtechnApi.Requireds.Repositories
             int totalItems = results.Count;
             var objectList = new List<object>();
             objectList.AddRange(results.Data);
-            var _results = new PaginatedResult<object>
+            var _results = new PaginatedResultVue<object>
             {
-                CurrentPage = page,
-                TotalPages = (int)Math.Ceiling((double)totalItems / pageSize),
-                TotalItems = totalItems,
-                Items = objectList,
+                Current_page = page,
+                Per_page = pageSize,
+                Last_page = (int)Math.Ceiling((double)totalItems / pageSize),
+                Total = totalItems,
+                Data = objectList,
             };
             objectList = null;
             results = null;
@@ -254,12 +255,34 @@ namespace JtechnApi.Requireds.Repositories
         }
         public async Task<Required> show(int id)
         {
-            Required required = await _context.Required.AsQueryable().Where(u => u.Id == id && u.Deleted_at == null).FirstOrDefaultAsync();
+            Required required = await _context.Required.AsQueryable().Where(u => u.Id == id).FirstOrDefaultAsync();
             if (required == null)
             {
                 return null;
             }
             return required;
+        }
+        public async Task<object> detail(int id)
+        {
+            Required required = await _context.Required.AsQueryable().Where(u => u.Id == id).FirstOrDefaultAsync();
+            if (required == null)
+            {
+                return null;
+            }
+            List<SignatureSubmission> signatureSubmission = await _context.SignatureSubmission.AsQueryable().Where(u => u.Required_id == required.Id).ToListAsync();
+            return new { required, signatureSubmission };
+        }
+        public Task<bool> DeleteRequiredAsync(int id)
+        {
+            var required = _context.Required.Where(x => x.Id == id).FirstOrDefault();
+            if (required == null)
+            {
+                return Task.FromResult(false);
+            }
+            required.Deleted_at = DateTime.Now; // Soft delete
+            _context.Required.Update(required);
+            _context.SaveChanges();
+            return Task.FromResult(true);   
         }
     }
 }

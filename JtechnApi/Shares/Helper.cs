@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
+using System.Linq;
+using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -133,21 +135,66 @@ namespace JtechnApi.Shares
                         confirm_to_dept = 2,
                         confirm_by_from_dept = new List<int> { 3 },
                         confirm_by_to_dept = new List<int> { 4, 5 },
-                        user_cat = new List<string> { "240929" },
-                        user_dap = new List<string> { "130764" },
-                        user_cam = new List<string> { "130206" },
-                        user_buredo = new List<string> { "140511" },
-                        user_laprap = new List<string> { "10281" },
-                        user_kiemtra = new List<string> { "131078" },
-                        data_table = new
-                        {
-                            code = "",
-                            quantity = "",
-                            size = "",
-                            unit_price = "",
-                            location_c = "",
-                            usage_status = ""
-                        }
+                        emp_dept = new[]
+                                    {
+                                        new {
+                                            id_dept = 5,
+                                            code_emp = new List<int> { 240929, 240923 },
+                                            group="Khánh"
+                                        },
+                                        new {
+                                            id_dept = 7,
+                                            code_emp = new List<int> { 240930, 240931 },
+                                            group="Cường"
+                                        },
+                                        new {
+                                            id_dept = 4,
+                                            code_emp = new List<int> { 240929, 240923 },
+                                            group="Hải"
+                                        },
+                                        new {
+                                            id_dept = 3,
+                                            code_emp = new List<int> { 240930, 240931 },
+                                            group="Quỳnh"
+                                        },
+                                       //new {
+                                       //    id_dept = 2,
+                                       //    code_emp = new List<int> { 240929, 240923 },
+                                       //    group="Tâm"
+                                       //},
+                                       //new {
+                                       //    id_dept = 6,
+                                       //    code_emp = new List<int> { 240930, 240931 },
+                                       //    group="Pawa"
+                                       //}
+                                    },
+                        work_group = new[]
+                                    {
+                                        new {
+                                            id=211,
+                                            group="Khánh"
+                                        },
+                                        new {
+                                             id=310,
+                                            group="Cường"
+                                        },
+                                        new {
+                                             id=288,
+                                            group="Hải"
+                                        },
+                                        new {
+                                             id=113,
+                                            group="Quỳnh"
+                                        },
+                                       // new {
+                                       //      id=107,
+                                       //     group="Tâm"
+                                       // },
+                                       // new {
+                                       //     id=0,
+                                       //     group="Pawa"
+                                       // }
+                                    },
                     };
                     break;
                 default:
@@ -188,6 +235,42 @@ namespace JtechnApi.Shares
             var relativePath ="public/assets/files/"+date_file+file.FileName; // dùng cho URL
 
             return new UploadResult(true, "OK", $"{relativePath}");
+        }
+        public static string GetClientInfo(IHttpContextAccessor accessor, string clientNameFromBody = null)
+        {
+            var context = accessor.HttpContext;
+
+            var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+                     ?? context.Connection.RemoteIpAddress?.ToString();
+
+            var userAgent = context.Request.Headers["User-Agent"].ToString();
+            var clientNameFromHeader = context.Request.Headers["X-Client-Name"].ToString();
+
+            string hostName = null;
+            try
+            {
+                var ipAddr = context.Connection.RemoteIpAddress;
+                if (ipAddr != null && !IPAddress.IsLoopback(ipAddr))
+                {
+                    var entry = Dns.GetHostEntry(ipAddr);
+                    hostName = entry.HostName;
+                }
+            }
+            catch
+            {
+                hostName = "Unable to resolve";
+            }
+
+            var result = new
+            {
+                ipAddress = ip,
+                userAgent = userAgent,
+                clientName_FromHeader = clientNameFromHeader,
+                clientName_FromBody = clientNameFromBody,
+                hostname_Resolved = hostName
+            };
+
+            return JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
         }
     }
         public class UploadResult

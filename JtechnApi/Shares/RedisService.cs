@@ -1,5 +1,7 @@
-using StackExchange.Redis;
+﻿using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,6 +11,7 @@ namespace JtechnApi.Shares
     public class RedisService
     {
         private readonly IDatabase _redisDb;
+        private readonly IServer _redisServer;
         private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -18,6 +21,7 @@ namespace JtechnApi.Shares
         public RedisService(IConnectionMultiplexer redis)
         {
             _redisDb = redis.GetDatabase();
+            _redisServer = redis.GetServer(redis.GetEndPoints().First()); // lấy IServer để duyệt key
         }
 
         public async Task SetAsync(string key, string value, TimeSpan? expires = null, CancellationToken cancellationToken = default)
@@ -31,7 +35,19 @@ namespace JtechnApi.Shares
             cancellationToken.ThrowIfCancellationRequested();
             return await _redisDb.StringGetAsync(key);
         }
+        public List<string> GetSortedHistoryPlansAsync(string key)
+        {
+            var pattern = $"*{key}*"; // ví dụ: key = "ke_hoach_san_xuat_"
 
+            var keys = _redisServer
+                .Keys(pattern: pattern)
+                .Select(k => k.ToString())
+                .ToList();
+
+            keys.Sort((a, b) => string.Compare(b, a, StringComparison.Ordinal)); // sắp xếp giảm dần
+
+            return keys;
+        }
         public async Task SetAsync<T>(string key, T value, TimeSpan? expires = null, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();

@@ -6,6 +6,7 @@ using JtechnApi.ProductionPlans.Models;
 using JtechnApi.Requireds.Models;
 using JtechnApi.Umesens.Models;
 using JtechnApi.UploadDatas.Models;
+using JtechnApi.UploadKTNQ.Models;
 using JtechnApi.Users.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,6 +26,7 @@ namespace JtechnApi.Shares.BaseRepository
         public DbSet<Accessory> Accessory { get; set; }
         public DbSet<Required> Required { get; set; }
         public DbSet<TempRequired> TempRequired { get; set; }
+        public DbSet<KTNQ> KTNQ { get; set; }
         public DBContext(DbContextOptions<DBContext> options) : base(options)
         {
 
@@ -41,8 +43,9 @@ namespace JtechnApi.Shares.BaseRepository
             modelBuider.Entity<UploadData>().HasQueryFilter(e => e.Deleted_at == null);
             modelBuider.Entity<ProductionPlan>().HasQueryFilter(e => e.Deleted_at == null);
             modelBuider.Entity<Umesen>().HasQueryFilter(e => e.Deleted_at == null);
-            modelBuider.Entity<Department>().HasQueryFilter(e => e.Deleted_at == null);
+            modelBuider.Entity<KTNQ>().HasQueryFilter(e => e.Deleted_at == null);
             modelBuider.Entity<EmployeeDepartment>().HasQueryFilter(e => e.Deleted_at == null);
+            modelBuider.Entity<KTNQ>().HasQueryFilter(e => e.Deleted_at == null);
         }           
     }
 }

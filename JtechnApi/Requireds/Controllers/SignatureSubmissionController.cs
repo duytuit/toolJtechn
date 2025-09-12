@@ -6,29 +6,30 @@ using JtechnApi.Shares.BaseRepository;
 using JtechnApi.Shares.Connects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Linq.Dynamic.Core;
-using System.Text.Json;
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace JtechnApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class SignatureSubmissionController : ControllerBase
+    public class SignatureSubmissionController : BaseApiController
     {
 
         private readonly ConnectionStrings con;
         private readonly ISignatureSubmissionRepository repo;
+        private readonly IRequiredRepository _required;
         private readonly ILogger<SignatureSubmissionController> _logger;
-         private readonly DBContext _context;
+        private readonly DBContext _context;
 
-        public SignatureSubmissionController(ILogger<SignatureSubmissionController> logger, ConnectionStrings c, ISignatureSubmissionRepository r, DBContext context)
+        public SignatureSubmissionController(ILogger<SignatureSubmissionController> logger, ConnectionStrings c, ISignatureSubmissionRepository r, DBContext context,IRequiredRepository required_repo)
         {
             _logger = logger;
             con = c;
             repo = r;
             _context = context;
+            _required = required_repo;
         }
 
         /// <summary>
@@ -41,6 +42,49 @@ namespace JtechnApi.Controllers
             var result = await repo.GetPaginatedAsync(page, pageSize);
 
             return Ok(result);
+        }
+        [HttpDelete("{id}")]
+        [Route("delete")]
+        public async Task<IActionResult> Delete([FromQuery] int id)
+        {
+            var isDeleted = await repo.Delete(id);
+            if (!isDeleted)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult<object>(true, "Xóa thành công", null);
+        }
+        [Route("change/status")]
+        [HttpPost]
+        public async Task<IActionResult> ChangeStatus([FromForm] ChangeStatusTaskDto changeStatusTaskDto)
+        {
+            SignatureSubmission _sig = await repo.show(changeStatusTaskDto.Signature_Id);
+            if (_sig == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu Signature", null);
+            }
+            Required _required_rs = await _required.show(changeStatusTaskDto.Required_Id);
+            if (_required_rs == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu Required", null);
+            }
+            _sig.Status = changeStatusTaskDto.Status;
+            _sig.Signature_id = changeStatusTaskDto.Status == 1 ? changeStatusTaskDto.Created_By : 0;
+            _sig.Updated_at = DateTime.Now;
+            _context.SignatureSubmission.Update(_sig);
+            _context.SaveChanges();
+            _sig = _context.SignatureSubmission.Where(u => u.Required_id == changeStatusTaskDto.Required_Id && u.Status == 0).FirstOrDefault();
+            if (_sig == null)
+            {
+                _required_rs.Status = 1;
+            }
+            else
+            {
+                _required_rs.Status = 0;
+            }
+            _context.Required.Update(_required_rs);
+            _context.SaveChanges();
+            return ApiResponseResult<object>(true, "Cập nhật thành công", null);
         }
     }
 }

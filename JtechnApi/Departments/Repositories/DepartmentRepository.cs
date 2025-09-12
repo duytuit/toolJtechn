@@ -11,10 +11,10 @@ using System.Linq.Dynamic.Core;
 
 namespace JtechnApi.Departments.Repositories
 {
-    public class DepartmentRepository : BaseRepository<Department>, IDepartmentRepository
+    public class Repository : BaseRepository<Department>, IDepartmentRepository
     {
         private readonly DBContext _context;
-        public DepartmentRepository(DBContext context) : base(context)
+        public Repository(DBContext context) : base(context)
         {
             _context = context;
         }

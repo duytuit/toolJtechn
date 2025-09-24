@@ -202,7 +202,7 @@ namespace JtechnApi.Shares
             }
             return result;
         }
-        public static async Task<UploadResult> ProcessFileAsync(IFormFile file)
+        public static async Task<UploadResult> ProcessFileAsync(IFormFile file,string? folder)
         {
             long _fileSizeLimit = 50 * 1024 * 1024;            // 50 MB
             string[] _permittedExtensions = { ".jpg", ".png", ".pdf" ,".xls",".xlsx"};
@@ -221,18 +221,23 @@ namespace JtechnApi.Shares
             // UNC gốc – dùng chuỗi verbatim @"" để đỡ phải gấp đôi \\
             const string UNC_ROOT = @"\\192.168.207.6\jtecdata\JTEC_PD_PROGAM\CMSWeb\jtecweb\public\public\assets\files";
 
-            // uploads\<yyyy>\<MM>
-            var folder = Path.Combine(UNC_ROOT);
+            // Nếu có folder thì thêm vào UNC path
+            string targetFolder = !string.IsNullOrWhiteSpace(folder)
+                ? Path.Combine(UNC_ROOT, folder.Replace("..", "").Trim())
+                : UNC_ROOT;
 
             // tạo thư mục (nếu chưa có)
-            Directory.CreateDirectory(folder);
+            Directory.CreateDirectory(targetFolder);
             string date_file = DateTime.Now.ToString("yyyyMMdd-HHmmss") + "-";
-            var filePath = Path.Combine(folder, date_file+file.FileName);
+            var filePath = Path.Combine(targetFolder, date_file+file.FileName);
 
             await using var stream = new FileStream(filePath, FileMode.Create);
             await file.CopyToAsync(stream);
 
-            var relativePath ="public/assets/files/"+date_file+file.FileName; // dùng cho URL
+            // Đường dẫn trả về cho client
+            var relativePath = !string.IsNullOrWhiteSpace(folder)
+                ? $"public/assets/files/{folder}/{date_file}{file.FileName}"
+                : $"public/assets/files/{date_file}{file.FileName}";
 
             return new UploadResult(true, "OK", $"{relativePath}");
         }

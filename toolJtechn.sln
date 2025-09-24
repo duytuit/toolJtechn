@@ -41,11 +41,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesignLabel", "DesignLabel\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hotfixapp", "hotfixapp\hotfixapp.csproj", "{7110D4BF-5BF6-42AE-929F-8AC3527FB1F3}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vudaco", "vudaco", "{6A0F9ACE-CC87-4157-A081-27A842EC9C8B}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "jtechotfix", "jtechotfix", "{6A0F9ACE-CC87-4157-A081-27A842EC9C8B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vudaco", "Vudaco\Vudaco.csproj", "{AFCED8E3-2F11-4AC9-BD1D-F75AF94B2474}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebSocketSharp.CustomHeaders.CustomHttpServer", "websocket-sharp\WebSocketSharp.CustomHeaders.CustomHttpServer.csproj", "{ECB2165D-4727-483B-B10F-9E91E5D12905}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyAspNetCoreApp", "MyAspNetCoreApp\MyAspNetCoreApp.csproj", "{C1E1783D-23EF-4429-B90D-D9445264CD9B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProductLapRap", "ProductLapRap", "{12C979DC-B5FD-4D6B-9377-06AD5976B620}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "productLapRap", "productLapRap\productLapRap.csproj", "{853E35B1-E1C9-4E9E-B109-F1B59A00F696}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -117,6 +123,14 @@ Global
 		{ECB2165D-4727-483B-B10F-9E91E5D12905}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECB2165D-4727-483B-B10F-9E91E5D12905}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECB2165D-4727-483B-B10F-9E91E5D12905}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1E1783D-23EF-4429-B90D-D9445264CD9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1E1783D-23EF-4429-B90D-D9445264CD9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1E1783D-23EF-4429-B90D-D9445264CD9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1E1783D-23EF-4429-B90D-D9445264CD9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{853E35B1-E1C9-4E9E-B109-F1B59A00F696}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{853E35B1-E1C9-4E9E-B109-F1B59A00F696}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{853E35B1-E1C9-4E9E-B109-F1B59A00F696}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{853E35B1-E1C9-4E9E-B109-F1B59A00F696}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -132,6 +146,7 @@ Global
 		{3F248E7F-1177-49AE-B582-07176478B424} = {90C95495-BE98-424F-B32B-BABE4C2A3854}
 		{7ABA6C33-7EFA-4A9F-AC0E-33444C26D6E8} = {9CCB5815-3550-4326-9069-0E1CBEF6EC49}
 		{AFCED8E3-2F11-4AC9-BD1D-F75AF94B2474} = {6A0F9ACE-CC87-4157-A081-27A842EC9C8B}
+		{853E35B1-E1C9-4E9E-B109-F1B59A00F696} = {12C979DC-B5FD-4D6B-9377-06AD5976B620}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C9D21F07-EC84-40D4-9D2A-7CFF8B6592AD}

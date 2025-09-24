@@ -97,9 +97,9 @@ namespace JtechnApi.Controllers
         }
         // POST api/upload/single
         [HttpPost("upload/single")]
-        public async Task<IActionResult> UploadSingle(IFormFile file)
+        public async Task<IActionResult> UploadSingle(IFormFile file, [FromForm] string? folder)
         {
-             var result = await Helper.ProcessFileAsync(file);
+             var result = await Helper.ProcessFileAsync(file, folder);
             if (result.Success)
                 return Ok(result);
             else
@@ -108,12 +108,12 @@ namespace JtechnApi.Controllers
 
         // POST api/upload/multiple
         [HttpPost("upload/multiple")]
-        public async Task<IActionResult> UploadMultiple([FromForm] IFormFile[] files)
+        public async Task<IActionResult> UploadMultiple([FromForm] IFormFile[] files, [FromForm] string? folder)
         {
            if (files == null || files.Length == 0)
             return BadRequest(new { success = false, message = "Không có file nào." });
 
-            var tasks = files.Select(file => Helper.ProcessFileAsync(file));
+            var tasks = files.Select(file => Helper.ProcessFileAsync(file, folder));
             var results = await Task.WhenAll(tasks);
 
             var success = results.Where(r => r.Success).ToList();

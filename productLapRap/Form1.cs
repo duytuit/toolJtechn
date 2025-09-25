@@ -4,6 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.IO.Ports;
+using System.Linq;
+using System.Management;
 using System.Windows.Forms;
 
 namespace productLapRap
@@ -22,6 +25,10 @@ namespace productLapRap
         private Point mouseDownPosition;
         private bool isDragging = false;
 
+        SerialPort sp;
+        string[] oldPorts = new string[0];
+        DateTime lastDataTime = DateTime.MinValue;
+
         public Form1()
         {
             InitializeComponent();
@@ -37,7 +44,23 @@ namespace productLapRap
             panel6.Focus();
             panel6.DoubleBuffered(true); // tránh nhấp nháy
         }
-        private void Form1_Load(object sender, EventArgs e) { }
+        private void Form1_Load(object sender, EventArgs e) { 
+
+        }
+        // Liệt kê cổng COM
+       // private void LoadCOMPorts()
+       // {
+       //     string[] ports = SerialPort.GetPortNames();
+       //     // Nếu có thay đổi mới update ComboBox
+       //     if (!ports.SequenceEqual(oldPorts))
+       //     {
+       //         oldPorts = ports;
+       //         cbListPort.Items.Clear();
+       //         cbListPort.Items.AddRange(ports);
+       //         if (ports.Length > 0)
+       //             cbListPort.SelectedIndex = 0;
+       //     }
+       // }
         #region Load dữ liệu và Button
 
         private void LoadData(List<ProductContent> productContents)
@@ -121,7 +144,89 @@ namespace productLapRap
                 _image = null;
             }
         }
+        private void Sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            try
+            {
+                string data = sp.ReadLine().Trim(); // đọc từng dòng
+                lastDataTime = DateTime.Now; // Cập nhật thời gian nhận dữ liệu
+                if (data == "NEXT")
+                {
+                    // Gọi event btnNext_Click trên UI thread
+                    this.Invoke((MethodInvoker)delegate {
+                        btnNext.PerformClick();
+                    });
+                }
+                else if (data == "PREV")
+                {
+                    this.Invoke((MethodInvoker)delegate {
+                        btnPrev.PerformClick();
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                HandleDisconnect("Mất kết nối khi đọc: " + ex.Message);
+            }
+        }
+        private string FindArduinoPort()
+        {
+            using (var searcher = new ManagementObjectSearcher(
+                "SELECT * FROM Win32_PnPEntity WHERE Name LIKE '%(COM%'"))
+            {
+                foreach (var device in searcher.Get())
+                {
+                    string name = device["Name"]?.ToString() ?? "";
 
+                    // Kiểm tra có chữ "Arduino"
+                    if (name.IndexOf("Arduino", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        // Ví dụ: "Arduino Mega 2560 (COM3)"
+                        int start = name.IndexOf("(COM") + 1;
+                        int end = name.IndexOf(")", start);
+                        if (start > 0 && end > start)
+                        {
+                            string comPort = name.Substring(start, end - start); // "COM3"
+
+                            // Cập nhật TextBox hiển thị thông tin
+                            txtModule.Text = name;  // VD: "Arduino Mega 2560 (COM3)"
+
+                            return comPort;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        private void SafeWrite(string text)
+        {
+            if (sp != null && sp.IsOpen)
+            {
+                try
+                {
+                    sp.WriteLine(text);
+                }
+                catch (Exception ex)
+                {
+                    HandleDisconnect("Mất kết nối khi gửi: " + ex.Message);
+                }
+            }
+        }
+        private void HandleDisconnect(string reason)
+        {
+            if (sp != null)
+            {
+                try { sp.Close(); } catch { }
+                sp = null;
+                this.Invoke(new Action(() =>
+                {
+                    btnConnect.Text = "Kết nối module";
+                    btnConnect.BackColor = Color.White;
+                    MessageBox.Show("⚠️ Arduino ngắt kết nối: " + reason + Environment.NewLine);
+                }));
+            }
+        }
         private void btnNext_Click(object sender, EventArgs e)
         {
             if (_productContents.Count == 0) return;
@@ -241,6 +346,66 @@ namespace productLapRap
         }
 
         #endregion
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+           // LoadCOMPorts();
+        }
+
+        private void btnConnect_Click(object sender, EventArgs e)
+        {
+            if (sp == null || !sp.IsOpen)
+            {
+                try
+                {
+                    string arduinoPort = FindArduinoPort();
+                    if (!string.IsNullOrEmpty(arduinoPort))
+                    {
+                        sp = new SerialPort(arduinoPort, 9600);
+                        sp.DataReceived += Sp_DataReceived;
+                        sp.Open();
+
+                        btnConnect.Text = "Ngắt kết nối";
+                        btnConnect.BackColor = Color.LawnGreen;
+                    }
+                    else
+                    {
+                        txtModule.Text = "";
+                        btnConnect.BackColor = Color.White;
+                        btnConnect.Text = "Kết nối module";
+                        MessageBox.Show("❌ Không tìm thấy Arduino!");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    txtModule.Text = "";
+                    btnConnect.BackColor = Color.White;
+                    btnConnect.Text = "Kết nối module";
+                    MessageBox.Show("Lỗi kết nối: " + ex.Message);
+                }
+            }
+            else
+            {
+                try
+                {
+                    sp.Close();
+
+                }
+                catch (Exception ex)
+                {
+                    txtModule.Text = "";
+                    MessageBox.Show("Lỗi khi ngắt kết nối: " + ex.Message);
+                }
+                finally
+                {
+                    sp = null;
+                    txtModule.Text = "";
+                    btnConnect.BackColor = Color.White;
+                    btnConnect.Text = "Kết nối module";
+                }
+            }
+        }
+
     }
 
     public class ProductContent

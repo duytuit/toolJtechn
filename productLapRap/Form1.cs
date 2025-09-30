@@ -7,6 +7,8 @@ using System.Drawing;
 using System.IO.Ports;
 using System.Linq;
 using System.Management;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace productLapRap
@@ -28,6 +30,15 @@ namespace productLapRap
         SerialPort sp;
         string[] oldPorts = new string[0];
         DateTime lastDataTime = DateTime.MinValue;
+
+        // Dictionary lưu trạng thái nhấp nháy của từng đèn
+        private Dictionary<int, CancellationTokenSource> ledBlinkTokens = new Dictionary<int, CancellationTokenSource>();
+
+        // Chế độ hiện tại: true = chỉ 1 đèn, false = nhiều đèn
+        private bool singleLedMode = true;
+
+        // Biến ghi nhớ đèn đang nhấp nháy (chỉ dùng cho chế độ singleLedMode)
+        private int currentLed;
 
         public Form1()
         {
@@ -143,25 +154,50 @@ namespace productLapRap
             {
                 _image = null;
             }
+            if (!string.IsNullOrEmpty(item.location))
+            {
+                string digits = new string(item.location.Where(char.IsDigit).ToArray());
+                int number = int.Parse(digits);
+                if (singleLedMode)
+                    SwitchBlinkSingle(number-1, 500);
+                else
+                    SwitchBlinkMulti(number-1, 500);
+
+            }
         }
         private void Sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             try
             {
                 string data = sp.ReadLine().Trim(); // đọc từng dòng
+                                                    // Gọi về UI thread
+                this.Invoke((MethodInvoker)delegate
+                {
+                    richTextBoxArduino.AppendText(data + Environment.NewLine);
+                    // Đảm bảo cuộn xuống cuối
+                    richTextBoxArduino.SelectionStart = richTextBoxArduino.Text.Length;
+                    richTextBoxArduino.ScrollToCaret();
+                });
+               
                 lastDataTime = DateTime.Now; // Cập nhật thời gian nhận dữ liệu
                 if (data == "NEXT")
                 {
                     // Gọi event btnNext_Click trên UI thread
-                    this.Invoke((MethodInvoker)delegate {
-                        btnNext.PerformClick();
-                    });
+                    if (this.IsHandleCreated)
+                    {
+                        this.BeginInvoke((MethodInvoker)delegate {
+                            btnNext.PerformClick();
+                        });
+                    }
                 }
                 else if (data == "PREV")
                 {
-                    this.Invoke((MethodInvoker)delegate {
-                        btnPrev.PerformClick();
-                    });
+                    if (this.IsHandleCreated)
+                    {
+                        this.BeginInvoke((MethodInvoker)delegate {
+                            btnPrev.PerformClick();
+                        });
+                    }
                 }
             }
             catch (Exception ex)
@@ -209,7 +245,7 @@ namespace productLapRap
                 }
                 catch (Exception ex)
                 {
-                    HandleDisconnect("Mất kết nối khi gửi: " + ex.Message);
+                    //HandleDisconnect("Mất kết nối khi gửi: " + ex.Message);
                 }
             }
         }
@@ -229,20 +265,36 @@ namespace productLapRap
         }
         private void btnNext_Click(object sender, EventArgs e)
         {
-            if (_productContents.Count == 0) return;
-            currentIndex++;
-            if (currentIndex >= buttons.Count) currentIndex = 0;
-            HighlightButton(currentIndex);
-            ShowNoteAndImage(currentIndex);
+            try
+            {
+                if (_productContents.Count == 0) return;
+                currentIndex++;
+                if (currentIndex >= buttons.Count) currentIndex = 0;
+                HighlightButton(currentIndex);
+                ShowNoteAndImage(currentIndex);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi trong btnNext_Click: " + ex.Message);
+            }
+           
         }
 
         private void btnPrev_Click(object sender, EventArgs e)
         {
-            if (_productContents.Count == 0) return;
-            currentIndex--;
-            if (currentIndex < 0) currentIndex = buttons.Count - 1;
-            HighlightButton(currentIndex);
-            ShowNoteAndImage(currentIndex);
+            try
+            {
+                if (_productContents.Count == 0) return;
+                currentIndex--;
+                if (currentIndex < 0) currentIndex = buttons.Count - 1;
+                HighlightButton(currentIndex);
+                ShowNoteAndImage(currentIndex);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi trong btnNext_Click: " + ex.Message);
+            }
+         
         }
 
         private void textBox2_KeyDown(object sender, KeyEventArgs e)
@@ -288,61 +340,51 @@ namespace productLapRap
 
         #region Pan + Zoom trong panel6
 
-        private void Panel6_Paint(object sender, PaintEventArgs e)
+        private void Panel6_Paint(object sender, PaintEventArgs e) 
         {
-            e.Graphics.Clear(Color.Gray);
-            e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-
-            if (_image != null)
+            e.Graphics.Clear(Color.Gray); 
+            e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic; 
+            if (_image != null) 
             {
                 e.Graphics.TranslateTransform(_pan.X, _pan.Y);
                 e.Graphics.ScaleTransform(zoomFactor, zoomFactor);
-                e.Graphics.DrawImage(_image, 0, 0);
+                e.Graphics.DrawImage(_image, 0, 0); 
             }
         }
-
         private void Panel6_MouseDown(object sender, MouseEventArgs e)
         {
-            if (_image == null) return;
+            if (_image == null) return; 
             if (e.Button == MouseButtons.Left)
             {
                 isDragging = true;
-                mouseDownPosition = e.Location;
-                panel6.Cursor = Cursors.SizeAll;
-            }
+                mouseDownPosition = e.Location; 
+                panel6.Cursor = Cursors.SizeAll; 
+            } 
         }
-
-        private void Panel6_MouseMove(object sender, MouseEventArgs e)
-        {
+        private void Panel6_MouseMove(object sender, MouseEventArgs e) 
+        { 
             if (_image == null) return;
-            if (isDragging)
-            {
+            if (isDragging) 
+            { 
                 _pan.X += e.X - mouseDownPosition.X;
                 _pan.Y += e.Y - mouseDownPosition.Y;
-                mouseDownPosition = e.Location;
-                panel6.Invalidate();
-            }
+                mouseDownPosition = e.Location; panel6.Invalidate();
+            } 
         }
-
         private void Panel6_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (_image == null) return;
+        { 
+            if (_image == null) return; 
             isDragging = false;
             panel6.Cursor = Cursors.Default;
         }
-
         private void Panel6_MouseWheel(object sender, MouseEventArgs e)
-        {
+        { 
             if (_image == null) return;
-
             float oldZoom = zoomFactor;
-            zoomFactor *= e.Delta > 0 ? 1.1f : 1 / 1.1f;
-
-            _pan.X = (int)(e.X - (e.X - _pan.X) * (zoomFactor / oldZoom));
+            zoomFactor *= e.Delta > 0 ? 1.2f : 1 / 1.2f;
+            _pan.X = (int)(e.X - (e.X - _pan.X) * (zoomFactor / oldZoom)); 
             _pan.Y = (int)(e.Y - (e.Y - _pan.Y) * (zoomFactor / oldZoom));
-
-
-            panel6.Invalidate();
+            panel6.Invalidate(); 
         }
 
         #endregion
@@ -405,7 +447,122 @@ namespace productLapRap
                 }
             }
         }
+        // ==========================
+        // Chế độ 1: chỉ 1 đèn nhấp nháy
+        // ==========================
+        private async void SwitchBlinkSingle(int ledNumber, int intervalMs)
+        {
+            // Nếu nhấn cùng đèn → tắt đèn
+            if (currentLed == ledNumber)
+            {
+                StopAllBlink();
+                return;
+            }
 
+            // Tắt tất cả đèn đang nhấp nháy
+            StopAllBlink();
+
+            // Bật đèn mới
+            var cts = new CancellationTokenSource();
+            ledBlinkTokens[ledNumber] = cts;
+            currentLed = ledNumber;
+
+            try
+            {
+                await BlinkLedContinuousAsync(ledNumber, intervalMs, cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                SafeWrite($"OFF{ledNumber}");
+                ledBlinkTokens.Remove(ledNumber);
+                currentLed = 0;
+            }
+        }
+
+        // ==========================
+        // Chế độ 2: nhiều đèn nhấp nháy độc lập
+        // ==========================
+        private async void SwitchBlinkMulti(int ledNumber, int intervalMs)
+        {
+            // Nếu đèn này đang nhấp nháy → tắt nó
+            if (ledBlinkTokens.ContainsKey(ledNumber))
+            {
+                StopBlink(ledNumber);
+                return;
+            }
+
+            // Tạo CancellationTokenSource mới cho đèn này
+            var cts = new CancellationTokenSource();
+            ledBlinkTokens[ledNumber] = cts;
+
+            try
+            {
+                await BlinkLedContinuousAsync(ledNumber, intervalMs, cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                SafeWrite($"OFF{ledNumber}");
+                ledBlinkTokens.Remove(ledNumber);
+            }
+        }
+
+        // ==========================
+        // Hàm nhấp nháy liên tục cho 1 đèn
+        // ==========================
+        private async Task BlinkLedContinuousAsync(int ledNumber, int intervalMs, CancellationToken token)
+        {
+            if (sp == null || !sp.IsOpen)
+                return;
+
+            while (true)
+            {
+                token.ThrowIfCancellationRequested();
+
+                SafeWrite($"ON{ledNumber}");
+                await Task.Delay(intervalMs, token);
+
+                SafeWrite($"OFF{ledNumber}");
+                await Task.Delay(intervalMs, token);
+            }
+        }
+
+        // ==========================
+        // Hàm tắt một đèn hoặc tất cả đèn
+        // ==========================
+        private void StopBlink(int ledNumber)
+        {
+            if (ledBlinkTokens.ContainsKey(ledNumber))
+            {
+                ledBlinkTokens[ledNumber].Cancel();
+                SafeWrite($"OFF{ledNumber}");
+                ledBlinkTokens.Remove(ledNumber);
+            }
+        }
+
+        private void StopAllBlink()
+        {
+            // Copy key trước khi duyệt
+            foreach (var key in ledBlinkTokens.Keys.ToArray())
+            {
+                ledBlinkTokens[key].Cancel();
+                SafeWrite($"OFF{key}");
+                ledBlinkTokens.Remove(key);
+            }
+
+            currentLed = 0;
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            try
+            {
+                StopAllBlink();
+            }
+            catch (Exception ex)
+            {
+               
+            }
+        }
     }
 
     public class ProductContent

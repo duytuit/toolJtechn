@@ -38,6 +38,9 @@ namespace productLapRap
             this.lbMaSanPham = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.richTextBoxArduino = new System.Windows.Forms.RichTextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.txtModule = new System.Windows.Forms.TextBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
@@ -52,7 +55,6 @@ namespace productLapRap
             this.button4 = new System.Windows.Forms.Button();
             this.panel6 = new System.Windows.Forms.Panel();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.txtModule = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -89,9 +91,9 @@ namespace productLapRap
             this.tableLayoutPanel2.Location = new System.Drawing.Point(783, 3);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 4;
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 31.19658F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 68.80342F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 96F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 51.57895F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 48.42105F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 184F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 44F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(255, 609);
             this.tableLayoutPanel2.TabIndex = 0;
@@ -101,9 +103,9 @@ namespace productLapRap
             this.panel1.Controls.Add(this.panelListQuyTrinh);
             this.panel1.Controls.Add(this.panel4);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(3, 149);
+            this.panel1.Location = new System.Drawing.Point(3, 199);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(249, 316);
+            this.panel1.Size = new System.Drawing.Size(249, 178);
             this.panel1.TabIndex = 0;
             // 
             // panelListQuyTrinh
@@ -112,7 +114,7 @@ namespace productLapRap
             this.panelListQuyTrinh.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelListQuyTrinh.Location = new System.Drawing.Point(0, 26);
             this.panelListQuyTrinh.Name = "panelListQuyTrinh";
-            this.panelListQuyTrinh.Size = new System.Drawing.Size(249, 290);
+            this.panelListQuyTrinh.Size = new System.Drawing.Size(249, 152);
             this.panelListQuyTrinh.TabIndex = 1;
             // 
             // panel4
@@ -146,6 +148,8 @@ namespace productLapRap
             // 
             // panel2
             // 
+            this.panel2.Controls.Add(this.richTextBoxArduino);
+            this.panel2.Controls.Add(this.label5);
             this.panel2.Controls.Add(this.txtModule);
             this.panel2.Controls.Add(this.textBox2);
             this.panel2.Controls.Add(this.label4);
@@ -156,12 +160,42 @@ namespace productLapRap
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel2.Location = new System.Drawing.Point(3, 3);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(249, 140);
+            this.panel2.Size = new System.Drawing.Size(249, 190);
             this.panel2.TabIndex = 1;
+            // 
+            // richTextBoxArduino
+            // 
+            this.richTextBoxArduino.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.richTextBoxArduino.Location = new System.Drawing.Point(85, 57);
+            this.richTextBoxArduino.Name = "richTextBoxArduino";
+            this.richTextBoxArduino.Size = new System.Drawing.Size(158, 50);
+            this.richTextBoxArduino.TabIndex = 9;
+            this.richTextBoxArduino.Text = "";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(7, 59);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(52, 13);
+            this.label5.TabIndex = 8;
+            this.label5.Text = "Phản hồi:";
+            // 
+            // txtModule
+            // 
+            this.txtModule.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtModule.Location = new System.Drawing.Point(56, 4);
+            this.txtModule.Name = "txtModule";
+            this.txtModule.Size = new System.Drawing.Size(188, 20);
+            this.txtModule.TabIndex = 7;
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(7, 111);
+            this.textBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox2.Location = new System.Drawing.Point(7, 166);
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(236, 20);
             this.textBox2.TabIndex = 6;
@@ -170,7 +204,7 @@ namespace productLapRap
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(7, 94);
+            this.label4.Location = new System.Drawing.Point(7, 149);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(71, 13);
             this.label4.TabIndex = 5;
@@ -178,7 +212,9 @@ namespace productLapRap
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(7, 71);
+            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox1.Location = new System.Drawing.Point(7, 126);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(236, 20);
             this.textBox1.TabIndex = 4;
@@ -186,7 +222,7 @@ namespace productLapRap
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(7, 54);
+            this.label3.Location = new System.Drawing.Point(7, 109);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(72, 13);
             this.label3.TabIndex = 3;
@@ -194,6 +230,8 @@ namespace productLapRap
             // 
             // btnConnect
             // 
+            this.btnConnect.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.btnConnect.BackColor = System.Drawing.Color.White;
             this.btnConnect.Location = new System.Drawing.Point(7, 28);
             this.btnConnect.Name = "btnConnect";
@@ -216,9 +254,9 @@ namespace productLapRap
             // 
             this.panel3.Controls.Add(this.richTextBoxDienGiai);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel3.Location = new System.Drawing.Point(3, 471);
+            this.panel3.Location = new System.Drawing.Point(3, 383);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(249, 90);
+            this.panel3.Size = new System.Drawing.Size(249, 178);
             this.panel3.TabIndex = 2;
             // 
             // richTextBoxDienGiai
@@ -227,7 +265,7 @@ namespace productLapRap
             this.richTextBoxDienGiai.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.richTextBoxDienGiai.Location = new System.Drawing.Point(0, 0);
             this.richTextBoxDienGiai.Name = "richTextBoxDienGiai";
-            this.richTextBoxDienGiai.Size = new System.Drawing.Size(249, 90);
+            this.richTextBoxDienGiai.Size = new System.Drawing.Size(249, 178);
             this.richTextBoxDienGiai.TabIndex = 1;
             this.richTextBoxDienGiai.Text = "Diễn giải...";
             // 
@@ -289,13 +327,6 @@ namespace productLapRap
             this.timer1.Interval = 1000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // txtModule
-            // 
-            this.txtModule.Location = new System.Drawing.Point(56, 4);
-            this.txtModule.Name = "txtModule";
-            this.txtModule.Size = new System.Drawing.Size(188, 20);
-            this.txtModule.TabIndex = 7;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -304,6 +335,7 @@ namespace productLapRap
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "Form1";
             this.Text = "Quy trình thao tác mã hàng X";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
@@ -343,6 +375,8 @@ namespace productLapRap
         private System.Windows.Forms.Panel panel6;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.TextBox txtModule;
+        private System.Windows.Forms.RichTextBox richTextBoxArduino;
+        private System.Windows.Forms.Label label5;
     }
 }
 

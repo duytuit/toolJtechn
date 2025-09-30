@@ -141,9 +141,16 @@ namespace productLapRap
                     _image = Image.FromFile(fullPath);
 
                     zoomFactor = 1.0f;
-                    _pan = new Point(0, 0);
+                    float scaledWidth = _image.Width * zoomFactor; 
+                    float scaledHeight = _image.Height * zoomFactor;
+                    float panelWidth = panel6.ClientSize.Width;
+                    float panelHeight = panel6.ClientSize.Height;
+                    int offsetX = (int)((panelWidth - scaledWidth) / 2f);
+                    int offsetY = (int)((panelHeight - scaledHeight) / 2f);
+                    // Tính pan để căn giữa ảnh ban đầu
+                    _pan = new Point(offsetX, offsetY);
 
-                    panel6.Invalidate(); // vẽ lại panel
+                    panel6.Invalidate();
                 }
                 catch
                 {
@@ -368,7 +375,8 @@ namespace productLapRap
             { 
                 _pan.X += e.X - mouseDownPosition.X;
                 _pan.Y += e.Y - mouseDownPosition.Y;
-                mouseDownPosition = e.Location; panel6.Invalidate();
+                mouseDownPosition = e.Location; 
+                panel6.Invalidate();
             } 
         }
         private void Panel6_MouseUp(object sender, MouseEventArgs e)

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Vudaco.Shares.AdoHelper
+namespace Vudaco.Shares.MysqlHelper
 {
     /// <summary>
     /// Đại diện cho một quan hệ giữa bảng cha và bảng con trong quá trình truy vấn dữ liệu theo cấu trúc động.

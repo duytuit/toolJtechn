@@ -41,7 +41,6 @@
     <Folder Include="Requireds\Dtos\" />
     <Folder Include="Requireds\Models\" />
     <Folder Include="Requireds\Repositories\" />
-    <Folder Include="Shares\SqlServerHelper\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 </Project>

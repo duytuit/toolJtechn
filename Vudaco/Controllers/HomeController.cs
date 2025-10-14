@@ -2,11 +2,13 @@
 using Microsoft.Extensions.Logging;
 using Vudaco.Shares.BaseRepository;
 using Vudaco.Shares;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Vudaco.Controllers
 {
     [ApiController]
     [Route("/")] // <-- Root path
+    [AllowAnonymous]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -32,7 +34,7 @@ namespace Vudaco.Controllers
         //}
         public IActionResult Index()
         {
-            ViewData["Message"] = "Chào mừng đến Web API + View2";
+            ViewData["Message"] = "Chào mừng đến Web API + View4";
             return View();
         }
     }

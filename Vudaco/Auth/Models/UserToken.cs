@@ -22,10 +22,14 @@ namespace Vudaco.Auth.Models
         [MaxLength(255)]
         public string DeviceId { get; set; }
 
-        [Column("Token")]
+        [Required]
+        [Column("Token", TypeName = "varchar(max)")]
+        public string Token { get; set; }
+
+        [Column("RefreshToken")]
         [Required]
         [MaxLength(500)]
-        public string Token { get; set; }
+        public string RefreshToken { get; set; }
 
         [Column("ExpiryTime")]
         public DateTime ExpiryTime { get; set; }

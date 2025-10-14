@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace Vudaco.Auth.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AllowAnonymous]
     public class AuthController : BaseApiController
     {
         private readonly IAuthRepository _authRepository;
@@ -43,7 +45,7 @@ namespace Vudaco.Auth.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromForm] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             try
             {

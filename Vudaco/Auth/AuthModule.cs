@@ -12,6 +12,7 @@ namespace Vudaco.Auth
     {
         public static IServiceCollection AddAuthModule(this IServiceCollection services)
         {
+            services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<ITokenService, TokenService>();
             return services;

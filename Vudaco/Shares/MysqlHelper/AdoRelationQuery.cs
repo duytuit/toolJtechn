@@ -8,7 +8,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Vudaco.Shares.AdoHelper
+namespace Vudaco.Shares.MysqlHelper
 {
     public static class AdoRelationQuery
     {

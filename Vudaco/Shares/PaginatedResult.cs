@@ -22,4 +22,13 @@ namespace Vudaco.Shares
         public List<T> Data { get; set; }
         public Dictionary<string, object> Extra { get; set; } = new Dictionary<string, object>();
     }
+    public class PaginatedResultReact<T>
+    {
+        public int PageNum { get; set; }
+        public int PageSize { get; set; }
+        public int First { get; set; }
+        public int Total { get; set; }
+        public List<T> Data { get; set; }
+        public Dictionary<string, object> Extra { get; set; } = new Dictionary<string, object>();
+    }
 }

@@ -17,7 +17,7 @@ namespace Vudaco.Auth.Repositories
         private readonly IConfiguration _config;
         public TokenService(IConfiguration config) => _config = config;
 
-        public string GenerateAccessToken(User user, string deviceId = null)
+        public string GenerateAccessToken(User user, string deviceId = null, int expire = 5)
         {
             var secret = _config["Jwt:Secret"];
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
@@ -34,7 +34,7 @@ namespace Vudaco.Auth.Repositories
 
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(30),
+                expires: DateTime.Now.AddMinutes(expire),
                 signingCredentials: creds
             );
 

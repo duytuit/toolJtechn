@@ -8,7 +8,7 @@ namespace Vudaco.Auth.Repositories
 {
     public interface ITokenService
     {
-        public string GenerateAccessToken(User user, string deviceId);
+        public string GenerateAccessToken(User user, string deviceId, int expire);
         public string GenerateRefreshToken();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,12 +16,13 @@ namespace Vudaco.Auth.Repositories
         private readonly VudacoDBContext _db;
         private readonly RedisService _redis;
         private readonly ITokenService _tokenService;
-
-        public AuthRepository(VudacoDBContext db, RedisService redis, ITokenService tokenService)
+        private readonly IConfiguration _configuration;
+        public AuthRepository(VudacoDBContext db, RedisService redis, ITokenService tokenService, IConfiguration configuration)
         {
             _db = db;
             _redis = redis;
             _tokenService = tokenService;
+            _configuration = configuration;
         }
 
         public async Task<User> RegisterAsync(RegisterRequest request)
@@ -37,8 +39,8 @@ namespace Vudaco.Auth.Repositories
                 Email = request.Email,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
             };
 
             _db.Users.Add(user);
@@ -49,13 +51,15 @@ namespace Vudaco.Auth.Repositories
 
         public async Task<(string accessToken, string refreshToken)> LoginAsync(LoginRequest request)
         {
+            var accessTokenExpiryMinutes = _configuration.GetValue<int>("Configs:AccessTokenExpiryMinutes");
+            var refreshTokenExpiryDays = _configuration.GetValue<int>("Configs:RefreshTokenExpiryDays");
             // 🔹 Kiểm tra user
             var user = await _db.Users.FirstOrDefaultAsync(x => x.Username == request.Username);
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
                 throw new Exception("Sai tên đăng nhập hoặc mật khẩu");
 
             // 🔹 Sinh access & refresh token
-            var accessToken = _tokenService.GenerateAccessToken(user, request.DeviceId);
+            var accessToken = _tokenService.GenerateAccessToken(user, request.DeviceId, accessTokenExpiryMinutes);
             var refreshToken = _tokenService.GenerateRefreshToken();
 
             // 🔹 Redis key
@@ -65,12 +69,14 @@ namespace Vudaco.Auth.Repositories
             var existingToken = await _db.UserTokens
                 .FirstOrDefaultAsync(x => x.UserId == user.Id && x.DeviceId == request.DeviceId);
 
+           
+
             if (existingToken != null)
             {
                 // 👉 Cập nhật token và refresh token mới
                 existingToken.Token = accessToken;
                 existingToken.RefreshToken = refreshToken;
-                existingToken.ExpiryTime = DateTime.UtcNow.AddDays(7);
+                existingToken.ExpiryTime = DateTime.Now.AddMinutes(accessTokenExpiryMinutes);
 
                 _db.UserTokens.Update(existingToken);
             }
@@ -83,15 +89,15 @@ namespace Vudaco.Auth.Repositories
                     DeviceId = request.DeviceId,
                     Token = accessToken,
                     RefreshToken = refreshToken,
-                    ExpiryTime = DateTime.UtcNow.AddDays(7)
-                };
+                    ExpiryTime = DateTime.Now.AddMinutes(accessTokenExpiryMinutes)
+            };
                 _db.UserTokens.Add(newUserToken);
             }
 
             await _db.SaveChangesAsync();
 
             // 🔹 Cập nhật lại Redis
-            await _redis.SetAsync(redisKey, accessToken, TimeSpan.FromDays(7));
+            await _redis.SetAsync(redisKey, accessToken, TimeSpan.FromMinutes(accessTokenExpiryMinutes));
 
             // 🔹 Trả về token mới
             return (accessToken, refreshToken);
@@ -112,11 +118,13 @@ namespace Vudaco.Auth.Repositories
 
         public async Task<(string accessToken, string refreshToken)> RefreshTokenAsync(RefreshTokenRequest request)
         {
+            var accessTokenExpiryMinutes = _configuration.GetValue<int>("Configs:AccessTokenExpiryMinutes");
+            var refreshTokenExpiryDays = _configuration.GetValue<int>("Configs:RefreshTokenExpiryDays");
             // 🔹 Lấy record trong DB theo UserId + DeviceId
             var userToken = await _db.UserTokens
                 .FirstOrDefaultAsync(t => t.UserId == request.UserId && t.DeviceId == request.DeviceId);
 
-            if (userToken == null || userToken.RefreshToken != request.RefreshToken || userToken.ExpiryTime < DateTime.UtcNow)
+            if (userToken == null || userToken.RefreshToken != request.RefreshToken || userToken.ExpiryTime < DateTime.Now)
                 throw new Exception("Refresh token không hợp lệ hoặc đã hết hạn");
 
             // 🔹 Lấy thông tin user
@@ -125,19 +133,19 @@ namespace Vudaco.Auth.Repositories
                 throw new Exception("Người dùng không tồn tại");
 
             // 🔹 Sinh token mới
-            var newAccessToken = _tokenService.GenerateAccessToken(user, request.DeviceId);
+            var newAccessToken = _tokenService.GenerateAccessToken(user, request.DeviceId, accessTokenExpiryMinutes);
             var newRefreshToken = _tokenService.GenerateRefreshToken();
 
             // 🔹 Cập nhật lại DB
             userToken.Token = newAccessToken;
             userToken.RefreshToken = newRefreshToken;
-            userToken.ExpiryTime = DateTime.UtcNow.AddDays(7);
+            userToken.ExpiryTime = DateTime.Now.AddMinutes(accessTokenExpiryMinutes);
             _db.UserTokens.Update(userToken);
             await _db.SaveChangesAsync();
 
             // 🔹 Cập nhật lại Redis (lưu access token)
             var redisKey = $"token:{request.UserId}:{request.DeviceId}";
-            await _redis.SetAsync(redisKey, newAccessToken, TimeSpan.FromDays(7));
+            await _redis.SetAsync(redisKey, newAccessToken, TimeSpan.FromMinutes(accessTokenExpiryMinutes));
 
             // 🔹 Trả về token mới cho client
             return (newAccessToken, newRefreshToken);

@@ -2,34 +2,40 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Vudaco.Partners.Models
+namespace Vudaco.Receipts.Models
 {
-    [Table("partner_details")]
-    public class PartnerDetail
+    [Table("receipt_details")]
+    public class ReceiptDetail
     {
         [Key]
         [Column("id")]
         public int Id { get; set; }
 
         [Required]
-        [Column("partner_id")]
-        public int PartnerId { get; set; }
-
-        [Required]
-        [Column("is_supplier")]
-        public bool IsSupplier { get; set; }
-
-        [MaxLength(50)]
-        [Column("code")]
-        public string Code { get; set; } 
-
-        [MaxLength(191)]
-        [Column("note")]
-        public string Note { get; set; }
+        [Column("receipt_id")]
+        public int ReceiptId { get; set; }
 
         [Required]
         [Column("storage_id")]
         public int StorageId { get; set; }
+
+        [Column("debit_id")]
+        public int? DebitId { get; set; }
+
+        [Required]
+        [Column("accounting_date")]
+        public DateTime AccountingDate { get; set; }
+
+        [Required]
+        [Column("amount")]
+        public int Amount { get; set; }
+
+        [Required]
+        [Column("vat")]
+        public int Vat { get; set; }
+
+        [Column("note", TypeName = "nvarchar(max)")]
+        public string Note { get; set; }
 
         [Column("created_by")]
         public int? CreatedBy { get; set; }

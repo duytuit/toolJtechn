@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Vudaco.Auth.Models
 {
-    [Table("user_token")]
+    [Table("user_tokens")]
     public class UserToken
     {
         [Key]

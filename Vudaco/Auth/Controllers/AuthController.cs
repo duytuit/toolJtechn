@@ -19,7 +19,7 @@ namespace Vudaco.Auth.Controllers
     {
         private readonly IAuthRepository _authRepository;
       
-        //int userId = (int)HttpContext.Items["UserId"];
+        public int userId => (int)HttpContext.Items["UserId"];
         public AuthController(IAuthRepository authRepository)
         {
             _authRepository = authRepository;

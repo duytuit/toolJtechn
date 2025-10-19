@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Dynamic;
 using System.Linq;
 using System.Threading;
@@ -301,6 +302,37 @@ namespace Vudaco.Shares.SqlServerHelper
 
             var result = await cmd.ExecuteScalarAsync(cancellationToken);
             return Convert.ToInt32(result);
+        }
+        public static string GenerateSoChungTu(
+         string connectionString,
+         string tableName,
+         string columnName,
+         string prefix,
+         int numberLength)
+        {
+            using var conn = new SqlConnection(connectionString);
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = $@"
+                SELECT MAX({columnName}) 
+                FROM {tableName} 
+                WHERE {columnName} LIKE @prefix
+            ";
+            cmd.Parameters.AddWithValue("@prefix", prefix + "%");
+
+            var result = cmd.ExecuteScalar();
+
+            if (result is string maxCode)
+            {
+                var numberPart = maxCode.Substring(prefix.Length);
+                if (int.TryParse(numberPart, out int number))
+                {
+                    return prefix + (number + 1).ToString().PadLeft(numberLength, '0');
+                }
+            }
+
+            // Trường hợp chưa có dữ liệu, bắt đầu từ 1
+            return prefix + 1.ToString().PadLeft(numberLength, '0');
         }
     }
 }

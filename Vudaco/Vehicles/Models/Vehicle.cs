@@ -2,26 +2,23 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Vudaco.Partners.Models
+namespace Vudaco.Vehicles.Models
 {
-    [Table("partner_details")]
-    public class PartnerDetail
+    [Table("vehicles")]
+    public class Vehicle
     {
         [Key]
         [Column("id")]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         [Required]
-        [Column("partner_id")]
-        public int PartnerId { get; set; }
-
-        [Required]
-        [Column("is_supplier")]
-        public bool IsSupplier { get; set; }
-
         [MaxLength(50)]
-        [Column("code")]
-        public string Code { get; set; } 
+        [Column("number_code")]
+        public string NumberCode { get; set; }
+
+        [Required]
+        [Column("is_external_driver")]
+        public bool IsExternalDriver { get; set; }
 
         [MaxLength(191)]
         [Column("note")]

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Vudaco.Auth.Models
 {
-    [Table("role_permission")]
+    [Table("role_permissions")]
     public class RolePermission
     {
         [Key]

@@ -2,34 +2,30 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Vudaco.Partners.Models
+namespace Vudaco.Categorys.Models
 {
-    [Table("partner_details")]
-    public class PartnerDetail
+    [Table("household_fee_categorys")]
+    public class HouseholdFeeCategory
     {
         [Key]
         [Column("id")]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         [Required]
-        [Column("partner_id")]
-        public int PartnerId { get; set; }
-
-        [Required]
-        [Column("is_supplier")]
-        public bool IsSupplier { get; set; }
-
         [MaxLength(50)]
-        [Column("code")]
-        public string Code { get; set; } 
-
-        [MaxLength(191)]
-        [Column("note")]
-        public string Note { get; set; }
+        [Column("household_code")]
+        public string HouseholdCode { get; set; }
 
         [Required]
+        [MaxLength(191)]
+        [Column("household_name")]
+        public string HouseholdName { get; set; }
+
         [Column("storage_id")]
-        public int StorageId { get; set; }
+        public int? StorageId { get; set; }
+
+        [Column("amount")]
+        public double? Amount { get; set; }
 
         [Column("created_by")]
         public int? CreatedBy { get; set; }

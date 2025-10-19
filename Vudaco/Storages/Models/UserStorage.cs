@@ -2,30 +2,18 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Vudaco.Partners.Models
+namespace Vudaco.Storages.Models
 {
-    [Table("partner_details")]
-    public class PartnerDetail
+    [Table("user_storages")]
+    public class UserStorage
     {
         [Key]
         [Column("id")]
         public int Id { get; set; }
 
         [Required]
-        [Column("partner_id")]
-        public int PartnerId { get; set; }
-
-        [Required]
-        [Column("is_supplier")]
-        public bool IsSupplier { get; set; }
-
-        [MaxLength(50)]
-        [Column("code")]
-        public string Code { get; set; } 
-
-        [MaxLength(191)]
-        [Column("note")]
-        public string Note { get; set; }
+        [Column("user_id")]
+        public int UserId { get; set; }
 
         [Required]
         [Column("storage_id")]

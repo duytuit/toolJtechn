@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Vudaco.Departments.Models
 {
-    [Table("department")]
+    [Table("departments")]
     public class Department
     {
         [Key]

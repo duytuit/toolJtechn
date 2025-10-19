@@ -19,6 +19,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Vudaco.Middlewares;
 using Vudaco.Auth;
+using Vudaco.ContractFiles;
 
 namespace Vudaco
 {
@@ -78,6 +79,7 @@ namespace Vudaco
             services.AddControllersWithViews(); // 👈 hỗ trợ cả View + API
             services.AddHttpClient(); // Add HttpClient factory
             services.AddAuthModule();
+            services.AddContractFileModule();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

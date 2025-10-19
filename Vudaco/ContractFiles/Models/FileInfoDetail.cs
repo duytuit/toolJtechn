@@ -2,34 +2,27 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Vudaco.Partners.Models
+namespace Vudaco.ContractFiles.Models
 {
-    [Table("partner_details")]
-    public class PartnerDetail
+    [Table("file_info_details")] 
+    public class FileInfoDetail
     {
         [Key]
         [Column("id")]
         public int Id { get; set; }
 
         [Required]
-        [Column("partner_id")]
-        public int PartnerId { get; set; }
+        [Column("file_id")]
+        public int FileId { get; set; }
 
-        [Required]
-        [Column("is_supplier")]
-        public bool IsSupplier { get; set; }
+        [Column("employee_id")]
+        public int? EmployeeId { get; set; }
 
-        [MaxLength(50)]
-        [Column("code")]
-        public string Code { get; set; } 
+        [Column("price")]
+        public double? Price { get; set; }
 
-        [MaxLength(191)]
-        [Column("note")]
-        public string Note { get; set; }
-
-        [Required]
         [Column("storage_id")]
-        public int StorageId { get; set; }
+        public int? StorageId { get; set; }
 
         [Column("created_by")]
         public int? CreatedBy { get; set; }

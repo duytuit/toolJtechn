@@ -4,17 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Vudaco.Auth.Repositories;
+using Vudaco.ContractFiles.Repositories;
 using Vudaco.Shares;
 
-namespace Vudaco.Auth
+namespace Vudaco.ContractFiles
 {
     public static class ContractFileModule
     {
-        public static IServiceCollection AddAuthModule(this IServiceCollection services)
+        public static IServiceCollection AddContractFileModule(this IServiceCollection services)
         {
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IAuthRepository, AuthRepository>();
-            services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IContractFileRepository, ContractFileRepository>();
             return services;
         }
     }

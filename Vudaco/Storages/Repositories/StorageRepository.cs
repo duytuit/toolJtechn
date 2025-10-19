@@ -4,45 +4,45 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Vudaco.Partners.Dtos;
-using Vudaco.Partners.Models;
 using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
+using Vudaco.Storages.Dtos;
+using Vudaco.Storages.Models;
 
-namespace Vudaco.Partners.Repositories
+namespace Vudaco.Storages.Repositories
 {
-    public class PartnerRepository : BaseRepository<Partner>, IPartnerRepository
+    public class StorageRepository : BaseRepository<Storage>, IStorageRepository
     {
         private readonly VudacoDBContext _context;
         private readonly IConfiguration _configuration;
         private readonly RedisService _redis;
-        public PartnerRepository(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
+        public StorageRepository(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;
             _configuration = configuration;
             _redis = redis;
         }
-        public Task<Partner> CreateAsync(Partner Storage)
+        public Task<Storage> CreateAsync(Storage Storage)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Partner> DeleteSoftAsync(Partner Storage)
+        public Task<Storage> DeleteSoftAsync(Storage Storage)
         {
             throw new NotImplementedException();
         }
 
-        public Task<PaginatedResultReact<object>> GetObjectTaskAsync(PartnerDto PartnerDto, int page, int pageSize, CancellationToken cancellationToken)
+        public Task<PaginatedResultReact<object>> GetObjectTaskAsync(StorageDto StorageDto, int page, int pageSize, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Partner> ShowAsync(int id)
+        public Task<Storage> ShowAsync(int id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Partner> UpdateAsync(Partner Storage)
+        public Task<Storage> UpdateAsync(Storage Storage)
         {
             throw new NotImplementedException();
         }

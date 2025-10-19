@@ -32,7 +32,6 @@
     <Folder Include="Debits\Repositories\" />
     <Folder Include="Receipts\Repositories\" />
     <Folder Include="Storages\Controllers\" />
-    <Folder Include="Storages\Repositories\" />
     <Folder Include="Receipts\Controllers\" />
     <Folder Include="Receipts\Dtos\" />
     <Folder Include="Vehicles\Controllers\" />

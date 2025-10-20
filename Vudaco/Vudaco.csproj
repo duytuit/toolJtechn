@@ -18,33 +18,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Activitys\Controllers\" />
-    <Folder Include="Activitys\Dtos\" />
-    <Folder Include="Activitys\Repositories\" />
     <Folder Include="Categorys\Controllers\" />
-    <Folder Include="Categorys\Dtos\" />
-    <Folder Include="Categorys\Repositories\" />
-    <Folder Include="Bills\Controllers\" />
-    <Folder Include="Bills\Dtos\" />
-    <Folder Include="Bills\Repositories\" />
-    <Folder Include="Debits\Controllers\" />
-    <Folder Include="Debits\Dtos\" />
-    <Folder Include="Debits\Repositories\" />
-    <Folder Include="Receipts\Repositories\" />
-    <Folder Include="Storages\Controllers\" />
-    <Folder Include="Receipts\Controllers\" />
-    <Folder Include="Receipts\Dtos\" />
-    <Folder Include="Vehicles\Controllers\" />
     <Folder Include="Vehicles\Dtos\" />
-    <Folder Include="Vehicles\Repositories\" />
     <Folder Include="Customers\Controllers\" />
     <Folder Include="Customers\Dtos\" />
     <Folder Include="Customers\Models\" />
     <Folder Include="Customers\Repositories\" />
-    <Folder Include="Departments\Controllers\" />
-    <Folder Include="Departments\Dtos\" />
-    <Folder Include="Departments\Repositories\" />
-    <Folder Include="Partners\Controllers\" />
     <Folder Include="Requireds\Controllers\" />
     <Folder Include="Requireds\Dtos\" />
     <Folder Include="Requireds\Models\" />

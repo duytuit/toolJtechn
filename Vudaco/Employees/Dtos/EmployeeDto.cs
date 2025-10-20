@@ -8,6 +8,8 @@ namespace Vudaco.Employees.Dtos
     public class EmployeeDto
     {
         public long Id { get; set; }
+        public string Username  { get; set; }
+        public string  Password  { get; set; }
         public string Code { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -31,5 +33,6 @@ namespace Vudaco.Employees.Dtos
         public string BankNumber { get; set; }
         public string BankName { get; set; }
         public int? UserId { get; set; }
+        public string StorageIds { get; set; }
     }
 }

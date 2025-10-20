@@ -29,7 +29,6 @@ namespace Vudaco.ContractFiles.Repositories
         }
         public async Task<PaginatedResultReact<object>> GetObjectTaskAsync(FileInfoDto FileInfo, int page, int pageSize, CancellationToken cancellationToken)
         {
-            var makh = SqlServerHelpers.GenerateSoChungTu(_configuration.GetConnectionString("DefaultConnection"), "file_infos", "file_number", "KH", 4);
             var whereEquals = new Dictionary<string, object>();
             var whereLikes = new Dictionary<string, string>();
             var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
@@ -62,7 +61,6 @@ namespace Vudaco.ContractFiles.Repositories
             };
             objectList = null;
             results = null;
-            _results.Extra["makh"] = makh;
             whereEquals?.Clear(); whereLikes?.Clear(); whereDateRange?.Clear(); orderByList?.Clear();
             return _results;
         }

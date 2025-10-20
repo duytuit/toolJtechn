@@ -15,8 +15,8 @@ namespace Vudaco.Partners.Repositories
     {
         Task<PaginatedResultReact<object>> GetObjectTaskAsync(PartnerDto PartnerDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<Partner> ShowAsync(int id);
-        Task<Partner> CreateAsync(Partner Storage);
-        Task<Partner> UpdateAsync(Partner Storage);
-        Task<Partner> DeleteSoftAsync(Partner Storage);
+        Task<Partner> CreateAsync(Partner Partner);
+        Task<Partner> UpdateAsync(Partner Partner);
+        Task<Partner> DeleteSoftAsync(Partner Partner);
     }
 }

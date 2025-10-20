@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ using Vudaco.Partners.Dtos;
 using Vudaco.Partners.Models;
 using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
+using Vudaco.Shares.SqlServerHelper;
 
 namespace Vudaco.Partners.Repositories
 {
@@ -25,27 +27,66 @@ namespace Vudaco.Partners.Repositories
         }
         public Task<PartnerDetail> CreateAsync(PartnerDetail PartnerDetail)
         {
-            throw new NotImplementedException();
+            _context.PartnerDetails.Add(PartnerDetail);
+            _context.SaveChanges();
+            return Task.FromResult(PartnerDetail);
         }
 
         public Task<PartnerDetail> DeleteSoftAsync(PartnerDetail PartnerDetail)
         {
-            throw new NotImplementedException();
+            _context.PartnerDetails.Update(PartnerDetail);
+            _context.SaveChanges();
+            return Task.FromResult(PartnerDetail);
         }
 
-        public Task<PaginatedResultReact<object>> GetObjectTaskAsync(PartnerDetailDto PartnerDetailDto, int page, int pageSize, CancellationToken cancellationToken)
+        public async Task<PaginatedResultReact<object>> GetObjectTaskAsync(PartnerDetailDto PartnerDetailDto, int page, int pageSize, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var whereEquals = new Dictionary<string, object>();
+            var whereLikes = new Dictionary<string, string>();
+            var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
+            var orderByList = new List<string> { "id" };
+
+            dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
+                        _configuration.GetConnectionString("DefaultConnection"),
+                        "partner_details",
+                        new[] { "id", "code", "partner_id", "is_supplier", "note", "storage_id", "created_by", "updated_by", "deleted_by", "deleted_at", "created_at", "updated_at"},
+                        offset: null,
+                        limit: null,
+                        whereEquals: whereEquals,
+                        whereLikes: whereLikes,
+                        dateRangeList: whereDateRange,
+                        orderByList: orderByList,
+                        redisCache: _redis,
+                        includeCount: false,
+                        cancellationToken: cancellationToken
+                    );
+            int totalItems = results.Count;
+            var objectList = new List<object>();
+            objectList.AddRange(results.Data);
+            var _results = new PaginatedResultReact<object>
+            {
+                PageNum = page,
+                PageSize = pageSize,
+                First = (int)Math.Ceiling((double)totalItems / pageSize),
+                Total = totalItems,
+                Data = objectList,
+            };
+            objectList = null;
+            results = null;
+            whereEquals?.Clear(); whereLikes?.Clear(); whereDateRange?.Clear(); orderByList?.Clear();
+            return _results;
         }
 
         public Task<PartnerDetail> ShowAsync(int id)
         {
-            throw new NotImplementedException();
+            return _context.PartnerDetails.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public Task<PartnerDetail> UpdateAsync(PartnerDetail PartnerDetail)
         {
-            throw new NotImplementedException();
+            _context.PartnerDetails.Update(PartnerDetail);
+            _context.SaveChanges();
+            return Task.FromResult(PartnerDetail);
         }
     }
 }

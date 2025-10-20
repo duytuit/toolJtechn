@@ -20,6 +20,16 @@ using System.Text;
 using Vudaco.Middlewares;
 using Vudaco.Auth;
 using Vudaco.ContractFiles;
+using Vudaco.Employees;
+using Vudaco.Storages;
+using Vudaco.Partners;
+using Vudaco.Categorys;
+using Vudaco.Activitys;
+using Vudaco.Bills;
+using Vudaco.Debits;
+using Vudaco.Departments;
+using Vudaco.Receipts;
+using Vudaco.Vehicles;
 
 namespace Vudaco
 {
@@ -80,6 +90,16 @@ namespace Vudaco
             services.AddHttpClient(); // Add HttpClient factory
             services.AddAuthModule();
             services.AddContractFileModule();
+            services.AddEmployeeModule();
+            services.AddStogareModule();
+            services.AddPartnerModule();
+            services.AddCategoryModule();
+            services.AddActivityModule();
+            services.AddBillModule();
+            services.AddDebitModule();
+            services.AddDepartmentModule();
+            services.AddReceiptModule();
+            services.AddVehicleModule();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

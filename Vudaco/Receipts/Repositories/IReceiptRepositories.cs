@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Vudaco.Receipts.Dtos;
+using Vudaco.Receipts.Models;
+using Vudaco.Shares;
+using Vudaco.Shares.BaseRepository;
+
+namespace Vudaco.Receipts.Repositories
+{
+    public interface IReceiptRepositories : IBaseRepository<Receipt>
+    {
+        Task<PaginatedResultReact<object>> GetObjectTaskAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<Receipt> ShowAsync(int id);
+        Task<Receipt> CreateAsync(Receipt Receipt);
+        Task<Receipt> UpdateAsync(Receipt Receipt);
+        Task<Receipt> DeleteSoftAsync(Receipt Receipt);
+    }
+}

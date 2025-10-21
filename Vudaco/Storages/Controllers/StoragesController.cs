@@ -63,9 +63,9 @@ namespace Vudaco.Storages.Controllers
                  UpdatedAt = DateTime.Now,
             };
             storage = await _repoStogare.CreateAsync(storage);
-            return ApiResponseResult(true, "Thêm thành công 234324", storage);
+            return ApiResponseResult(true, "Thêm thành công", storage);
         }
-        [HttpPut]
+        [HttpPost]
         [Route("update")]
         public async Task<IActionResult> Update([FromBody] StorageDto StorageDto)
         {
@@ -78,7 +78,11 @@ namespace Vudaco.Storages.Controllers
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
             }
-            storage.Code = StorageDto.Code;
+            // Check trùng Name
+            var entity = await _context.Storages.FirstOrDefaultAsync(p => p.Name == StorageDto.Name && p.Id != StorageDto.Id);
+            if (entity != null)
+                return ApiResponseResult<object>(false, "Tên dữ liệu đã tồn tại", null);
+            storage.Code = StorageDto.Code?? StorageDto.Name;
             storage.Name = StorageDto.Name;
             storage.Note = StorageDto.Note;
             storage.Address = StorageDto.Address;
@@ -88,15 +92,15 @@ namespace Vudaco.Storages.Controllers
             storage = await _repoStogare.UpdateAsync(storage);
             return ApiResponseResult(true, "Cập nhật thành công", storage);
         }
-        [HttpDelete("{id}")]
+        [HttpPost]
         [Route("delete")]
-        public async Task<IActionResult> Delete([FromQuery] int id)
+        public async Task<IActionResult> Delete([FromBody] StorageDto StorageDto)
         {
-            if (id <= 0)
+            if (StorageDto.Id <= 0)
             {
                 return ApiResponseResult<object>(false, "Id không tồn tại", null);
             }
-            var storage = _context.Storages.Find(id);
+            var storage = _context.Storages.Find(StorageDto.Id);
             if (storage == null)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);

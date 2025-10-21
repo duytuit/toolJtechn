@@ -7,9 +7,9 @@ using Vudaco.Storages.Repositories;
 
 namespace Vudaco.Storages
 {
-    public static class StogareModule
+    public static class StoragesModule
     {
-        public static IServiceCollection AddStogareModule(this IServiceCollection services)
+        public static IServiceCollection AddStoragesModule(this IServiceCollection services)
         {
             services.AddScoped<IStorageRepository, StorageRepository>();
             services.AddScoped<IUserStorageRepository, UserStorageRepository>();

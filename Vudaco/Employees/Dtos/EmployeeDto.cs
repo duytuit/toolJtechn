@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -28,6 +29,7 @@ namespace Vudaco.Employees.Dtos
         public long? UpdatedBy { get; set; }
         public long? DeletedBy { get; set; }
         public string Avatar { get; set; }
+         [Required]
         public string Phone { get; set; }
         public string Email { get; set; }
         public string BankNumber { get; set; }

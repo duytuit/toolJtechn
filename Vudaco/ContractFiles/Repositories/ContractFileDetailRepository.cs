@@ -1,44 +1,44 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
+
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Vudaco.Partners.Dtos;
-using Vudaco.Partners.Models;
+using Vudaco.ContractFiles.Dtos;
+using Vudaco.ContractFiles.Models;
 using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
 using Vudaco.Shares.SqlServerHelper;
 
-namespace Vudaco.Partners.Repositories
+namespace Vudaco.ContractFiles.Repositories
 {
-    public class PartnerRepository : BaseRepository<Partner>, IPartnerRepository
+    public class ContractFileDetailRepository :BaseRepository<FileInfoDetail>, IContractFileDetailRepository
     {
         private readonly VudacoDBContext _context;
         private readonly IConfiguration _configuration;
         private readonly RedisService _redis;
-        public PartnerRepository(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
+        public ContractFileDetailRepository(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;
             _configuration = configuration;
             _redis = redis;
         }
-        public Task<Partner> CreateAsync(Partner Partner)
+
+        public Task<FileInfoDetail> CreateAsync(FileInfoDetail FileInfo)
         {
-            _context.Partners.Add(Partner);
-            _context.SaveChanges();
-            return Task.FromResult(Partner);
+            throw new NotImplementedException();
         }
 
-        public Task<Partner> DeleteSoftAsync(Partner Partner)
+        public Task<FileInfoDetail> DeleteSoftAsync(FileInfoDetail FileInfo)
         {
-            _context.Partners.Update(Partner);
-            _context.SaveChanges();
-            return Task.FromResult(Partner);
+            throw new NotImplementedException();
         }
 
-        public async Task<PaginatedResultReact<object>> GetObjectTaskAsync(PartnerDto PartnerDto, int page, int pageSize, CancellationToken cancellationToken)
+        public async Task<PaginatedResultReact<object>> GetObjectTaskAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
         {
             var whereEquals = new Dictionary<string, object>();
             var whereLikes = new Dictionary<string, string>();
@@ -47,8 +47,8 @@ namespace Vudaco.Partners.Repositories
 
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
-                        "partners",
-                        new[] { "id", "code", "name", "address", "tax_code", "phone", "email", "bank_account", "allowed_debt_days", "max_debt", "note", "storage_id", "abbreviation", "created_by", "updated_by", "deleted_by", "deleted_at", "created_at", "updated_at" },
+                        "file_info_details",
+                        new[] { "id","file_id","employee_id","price","storage_id","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},
                         offset: null,
                         limit: null,
                         whereEquals: whereEquals,
@@ -76,16 +76,14 @@ namespace Vudaco.Partners.Repositories
             return _results;
         }
 
-        public Task<Partner> ShowAsync(int id)
+        public Task<FileInfoDetail> ShowAsync(int id)
         {
-            return _context.Partners.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            throw new NotImplementedException();
         }
 
-        public Task<Partner> UpdateAsync(Partner Partner)
+        public Task<FileInfoDetail> UpdateAsync(FileInfoDetail FileInfo)
         {
-            _context.Partners.Update(Partner);
-            _context.SaveChanges();
-            return Task.FromResult(Partner);
+            throw new NotImplementedException();
         }
     }
 }

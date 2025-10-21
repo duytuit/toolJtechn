@@ -16,8 +16,8 @@ namespace Vudaco.Partners.Models
         public int PartnerId { get; set; }
 
         [Required]
-        [Column("is_supplier")]
-        public bool IsSupplier { get; set; }
+        [Column("status")]
+        public int Status { get; set; }
 
         [MaxLength(50)]
         [Column("code")]

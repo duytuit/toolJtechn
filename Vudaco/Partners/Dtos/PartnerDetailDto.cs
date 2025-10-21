@@ -9,7 +9,7 @@ namespace Vudaco.Partners.Dtos
     {
         public int Id { get; set; }
         public int PartnerId { get; set; }
-        public bool IsSupplier { get; set; }
+        public int Status { get; set; }
         public string Code { get; set; }
         public string Note { get; set; }
         public int StorageId { get; set; }

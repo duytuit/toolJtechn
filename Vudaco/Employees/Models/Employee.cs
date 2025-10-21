@@ -60,8 +60,9 @@ namespace Vudaco.Employees.Models
         [Column("end_date_company")]
         public DateTime? EndDateCompany { get; set; }
 
+        [Required]
         [Column("storage_id")]
-        public int? StorageId { get; set; }
+        public int StorageId { get; set; }
 
         [Column("created_by")]
         public long? CreatedBy { get; set; }
@@ -87,6 +88,7 @@ namespace Vudaco.Employees.Models
 
         [MaxLength(191)]
         [Column("phone")]
+         [Required]
         public string Phone { get; set; }
 
         [MaxLength(191)]

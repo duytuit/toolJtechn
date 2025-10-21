@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,15 +17,15 @@ namespace Vudaco.Storages.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StogaresController : BaseApiController
+    public class StoragesController : BaseApiController
     {
         private readonly IStorageRepository _repoStogare;
         private readonly IUserStorageRepository _repoUserStorage;
-        private readonly ILogger<StogaresController> _logger;
+        private readonly ILogger<StoragesController> _logger;
         private readonly VudacoDBContext _context;
         public int userId => (int)HttpContext.Items["UserId"];
 
-        public StogaresController(ILogger<StogaresController> logger, IUserStorageRepository repoUserStorage, IStorageRepository repoStogare, VudacoDBContext context)
+        public StoragesController(ILogger<StoragesController> logger, IUserStorageRepository repoUserStorage, IStorageRepository repoStogare, VudacoDBContext context)
         {
             _logger = logger;
             _repoStogare = repoStogare;
@@ -45,9 +47,14 @@ namespace Vudaco.Storages.Controllers
         [Route("create")]
         public async Task<IActionResult> Create([FromBody] StorageDto StorageDto)
         {
+            // Check trùng Name
+            var entity = await _context.Storages.FirstOrDefaultAsync(p => p.Name == StorageDto.Name);
+            if (entity != null)
+                return ApiResponseResult<object>(false, "Tên dữ liệu đã tồn tại", null);
+                
             var storage = new Storage
             {
-                 Code = StorageDto.Code,
+                 Code = StorageDto.Code??StorageDto.Name,
                  Name = StorageDto.Name,
                  Note = StorageDto.Note,
                  Address = StorageDto.Address,
@@ -56,7 +63,7 @@ namespace Vudaco.Storages.Controllers
                  UpdatedAt = DateTime.Now,
             };
             storage = await _repoStogare.CreateAsync(storage);
-            return ApiResponseResult(true, "Thêm thành công", storage);
+            return ApiResponseResult(true, "Thêm thành công 234324", storage);
         }
         [HttpPut]
         [Route("update")]
@@ -97,7 +104,21 @@ namespace Vudaco.Storages.Controllers
             storage.DeletedBy = userId;
             storage.DeletedAt = DateTime.Now;
             await _repoStogare.DeleteSoftAsync(storage);
-            return ApiResponseResult<object>(true, "Xóa thành công",null);
+            return ApiResponseResult<object>(true, "Xóa thành công", null);
+        }
+        [HttpGet("show")]
+        public async Task<IActionResult> Show([FromQuery] int id)
+        {
+            if (id <= 0)
+            {
+                return ApiResponseResult<object>(false, "Id không tồn tại", null);
+            }
+            var storage =  await _repoStogare.ShowAsync(id);
+            if (storage == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", storage);
         }
     }
 }

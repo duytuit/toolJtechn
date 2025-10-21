@@ -49,7 +49,7 @@ namespace Vudaco.Partners.Repositories
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "partner_details",
-                        new[] { "id", "code", "partner_id", "is_supplier", "note", "storage_id", "created_by", "updated_by", "deleted_by", "deleted_at", "created_at", "updated_at"},
+                        new[] { "id", "code", "partner_id", "status", "note", "storage_id", "created_by", "updated_by", "deleted_by", "deleted_at", "created_at", "updated_at"},
                         offset: null,
                         limit: null,
                         whereEquals: whereEquals,

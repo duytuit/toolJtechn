@@ -31,6 +31,7 @@ namespace Vudaco.Partners.Models
 
         [MaxLength(50)]
         [Column("phone")]
+         [Required]
         public string Phone { get; set; }
 
         [MaxLength(191)]
@@ -47,16 +48,15 @@ namespace Vudaco.Partners.Models
         [Column("max_debt")]
         public double? MaxDebt { get; set; }
 
-        [Required]
-        [Column("is_supplier")]
-        public bool IsSupplier { get; set; }
-
         [Column("note", TypeName = "nvarchar(max)")]
         public string Note { get; set; }
 
         [Required]
         [Column("storage_id")]
         public int StorageId { get; set; }
+        [Required]
+        [Column("user_id")]
+        public int UserId { get; set; }
 
         [Required]
         [MaxLength(50)]

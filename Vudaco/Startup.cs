@@ -91,7 +91,7 @@ namespace Vudaco
             services.AddAuthModule();
             services.AddContractFileModule();
             services.AddEmployeeModule();
-            services.AddStogareModule();
+            services.AddStoragesModule();
             services.AddPartnerModule();
             services.AddCategoryModule();
             services.AddActivityModule();

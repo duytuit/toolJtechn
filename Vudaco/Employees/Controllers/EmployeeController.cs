@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -46,105 +47,113 @@ namespace Vudaco.Employees.Controllers
                 }
                 return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
-         [HttpPost]
-         [Route("create")]
-         public async Task<IActionResult> Create([FromBody] EmployeeDto EmployeeDto)
+        [HttpPost("create")]
+        public async Task<IActionResult> Create([FromBody] EmployeeDto dto)
         {
-                using var transaction = await _context.Database.BeginTransactionAsync();
-                try
+            // ====== VALIDATE ======
+            if (await _context.Users.AnyAsync(u => u.Username == dto.Phone))
+                return ApiResponseResult<object>(false, "Số điện thoại đã được dùng làm username", null);
+
+            if (await _context.Employees.AnyAsync(e => e.Phone == dto.Phone))
+                return ApiResponseResult<object>(false, "Số điện thoại đã tồn tại", null);
+
+            using var tran = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // ====== CREATE USER ======
+                var user = new User
                 {
-                    // ✅ Check username trùng
-                    if (await _context.Users.AnyAsync(u => u.Username == EmployeeDto.Username))
-                        return ApiResponseResult<object>(false, "Tên đăng nhập đã tồn tại", null);
+                    Username  = dto.Phone,
+                    Password  = BCrypt.Net.BCrypt.HashPassword(dto.Phone),
+                    Email     = dto.Email,
+                    FirstName = dto.FirstName,
+                    LastName  = dto.LastName,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                    UpdatedBy = userId
+                };
 
-                    // ✅ Tạo user
-                    var user = new User
-                    {
-                        Username = EmployeeDto.Username,
-                        Password = BCrypt.Net.BCrypt.HashPassword(EmployeeDto.Password),
-                        Email = EmployeeDto.Email,
-                        FirstName = EmployeeDto.FirstName,
-                        LastName = EmployeeDto.LastName,
-                        CreatedAt = DateTime.Now,
-                        UpdatedAt = DateTime.Now,
-                        UpdatedBy = userId
-                    };
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync(); // cần để lấy user.Id
 
-                    _context.Users.Add(user);
-                    await _context.SaveChangesAsync(); // cần để lấy user.Id
-
-                    // ✅ Tạo employee
-                    var employee = new Employee
-                    {
-                        Code = EmployeeDto.Code,
-                        FirstName = EmployeeDto.FirstName,
-                        LastName = EmployeeDto.LastName,
-                        StorageId = EmployeeDto.StorageId,
-                        CreatedBy = userId,
-                        Phone = EmployeeDto.Phone,
-                        Email = EmployeeDto.Email,
-                        UserId = user.Id
-                    };
-
-                    _context.Employees.Add(employee);
-                    await _context.SaveChangesAsync();
-
-                    await transaction.CommitAsync(); // ✅ Commit
-                    return ApiResponseResult(true, "Thêm thành công", employee);
-                }
-                catch (Exception ex)
+                // ====== CREATE EMPLOYEE ======
+                var employee = new Employee
                 {
-                    await transaction.RollbackAsync(); // ✅ Rollback khi lỗi
-                    return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.Message, null);
-                }
-         }
-         [HttpPut]
-         [Route("update")]
-         public async Task<IActionResult> Update([FromBody] EmployeeDto EmployeeDto)
-         {
-            if (EmployeeDto.Id <= 0)
+                    Code      = dto.Code,
+                    FirstName = dto.FirstName,
+                    LastName  = dto.LastName,
+                    StorageId = dto.StorageId,
+                    CreatedBy = userId,
+                    Phone     = dto.Phone,
+                    Email     = dto.Email,
+                    UserId    = user.Id,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                    UpdatedBy = userId
+                };
+
+                _context.Employees.Add(employee);
+                await _context.SaveChangesAsync();
+
+                await tran.CommitAsync();
+                return ApiResponseResult(true, "Thêm thành công", employee);
+            }
+            catch (Exception ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.Message, null);
+            }
+        }
+        [HttpPut("update")]
+        public async Task<IActionResult> Update([FromBody] EmployeeDto dto)
+        {
+            if (dto.Id <= 0)
                 return ApiResponseResult<object>(false, "Id không hợp lệ", null);
 
             using var tran = await _context.Database.BeginTransactionAsync();
             try
             {
-                // Lấy employee theo Id
-                var employee = await _context.Employees
-                    .AsTracking()
-                    .FirstOrDefaultAsync(e => e.Id == EmployeeDto.Id);
-
+                var employee = await _context.Employees.AsTracking()
+                    .FirstOrDefaultAsync(e => e.Id == dto.Id);
                 if (employee == null)
                     return ApiResponseResult<object>(false, "Không tìm thấy nhân viên", null);
 
-                // Lấy user theo userId của employee
-                var user = await _context.Users
-                    .AsTracking()
+                var user = await _context.Users.AsTracking()
                     .FirstOrDefaultAsync(u => u.Id == employee.UserId);
-
                 if (user == null)
                     return ApiResponseResult<object>(false, "Không tìm thấy user của nhân viên", null);
 
-            
-                // ✅ Chỉ cập nhật password nếu có nhập
-                if (!string.IsNullOrWhiteSpace(EmployeeDto.Password))
-                {
-                    user.Password = BCrypt.Net.BCrypt.HashPassword(EmployeeDto.Password);
-                }
-                user.FirstName = EmployeeDto.FirstName;
-                user.LastName  = EmployeeDto.LastName;
-                user.Email     = EmployeeDto.Email;
+
+                // ✅ Check trùng phone/username (trừ bản thân nó)
+                if (await _context.Users.AnyAsync(u => u.Username == dto.Phone && u.Id != user.Id))
+                    return ApiResponseResult<object>(false, "Số điện thoại đã được dùng làm username của user khác", null);
+
+                if (await _context.Employees.AnyAsync(e => e.Phone == dto.Phone && e.Id != employee.Id))
+                    return ApiResponseResult<object>(false, "Số điện thoại đã tồn tại ở nhân viên khác", null);
+
+
+                // ====== UPDATE USER ======
+                if (!string.IsNullOrWhiteSpace(dto.Password))
+                    user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
+                user.Username  = dto.Phone; // nếu bạn dùng phone làm username
+                user.FirstName = dto.FirstName;
+                user.LastName  = dto.LastName;
+                user.Email     = dto.Email;
                 user.UpdatedAt = DateTime.Now;
                 user.UpdatedBy = userId;
 
-                // ====== CẬP NHẬT EMPLOYEE ======
-                employee.Code       = EmployeeDto.Code;
-                employee.FirstName  = EmployeeDto.FirstName;
-                employee.LastName   = EmployeeDto.LastName;
-                employee.StorageId  = EmployeeDto.StorageId;
-                employee.Phone      = EmployeeDto.Phone;
-                employee.Email      = EmployeeDto.Email;
-                employee.UpdatedAt  = DateTime.Now;
-                employee.UpdatedBy  = userId;
+
+                // ====== UPDATE EMPLOYEE ======
+                employee.Code      = dto.Code;
+                employee.FirstName = dto.FirstName;
+                employee.LastName  = dto.LastName;
+                employee.StorageId = dto.StorageId;
+                employee.Phone     = dto.Phone;
+                employee.Email     = dto.Email;
+                employee.UpdatedAt = DateTime.Now;
+                employee.UpdatedBy = userId;
+
 
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
@@ -156,7 +165,7 @@ namespace Vudaco.Employees.Controllers
                 await tran.RollbackAsync();
                 return ApiResponseResult<object>(false, "Lỗi: " + ex.Message, null);
             }
-         }
+        }
         [HttpDelete("delete")]
         public async Task<IActionResult> Delete([FromQuery] int id)
         {
@@ -176,19 +185,23 @@ namespace Vudaco.Employees.Controllers
                 emp.DeletedBy = userId;
                 _context.Employees.Update(emp);
 
-                // Xóa mềm user nếu có
-                if (emp.UserId.HasValue)
+               var countUseUser = await _context.Employees
+                    .Where(p => p.UserId == emp.UserId && p.Id != emp.Id)
+                    .CountAsync();
+
+                if (countUseUser == 0)
                 {
-                    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == emp.UserId.Value);
+                    var user = await _context.Users
+                        .AsTracking()
+                        .FirstOrDefaultAsync(u => u.Id == emp.UserId);
                     if (user != null)
                     {
                         user.DeletedAt = DateTime.Now;
+                        user.UpdatedAt = DateTime.Now;
                         user.UpdatedBy = userId;
-                        _context.Users.Update(user);
-                        await _context.SaveChangesAsync();
                     }
                 }
-
+                await _context.SaveChangesAsync();
                 await tran.CommitAsync();
                 return ApiResponseResult<object>(true, "Xóa mềm thành công", null);
             }

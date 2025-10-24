@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -17,6 +18,9 @@ namespace Vudaco.ContractFiles.Models
         [Required]
         [Column("storage_id")]
         public int StorageId { get; set; }
+        [Required]
+        [Column("accounting_date")]
+        public DateTime AccountingDate { get; set; }
 
         [Required]
         [MaxLength(50)]
@@ -39,8 +43,8 @@ namespace Vudaco.ContractFiles.Models
         [Column("container_code")]
         public string ContainerCode { get; set; }
 
-        [Column("sales_id")]
-        public int? SalesId { get; set; }
+        [Column("sales")]
+        public string Sales { get; set; }
 
         [Column("type")]
         public int? Type { get; set; }
@@ -80,5 +84,8 @@ namespace Vudaco.ContractFiles.Models
 
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
+        [NotMapped]
+        public List<FileInfoDetail> FileInfoDetails { get; set; }
+
     }
 }

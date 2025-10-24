@@ -12,6 +12,7 @@ using Vudaco.ContractFiles.Dtos;
 using Vudaco.ContractFiles.Models;
 using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
+using Vudaco.Shares.MysqlHelper;
 using Vudaco.Shares.SqlServerHelper;
 
 namespace Vudaco.ContractFiles.Repositories
@@ -32,18 +33,32 @@ namespace Vudaco.ContractFiles.Repositories
             var whereEquals = new Dictionary<string, object>();
             var whereLikes = new Dictionary<string, string>();
             var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
-            var orderByList = new List<string> { "id" };
-
+            var orderByList = new List<string> {  "updated_at desc" , "id"};
+            if (FileInfo.StorageId > 0)
+                whereEquals["storage_id"] = FileInfo.StorageId;
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "file_infos",
-                        new[] { "id", "partner_detail_id", "storage_id", "file_number", "declaration", "bill", "quantity", "container_code", "sales_id", "type", "feature", "declaration_quantity", "declaration_type", "business", "occurrence", "note", "created_by", "updated_by", "deleted_by", "deleted_at", "created_at", "updated_at", },
+                        new[] { "id", "partner_detail_id", "accounting_date", "storage_id", "file_number", "declaration", "bill", "quantity", "container_code", "sales", "type", "feature", "declaration_quantity", "declaration_type", "business", "occurrence", "note", "created_by", "updated_by", "deleted_by", "deleted_at", "created_at", "updated_at", },
                         offset: null,
                         limit: null,
                         whereEquals: whereEquals,
                         whereLikes: whereLikes,
                         dateRangeList: whereDateRange,
                         orderByList: orderByList,
+                        relations: new List<AdoRelation>
+                                {
+                                    new AdoRelation
+                                    {
+                                        Name = "file_info_details",
+                                        Table = "file_info_details",
+                                        Columns = new[] { "id","file_id","employee_id","price","storage_id","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},
+                                        ParentKey = "id",
+                                        ForeignKey = "file_id",
+                                        KeyName = "file_id",
+                                        IsCollection = true,
+                                    }
+                                },
                         redisCache: _redis,
                         includeCount: false,
                         cancellationToken: cancellationToken
@@ -64,9 +79,20 @@ namespace Vudaco.ContractFiles.Repositories
             whereEquals?.Clear(); whereLikes?.Clear(); whereDateRange?.Clear(); orderByList?.Clear();
             return _results;
         }
-        public Task<FileInfo> ShowAsync(int id)
+        public async Task<FileInfo> ShowAsync(int id)
         {
-            return _context.FileInfos.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            var file = await _context.FileInfos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (file == null) return null;
+
+            file.FileInfoDetails = await _context.FileInfoDetails
+                .AsNoTracking()
+                .Where(d => d.FileId == id)
+                .ToListAsync();
+
+            return file;
         }
         public Task<FileInfo> CreateAsync(FileInfo FileInfo)
         {

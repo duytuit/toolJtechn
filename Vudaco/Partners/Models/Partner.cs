@@ -11,7 +11,6 @@ namespace Vudaco.Partners.Models
         [Column("id")]
         public int Id { get; set; }
 
-        [Required]
         [MaxLength(191)]
         [Column("code")]
         public string Code { get; set; }

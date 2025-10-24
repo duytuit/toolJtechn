@@ -9,6 +9,7 @@ using Vudaco.Partners.Dtos;
 using Vudaco.Partners.Models;
 using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
+using Vudaco.Shares.MysqlHelper;
 using Vudaco.Shares.SqlServerHelper;
 
 namespace Vudaco.Partners.Repositories
@@ -55,6 +56,75 @@ namespace Vudaco.Partners.Repositories
                         whereLikes: whereLikes,
                         dateRangeList: whereDateRange,
                         orderByList: orderByList,
+                        relations: new List<AdoRelation>
+                                {
+                                    new AdoRelation
+                                    {
+                                        Name = "partner_details",
+                                        Table = "partner_details",
+                                        Columns = new[] { "id","code","partner_id","note","storage_id","status","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},
+                                        ParentKey = "id",
+                                        ForeignKey = "partner_id",
+                                        KeyName = "partner_id",
+                                        IsCollection = true,
+                                    }
+                                },
+                        redisCache: _redis,
+                        includeCount: false,
+                        cancellationToken: cancellationToken
+                    );
+            int totalItems = results.Count;
+            var objectList = new List<object>();
+            objectList.AddRange(results.Data);
+            var _results = new PaginatedResultReact<object>
+            {
+                PageNum = page,
+                PageSize = pageSize,
+                First = (int)Math.Ceiling((double)totalItems / pageSize),
+                Total = totalItems,
+                Data = objectList,
+            };
+            objectList = null;
+            results = null;
+            whereEquals?.Clear(); whereLikes?.Clear(); whereDateRange?.Clear(); orderByList?.Clear();
+            return _results;
+        }
+
+        public async Task<PaginatedResultReact<object>> GetPartnerDetail(PartnerDetailDto PartnerDetailDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var whereEquals = new Dictionary<string, object>();
+            var whereLikes = new Dictionary<string, string>();
+            var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
+            var orderByList = new List<string> { "id" };
+
+            if (PartnerDetailDto.Status > 0)
+                whereEquals["status"] = PartnerDetailDto.Status;
+            if (PartnerDetailDto.StorageId > 0)
+                whereEquals["storage_id"] = PartnerDetailDto.StorageId;
+
+            dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
+                        _configuration.GetConnectionString("DefaultConnection"),
+                        "partner_details",
+                        new[] { "id","code","partner_id","note","storage_id","status","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},
+                        offset: null,
+                        limit: null,
+                        whereEquals: whereEquals,
+                        whereLikes: whereLikes,
+                        dateRangeList: whereDateRange,
+                        orderByList: orderByList,
+                        relations: new List<AdoRelation>
+                                {
+                                    new AdoRelation
+                                    {
+                                        Name = "partners",
+                                        Table = "partners",
+                                        Columns = new[] { "id", "code", "name", "address", "tax_code", "phone", "email", "bank_account", "allowed_debt_days", "max_debt", "note", "storage_id", "abbreviation", "created_by", "updated_by", "deleted_by", "deleted_at", "created_at", "updated_at"},
+                                        ParentKey = "partner_id",
+                                        ForeignKey = "id",
+                                        KeyName = "id",
+                                        IsCollection = false,
+                                    }
+                                },
                         redisCache: _redis,
                         includeCount: false,
                         cancellationToken: cancellationToken

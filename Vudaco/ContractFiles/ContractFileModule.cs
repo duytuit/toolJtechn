@@ -14,6 +14,7 @@ namespace Vudaco.ContractFiles
         public static IServiceCollection AddContractFileModule(this IServiceCollection services)
         {
             services.AddScoped<IContractFileRepository, ContractFileRepository>();
+            services.AddScoped<IContractFileDetailRepository, ContractFileDetailRepository>();
             return services;
         }
     }

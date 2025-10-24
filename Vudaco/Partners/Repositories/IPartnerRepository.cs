@@ -14,6 +14,7 @@ namespace Vudaco.Partners.Repositories
     public interface IPartnerRepository : IBaseRepository<Partner>
     {
         Task<PaginatedResultReact<object>> GetObjectTaskAsync(PartnerDto PartnerDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<PaginatedResultReact<object>> GetPartnerDetail(PartnerDetailDto PartnerDetailDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<Partner> ShowAsync(int id);
         Task<Partner> CreateAsync(Partner Partner);
         Task<Partner> UpdateAsync(Partner Partner);

@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Vudaco.Auth.Models;
 using Vudaco.ContractFiles.Dtos;
@@ -13,6 +14,7 @@ using Vudaco.Employees.Dtos;
 using Vudaco.Employees.Models;
 using Vudaco.Employees.Repositories;
 using Vudaco.Shares.BaseRepository;
+using Vudaco.Shares.SqlServerHelper;
 
 namespace Vudaco.Employees.Controllers
 {
@@ -25,11 +27,14 @@ namespace Vudaco.Employees.Controllers
         private readonly VudacoDBContext _context;
         public int userId => (int)HttpContext.Items["UserId"];
 
-        public EmployeeController(ILogger<EmployeeController> logger, IEmployeeRepository repoEmployee, VudacoDBContext context)
+          private readonly IConfiguration _configuration;
+
+        public EmployeeController(ILogger<EmployeeController> logger, IConfiguration configuration,IEmployeeRepository repoEmployee, VudacoDBContext context)
         {
             _logger = logger;
             _repoEmployee = repoEmployee;
             _context = context;
+             _configuration = configuration;
         }
 
         /// <summary>
@@ -51,6 +56,10 @@ namespace Vudaco.Employees.Controllers
         public async Task<IActionResult> Create([FromBody] EmployeeDto dto)
         {
             // ====== VALIDATE ======
+            if (string.IsNullOrWhiteSpace(dto.StorageId.ToString()))
+            {
+                return ApiResponseResult<object>(false, "Vui lòng chọn kho làm việc", null);
+            }
             if (await _context.Users.AnyAsync(u => u.Username == dto.Phone))
                 return ApiResponseResult<object>(false, "Số điện thoại đã được dùng làm username", null);
 
@@ -64,7 +73,7 @@ namespace Vudaco.Employees.Controllers
                 var user = new User
                 {
                     Username  = dto.Phone,
-                    Password  = BCrypt.Net.BCrypt.HashPassword(dto.Phone),
+                    Password  = !string.IsNullOrWhiteSpace(dto.Password) ? BCrypt.Net.BCrypt.HashPassword(dto.Password) : BCrypt.Net.BCrypt.HashPassword(dto.Phone),
                     Email     = dto.Email,
                     FirstName = dto.FirstName,
                     LastName  = dto.LastName,
@@ -79,14 +88,15 @@ namespace Vudaco.Employees.Controllers
                 // ====== CREATE EMPLOYEE ======
                 var employee = new Employee
                 {
-                    Code      = dto.Code,
+                    Code = SqlServerHelpers.GenerateSoChungTu(_configuration.GetConnectionString("DefaultConnection"), "employees", "code", "NV", 4),
                     FirstName = dto.FirstName,
-                    LastName  = dto.LastName,
+                    LastName = dto.LastName,
                     StorageId = dto.StorageId,
                     CreatedBy = userId,
-                    Phone     = dto.Phone,
-                    Email     = dto.Email,
-                    UserId    = user.Id,
+                    BeginDateCompany = DateTime.Now,
+                    Phone = dto.Phone,
+                    Email = dto.Email,
+                    UserId = user.Id,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now,
                     UpdatedBy = userId
@@ -98,13 +108,13 @@ namespace Vudaco.Employees.Controllers
                 await tran.CommitAsync();
                 return ApiResponseResult(true, "Thêm thành công", employee);
             }
-            catch (Exception ex)
+            catch (DbUpdateException ex)
             {
                 await tran.RollbackAsync();
-                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.Message, null);
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
             }
         }
-        [HttpPut("update")]
+        [HttpPost("update")]
         public async Task<IActionResult> Update([FromBody] EmployeeDto dto)
         {
             if (dto.Id <= 0)
@@ -166,17 +176,17 @@ namespace Vudaco.Employees.Controllers
                 return ApiResponseResult<object>(false, "Lỗi: " + ex.Message, null);
             }
         }
-        [HttpDelete("delete")]
-        public async Task<IActionResult> Delete([FromQuery] int id)
+        [HttpPost("delete")]
+        public async Task<IActionResult> Delete([FromBody] EmployeeDto dto)
         {
-            if (id <= 0)
+            if (dto.Id <= 0)
                 return ApiResponseResult<object>(false, "Id không tồn tại", null);
 
             using var tran = await _context.Database.BeginTransactionAsync();
             try
             {
                 // Lấy employee
-                var emp = await _context.Employees.FindAsync(id);
+                var emp = await _context.Employees.FindAsync(dto.Id);
                 if (emp == null)
                     return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
 
@@ -185,9 +195,9 @@ namespace Vudaco.Employees.Controllers
                 emp.DeletedBy = userId;
                 _context.Employees.Update(emp);
 
-               var countUseUser = await _context.Employees
-                    .Where(p => p.UserId == emp.UserId && p.Id != emp.Id)
-                    .CountAsync();
+                var countUseUser = await _context.Employees
+                     .Where(p => p.UserId == emp.UserId && p.Id != emp.Id)
+                     .CountAsync();
 
                 if (countUseUser == 0)
                 {
@@ -203,13 +213,27 @@ namespace Vudaco.Employees.Controllers
                 }
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
-                return ApiResponseResult<object>(true, "Xóa mềm thành công", null);
+                return ApiResponseResult<object>(true, "Xóa thành công", null);
             }
             catch (Exception ex)
             {
                 await tran.RollbackAsync();
                 return ApiResponseResult<object>(false, "Lỗi khi xóa: " + ex.Message, null);
             }
+        }
+        [HttpGet("show")]
+        public async Task<IActionResult> Show([FromQuery] int id)
+        {
+            if (id <= 0)
+            {
+                return ApiResponseResult<object>(false, "Id không tồn tại", null);
+            }
+            var storage =  await _repoEmployee.ShowAsync(id);
+            if (storage == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", storage);
         }
     }
 }

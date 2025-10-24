@@ -8,7 +8,7 @@ namespace Vudaco.Employees.Dtos
 {
     public class EmployeeDto
     {
-        public long Id { get; set; }
+        public int Id { get; set; }
         public string Username  { get; set; }
         public string  Password  { get; set; }
         public string Code { get; set; }
@@ -22,14 +22,14 @@ namespace Vudaco.Employees.Dtos
         public int? Marital { get; set; }
         public int? Worker { get; set; }
         public int? Positions { get; set; }
-        public DateTime BeginDateCompany { get; set; }
+        public DateTime? BeginDateCompany { get; set; }
         public DateTime? EndDateCompany { get; set; }
         public int StorageId { get; set; }
         public long? CreatedBy { get; set; }
         public long? UpdatedBy { get; set; }
         public long? DeletedBy { get; set; }
         public string Avatar { get; set; }
-         [Required]
+       
         public string Phone { get; set; }
         public string Email { get; set; }
         public string BankNumber { get; set; }

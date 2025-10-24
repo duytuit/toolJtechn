@@ -94,7 +94,7 @@ namespace Vudaco.Storages.Controllers
         }
         [HttpPost]
         [Route("delete")]
-        public async Task<IActionResult> Delete([FromBody] StorageDto StorageDto)
+        public async Task<IActionResult> Delete([FromBody]  StorageDto StorageDto)
         {
             if (StorageDto.Id <= 0)
             {

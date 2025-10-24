@@ -35,11 +35,22 @@ namespace Vudaco.Partners.Controllers
             _context = context;
             _configuration = configuration;
         }
-         [HttpGet]
-        public async Task<IActionResult> GetTask(CancellationToken cancellationToken,[FromQuery] int page = 1, int pageSize = 50, [FromQuery] PartnerDto PartnerDto = null )
+        [HttpGet]
+        public async Task<IActionResult> GetTask(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] PartnerDto PartnerDto = null)
         {
             // test
             var result = await _repoPartner.GetObjectTaskAsync(PartnerDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet("PartnerDetail")]
+        public async Task<IActionResult> GetPartnerDetail(CancellationToken cancellationToken,[FromQuery] int page = 1, int pageSize = 50, [FromQuery] PartnerDetailDto PartnerDetailDto = null )
+        {
+            // test
+            var result = await _repoPartner.GetPartnerDetail(PartnerDetailDto, page, pageSize, cancellationToken);
                 if (result == null)
                 {
                     return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
@@ -51,14 +62,6 @@ namespace Vudaco.Partners.Controllers
         {
             // ====== VALIDATE ======
           
-            // Check trùng Code trong cùng storage (bỏ qua bản mềm xóa)
-            if (!string.IsNullOrWhiteSpace(dto.Phone))
-            {
-                if (await _context.Partners.AnyAsync(p =>
-                    p.Code == dto.Code &&
-                    p.StorageId == dto.StorageId))
-                    return ApiResponseResult<object>(false, "Mã đối tác đã tồn tại trong kho này", null);
-            }
             // Check trùng Name trong cùng storage
             if (await _context.Partners.AnyAsync(p =>
                 p.Name == dto.Name &&
@@ -91,7 +94,7 @@ namespace Vudaco.Partners.Controllers
                     user = new User
                     {
                         Username  = dto.Phone,
-                        Password  = BCrypt.Net.BCrypt.HashPassword(dto.Phone),
+                        Password  = !string.IsNullOrWhiteSpace(dto.Password) ? BCrypt.Net.BCrypt.HashPassword(dto.Password) : BCrypt.Net.BCrypt.HashPassword(dto.Phone),
                         Email     = dto.Email,
                         LastName  = dto.Abbreviation,
                         CreatedAt = DateTime.Now,
@@ -104,29 +107,30 @@ namespace Vudaco.Partners.Controllers
                 // ====== CREATE PARTNER ======
                 var partner = new Partner
                 {
-                    Code = dto.Code,
+                    //Code = dto.Code,
                     Name = dto.Name,
                     StorageId = dto.StorageId,
                     Address = dto.Address,
                     TaxCode = dto.TaxCode,
                     Phone = dto.Phone,
                     Email = dto.Email,
-                    BankAccount = dto.BankAccount,
-                    AllowedDebtDays = dto.AllowedDebtDays, // null allowed
-                    MaxDebt = dto.MaxDebt,                 // null allowed
-                    Note = dto.Note,
+                    //BankAccount = dto.BankAccount,
+                    //AllowedDebtDays = dto.AllowedDebtDays, // null allowed
+                    //MaxDebt = dto.MaxDebt,                 // null allowed
+                    //Note = dto.Note,
                     Abbreviation = dto.Abbreviation,
                     CreatedBy = userId,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now,
                     UserId = user.Id
                 };
-                await _context.SaveChangesAsync();
+                _context.Partners.Add(partner);
+                await _context.SaveChangesAsync();   
                 var partnerDetail = new PartnerDetail
                 {
                     PartnerId = partner.Id,
                     Status = 0,
-                    //Code = SqlServerHelpers.GenerateSoChungTu( _configuration.GetConnectionString("DefaultConnection"),"partner_details","code","KH", 4),
+                    Code = SqlServerHelpers.GenerateSoChungTu( _configuration.GetConnectionString("DefaultConnection"),"partner_details","code","KH", 4),
                     StorageId = dto.StorageId,
                     CreatedBy = userId,
                     CreatedAt = DateTime.Now,
@@ -137,34 +141,33 @@ namespace Vudaco.Partners.Controllers
                 {
                     PartnerId = partner.Id,
                     Status = 0,
-                    //Code = SqlServerHelpers.GenerateSoChungTu( _configuration.GetConnectionString("DefaultConnection"),"partner_details","code","NCC", 4),
+                    Code = SqlServerHelpers.GenerateSoChungTu( _configuration.GetConnectionString("DefaultConnection"),"partner_details","code","NCC", 4),
                     StorageId = dto.StorageId,
                     CreatedBy = userId,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
                 };
                 _context.PartnerDetails.Add(partnerDetail);
-                _context.Partners.Add(partner);
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
 
                 return ApiResponseResult(true, "Thêm đối tác thành công", partner);
             }
-            catch (Exception ex)
+            catch (DbUpdateException ex)
             {
                 await tran.RollbackAsync();
-                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.Message, null);
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
             }
         }
-       [HttpPut("update")]
-        public async Task<IActionResult> Update([FromQuery] int id, [FromBody] PartnerDto dto)
+       [HttpPost("update")]
+        public async Task<IActionResult> Update([FromBody] PartnerDto dto)
         {
-            if (id <= 0)
+            if (dto.Id <= 0)
                 return ApiResponseResult<object>(false, "Id không hợp lệ", null);
 
             var partner = await _context.Partners
                 .AsTracking()
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == dto.Id);
             if (partner == null)
                 return ApiResponseResult<object>(false, "Không tìm thấy đối tác", null);
 
@@ -176,12 +179,13 @@ namespace Vudaco.Partners.Controllers
                 return ApiResponseResult<object>(false, "Không tìm thấy tài khoản đối tác", null);
 
             // ========== VALIDATE giống Create ==========
-            // Check Code trong Storage
-            if (!string.IsNullOrWhiteSpace(dto.Code) &&
+
+             // Check Name trong Storage
+            if (!string.IsNullOrWhiteSpace(dto.Abbreviation) &&
                 await _context.Partners.AnyAsync(p =>
-                    p.Code == dto.Code &&
+                    p.Abbreviation == dto.Abbreviation &&
                     p.StorageId == partner.StorageId && // dùng storage của partner
-                    p.Id != id))
+                    p.Id != dto.Id))
                 return ApiResponseResult<object>(false, "Mã đối tác đã tồn tại trong kho này", null);
 
             // Check Name
@@ -189,7 +193,7 @@ namespace Vudaco.Partners.Controllers
                 await _context.Partners.AnyAsync(p =>
                     p.Name == dto.Name &&
                     p.StorageId == partner.StorageId &&
-                    p.Id != id))
+                    p.Id != dto.Id))
                 return ApiResponseResult<object>(false, "Tên đối tác đã tồn tại trong kho này", null);
 
             // Check Phone (trong Partner + trong User)
@@ -198,7 +202,7 @@ namespace Vudaco.Partners.Controllers
                 if (await _context.Partners.AnyAsync(p =>
                     p.Phone == dto.Phone &&
                     p.StorageId == partner.StorageId &&
-                    p.Id != id))
+                    p.Id != dto.Id))
                     return ApiResponseResult<object>(false, "Số điện thoại đã tồn tại trong kho này", null);
 
                 if (await _context.Users.AnyAsync(u =>
@@ -247,7 +251,7 @@ namespace Vudaco.Partners.Controllers
                 return ApiResponseResult<object>(false, "Lỗi khi cập nhật: " + ex.Message, null);
             }
         }
-        [HttpPut("PartnerDetail/change-status")]
+        [HttpPost("PartnerDetail/change-status")]
         public async Task<IActionResult> ChangeStatus([FromBody] PartnerDetailDto dto)
         {
             if (dto.Id <= 0)
@@ -259,17 +263,16 @@ namespace Vudaco.Partners.Controllers
 
             if (partnerDetail == null)
                 return ApiResponseResult<object>(false, "Không tìm thấy chi tiết đối tác", null);
-
             // ====== UPDATE STATUS ======
-            partnerDetail.Code = null;
-            if (dto.Status == 1)
-            {
-                partnerDetail.Code = SqlServerHelpers.GenerateSoChungTu(_configuration.GetConnectionString("DefaultConnection"), "partner_details", "code", "KH", 4);
-            }
-            if (dto.Status == 2)
-            {
-                 partnerDetail.Code = SqlServerHelpers.GenerateSoChungTu(_configuration.GetConnectionString("DefaultConnection"), "partner_details", "code", "NCC", 4);
-            }
+            //partnerDetail.Code = null;
+            //if (dto.Status == 1)
+            //{
+            //    partnerDetail.Code = SqlServerHelpers.GenerateSoChungTu(_configuration.GetConnectionString("DefaultConnection"), "partner_details", "code", "KH", 4);
+            //}
+            //if (dto.Status == 2)
+            //{
+            //     partnerDetail.Code = SqlServerHelpers.GenerateSoChungTu(_configuration.GetConnectionString("DefaultConnection"), "partner_details", "code", "NCC", 4);
+            //}
             partnerDetail.Status = dto.Status;
             partnerDetail.UpdatedAt = DateTime.Now;
             partnerDetail.UpdatedBy = userId;
@@ -279,10 +282,10 @@ namespace Vudaco.Partners.Controllers
 
             return ApiResponseResult(true, "Cập nhật trạng thái thành công", partnerDetail);
         }
-        [HttpDelete("delete")]
-        public async Task<IActionResult> Delete([FromQuery] int id)
+        [HttpPost("delete")]
+        public async Task<IActionResult> Delete([FromBody] PartnerDetailDto dto)
         {
-            if (id <= 0)
+            if (dto.Id <= 0)
                 return ApiResponseResult<object>(false, "Id không hợp lệ", null);
 
             using var tran = await _context.Database.BeginTransactionAsync();
@@ -290,7 +293,7 @@ namespace Vudaco.Partners.Controllers
             {
                 var partner = await _context.Partners
                     .AsTracking()
-                    .FirstOrDefaultAsync(p => p.Id == id);
+                    .FirstOrDefaultAsync(p => p.Id == dto.Id);
 
                 if (partner == null)
                     return ApiResponseResult<object>(false, "Không tìm thấy đối tác", null);
@@ -303,7 +306,7 @@ namespace Vudaco.Partners.Controllers
                 // chỉ lấy detail chưa deleted
                 var partnerDetails = await _context.PartnerDetails
                     .AsTracking()
-                    .Where(d => d.PartnerId == id)
+                    .Where(d => d.PartnerId == dto.Id)
                     .ToListAsync();
 
                 foreach (var detail in partnerDetails)
@@ -341,6 +344,20 @@ namespace Vudaco.Partners.Controllers
                 await tran.RollbackAsync();
                 return ApiResponseResult<object>(false, "Lỗi khi xóa: " + ex.Message, null);
             }
+        }
+        [HttpGet("show")]
+        public async Task<IActionResult> Show([FromQuery] int id)
+        {
+            if (id <= 0)
+            {
+                return ApiResponseResult<object>(false, "Id không tồn tại", null);
+            }
+            var entity =  await _repoPartner.ShowAsync(id);
+            if (entity == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", entity);
         }
     }
 }

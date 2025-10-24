@@ -19,7 +19,7 @@ namespace Vudaco.ContractFiles.Models
         public int? EmployeeId { get; set; }
 
         [Column("price")]
-        public double? Price { get; set; }
+        public int? Price { get; set; }
 
         [Column("storage_id")]
         public int? StorageId { get; set; }

@@ -14,7 +14,6 @@ namespace Vudaco.Partners.Dtos
         public string Address { get; set; }
         public string TaxCode { get; set; }
         public int UserId { get; set; }
-        [Required]
         public string Phone { get; set; }
         public string Password { get; set; }
         public string Email { get; set; }

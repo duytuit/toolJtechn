@@ -28,6 +28,8 @@ namespace Vudaco.ContractFiles.Dtos
         public int? UpdatedBy { get; set; }
         public int? DeletedBy { get; set; }
         public int[] EmployeeIds { get; set; }
+        public DateTime? FromDate { get; set; }
+        public DateTime? ToDate { get; set; }
 
     }
 }

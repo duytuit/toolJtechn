@@ -9,7 +9,7 @@ namespace Vudaco.Vehicles.Models
     {
         [Key]
         [Column("id")]
-        public long Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         [MaxLength(50)]
@@ -18,7 +18,7 @@ namespace Vudaco.Vehicles.Models
 
         [Required]
         [Column("is_external_driver")]
-        public bool IsExternalDriver { get; set; }
+        public int IsExternalDriver { get; set; }
 
         [MaxLength(191)]
         [Column("note")]

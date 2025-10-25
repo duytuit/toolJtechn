@@ -28,14 +28,16 @@ namespace Vudaco.ContractFiles.Repositories
             _redis = redis;
         }
 
-        public Task<FileInfoDetail> CreateAsync(FileInfoDetail FileInfo)
+        public Task<FileInfoDetail> CreateAsync(FileInfoDetail FileInfoDetail)
         {
             throw new NotImplementedException();
         }
 
-        public Task<FileInfoDetail> DeleteSoftAsync(FileInfoDetail FileInfo)
+        public Task<FileInfoDetail> DeleteSoftAsync(FileInfoDetail FileInfoDetail)
         {
-            throw new NotImplementedException();
+            _context.FileInfoDetails.Update(FileInfoDetail);
+            _context.SaveChanges();
+            return Task.FromResult(FileInfoDetail);
         }
 
         public async Task<PaginatedResultReact<object>> GetObjectTaskAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
@@ -81,7 +83,7 @@ namespace Vudaco.ContractFiles.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<FileInfoDetail> UpdateAsync(FileInfoDetail FileInfo)
+        public Task<FileInfoDetail> UpdateAsync(FileInfoDetail FileInfoDetail)
         {
             throw new NotImplementedException();
         }

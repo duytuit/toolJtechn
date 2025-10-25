@@ -36,6 +36,10 @@ namespace Vudaco.ContractFiles.Repositories
             var orderByList = new List<string> {  "updated_at desc" , "id"};
             if (FileInfo.StorageId > 0)
                 whereEquals["storage_id"] = FileInfo.StorageId;
+            if (FileInfo.PartnerDetailId > 0)
+                whereEquals["partner_detail_id"] = FileInfo.PartnerDetailId;
+            if (FileInfo.FromDate.HasValue && FileInfo.ToDate.HasValue)
+                whereDateRange.Add(("accounting_date", FileInfo.FromDate.Value, FileInfo.ToDate.Value));
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "file_infos",

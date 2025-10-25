@@ -14,8 +14,8 @@ namespace Vudaco.ContractFiles.Repositories
     {
         Task<PaginatedResultReact<object>> GetObjectTaskAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<FileInfoDetail> ShowAsync(int id);
-        Task<FileInfoDetail> CreateAsync(FileInfoDetail FileInfo);
-        Task<FileInfoDetail> UpdateAsync(FileInfoDetail FileInfo);
-        Task<FileInfoDetail> DeleteSoftAsync(FileInfoDetail FileInfo);
+        Task<FileInfoDetail> CreateAsync(FileInfoDetail FileInfoDetail);
+        Task<FileInfoDetail> UpdateAsync(FileInfoDetail FileInfoDetail);
+        Task<FileInfoDetail> DeleteSoftAsync(FileInfoDetail FileInfoDetail);
     }
 }

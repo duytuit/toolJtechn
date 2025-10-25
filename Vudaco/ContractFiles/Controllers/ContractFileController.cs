@@ -24,7 +24,7 @@ namespace Vudaco.ContractFiles.Controllers
         private readonly ILogger<ContractFileController> _logger;
         private readonly VudacoDBContext _context;
         public int userId => (int)HttpContext.Items["UserId"];
-        public ContractFileController(ILogger<ContractFileController> logger,IContractFileDetailRepository repoContractFileDetail, IContractFileRepository repoContractFile, VudacoDBContext context)
+        public ContractFileController(ILogger<ContractFileController> logger, IContractFileDetailRepository repoContractFileDetail, IContractFileRepository repoContractFile, VudacoDBContext context)
         {
             _logger = logger;
             _repoContractFile = repoContractFile;
@@ -53,7 +53,7 @@ namespace Vudaco.ContractFiles.Controllers
                     return ApiResponseResult<object>(false, "FileNumber bắt buộc", null);
 
                 if (dto.EmployeeIds == null || dto.EmployeeIds.Length == 0)
-                 return ApiResponseResult<object>(false, "Nhân viên sales bắt buộc", null);
+                    return ApiResponseResult<object>(false, "Nhân viên sales bắt buộc", null);
 
                 // Check trùng FileNumber trong cùng storage (bỏ qua soft-deleted)
                 var fileInfos = await _context.FileInfos.AnyAsync(f =>
@@ -111,73 +111,132 @@ namespace Vudaco.ContractFiles.Controllers
                 await tran.RollbackAsync();
                 return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
             }
-           
+
         }
         [HttpPost("update")]
         public async Task<IActionResult> Update([FromBody] FileInfoDto dto)
         {
-            var entity = await _context.FileInfos.AsTracking().FirstOrDefaultAsync(f => f.Id == dto.Id);
-            if (entity == null)
-                return ApiResponseResult<object>(false, "Không tìm thấy file", null);
+            using var tran = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var entity = await _context.FileInfos.AsTracking().FirstOrDefaultAsync(f => f.Id == dto.Id);
+                if (entity == null)
+                    return ApiResponseResult<object>(false, "Không tìm thấy file", null);
 
-            // Check trùng FileNumber trong cùng storage (bỏ qua soft-deleted và chính nó)
-            var fileInfos = await _context.FileInfos.AnyAsync(f =>
-                f.Id != dto.Id &&
-                f.FileNumber == dto.FileNumber &&
-                f.StorageId == dto.StorageId);
-            if (fileInfos)
-                return ApiResponseResult<object>(false, "FileNumber đã tồn tại trong kho này", null);
+                // Check trùng FileNumber trong cùng storage (bỏ qua soft-deleted và chính nó)
+                var fileInfos = await _context.FileInfos.AnyAsync(f =>
+                    f.Id != dto.Id &&
+                    f.FileNumber == dto.FileNumber &&
+                    f.StorageId == dto.StorageId);
+                if (fileInfos)
+                    return ApiResponseResult<object>(false, "FileNumber đã tồn tại trong kho này", null);
+                var totalPrice = await _context.FileInfoDetails
+                .Where(f =>
+                    f.FileId == dto.Id &&
+                    f.StorageId == dto.StorageId
+                )
+                .SumAsync(f => f.Price);
+                if (totalPrice > 0)
+                {
+                    return ApiResponseResult<object>(false, "Số file này. đã được duyệt ứng: " + totalPrice, null);
+                }
+                entity.PartnerDetailId = dto.PartnerDetailId;
+                entity.AccountingDate = dto.AccountingDate;
+                entity.StorageId = dto.StorageId;
+                entity.FileNumber = dto.FileNumber;
+                entity.Declaration = dto.Declaration;
+                entity.Bill = dto.Bill;
+                entity.Quantity = dto.Quantity;
+                entity.ContainerCode = dto.ContainerCode;
+                entity.Sales = dto.Sales;
+                entity.Type = dto.Type;
+                entity.Feature = dto.Feature;
+                entity.DeclarationQuantity = dto.DeclarationQuantity;
+                entity.DeclarationType = dto.DeclarationType;
+                entity.Business = dto.Business;
+                entity.Occurrence = dto.Occurrence;
+                entity.Note = dto.Note;
+                entity.UpdatedBy = userId;
+                entity.UpdatedAt = DateTime.Now;
 
-            entity.PartnerDetailId = dto.PartnerDetailId;
-            entity.AccountingDate = dto.AccountingDate;
-            entity.StorageId = dto.StorageId;
-            entity.FileNumber = dto.FileNumber;
-            entity.Declaration = dto.Declaration;
-            entity.Bill = dto.Bill;
-            entity.Quantity = dto.Quantity;
-            entity.ContainerCode = dto.ContainerCode;
-            entity.Sales = dto.Sales;
-            entity.Type = dto.Type;
-            entity.Feature = dto.Feature;
-            entity.DeclarationQuantity = dto.DeclarationQuantity;
-            entity.DeclarationType = dto.DeclarationType;
-            entity.Business = dto.Business;
-            entity.Occurrence = dto.Occurrence;
-            entity.Note = dto.Note;
-            entity.UpdatedBy = userId;
-            entity.UpdatedAt = DateTime.Now;
+                _context.FileInfos.Update(entity);
+                await _context.SaveChangesAsync();
+                var FileInfoDetails = await _context.FileInfoDetails.Where(x => x.FileId == dto.Id).ToListAsync();
+                foreach (var item in FileInfoDetails)
+                {
+                    item.DeletedAt = DateTime.Now;
+                    item.DeletedBy = userId;
+                    await _repoContractFileDetail.DeleteSoftAsync(item);
+                }
+                foreach (var item in dto.EmployeeIds)
+                {
+                    var entity_FileInfoDetail = new FileInfoDetail
+                    {
+                        FileId = entity.Id,
+                        EmployeeId = item,
+                        StorageId = dto.StorageId,
+                        Price = 0,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now,
+                        UpdatedBy = userId
+                    };
+                    _context.FileInfoDetails.Add(entity_FileInfoDetail);
+                }
+                await _context.SaveChangesAsync();
 
-            _context.FileInfos.Update(entity);
-            await _context.SaveChangesAsync();
-            return ApiResponseResult(true, "Cập nhật file thành công", entity);
+                await tran.CommitAsync();
+                return ApiResponseResult(true, "Cập nhật file thành công", entity);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
+            }
         }
         [HttpPost("delete")]
         public async Task<IActionResult> Delete([FromBody] FileInfoDto FileInfoDto)
         {
-            if (FileInfoDto.Id <= 0)
+            using var tran = await _context.Database.BeginTransactionAsync();
+            try
             {
-                return ApiResponseResult<object>(false, "Id không tồn tại", null);
+                if (FileInfoDto.Id <= 0)
+                {
+                    return ApiResponseResult<object>(false, "Id không tồn tại", null);
+                }
+                var FileInfo = _context.FileInfos.Find(FileInfoDto.Id);
+                if (FileInfo == null)
+                {
+                    return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+                }
+                var totalPrice = await _context.FileInfoDetails
+                .Where(f =>
+                    f.FileId == FileInfo.Id &&
+                    f.StorageId == FileInfo.StorageId
+                )
+                .SumAsync(f => f.Price);
+                if (totalPrice > 0)
+                {
+                    return ApiResponseResult<object>(false, "Số file này. đã được duyệt ứng: " + totalPrice, null);
+                }
+                var FileInfoDetails = await _context.FileInfoDetails.Where(x => x.FileId == FileInfoDto.Id).ToListAsync();
+              
+                FileInfo.DeletedBy = userId;
+                FileInfo.DeletedAt = DateTime.Now;
+                await _repoContractFile.DeleteSoftAsync(FileInfo);
+                foreach (var item in FileInfoDetails)
+                {
+                    item.DeletedAt = DateTime.Now;
+                    item.DeletedBy = userId;
+                    await _repoContractFileDetail.DeleteSoftAsync(item);
+                }
+                await tran.CommitAsync();
+                return ApiResponseResult<object>(true, "Xóa thành công", null);
             }
-            var FileInfo = _context.FileInfos.Find(FileInfoDto.Id);
-            if (FileInfo == null)
+            catch (DbUpdateException ex)
             {
-                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
             }
-            var FileInfoDetails = await _context.FileInfoDetails.Where(x => x.FileId == FileInfoDto.Id).ToListAsync();
-            if (FileInfoDetails == null)
-            {
-                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
-            }
-            FileInfo.DeletedBy = userId;
-            FileInfo.DeletedAt = DateTime.Now;
-            await _repoContractFile.DeleteSoftAsync(FileInfo);
-            foreach (var item in FileInfoDetails)
-            {
-                item.DeletedAt = DateTime.Now;
-                item.DeletedBy = userId;
-                await _repoContractFileDetail.DeleteSoftAsync(item);
-            }
-            return ApiResponseResult<object>(true, "Xóa thành công", null);
         }
         [HttpGet("show")]
         public async Task<IActionResult> Show([FromQuery] int id)
@@ -186,13 +245,13 @@ namespace Vudaco.ContractFiles.Controllers
             {
                 return ApiResponseResult<object>(false, "Id không tồn tại", null);
             }
-            var entity =  await _repoContractFile.ShowAsync(id);
+            var entity = await _repoContractFile.ShowAsync(id);
             if (entity == null)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", entity);
         }
-      
+
     }
 }

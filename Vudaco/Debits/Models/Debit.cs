@@ -21,6 +21,9 @@ namespace Vudaco.Debits.Models
         [Required]
         [Column("partner_detail_id")]
         public int PartnerDetailId { get; set; }
+        [Required]
+        [Column("supplier_partner_detail_id")]
+        public int SupplierPartnerDetailId { get; set; }
 
         [Column("file_info_id")]
         public int? FileInfoId { get; set; }
@@ -47,6 +50,10 @@ namespace Vudaco.Debits.Models
         public int Price { get; set; }
 
         [Required]
+        [Column("purchase_price")]
+        public int PurchasePrice { get; set; }
+
+        [Required]
         [Column("vat")]
         public int Vat { get; set; }
 
@@ -56,6 +63,8 @@ namespace Vudaco.Debits.Models
 
         [Column("note", TypeName = "nvarchar(max)")]
         public string Note { get; set; }
+        [Column("data", TypeName = "nvarchar(max)")]
+        public string Data { get; set; }
 
         [Column("approved_by_user")]
         public int? ApprovedByUser { get; set; }

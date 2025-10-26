@@ -11,19 +11,24 @@ namespace Vudaco.Debits.Dtos
         public int BillId { get; set; }
         public int? VehicleDispatchId { get; set; }
         public int PartnerDetailId { get; set; }
+        public int SupplierPartnerDetailId { get; set; }
         public int? FileInfoId { get; set; }
         public int StorageId { get; set; }
         public int Type { get; set; }
         public string Name { get; set; }
         public DateTime AccountingDate { get; set; }
+        public int PurchasePrice { get; set; }
         public int Price { get; set; }
         public int Vat { get; set; }
         public int Status { get; set; }
         public string Note { get; set; }
+        public string Data { get; set; }
         public int? ApprovedByUser { get; set; }
         public DateTime? ApprovalTime { get; set; }
         public int? CreatedBy { get; set; }
         public int? UpdatedBy { get; set; }
         public int? DeletedBy { get; set; }
+        public DateTime? FromDate { get; set; }
+        public DateTime? ToDate { get; set; }
     }
 }

@@ -334,5 +334,36 @@ namespace Vudaco.Shares.SqlServerHelper
             // Trường hợp chưa có dữ liệu, bắt đầu từ 1
             return prefix + 1.ToString().PadLeft(numberLength, '0');
         }
+        public static async Task<List<object>> ExecuteQuerySqlAsync(
+            string connectionString,
+            string sql,
+            CancellationToken cancellationToken = default)
+        {
+            await using var conn = new SqlConnection(connectionString);
+            await conn.OpenAsync(cancellationToken);
+
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = sql;
+
+            var result = new List<object>();
+
+            await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var row = new ExpandoObject() as IDictionary<string, object>;
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    row[reader.GetName(i)] = await reader.IsDBNullAsync(i, cancellationToken)
+                        ? null
+                        : reader.GetValue(i);
+                }
+
+                result.Add((object)row);  // cast về object
+            }
+
+            return result;
+        }
     }
 }

@@ -4,28 +4,33 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Vudaco.Categorys.Models
 {
-    [Table("household_fee_categorys")]
-    public class HouseholdFeeCategory
+    [Table("income_expense_categorys")]
+    public class IncomeExpenseCategory
     {
         [Key]
         [Column("id")]
-        public long Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         [MaxLength(50)]
-        [Column("household_code")]
-        public string HouseholdCode { get; set; }
+        [Column("code")]
+        public string Code { get; set; }
 
         [Required]
         [MaxLength(191)]
-        [Column("household_name")]
-        public string HouseholdName { get; set; }
+        [Column("name")]
+        public string Name { get; set; }
+
+        [MaxLength(50)]
+        [Column("parent_id")]
+        public int ParentId { get; set; }
+
+        [MaxLength(50)]
+        [Column("type")]
+        public int Type { get; set; }
 
         [Column("storage_id")]
         public int? StorageId { get; set; }
-
-        [Column("amount")]
-        public double? Amount { get; set; }
 
         [Column("created_by")]
         public int? CreatedBy { get; set; }

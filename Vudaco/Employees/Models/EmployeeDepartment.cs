@@ -4,12 +4,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Vudaco.Employees.Models
 {
-    [Table("employee_department")]
+    [Table("employee_departments")]
     public class EmployeeDepartment
     {
         [Key]
         [Column("id")]
-        public long Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         [Column("employee_id")]

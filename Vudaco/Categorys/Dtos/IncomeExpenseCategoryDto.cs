@@ -5,12 +5,13 @@ using System.Threading.Tasks;
 
 namespace Vudaco.Categorys.Dtos
 {
-    public class BranchCategoryDto
+    public class IncomeExpenseCategoryDto
     {
-        public long Id { get; set; }
-        public string BranchCode { get; set; }
-        public string BranchName { get; set; }
-        public string ParentCode { get; set; }
+        public int Id { get; set; }
+        public string Code { get; set; }
+        public string Name { get; set; }
+        public int ParentId { get; set; }
+        public int Type { get; set; }
         public int? StorageId { get; set; }
         public int? CreatedBy { get; set; }
         public int? UpdatedBy { get; set; }

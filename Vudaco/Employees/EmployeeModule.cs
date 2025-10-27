@@ -1,8 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Vudaco.Employees.Repositories;
 
 namespace Vudaco.Employees
@@ -12,6 +8,7 @@ namespace Vudaco.Employees
         public static IServiceCollection AddEmployeeModule(this IServiceCollection services)
         {
             services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+            services.AddScoped<IEmployeeDepartmentRepository, EmployeeDepartmentRepository>();
             return services;
         }
     }

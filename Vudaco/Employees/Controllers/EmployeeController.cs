@@ -23,18 +23,20 @@ namespace Vudaco.Employees.Controllers
     public class EmployeeController : BaseApiController
     {
         private readonly IEmployeeRepository _repoEmployee;
+        private readonly IEmployeeDepartmentRepository _repoEmployeeDepartmentRepository;
         private readonly ILogger<EmployeeController> _logger;
         private readonly VudacoDBContext _context;
         public int userId => (int)HttpContext.Items["UserId"];
 
           private readonly IConfiguration _configuration;
 
-        public EmployeeController(ILogger<EmployeeController> logger, IConfiguration configuration,IEmployeeRepository repoEmployee, VudacoDBContext context)
+        public EmployeeController(ILogger<EmployeeController> logger, IConfiguration configuration,IEmployeeDepartmentRepository repoEmployeeDepartmentRepository,IEmployeeRepository repoEmployee, VudacoDBContext context)
         {
             _logger = logger;
             _repoEmployee = repoEmployee;
+            _repoEmployeeDepartmentRepository = repoEmployeeDepartmentRepository;
             _context = context;
-             _configuration = configuration;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -101,10 +103,19 @@ namespace Vudaco.Employees.Controllers
                     UpdatedAt = DateTime.Now,
                     UpdatedBy = userId
                 };
-
                 _context.Employees.Add(employee);
                 await _context.SaveChangesAsync();
-
+                if (dto.EmployeeDepartment.DepartmentId > 0)
+                {
+                    var employeeDepartment = new EmployeeDepartment
+                    {
+                        EmployeeId = employee.Id,
+                        DepartmentId = dto.EmployeeDepartment.DepartmentId,
+                        StorageId = employee.StorageId,
+                    };
+                    _context.EmployeeDepartments.Add(employeeDepartment);
+                }
+                await _context.SaveChangesAsync();
                 await tran.CommitAsync();
                 return ApiResponseResult(true, "Thêm thành công", employee);
             }
@@ -164,7 +175,22 @@ namespace Vudaco.Employees.Controllers
                 employee.UpdatedAt = DateTime.Now;
                 employee.UpdatedBy = userId;
 
-
+                if (dto.EmployeeDepartment.Id>0)
+                {
+                    var _employeeDepartments = await _context.EmployeeDepartments.AsNoTracking().FirstOrDefaultAsync(d => d.Id == dto.EmployeeDepartment.Id);
+                    _employeeDepartments.DepartmentId = dto.EmployeeDepartment.DepartmentId;
+                     _context.EmployeeDepartments.Update(_employeeDepartments);
+                }
+                else
+                {
+                     var employeeDepartment = new EmployeeDepartment
+                    {
+                        EmployeeId = employee.Id,
+                        DepartmentId = dto.EmployeeDepartment.DepartmentId,
+                        StorageId = employee.StorageId,
+                    };
+                    _context.EmployeeDepartments.Add(employeeDepartment);
+                }
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
 

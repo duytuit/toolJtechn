@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Vudaco.Employees.Models;
 
 namespace Vudaco.Employees.Dtos
 {
@@ -25,6 +26,7 @@ namespace Vudaco.Employees.Dtos
         public DateTime? BeginDateCompany { get; set; }
         public DateTime? EndDateCompany { get; set; }
         public int StorageId { get; set; }
+        public int DepartmentId { get; set; }
         public long? CreatedBy { get; set; }
         public long? UpdatedBy { get; set; }
         public long? DeletedBy { get; set; }
@@ -36,5 +38,6 @@ namespace Vudaco.Employees.Dtos
         public string BankName { get; set; }
         public int? UserId { get; set; }
         public string StorageIds { get; set; }
+        public EmployeeDepartment EmployeeDepartment { get; set; }
     }
 }

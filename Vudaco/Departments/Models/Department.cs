@@ -9,11 +9,11 @@ namespace Vudaco.Departments.Models
     {
         [Key]
         [Column("id")]
-        public long Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         [Column("code")]
-        public int Code { get; set; }
+        public string Code { get; set; }
 
         [Required]
         [MaxLength(191)]

@@ -4,40 +4,29 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Vudaco.Categorys.Models
 {
-    [Table("price_categorys")]
-    public class PriceCategory
+    [Table("services")]
+    public class ServiceCategory
     {
         [Key]
         [Column("id")]
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(255)]
+        [MaxLength(50)]
+        [Column("code")]
+        public string Code { get; set; }
+        [Required]
+        [MaxLength(191)]
         [Column("name")]
         public string Name { get; set; }
-
-        [Required]
-        [Column("storage_id")]
-        public int StorageId { get; set; }
-
-        [Column("partner_detail_id")]
-        public int? PartnerDetailId { get; set; }
-
-        [Required]
-        [Column("selling_price")]
-        public int SellingPrice { get; set; }
-
-        [Required]
-        [Column("purchase_price")]
-        public int PurchasePrice { get; set; }
-
-        [Required]
-        [Column("status")]
-        public int Status { get; set; }
-
-        [Required]
         [Column("type")]
-        public int Type { get; set; }
+        public int? Type { get; set; }
+
+        [Column("storage_id")]
+        public int? StorageId { get; set; }
+
+        [Column("amount")]
+        public double? Amount { get; set; }
 
         [Column("created_by")]
         public int? CreatedBy { get; set; }

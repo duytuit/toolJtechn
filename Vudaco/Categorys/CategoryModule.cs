@@ -11,13 +11,10 @@ namespace Vudaco.Categorys
     {
         public static IServiceCollection AddCategoryModule(this IServiceCollection services)
         {
-            services.AddScoped<IAdministrativeFeeRepository, AdministrativeFeeRepository>();
+            services.AddScoped<IIncomeExpenseCategoryRepository, IncomeExpenseCategoryRepository>();
             services.AddScoped<IBankRepository, BankRepository>();
-            services.AddScoped<IBranchCategoryRepository, BranchCategoryRepository>();
+            services.AddScoped<IServiceRepository, ServiceRepository>();
             services.AddScoped<IFundCategoryRepository, FundCategoryRepository>();
-            services.AddScoped<IHouseholdFeeCategoryRepository, HouseholdFeeCategoryRepository>();
-            services.AddScoped<IIncomeCategoryRepository, IncomeCategoryRepository>();
-            services.AddScoped<IPriceCategoryRepository, PriceCategoryRepository>();
             return services;
         }
     }

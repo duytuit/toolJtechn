@@ -24,12 +24,10 @@ namespace Vudaco.Shares.BaseRepository
         public DbSet<RolePermission> RolePermissions { get; set; }
         public DbSet<UserToken> UserTokens { get; set; }
         public DbSet<Activity> Activitys { get; set; }
-        public DbSet<AdministrativeFeeCategory> AdministrativeFeeCategorys { get; set; }
+        public DbSet<ServiceCategory> ServiceCategorys { get; set; }
         public DbSet<Bank> Banks { get; set; }
-        public DbSet<BranchCategory> Branchs { get; set; }
+        public DbSet<IncomeExpenseCategory> IncomeExpenseCategorys { get; set; }
         public DbSet<FundCategory> FundCategorys { get; set; }
-        public DbSet<HouseholdFeeCategory> HouseholdFeeCategorys { get; set; }
-        public DbSet<IncomeCategory> IncomeCategorys { get; set; }
         public DbSet<FileInfo> FileInfos { get; set; }
         public DbSet<FileInfoDetail> FileInfoDetails { get; set; }
         public DbSet<Department> Departments { get; set; }
@@ -45,7 +43,6 @@ namespace Vudaco.Shares.BaseRepository
         public DbSet<ReceiptDetail> ReceiptDetails { get; set; }
         public DbSet<Bill> Bills { get; set; }
         public DbSet<Debit> Debits { get; set; }
-        public DbSet<PriceCategory> PriceCategorys { get; set; }
         public VudacoDBContext(DbContextOptions<VudacoDBContext> options) : base(options)
         {
 
@@ -56,12 +53,10 @@ namespace Vudaco.Shares.BaseRepository
             modelBuider.Entity<User>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<Permission>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<Role>().HasQueryFilter(e => e.DeletedAt == null);
-            modelBuider.Entity<AdministrativeFeeCategory>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<ServiceCategory>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<Bank>().HasQueryFilter(e => e.DeletedAt == null);
-            modelBuider.Entity<BranchCategory>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<IncomeExpenseCategory>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<FundCategory>().HasQueryFilter(e => e.DeletedAt == null);
-            modelBuider.Entity<HouseholdFeeCategory>().HasQueryFilter(e => e.DeletedAt == null);
-            modelBuider.Entity<IncomeCategory>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<FileInfo>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<FileInfoDetail>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<Department>().HasQueryFilter(e => e.DeletedAt == null);
@@ -77,7 +72,6 @@ namespace Vudaco.Shares.BaseRepository
             modelBuider.Entity<Debit>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<Receipt>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<ReceiptDetail>().HasQueryFilter(e => e.DeletedAt == null);
-            modelBuider.Entity<PriceCategory>().HasQueryFilter(e => e.DeletedAt == null);
         }           
     }
 }

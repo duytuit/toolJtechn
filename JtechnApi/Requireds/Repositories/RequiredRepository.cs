@@ -206,7 +206,7 @@ namespace JtechnApi.Requireds.Repositories
             {
                 Current_page = page,
                 Per_page = pageSize,
-                Last_page = (int)Math.Ceiling((double)totalItems / pageSize),
+                Last_page = (int)Math.Ceiling((double)totalItems / pageSize),11
                 Total = totalItems,
                 Data = objectList,
             };

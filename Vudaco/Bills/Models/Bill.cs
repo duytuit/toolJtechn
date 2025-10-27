@@ -24,7 +24,7 @@ namespace Vudaco.Bills.Models
 
         [Required]
         [Column("partner_detail_id")]
-        public int PartnerDetailId { get; set; }
+        public int? PartnerDetailId { get; set; }
 
         [Required]
         [Column("accounting_date")]

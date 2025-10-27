@@ -5,50 +5,53 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Vudaco.Employees.Dtos;
-using Vudaco.Employees.Models;
+using Vudaco.Categorys.Dtos;
+using Vudaco.Categorys.Models;
 using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
 using Vudaco.Shares.SqlServerHelper;
 
-namespace Vudaco.Employees.Repositories
+namespace Vudaco.Categorys.Repositories
 {
-    public class EmployeeStorageRepository : BaseRepository<Employee>, IEmployeeRepository
+    public class ServiceRepository : BaseRepository<ServiceCategory>, IServiceRepository
     {
         private readonly VudacoDBContext _context;
         private readonly IConfiguration _configuration;
         private readonly RedisService _redis;
-        public EmployeeStorageRepository(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
+        public ServiceRepository(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;
             _configuration = configuration;
             _redis = redis;
         }
-        public Task<Employee> CreateAsync(Employee Employee)
+        public Task<ServiceCategory> CreateAsync(ServiceCategory ServiceCategory)
         {
-            _context.Employees.Add(Employee);
+              _context.ServiceCategorys.Add(ServiceCategory);
             _context.SaveChanges();
-            return Task.FromResult(Employee);
+            return Task.FromResult(ServiceCategory);
         }
 
-        public Task<Employee> DeleteSoftAsync(Employee Employee)
+        public Task<ServiceCategory> DeleteSoftAsync(ServiceCategory ServiceCategory)
         {
-            _context.Employees.Update(Employee);
+              _context.ServiceCategorys.Update(ServiceCategory);
             _context.SaveChanges();
-            return Task.FromResult(Employee);
+            return Task.FromResult(ServiceCategory);
         }
 
-        public async Task<PaginatedResultReact<object>> GetObjectTaskAsync(EmployeeDto EmployeeDto, int page, int pageSize, CancellationToken cancellationToken)
+        public async Task<PaginatedResultReact<object>> GetObjectTaskAsync(ServiceCategoryDto ServiceCategoryDto, int page, int pageSize, CancellationToken cancellationToken)
         {
             var whereEquals = new Dictionary<string, object>();
             var whereLikes = new Dictionary<string, string>();
             var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
-            var orderByList = new List<string> { "id" };
-
+            var orderByList = new List<string> {  "updated_at desc" , "id"};
+            if (ServiceCategoryDto.StorageId > 0)
+                whereEquals["storage_id"] = ServiceCategoryDto.StorageId;
+            if (ServiceCategoryDto.Type > 0)
+                whereEquals["type"] = ServiceCategoryDto.Type;
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
-                        "employees",
-                        new[] { "id", "code", "first_name", "last_name", "identity_card", "native_land", "addresss", "birthday", "status", "marital", "worker", "positions", "begin_date_company", "end_date_company", "storage_id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "avatar", "phone", "email", "bank_number", "bank_name", "user_id" },
+                        "services",
+                        new[] { "id","code","name","type","storage_id","amount","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},
                         offset: null,
                         limit: null,
                         whereEquals: whereEquals,
@@ -76,16 +79,16 @@ namespace Vudaco.Employees.Repositories
             return _results;
         }
 
-        public Task<Employee> ShowAsync(int id)
+        public Task<ServiceCategory> ShowAsync(int id)
         {
-            return _context.Employees.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            return _context.ServiceCategorys.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public Task<Employee> UpdateAsync(Employee Employee)
+        public Task<ServiceCategory> UpdateAsync(ServiceCategory ServiceCategory)
         {
-            _context.Employees.Update(Employee);
+              _context.ServiceCategorys.Update(ServiceCategory);
             _context.SaveChanges();
-            return Task.FromResult(Employee);
+            return Task.FromResult(ServiceCategory);
         }
     }
 }

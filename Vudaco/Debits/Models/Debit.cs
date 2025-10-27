@@ -15,15 +15,11 @@ namespace Vudaco.Debits.Models
         [Column("bill_id")]
         public int BillId { get; set; }
 
-        [Column("vehicle_dispatch_id")]
-        public int? VehicleDispatchId { get; set; }
+        [Column("vehicle_id")]
+        public int? VehicleId { get; set; }
 
-        [Required]
         [Column("partner_detail_id")]
-        public int PartnerDetailId { get; set; }
-        [Required]
-        [Column("supplier_partner_detail_id")]
-        public int SupplierPartnerDetailId { get; set; }
+        public int? PartnerDetailId { get; set; }
 
         [Column("file_info_id")]
         public int? FileInfoId { get; set; }
@@ -36,35 +32,66 @@ namespace Vudaco.Debits.Models
         [Column("type")]
         public int Type { get; set; }
 
+        [MaxLength(255)]
+        [Column("dispatch_code")]
+        public string DispatchCode { get; set; }
+
         [Required]
         [MaxLength(255)]
         [Column("name")]
         public string Name { get; set; }
 
         [Required]
-        [Column("accounting_date")]
+        [Column("accounting_date", TypeName = "date")]
         public DateTime AccountingDate { get; set; }
-
-        [Required]
-        [Column("price")]
-        public int Price { get; set; }
 
         [Required]
         [Column("purchase_price")]
         public int PurchasePrice { get; set; }
 
         [Required]
+        [Column("price")]
+        public int Price { get; set; }
+
+        [Required]
         [Column("vat")]
         public int Vat { get; set; }
+
+        [Column("driver_fee")]
+        public int? DriverFee { get; set; }
+
+        [Column("meal_fee")]
+        public int? MealFee { get; set; }
+
+        [Column("ticket_fee")]
+        public int? TicketFee {get; set; }
+
+        [Column("overnight_fee")]
+        public int? OvernightFee { get; set; }
+
+        [Column("penalty_fee")]
+        public int? PenaltyFee { get; set; }
+
+        [Column("goods_fee")]
+        public int? GoodsFee { get; set; }
 
         [Required]
         [Column("status")]
         public int Status { get; set; }
 
-        [Column("note", TypeName = "nvarchar(max)")]
-        public string Note { get; set; }
-        [Column("data", TypeName = "nvarchar(max)")]
+        [Column("data")]
         public string Data { get; set; }
+
+        [Column("note")]
+        public string Note { get; set; }
+
+        [MaxLength(50)]
+        [Column("customer_vehicle_type")]
+        public string CustomerVehicleType { get; set; }
+
+        [MaxLength(50)]
+        [Column("supplier_vehicle_type")]
+        public string SupplierVehicleType { get; set; }
 
         [Column("approved_by_user")]
         public int? ApprovedByUser { get; set; }

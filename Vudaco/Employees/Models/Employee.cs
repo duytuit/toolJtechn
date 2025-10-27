@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -105,5 +106,7 @@ namespace Vudaco.Employees.Models
 
         [Column("user_id")]
         public int? UserId { get; set; }
+        [NotMapped]
+        public EmployeeDepartment EmployeeDepartment { get; set; }
     }
 }

@@ -7,8 +7,8 @@ namespace Vudaco.Departments.Dtos
 {
     public class DepartmentDto
     {
-        public long Id { get; set; }
-        public int Code { get; set; }
+        public int Id { get; set; }
+        public string Code { get; set; }
         public string Name { get; set; }
         public int ParentId { get; set; }
         public int Status { get; set; }

@@ -5,50 +5,53 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Vudaco.Employees.Dtos;
-using Vudaco.Employees.Models;
+using Vudaco.Categorys.Dtos;
+using Vudaco.Categorys.Models;
 using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
 using Vudaco.Shares.SqlServerHelper;
 
-namespace Vudaco.Employees.Repositories
+namespace Vudaco.Categorys.Repositories
 {
-    public class EmployeeRepository : BaseRepository<Employee>, IEmployeeRepository
+    public class IncomeExpenseCategoryRepository : BaseRepository<IncomeExpenseCategory>, IIncomeExpenseCategoryRepository
     {
         private readonly VudacoDBContext _context;
         private readonly IConfiguration _configuration;
         private readonly RedisService _redis;
-        public EmployeeRepository(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
+        public IncomeExpenseCategoryRepository(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;
             _configuration = configuration;
             _redis = redis;
         }
-        public Task<Employee> CreateAsync(Employee Employee)
+        public Task<IncomeExpenseCategory> CreateAsync(IncomeExpenseCategory IncomeExpenseCategory)
         {
-            _context.Employees.Add(Employee);
+              _context.IncomeExpenseCategorys.Add(IncomeExpenseCategory);
             _context.SaveChanges();
-            return Task.FromResult(Employee);
+            return Task.FromResult(IncomeExpenseCategory);
         }
 
-        public Task<Employee> DeleteSoftAsync(Employee Employee)
+        public Task<IncomeExpenseCategory> DeleteSoftAsync(IncomeExpenseCategory IncomeExpenseCategory)
         {
-            _context.Employees.Update(Employee);
+              _context.IncomeExpenseCategorys.Update(IncomeExpenseCategory);
             _context.SaveChanges();
-            return Task.FromResult(Employee);
+            return Task.FromResult(IncomeExpenseCategory);
         }
 
-        public async Task<PaginatedResultReact<object>> GetObjectTaskAsync(EmployeeDto EmployeeDto, int page, int pageSize, CancellationToken cancellationToken)
+        public async Task<PaginatedResultReact<object>> GetObjectTaskAsync(IncomeExpenseCategoryDto IncomeExpenseCategoryDto, int page, int pageSize, CancellationToken cancellationToken)
         {
             var whereEquals = new Dictionary<string, object>();
             var whereLikes = new Dictionary<string, string>();
             var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
-            var orderByList = new List<string> { "id" };
-
+            var orderByList = new List<string> {  "updated_at desc" , "id"};
+            if (IncomeExpenseCategoryDto.StorageId > 0)
+                whereEquals["storage_id"] = IncomeExpenseCategoryDto.StorageId;
+            if (IncomeExpenseCategoryDto.Type > 0)
+                whereEquals["type"] = IncomeExpenseCategoryDto.Type;
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
-                        "employees",
-                        new[] { "id", "code", "first_name", "last_name", "identity_card", "native_land", "addresss", "birthday", "status", "marital", "worker", "positions", "begin_date_company", "end_date_company", "storage_id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "avatar", "phone", "email", "bank_number", "bank_name", "user_id" },
+                        "income_expense_categorys",
+                        new[] { "id","code","name","type","parent_id","storage_id","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at",},
                         offset: null,
                         limit: null,
                         whereEquals: whereEquals,
@@ -76,26 +79,16 @@ namespace Vudaco.Employees.Repositories
             return _results;
         }
 
-        public async Task<Employee> ShowAsync(int id)
+        public Task<IncomeExpenseCategory> ShowAsync(int id)
         {
-            var entity = await _context.Employees
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == id);
-
-            if (entity == null) return null;
-
-            entity.EmployeeDepartment = await _context.EmployeeDepartments
-                .AsNoTracking()
-                .FirstOrDefaultAsync(d => d.EmployeeId == id);
-
-            return entity;
+             return _context.IncomeExpenseCategorys.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public Task<Employee> UpdateAsync(Employee Employee)
+        public Task<IncomeExpenseCategory> UpdateAsync(IncomeExpenseCategory IncomeExpenseCategory)
         {
-            _context.Employees.Update(Employee);
+             _context.IncomeExpenseCategorys.Update(IncomeExpenseCategory);
             _context.SaveChanges();
-            return Task.FromResult(Employee);
+            return Task.FromResult(IncomeExpenseCategory);
         }
     }
 }

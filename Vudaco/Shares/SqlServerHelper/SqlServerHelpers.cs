@@ -312,27 +312,49 @@ namespace Vudaco.Shares.SqlServerHelper
         {
             using var conn = new SqlConnection(connectionString);
             conn.Open();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = $@"
-                SELECT MAX({columnName}) 
-                FROM {tableName} 
-                WHERE {columnName} LIKE @prefix
-            ";
-            cmd.Parameters.AddWithValue("@prefix", prefix + "%");
 
-            var result = cmd.ExecuteScalar();
+            using var tran = conn.BeginTransaction(IsolationLevel.Serializable); // cao nhất
 
-            if (result is string maxCode)
+            try
             {
-                var numberPart = maxCode.Substring(prefix.Length);
-                if (int.TryParse(numberPart, out int number))
-                {
-                    return prefix + (number + 1).ToString().PadLeft(numberLength, '0');
-                }
-            }
+                // Dùng UPDLOCK + HOLDLOCK để khóa logical row/scan
+                string sql = $@"
+            SELECT MAX({columnName}) 
+            FROM {tableName} WITH (UPDLOCK, HOLDLOCK)
+            WHERE {columnName} LIKE @prefix
+        ";
 
-            // Trường hợp chưa có dữ liệu, bắt đầu từ 1
-            return prefix + 1.ToString().PadLeft(numberLength, '0');
+                using var cmd = new SqlCommand(sql, conn, tran);
+                cmd.Parameters.AddWithValue("@prefix", prefix + "%");
+
+                var scalar = cmd.ExecuteScalar();
+                string nextCode;
+
+                if (scalar != null && scalar != DBNull.Value)
+                {
+                    var maxCode = scalar.ToString();
+                    var numberPart = maxCode.Substring(prefix.Length);
+                    int number = int.TryParse(numberPart, out var n) ? n : 0;
+                    nextCode = prefix + (number + 1).ToString().PadLeft(numberLength, '0');
+                }
+                else
+                {
+                    nextCode = prefix + "1".PadLeft(numberLength, '0');
+                }
+
+                // (Optionally) Insert luôn trong transaction tại đây
+                // => đảm bảo không bị chen số
+                // ví dụ:
+                // new SqlCommand($"INSERT INTO {tableName}({columnName}) VALUES('{nextCode}')", conn, tran).ExecuteNonQuery();
+
+                tran.Commit();
+                return nextCode;
+            }
+            catch
+            {
+                tran.Rollback();
+                throw;
+            }
         }
         public static async Task<List<object>> ExecuteQuerySqlAsync(
             string connectionString,

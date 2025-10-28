@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Vudaco.Auth.Dtos;
 using Vudaco.Auth.Models;
+using Vudaco.Employees.Models;
 using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
 
@@ -49,7 +50,7 @@ namespace Vudaco.Auth.Repositories
             return user;
         }
 
-        public async Task<(string accessToken, string refreshToken)> LoginAsync(LoginRequest request)
+        public async Task<(string accessToken, string refreshToken, Employee employee)> LoginAsync(LoginRequest request)
         {
             var accessTokenExpiryMinutes = _configuration.GetValue<int>("Configs:AccessTokenExpiryMinutes");
             var refreshTokenExpiryDays = _configuration.GetValue<int>("Configs:RefreshTokenExpiryDays");
@@ -59,6 +60,7 @@ namespace Vudaco.Auth.Repositories
                 throw new Exception("Sai tên đăng nhập hoặc mật khẩu");
 
             // 🔹 Sinh access & refresh token
+            var employee = await _db.Employees.FirstOrDefaultAsync(e => e.UserId == user.Id);
             var accessToken = _tokenService.GenerateAccessToken(user, request.DeviceId, accessTokenExpiryMinutes);
             var refreshToken = _tokenService.GenerateRefreshToken();
 
@@ -100,7 +102,7 @@ namespace Vudaco.Auth.Repositories
             await _redis.SetAsync(redisKey, accessToken, TimeSpan.FromMinutes(accessTokenExpiryMinutes));
 
             // 🔹 Trả về token mới
-            return (accessToken, refreshToken);
+            return (accessToken, refreshToken, employee);
         }
 
         public async Task LogoutAsync(int userId, string deviceId)
@@ -116,7 +118,7 @@ namespace Vudaco.Auth.Repositories
             }
         }
 
-        public async Task<(string accessToken, string refreshToken)> RefreshTokenAsync(RefreshTokenRequest request)
+        public async Task<(string accessToken, string refreshToken, Employee employee)> RefreshTokenAsync(RefreshTokenRequest request)
         {
             var accessTokenExpiryMinutes = _configuration.GetValue<int>("Configs:AccessTokenExpiryMinutes");
             var refreshTokenExpiryDays = _configuration.GetValue<int>("Configs:RefreshTokenExpiryDays");
@@ -133,6 +135,7 @@ namespace Vudaco.Auth.Repositories
                 throw new Exception("Người dùng không tồn tại");
 
             // 🔹 Sinh token mới
+            var employee = await _db.Employees.FirstOrDefaultAsync(e => e.UserId == user.Id);
             var newAccessToken = _tokenService.GenerateAccessToken(user, request.DeviceId, accessTokenExpiryMinutes);
             var newRefreshToken = _tokenService.GenerateRefreshToken();
 
@@ -148,7 +151,7 @@ namespace Vudaco.Auth.Repositories
             await _redis.SetAsync(redisKey, newAccessToken, TimeSpan.FromMinutes(accessTokenExpiryMinutes));
 
             // 🔹 Trả về token mới cho client
-            return (newAccessToken, newRefreshToken);
+            return (newAccessToken, newRefreshToken, employee);
         }
         public async Task LogoutAllAsync(int userId)
         {

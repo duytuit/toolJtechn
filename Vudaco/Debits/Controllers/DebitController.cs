@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Vudaco.Bills.Models;
@@ -80,11 +81,13 @@ namespace Vudaco.Debits.Controllers
                         BillId = bill_Partner.Id,
                         VehicleId = DebitDto.VehicleId,
                         PartnerDetailId = DebitDto.PartnerDetailId,
+                        EmployeeDriverId = DebitDto.EmployeeDriverId,
+                        EmployeeStaffId = DebitDto.EmployeeStaffId, 
                         FileInfoId = DebitDto.FileInfoId,
                         StorageId = DebitDto.StorageId,
                         Type = DebitDto.Type,
                         DispatchCode = DebitDto.DispatchCode,
-                        Name = DebitDto.Name,
+                        Name = DebitDto.Route,
                         AccountingDate = DebitDto.AccountingDate,
                         PurchasePrice = DebitDto.PurchasePrice,
                         Price = DebitDto.Price,
@@ -100,8 +103,6 @@ namespace Vudaco.Debits.Controllers
                         Note = DebitDto.Note,
                         CustomerVehicleType = DebitDto.CustomerVehicleType,
                         SupplierVehicleType = DebitDto.SupplierVehicleType,
-                        ApprovedByUser = DebitDto.ApprovedByUser,
-                        ApprovalTime = DebitDto.ApprovalTime,
                         CreatedBy = userId,
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow
@@ -133,11 +134,13 @@ namespace Vudaco.Debits.Controllers
                         BillId = bill_Supplier.Id,
                         VehicleId = DebitDto.VehicleId,
                         PartnerDetailId = DebitDto.SupplierPartnerDetailId,
+                        EmployeeDriverId = DebitDto.EmployeeDriverId,
+                        EmployeeStaffId = DebitDto.EmployeeStaffId,     
                         FileInfoId = DebitDto.FileInfoId,
                         StorageId = DebitDto.StorageId,
                         Type = DebitDto.Type,
                         DispatchCode = DebitDto.DispatchCode,
-                        Name = DebitDto.Name,
+                        Name = DebitDto.Route,
                         AccountingDate = DebitDto.AccountingDate,
                         PurchasePrice = DebitDto.PurchasePrice,
                         Price = DebitDto.Price,
@@ -153,8 +156,6 @@ namespace Vudaco.Debits.Controllers
                         Note = DebitDto.Note,
                         CustomerVehicleType = DebitDto.CustomerVehicleType,
                         SupplierVehicleType = DebitDto.SupplierVehicleType,
-                        ApprovedByUser = DebitDto.ApprovedByUser,
-                        ApprovalTime = DebitDto.ApprovalTime,
                         CreatedBy = userId,
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow
@@ -184,6 +185,8 @@ namespace Vudaco.Debits.Controllers
                 // cập nhật các field theo DebitDto
                 debit.VehicleId = DebitDto.VehicleId;
                 debit.PartnerDetailId = DebitDto.PartnerDetailId;
+                debit.EmployeeDriverId = DebitDto.EmployeeDriverId;
+                debit.EmployeeStaffId = DebitDto.EmployeeStaffId;   
                 debit.FileInfoId = DebitDto.FileInfoId;
                 debit.StorageId = DebitDto.StorageId;
                 debit.Type = DebitDto.Type;
@@ -200,7 +203,7 @@ namespace Vudaco.Debits.Controllers
                 debit.PenaltyFee = DebitDto.PenaltyFee;
                 debit.GoodsFee = DebitDto.GoodsFee;
                 debit.Status = DebitDto.Status;
-                debit.Data = DebitDto.Data;
+                debit.Data = JsonSerializer.Serialize(DebitDto);
                 debit.Note = DebitDto.Note;
                 debit.CustomerVehicleType = DebitDto.CustomerVehicleType;
                 debit.SupplierVehicleType = DebitDto.SupplierVehicleType;

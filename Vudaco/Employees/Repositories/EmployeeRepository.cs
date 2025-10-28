@@ -9,6 +9,7 @@ using Vudaco.Employees.Dtos;
 using Vudaco.Employees.Models;
 using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
+using Vudaco.Shares.MysqlHelper;
 using Vudaco.Shares.SqlServerHelper;
 
 namespace Vudaco.Employees.Repositories
@@ -55,6 +56,19 @@ namespace Vudaco.Employees.Repositories
                         whereLikes: whereLikes,
                         dateRangeList: whereDateRange,
                         orderByList: orderByList,
+                        relations: new List<AdoRelation>
+                                    {
+                                        new AdoRelation
+                                        {
+                                            Name = "employee_departments",
+                                            Table = "employee_departments",
+                                            Columns = new[] { "id","employee_id","department_id","positions","storage_id","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at","unit_id","dept_id","team_id","process_id","permissions"},
+                                            ParentKey = "id",
+                                            ForeignKey = "employee_id",
+                                            KeyName = "employee_id",
+                                            IsCollection = true,
+                                        }
+                                    },
                         redisCache: _redis,
                         includeCount: false,
                         cancellationToken: cancellationToken

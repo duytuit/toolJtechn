@@ -10,6 +10,8 @@ namespace Vudaco.Debits.Dtos
         public int Id { get; set; }
         public int BillId { get; set; }
         public int? VehicleId { get; set; }
+        public int? EmployeeStaffId { get; set; }
+        public int? EmployeeDriverId { get; set; }
         public int? PartnerDetailId { get; set; }
         public int? SupplierPartnerDetailId { get; set; }
         public int? FileInfoId { get; set; }
@@ -39,5 +41,6 @@ namespace Vudaco.Debits.Dtos
         public int? DeletedBy { get; set; }
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
+        public string Route { get; set; }
     }
 }

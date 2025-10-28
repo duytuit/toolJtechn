@@ -21,6 +21,12 @@ namespace Vudaco.Debits.Models
         [Column("partner_detail_id")]
         public int? PartnerDetailId { get; set; }
 
+        [Column("employee_staff_id")]
+        public int? EmployeeStaffId { get; set; }
+
+        [Column("employee_driver_id")]
+        public int? EmployeeDriverId { get; set; }
+
         [Column("file_info_id")]
         public int? FileInfoId { get; set; }
 

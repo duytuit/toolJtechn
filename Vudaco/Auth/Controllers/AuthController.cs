@@ -52,11 +52,13 @@ namespace Vudaco.Auth.Controllers
         {
             try
             {
-                var (accessToken, refreshToken) = await _authRepository.LoginAsync(request);
+                var (accessToken, refreshToken, employee) = await _authRepository.LoginAsync(request);
+
                 return ApiResponseResult(true, "Đăng nhập thành công", new
                 {
                     accessToken,
-                    refreshToken
+                    refreshToken,
+                    employee
                 });
             }
             catch (Exception ex)
@@ -70,11 +72,12 @@ namespace Vudaco.Auth.Controllers
         {
             try
             {
-                var (accessToken, refreshToken) = await _authRepository.RefreshTokenAsync(request);
+                var (accessToken, refreshToken, employee) = await _authRepository.RefreshTokenAsync(request);
                 return ApiResponseResult(true, "Làm mới token thành công", new
                 {
                     accessToken,
-                    refreshToken
+                    refreshToken,
+                    employee
                 });
             }
             catch (Exception ex)

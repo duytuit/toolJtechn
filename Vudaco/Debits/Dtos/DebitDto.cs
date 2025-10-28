@@ -42,5 +42,17 @@ namespace Vudaco.Debits.Dtos
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
         public string Route { get; set; }
+        public List<serviceDto> productChiho { get; set; }
+        public List<serviceDto> productHaiquan { get; set; }
     }
+}
+
+public class serviceDto
+{
+    public string Name { get; set; }
+    public int Price { get; set; }
+    public string Bill { get; set; }
+    public string LinkBill { get; set; }
+    public string CodeBill { get; set; }
+    public string Note { get; set; }
 }

@@ -46,7 +46,6 @@ namespace Vudaco.Categorys.Repositories
             var orderByList = new List<string> {  "updated_at desc" , "id"};
             if (ServiceCategoryDto.StorageId > 0)
                 whereEquals["storage_id"] = ServiceCategoryDto.StorageId;
-            if (ServiceCategoryDto.Type > 0)
                 whereEquals["type"] = ServiceCategoryDto.Type;
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),

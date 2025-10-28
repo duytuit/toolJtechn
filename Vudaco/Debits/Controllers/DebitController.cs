@@ -82,10 +82,10 @@ namespace Vudaco.Debits.Controllers
                         VehicleId = DebitDto.VehicleId,
                         PartnerDetailId = DebitDto.PartnerDetailId,
                         EmployeeDriverId = DebitDto.EmployeeDriverId,
-                        EmployeeStaffId = DebitDto.EmployeeStaffId, 
+                        EmployeeStaffId = DebitDto.EmployeeStaffId,
                         FileInfoId = DebitDto.FileInfoId,
                         StorageId = DebitDto.StorageId,
-                        Type = DebitDto.Type,
+                        Type = 0,
                         DispatchCode = DebitDto.DispatchCode,
                         Name = DebitDto.Route,
                         AccountingDate = DebitDto.AccountingDate,
@@ -98,7 +98,6 @@ namespace Vudaco.Debits.Controllers
                         OvernightFee = DebitDto.OvernightFee,
                         PenaltyFee = DebitDto.PenaltyFee,
                         GoodsFee = DebitDto.GoodsFee,
-                        Status = DebitDto.Status,
                         Data = DebitDto.Data,
                         Note = DebitDto.Note,
                         CustomerVehicleType = DebitDto.CustomerVehicleType,
@@ -135,10 +134,10 @@ namespace Vudaco.Debits.Controllers
                         VehicleId = DebitDto.VehicleId,
                         PartnerDetailId = DebitDto.SupplierPartnerDetailId,
                         EmployeeDriverId = DebitDto.EmployeeDriverId,
-                        EmployeeStaffId = DebitDto.EmployeeStaffId,     
+                        EmployeeStaffId = DebitDto.EmployeeStaffId,
                         FileInfoId = DebitDto.FileInfoId,
                         StorageId = DebitDto.StorageId,
-                        Type = DebitDto.Type,
+                        Type = 0,
                         DispatchCode = DebitDto.DispatchCode,
                         Name = DebitDto.Route,
                         AccountingDate = DebitDto.AccountingDate,
@@ -151,7 +150,6 @@ namespace Vudaco.Debits.Controllers
                         OvernightFee = DebitDto.OvernightFee,
                         PenaltyFee = DebitDto.PenaltyFee,
                         GoodsFee = DebitDto.GoodsFee,
-                        Status = DebitDto.Status,
                         Data = DebitDto.Data,
                         Note = DebitDto.Note,
                         CustomerVehicleType = DebitDto.CustomerVehicleType,
@@ -162,6 +160,88 @@ namespace Vudaco.Debits.Controllers
                     };
                     debit = await _repoDebit.CreateAsync(debit);
                 }
+                await tran.CommitAsync();
+                return ApiResponseResult<object>(true, "Thêm thành công", null);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
+            }
+
+        }
+        [HttpPost]
+        [Route("service/create")]
+        public async Task<IActionResult> ServiceCreate([FromBody] DebitDto DebitDto)
+        {
+            using var tran = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
+                if (DebitDto.PartnerDetailId > 0)
+                {
+                    var bill_Partner = await _context.Bills.AsNoTracking().FirstOrDefaultAsync(x => x.CycleName == CycleName && x.PartnerDetailId == DebitDto.PartnerDetailId);
+                    if (bill_Partner == null)
+                    {
+                        bill_Partner = new Bill
+                        {
+                            BillCode = SqlServerHelpers.GenerateSoChungTu(_configuration.GetConnectionString("DefaultConnection"), "bills", "bill_code", "HDK", 8),
+                            StorageId = DebitDto.StorageId,
+                            Name = CycleName.ToString(),
+                            AccountingDate = DebitDto.AccountingDate,
+                            PartnerDetailId = DebitDto.PartnerDetailId,
+                            CycleName = CycleName,
+                            CreatedBy = userId,
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow
+                        };
+                        _context.Bills.Add(bill_Partner);
+                        await _context.SaveChangesAsync();
+                    }
+                    foreach (var item in DebitDto.productChiho)
+                    {
+                        var debit = new Debit
+                        {
+                            BillId = bill_Partner.Id,
+                            PartnerDetailId = DebitDto.PartnerDetailId,
+                            EmployeeStaffId = DebitDto.EmployeeStaffId,
+                            FileInfoId = DebitDto.FileInfoId,
+                            StorageId = DebitDto.StorageId,
+                            Type = 1,
+                            Name = item.Name,
+                            AccountingDate = DebitDto.AccountingDate,
+                            Price = item.Price,
+                            Data = DebitDto.Data,
+                            Note = DebitDto.Note,
+                            CreatedBy = userId,
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow
+                        };
+                        debit = await _repoDebit.CreateAsync(debit);
+                    }
+                    foreach (var item in DebitDto.productHaiquan)
+                    {
+                        var debit = new Debit
+                        {
+                            BillId = bill_Partner.Id,
+                            PartnerDetailId = DebitDto.PartnerDetailId,
+                            EmployeeStaffId = DebitDto.EmployeeStaffId,
+                            FileInfoId = DebitDto.FileInfoId,
+                            StorageId = DebitDto.StorageId,
+                            Type = 2,
+                            Name = item.Name,
+                            AccountingDate = DebitDto.AccountingDate,
+                            Price = item.Price,
+                            Data = DebitDto.Data,
+                            Note = DebitDto.Note,
+                            CreatedBy = userId,
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow
+                        };
+                        debit = await _repoDebit.CreateAsync(debit);
+                    }
+                }
+               
                 await tran.CommitAsync();
                 return ApiResponseResult<object>(true, "Thêm thành công", null);
             }

@@ -38,7 +38,18 @@ namespace Vudaco.Debits.Repositories
             _context.SaveChanges();
             return Task.FromResult(Debit);
         }
-
+        public async Task<PaginatedResultReact<object>> GetObjectDispatchAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var sql = $@"
+                SELECT *
+                FROM debits where deleted_at is null";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
         public async Task<PaginatedResultReact<object>> GetObjectTaskAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
         {
              var whereEquals = new Dictionary<string, object>();

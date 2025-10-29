@@ -13,42 +13,48 @@ namespace Vudaco.Shares.SqlServerHelper
 {
     public static class AdoRelationQuerySqlServer
     {
+        #region WithRelationsAdoAsync
         /// <summary>
-        /// Truy vấn dữ liệu từ SQL Server với khả năng chọn cột, phân trang, lọc, sắp xếp và load các quan hệ liên quan.
-        /// Hỗ trợ đếm tổng số bản ghi và cache kết quả vào Redis.
+        /// Truy vấn dữ liệu cha + quan hệ con (1-n, 1-1) + cache Redis + alias + join
         /// </summary>
         public static async Task<object> WithRelationsAdoAsync(
-            string connectionString,
-            string tableName,
-            string[] columns,
-            int? offset = null,
-            int? limit = null,
-            Dictionary<string, object> whereEquals = null,
-            Dictionary<string, string> whereLikes = null,
-            Dictionary<string, IEnumerable<object>> whereInList = null,
-            List<(string Sql, object[] Params)> whereCustom = null,
-            List<(string Field, DateTime From, DateTime To)> dateRangeList = null,
-            List<string> orderByList = null,
-            IEnumerable<AdoRelation> relations = null,
-            RedisService redisCache = null,
-            string redisKey = null,
-            TimeSpan? redisKeyDuration = null,
-            bool includeCount = false,
-            CancellationToken cancellationToken = default)
+         string connectionString,
+         string tableNameWithAlias,
+         string[] columns,
+         int? offset = null,
+         int? limit = null,
+         Dictionary<string, object> whereEquals = null,
+         Dictionary<string, string> whereLikes = null,
+         Dictionary<string, IEnumerable<object>> whereInList = null,
+         List<(string Sql, object[] Params)> whereCustom = null,
+         List<(string Field, DateTime From, DateTime To)> dateRangeList = null,
+         List<string> orderByList = null,
+         IEnumerable<AdoRelation> relations = null,
+         List<(string Sql, object[] Params)> joinsList = null,
+         RedisService redisCache = null,
+         string redisKey = null,
+         TimeSpan? redisKeyDuration = null,
+         bool includeCount = false,
+         CancellationToken cancellationToken = default)
         {
             int count = 0;
 
             await using var conn = new SqlConnection(connectionString);
             await conn.OpenAsync(cancellationToken);
 
-            // Nếu cần đếm tổng số bản ghi
+            // Tách table name và alias
+            var parts = tableNameWithAlias.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            string tableBaseName = parts[0];
+            string alias = parts.Length > 1 ? parts[1] : null;
+
+            // Đếm tổng số
             if (includeCount)
             {
                 count = await SqlServerHelpers.ExecuteCountCommandAsync(
-                    conn, tableName, whereEquals, whereLikes, whereInList, whereCustom, dateRangeList, cancellationToken);
+                    conn, tableNameWithAlias, whereEquals, whereLikes, whereInList, whereCustom, dateRangeList, joinsList, cancellationToken);
             }
 
-            // Kiểm tra Redis cache
+            // Check Redis
             if (!string.IsNullOrEmpty(redisKey) && redisKeyDuration.HasValue && redisCache != null)
             {
                 var cachedJson = await redisCache.GetAsync(redisKey, cancellationToken);
@@ -60,30 +66,48 @@ namespace Vudaco.Shares.SqlServerHelper
                 }
             }
 
-            // Build câu lệnh SELECT chính
-            using var baseCmd = await SqlServerHelpers.BuildBaseCommandAsync(
-                conn, tableName, columns, offset, limit,
-                whereEquals, whereLikes, whereInList, whereCustom, dateRangeList, orderByList, cancellationToken);
+            // Build command
+            using var cmd = await SqlServerHelpers.BuildBaseCommandAsync(
+                conn,
+                tableNameWithAlias,
+                columns,
+                joinsList,
+                offset,
+                limit,
+                whereEquals,
+                whereLikes,
+                whereInList,
+                whereCustom,
+                dateRangeList,
+                orderByList,
+                cancellationToken
+            );
 
-            var baseList = (await SqlServerHelpers.ExecuteQueryAsync(baseCmd, cancellationToken))
+            // Execute query cha
+            var baseList = (await SqlServerHelpers.ExecuteQueryAsync(cmd, cancellationToken))
                 .Cast<IDictionary<string, object>>()
                 .ToList();
 
-            // Load các quan hệ liên quan (1-n, 1-1)
-            await LoadRelationsRecursiveAsync(conn, baseList, relations, cancellationToken);
+            // Load relations (1-1 hoặc 1-n)
+            if (relations != null && relations.Any())
+            {
+                await LoadRelationsRecursiveAsync(conn, baseList, relations, cancellationToken);
+            }
 
             var result = baseList.Select(r => (ExpandoObject)r).ToList();
 
-            // Lưu vào Redis nếu cần
+            // Lưu cache
             if (!string.IsNullOrEmpty(redisKey) && redisKeyDuration.HasValue && redisCache != null)
             {
                 var json = JsonSerializer.Serialize(result);
-                await redisCache.SetAsync(redisKey, json, redisKeyDuration, cancellationToken);
+                await redisCache.SetAsync(redisKey, json, redisKeyDuration.Value, cancellationToken);
             }
 
             return new { Count = count, Data = result };
         }
+        #endregion
 
+        #region LoadRelationsRecursiveAsync
         private static async Task LoadRelationsRecursiveAsync(
             SqlConnection conn,
             List<IDictionary<string, object>> parentList,
@@ -103,17 +127,13 @@ namespace Vudaco.Shares.SqlServerHelper
                 if (parentKeys.Count == 0)
                     continue;
 
-                List<IDictionary<string, object>> childList;
-
-                // Dùng SqlServerHelpers thay vì SqlHelpers
-                var cmd = await SqlServerHelpers.BuildSelectInCommandAsync(
-                    conn, relation.Table, relation.Columns, relation.KeyName, parentKeys, cancellationToken);
-
-                childList = (await SqlServerHelpers.ExecuteQueryAsync(cmd, cancellationToken))
+                // Build child command
+                var cmd = await SqlServerHelpers.BuildSelectInCommandAsync(conn, relation.Table, relation.Columns, relation.KeyName, parentKeys, cancellationToken);
+                var childList = (await SqlServerHelpers.ExecuteQueryAsync(cmd, cancellationToken))
                     .Cast<IDictionary<string, object>>()
                     .ToList();
 
-                // Mapping dữ liệu con theo khóa ngoại
+                // Map child -> parent
                 var childLookup = childList
                     .Where(c => c.ContainsKey(relation.ForeignKey))
                     .GroupBy(c => Convert.ToInt64(c[relation.ForeignKey]))
@@ -127,21 +147,12 @@ namespace Vudaco.Shares.SqlServerHelper
                     var key = Convert.ToInt64(parent[relation.ParentKey]);
                     childLookup.TryGetValue(key, out var relatedItems);
 
-                    if (relation.IsCollection)
-                    {
-                        parent[relation.Name] = relatedItems != null
-                            ? relatedItems.Select(x => (ExpandoObject)x).ToList()
-                            : new List<ExpandoObject>();
-                    }
-                    else
-                    {
-                        parent[relation.Name] = relatedItems != null
-                            ? (ExpandoObject)relatedItems.FirstOrDefault()
-                            : new ExpandoObject();
-                    }
+                    parent[relation.Name] = relation.IsCollection
+                        ? (relatedItems?.Select(x => (ExpandoObject)x).ToList() ?? new List<ExpandoObject>())
+                        : (ExpandoObject)(relatedItems?.FirstOrDefault() ?? new ExpandoObject());
                 }
 
-                // Đệ quy nạp sub-relations (nếu có)
+                // Recursive sub-relations
                 if (relation.SubRelations?.Any() == true)
                 {
                     var allChildren = childList.Select(c => (IDictionary<string, object>)c).ToList();
@@ -149,5 +160,6 @@ namespace Vudaco.Shares.SqlServerHelper
                 }
             }
         }
+        #endregion
     }
 }

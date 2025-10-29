@@ -38,6 +38,17 @@ namespace Vudaco.Debits.Controllers
             _context = context;
             _configuration = configuration;
         }
+        [HttpGet("dispatch")]
+        public async Task<IActionResult> GetTaskDispatch(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectDispatchAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
         [HttpGet]
         public async Task<IActionResult> GetTask(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
         {

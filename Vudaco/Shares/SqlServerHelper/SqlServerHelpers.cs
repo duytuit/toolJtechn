@@ -12,150 +12,197 @@ namespace Vudaco.Shares.SqlServerHelper
 {
     public static class SqlServerHelpers
     {
+        #region BuildBaseCommandAsync
+        /// <summary>
+        /// Build SQL command hỗ trợ alias, join, where, paging
+        /// </summary>
         public static async Task<SqlCommand> BuildBaseCommandAsync(
-            SqlConnection connection,
-            string tableName,
-            string[] fields,
-            int? skip = null,
-            int? take = null,
-            Dictionary<string, object> whereEquals = null,
-            Dictionary<string, string> whereLikes = null,
-            Dictionary<string, IEnumerable<object>> whereInList = null,
-            List<(string Sql, object[] Params)> whereCustom = null,
-            List<(string Field, DateTime From, DateTime To)> dateRangeList = null,
-            List<string> orderByList = null,
-            CancellationToken cancellationToken = default)
+    SqlConnection connection,
+    string tableNameWithAlias,
+    string[] fields,
+    List<(string Sql, object[] Params)> joinsList = null,
+    int? skip = null,
+    int? take = null,
+    Dictionary<string, object> whereEquals = null,
+    Dictionary<string, string> whereLikes = null,
+    Dictionary<string, IEnumerable<object>> whereInList = null,
+    List<(string Sql, object[] Params)> whereCustom = null,
+    List<(string Field, DateTime From, DateTime To)> dateRangeList = null,
+    List<string> orderByList = null,
+    CancellationToken cancellationToken = default)
         {
             var cmd = new SqlCommand();
             cmd.Connection = connection;
 
-            // Kiểm tra cột deleted_at có tồn tại không
+            // Tách tên bảng và alias
+            var parts = tableNameWithAlias.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            string tableBaseName = parts[0];
+            string alias = parts.Length > 1 ? parts[1] : null;
+
+            // Helper thêm alias vào cột
+            string Col(string col)
+            {
+                return col.Contains(".") ? col : (alias != null ? $"{alias}.[{col}]" : $"[{col}]");
+            }
+
+            // Kiểm tra deleted_at
             cmd.CommandText = @"
-                SELECT COUNT(*) 
-                FROM INFORMATION_SCHEMA.COLUMNS 
-                WHERE TABLE_NAME = @table AND COLUMN_NAME = 'deleted_at'";
-            cmd.Parameters.AddWithValue("@table", tableName);
-            var count = (int)(await cmd.ExecuteScalarAsync(cancellationToken));
-            bool hasDeletedAt = count > 0;
+        SELECT COUNT(*) 
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_NAME = @table AND COLUMN_NAME = 'deleted_at'";
+            cmd.Parameters.AddWithValue("@table", tableBaseName);
+            bool hasDeletedAt = ((int)await cmd.ExecuteScalarAsync(cancellationToken)) > 0;
 
+            // WHERE clause
             var whereClauses = new List<string>();
-
             if (hasDeletedAt)
-                whereClauses.Add("deleted_at IS NULL");
+                whereClauses.Add(Col("deleted_at") + " IS NULL");
 
             // WHERE EQUALS
             if (whereEquals != null)
             {
-                foreach (var kvp in whereEquals)
+                foreach (var kv in whereEquals)
                 {
-                    string paramName = $"@{kvp.Key}";
-                    whereClauses.Add($"[{kvp.Key}] = {paramName}");
-                    cmd.Parameters.AddWithValue(paramName, kvp.Value ?? DBNull.Value);
+                    string paramName = $"@eq_{kv.Key.Split('.').Last()}";
+                    whereClauses.Add($"{kv.Key} = {paramName}");
+                    cmd.Parameters.AddWithValue(paramName, kv.Value ?? DBNull.Value);
                 }
             }
 
             // WHERE LIKE
             if (whereLikes != null)
             {
-                foreach (var kvp in whereLikes)
+                foreach (var kv in whereLikes)
                 {
-                    string paramName = $"@like_{kvp.Key}";
-                    whereClauses.Add($"[{kvp.Key}] LIKE {paramName}");
-                    cmd.Parameters.AddWithValue(paramName, $"%{kvp.Value}%");
+                    string paramName = $"@like_{kv.Key.Split('.').Last()}";
+                    whereClauses.Add($"{kv.Key} LIKE {paramName}");
+                    cmd.Parameters.AddWithValue(paramName, $"%{kv.Value}%");
                 }
             }
 
-            // WHERE IN (...)
+            // WHERE IN
             if (whereInList != null)
             {
-                foreach (var kvp in whereInList)
+                foreach (var kv in whereInList)
                 {
                     var paramNames = new List<string>();
-                    int index = 0;
-                    foreach (var value in kvp.Value)
+                    int idx = 0;
+                    foreach (var val in kv.Value)
                     {
-                        string paramName = $"@in_{kvp.Key}_{index++}";
-                        paramNames.Add(paramName);
-                        cmd.Parameters.AddWithValue(paramName, value);
+                        string param = $"@in_{kv.Key.Split('.').Last()}_{idx++}";
+                        paramNames.Add(param);
+                        cmd.Parameters.AddWithValue(param, val ?? DBNull.Value);
                     }
-                    whereClauses.Add($"[{kvp.Key}] IN ({string.Join(", ", paramNames)})");
+                    if (paramNames.Count > 0)
+                        whereClauses.Add($"{kv.Key} IN ({string.Join(", ", paramNames)})");
                 }
             }
 
-            // WHERE Custom (dạng SQL + ?)
+            // WHERE CUSTOM
             if (whereCustom != null)
             {
                 int customIndex = 0;
-                foreach (var (sql, paramValues) in whereCustom)
+                foreach (var (sql, vals) in whereCustom)
                 {
-                    var parts = sql.Split('?');
-                    var sqlWithParams = "";
-
-                    for (int i = 0; i < paramValues.Length; i++)
+                    var partsSql = sql.Split('?');
+                    string sqlWithParams = "";
+                    for (int i = 0; i < vals.Length; i++)
                     {
-                        string paramName = $"@customParam_{customIndex}";
-                        cmd.Parameters.AddWithValue(paramName, paramValues[i]);
-                        sqlWithParams += parts[i] + paramName;
-                        customIndex++;
+                        string param = $"@custom_{customIndex++}";
+                        cmd.Parameters.AddWithValue(param, vals[i] ?? DBNull.Value);
+                        sqlWithParams += partsSql[i] + param;
                     }
-
-                    if (parts.Length > paramValues.Length)
-                    {
-                        sqlWithParams += parts.Last();
-                    }
-
+                    if (partsSql.Length > vals.Length)
+                        sqlWithParams += partsSql.Last();
                     whereClauses.Add(sqlWithParams);
                 }
             }
 
-            // WHERE Date Range
+            // WHERE DATE RANGE
             if (dateRangeList != null)
             {
                 for (int i = 0; i < dateRangeList.Count; i++)
                 {
-                    var range = dateRangeList[i];
-                    string fromParam = $"@dateFrom{i}";
-                    string toParam = $"@dateTo{i}";
-                    whereClauses.Add($"[{range.Field}] BETWEEN {fromParam} AND {toParam}");
-                    cmd.Parameters.AddWithValue(fromParam, range.From);
-                    cmd.Parameters.AddWithValue(toParam, range.To);
+                    var r = dateRangeList[i];
+                    string paramFrom = $"@from_{r.Field.Split('.').Last()}_{i}";
+                    string paramTo = $"@to_{r.Field.Split('.').Last()}_{i}";
+                    whereClauses.Add($"{r.Field} BETWEEN {paramFrom} AND {paramTo}");
+                    cmd.Parameters.AddWithValue(paramFrom, r.From);
+                    cmd.Parameters.AddWithValue(paramTo, r.To);
                 }
             }
 
-            // Compose WHERE, ORDER, PAGING
-            string whereClause = whereClauses.Count > 0 ? "WHERE " + string.Join(" AND ", whereClauses) : "";
-            string orderClause = (orderByList != null && orderByList.Count > 0)
-                ? "ORDER BY " + string.Join(", ", orderByList)
-                : "";
+            string whereSql = whereClauses.Count > 0 ? "WHERE " + string.Join(" AND ", whereClauses) : "";
 
-            // SQL Server paging: OFFSET + FETCH
-            string pagingClause = "";
-            if (skip.HasValue || take.HasValue)
+            // JOIN
+            string joinSql = "";
+            if (joinsList != null && joinsList.Count > 0)
             {
-                pagingClause = "OFFSET " + (skip ?? 0) + " ROWS";
-                if (take.HasValue)
-                    pagingClause += $" FETCH NEXT {Math.Min(take.Value, 1000)} ROWS ONLY";
+                int joinIndex = 0;
+                var joinClauses = new List<string>();
+                foreach (var (sql, vals) in joinsList)
+                {
+                    if (string.IsNullOrWhiteSpace(sql)) continue;
+                    if (vals != null && vals.Length > 0)
+                    {
+                        var partsSql = sql.Split('?');
+                        string sqlWithParams = "";
+                        for (int i = 0; i < vals.Length; i++)
+                        {
+                            string param = $"@join_{joinIndex++}";
+                            cmd.Parameters.AddWithValue(param, vals[i] ?? DBNull.Value);
+                            sqlWithParams += partsSql[i] + param;
+                        }
+                        if (partsSql.Length > vals.Length)
+                            sqlWithParams += partsSql.Last();
+                        joinClauses.Add(sqlWithParams);
+                    }
+                    else
+                    {
+                        joinClauses.Add(sql);
+                    }
+                }
+                joinSql = string.Join(" ", joinClauses);
             }
 
-            string fieldList = string.Join(", ", fields.Select(f => $"[{f}]"));
+            // Fields
+            string fieldList = string.Join(", ", fields.Select(f => f.Contains(".") ? f : (alias != null ? $"{alias}.[{f}]" : $"[{f}]")));
+
+            // ORDER BY
+            string orderSql = "";
+            if (orderByList != null && orderByList.Count > 0)
+            {
+                orderSql = "ORDER BY " + string.Join(", ", orderByList.Select(c => c.Contains(".") ? c : (alias != null ? $"{alias}.{c}" : c)));
+            }
+
+            // Paging
+            string pagingSql = "";
+            if (skip.HasValue || take.HasValue)
+            {
+                pagingSql = "OFFSET " + (skip ?? 0) + " ROWS";
+                if (take.HasValue)
+                    pagingSql += $" FETCH NEXT {Math.Min(take.Value, 1000)} ROWS ONLY";
+            }
 
             cmd.CommandText = $@"
-                SELECT {fieldList}
-                FROM [{tableName}]
-                {whereClause}
-                {orderClause}
-                {pagingClause}".Trim();
+SELECT {fieldList}
+FROM {tableNameWithAlias} {joinSql}
+{whereSql}
+{orderSql}
+{pagingSql}".Trim();
 
             return cmd;
         }
+        #endregion
 
+        #region BuildSelectInCommandAsync
         public static async Task<SqlCommand> BuildSelectInCommandAsync(
-            SqlConnection conn,
-            string tableName,
-            string[] fields,
-            string keyField,
-            List<object> ids,
-            CancellationToken cancellationToken = default)
+             SqlConnection conn,
+             string tableName,
+             string[] fields,
+             string keyField,
+             List<object> ids,
+             CancellationToken cancellationToken = default)
         {
             string fieldList = string.Join(", ", fields.Select(f => $"[{f}]"));
             var cmd = new SqlCommand();
@@ -185,10 +232,10 @@ namespace Vudaco.Shares.SqlServerHelper
             cmd.CommandText = $"SELECT {fieldList} FROM [{tableName}] {whereClause}";
             return cmd;
         }
-
+        #endregion
         public static async Task<List<ExpandoObject>> ExecuteQueryAsync(
-            SqlCommand cmd,
-            CancellationToken cancellationToken = default)
+                   SqlCommand cmd,
+                   CancellationToken cancellationToken = default)
         {
             var result = new List<ExpandoObject>();
             using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
@@ -211,26 +258,35 @@ namespace Vudaco.Shares.SqlServerHelper
         }
 
         public static async Task<int> ExecuteCountCommandAsync(
-            SqlConnection conn,
-            string tableName,
-            Dictionary<string, object> whereEquals = null,
-            Dictionary<string, string> whereLikes = null,
-            Dictionary<string, IEnumerable<object>> whereInList = null,
-            List<(string Sql, object[] Params)> whereCustom = null,
-            List<(string Field, DateTime From, DateTime To)> dateRangeList = null,
-            CancellationToken cancellationToken = default)
+     SqlConnection conn,
+     string tableNameWithAlias,
+     Dictionary<string, object> whereEquals = null,
+     Dictionary<string, string> whereLikes = null,
+     Dictionary<string, IEnumerable<object>> whereInList = null,
+     List<(string Sql, object[] Params)> whereCustom = null,
+     List<(string Field, DateTime From, DateTime To)> dateRangeList = null,
+     List<(string Sql, object[] Params)> joinsList = null,
+     CancellationToken cancellationToken = default)
         {
+            using var cmd = conn.CreateCommand();
             var whereClauses = new List<string>();
-            var cmd = conn.CreateCommand();
+
+            // Tách tên bảng và alias
+            var parts = tableNameWithAlias.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            string tableName = parts[0];
+            string alias = parts.Length > 1 ? parts[1] : null;
+
+            // Helper thêm alias vào cột nếu cần
+            string ColWithAlias(string col) => col.Contains(".") ? col : (alias != null ? $"{alias}.[{col}]" : $"[{col}]");
 
             // WHERE =
             if (whereEquals != null)
             {
                 foreach (var kv in whereEquals)
                 {
-                    var paramName = $"@eq_{kv.Key}";
-                    whereClauses.Add($"[{kv.Key}] = {paramName}");
-                    cmd.Parameters.AddWithValue(paramName, kv.Value);
+                    string param = $"@eq_{kv.Key.Split('.').Last()}";
+                    whereClauses.Add($"{kv.Key} = {param}");
+                    cmd.Parameters.AddWithValue(param, kv.Value ?? DBNull.Value);
                 }
             }
 
@@ -239,9 +295,9 @@ namespace Vudaco.Shares.SqlServerHelper
             {
                 foreach (var kv in whereLikes)
                 {
-                    var paramName = $"@like_{kv.Key}";
-                    whereClauses.Add($"[{kv.Key}] LIKE {paramName}");
-                    cmd.Parameters.AddWithValue(paramName, $"%{kv.Value}%");
+                    string param = $"@like_{kv.Key.Split('.').Last()}";
+                    whereClauses.Add($"{kv.Key} LIKE {param}");
+                    cmd.Parameters.AddWithValue(param, $"%{kv.Value}%");
                 }
             }
 
@@ -250,75 +306,104 @@ namespace Vudaco.Shares.SqlServerHelper
             {
                 foreach (var kv in whereInList)
                 {
-                    var paramNames = kv.Value.Select((v, i) => $"@in_{kv.Key}_{i}").ToList();
-                    whereClauses.Add($"[{kv.Key}] IN ({string.Join(", ", paramNames)})");
-
-                    int index = 0;
+                    var paramNames = new List<string>();
+                    int idx = 0;
                     foreach (var val in kv.Value)
-                        cmd.Parameters.AddWithValue(paramNames[index++], val);
+                    {
+                        string p = $"@in_{kv.Key.Split('.').Last()}_{idx++}";
+                        paramNames.Add(p);
+                        cmd.Parameters.AddWithValue(p, val ?? DBNull.Value);
+                    }
+                    if (paramNames.Count > 0)
+                        whereClauses.Add($"{kv.Key} IN ({string.Join(", ", paramNames)})");
                 }
             }
 
-            // WHERE Custom
+            // WHERE CUSTOM
             if (whereCustom != null)
             {
                 int customIndex = 0;
                 foreach (var (sql, paramValues) in whereCustom)
                 {
-                    var parts = sql.Split('?');
-                    var sqlWithParams = "";
-
+                    var partsSql = sql.Split('?');
+                    string sqlWithParams = "";
                     for (int i = 0; i < paramValues.Length; i++)
                     {
-                        string paramName = $"@customParam_{customIndex}";
-                        cmd.Parameters.AddWithValue(paramName, paramValues[i]);
-                        sqlWithParams += parts[i] + paramName;
-                        customIndex++;
+                        string p = $"@custom_{customIndex++}";
+                        cmd.Parameters.AddWithValue(p, paramValues[i] ?? DBNull.Value);
+                        sqlWithParams += partsSql[i] + p;
                     }
-
-                    if (parts.Length > paramValues.Length)
-                    {
-                        sqlWithParams += parts.Last();
-                    }
-
+                    if (partsSql.Length > paramValues.Length)
+                        sqlWithParams += partsSql.Last();
                     whereClauses.Add(sqlWithParams);
                 }
             }
 
-            // WHERE Date range
+            // WHERE DATE RANGE
             if (dateRangeList != null)
             {
-                foreach (var range in dateRangeList)
+                for (int i = 0; i < dateRangeList.Count; i++)
                 {
-                    var fromParam = $"@from_{range.Field}";
-                    var toParam = $"@to_{range.Field}";
-                    whereClauses.Add($"[{range.Field}] BETWEEN {fromParam} AND {toParam}");
-                    cmd.Parameters.AddWithValue(fromParam, range.From);
-                    cmd.Parameters.AddWithValue(toParam, range.To);
+                    var r = dateRangeList[i];
+                    string fromParam = $"@from_{r.Field.Split('.').Last()}_{i}";
+                    string toParam = $"@to_{r.Field.Split('.').Last()}_{i}";
+                    whereClauses.Add($"{r.Field} BETWEEN {fromParam} AND {toParam}");
+                    cmd.Parameters.AddWithValue(fromParam, r.From);
+                    cmd.Parameters.AddWithValue(toParam, r.To);
                 }
             }
 
-            var whereSql = whereClauses.Count > 0 ? $"WHERE {string.Join(" AND ", whereClauses)}" : "";
-            cmd.CommandText = $"SELECT COUNT(*) FROM [{tableName}] {whereSql}";
+            // JOIN
+            string joinSql = "";
+            if (joinsList != null && joinsList.Count > 0)
+            {
+                int joinIndex = 0;
+                var joinClauses = new List<string>();
+                foreach (var (sql, vals) in joinsList)
+                {
+                    if (vals != null && vals.Length > 0)
+                    {
+                        var partsSql = sql.Split('?');
+                        string sqlWithParams = "";
+                        for (int i = 0; i < vals.Length; i++)
+                        {
+                            string p = $"@join_{joinIndex++}";
+                            cmd.Parameters.AddWithValue(p, vals[i] ?? DBNull.Value);
+                            sqlWithParams += partsSql[i] + p;
+                        }
+                        if (partsSql.Length > vals.Length)
+                            sqlWithParams += partsSql.Last();
+                        joinClauses.Add(sqlWithParams);
+                    }
+                    else
+                    {
+                        joinClauses.Add(sql);
+                    }
+                }
+                joinSql = string.Join(" ", joinClauses);
+            }
 
+            string whereSql = whereClauses.Count > 0 ? "WHERE " + string.Join(" AND ", whereClauses) : "";
+
+            cmd.CommandText = $"SELECT COUNT(*) FROM {tableNameWithAlias} {joinSql} {whereSql}";
             var result = await cmd.ExecuteScalarAsync(cancellationToken);
             return Convert.ToInt32(result);
         }
         public static string GenerateSoChungTu(
-     string connectionString,
-     string tableName,
-     string columnName,
-     string prefix,
-     int numberLength)
+        string connectionString,
+        string tableName,
+        string columnName,
+        string prefix,
+        int numberLength)
         {
             using var conn = new SqlConnection(connectionString);
             conn.Open();
 
             string sql = $@"
-        SELECT MAX({columnName})
-        FROM {tableName} WITH (UPDLOCK, HOLDLOCK)
-        WHERE {columnName} LIKE @prefix
-    ";
+                SELECT MAX({columnName})
+                FROM {tableName} WITH (UPDLOCK, HOLDLOCK)
+                WHERE {columnName} LIKE @prefix
+            ";
 
             using var cmd = new SqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@prefix", prefix + "%");

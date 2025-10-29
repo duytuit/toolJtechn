@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Dynamic;
 using System.Linq;
 using System.Threading;
@@ -304,57 +305,81 @@ namespace Vudaco.Shares.SqlServerHelper
             return Convert.ToInt32(result);
         }
         public static string GenerateSoChungTu(
-         string connectionString,
-         string tableName,
-         string columnName,
-         string prefix,
-         int numberLength)
+     string connectionString,
+     string tableName,
+     string columnName,
+     string prefix,
+     int numberLength)
         {
             using var conn = new SqlConnection(connectionString);
             conn.Open();
 
-            using var tran = conn.BeginTransaction(IsolationLevel.Serializable); // cao nhất
+            string sql = $@"
+        SELECT MAX({columnName})
+        FROM {tableName} WITH (UPDLOCK, HOLDLOCK)
+        WHERE {columnName} LIKE @prefix
+    ";
 
-            try
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@prefix", prefix + "%");
+
+            var scalar = cmd.ExecuteScalar();
+            string nextCode;
+
+            if (scalar != null && scalar != DBNull.Value)
             {
-                // Dùng UPDLOCK + HOLDLOCK để khóa logical row/scan
-                string sql = $@"
-            SELECT MAX({columnName}) 
-            FROM {tableName} WITH (UPDLOCK, HOLDLOCK)
-            WHERE {columnName} LIKE @prefix
-        ";
-
-                using var cmd = new SqlCommand(sql, conn, tran);
-                cmd.Parameters.AddWithValue("@prefix", prefix + "%");
-
-                var scalar = cmd.ExecuteScalar();
-                string nextCode;
-
-                if (scalar != null && scalar != DBNull.Value)
-                {
-                    var maxCode = scalar.ToString();
-                    var numberPart = maxCode.Substring(prefix.Length);
-                    int number = int.TryParse(numberPart, out var n) ? n : 0;
-                    nextCode = prefix + (number + 1).ToString().PadLeft(numberLength, '0');
-                }
-                else
-                {
-                    nextCode = prefix + "1".PadLeft(numberLength, '0');
-                }
-
-                // (Optionally) Insert luôn trong transaction tại đây
-                // => đảm bảo không bị chen số
-                // ví dụ:
-                // new SqlCommand($"INSERT INTO {tableName}({columnName}) VALUES('{nextCode}')", conn, tran).ExecuteNonQuery();
-
-                tran.Commit();
-                return nextCode;
+                var maxCode = scalar.ToString();
+                var numberPart = maxCode.Substring(prefix.Length);
+                int number = int.TryParse(numberPart, out var n) ? n : 0;
+                nextCode = prefix + (number + 1).ToString().PadLeft(numberLength, '0');
             }
-            catch
+            else
             {
-                tran.Rollback();
-                throw;
+                nextCode = prefix + "1".PadLeft(numberLength, '0');
             }
+
+            return nextCode;
+        }
+        public static async Task<string> GenerateSoChungTuEfAsync(
+        DbConnection conn,
+        DbTransaction? tran,
+        string tableName,
+        string columnName,
+        string prefix,
+        int numberLength)
+        {
+            string sql = $@"
+                SELECT MAX({columnName})
+                FROM {tableName} WITH (UPDLOCK, HOLDLOCK)
+                WHERE {columnName} LIKE @prefix
+            ";
+
+            using var cmd = conn.CreateCommand();
+            if (tran != null)
+                cmd.Transaction = tran;
+
+            cmd.CommandText = sql;
+            var param = cmd.CreateParameter();
+            param.ParameterName = "@prefix";
+            param.Value = prefix + "%";
+            cmd.Parameters.Add(param);
+
+            var scalar = await cmd.ExecuteScalarAsync();
+
+            string nextCode;
+            if (scalar != null && scalar != DBNull.Value)
+            {
+                var maxCode = scalar.ToString();
+                var numberPart = maxCode.Substring(prefix.Length);
+                int number = int.TryParse(numberPart, out var n) ? n : 0;
+                nextCode = prefix + (number + 1).ToString().PadLeft(numberLength, '0');
+            }
+            else
+            {
+                nextCode = prefix + "1".PadLeft(numberLength, '0');
+            }
+
+            return nextCode;
         }
         public static async Task<List<object>> ExecuteQuerySqlAsync(
             string connectionString,

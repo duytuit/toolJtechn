@@ -36,6 +36,8 @@ namespace Vudaco.Receipts.Models
 
         [Column("note", TypeName = "nvarchar(max)")]
         public string Note { get; set; }
+        [Column("data", TypeName = "nvarchar(max)")]
+        public string Data { get; set; }
 
         [Column("created_by")]
         public int? CreatedBy { get; set; }

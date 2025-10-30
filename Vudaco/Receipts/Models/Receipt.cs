@@ -20,9 +20,14 @@ namespace Vudaco.Receipts.Models
         [Column("storage_id")]
         public int StorageId { get; set; }
 
-        [Required]
         [Column("partner_detail_id")]
-        public int PartnerDetailId { get; set; }
+        public int? PartnerDetailId { get; set; }
+        [Column("file_info_id")]
+        public int? FileInfoId { get; set; }
+         [Column("employee_id")]
+        public int? EmployeeId { get; set; }
+        [Column("type")]
+        public int? Type { get; set; }
 
         [Column("accounting_date")]
         public DateTime? AccountingDate { get; set; }

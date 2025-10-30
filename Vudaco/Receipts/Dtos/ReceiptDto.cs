@@ -10,7 +10,10 @@ namespace Vudaco.Receipts.Dtos
         public int Id { get; set; }
         public string CodeReceipt { get; set; }
         public int StorageId { get; set; }
-        public int PartnerDetailId { get; set; }
+        public int? PartnerDetailId { get; set; }
+        public int? FileInfoId { get; set; }
+        public int? EmployeeId { get; set; }
+        public int? Type { get; set; }
         public DateTime? AccountingDate { get; set; }
         public string CodeFund { get; set; }
         public string Code { get; set; }

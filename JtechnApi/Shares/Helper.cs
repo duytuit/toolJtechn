@@ -6,6 +6,7 @@ using System.Data.Common;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -277,6 +278,30 @@ namespace JtechnApi.Shares
 
             return JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
         }
+        public static string RemoteLampSync(RemoteLampRequest request, int timeoutSeconds = 30)
+        {
+            using (var client = new HttpClient())
+            {
+                client.Timeout = TimeSpan.FromSeconds(timeoutSeconds); // set timeout
+
+                var postFields = new Dictionary<string, string>
+                {
+                    ["Event"] = request.Event.ToString(),
+                    ["Chanel"] = request.Chanel,
+                    ["Status"] = request.Status.ToString(),
+                    ["MessageText"] = request.MessageText,
+                    ["Mode"] = request.Mode.ToString()
+                };
+
+                var content = new FormUrlEncodedContent(postFields);
+
+                // Đồng bộ bằng cách dùng .GetAwaiter().GetResult()
+                var response = client.PostAsync("http://192.168.207.6:8092/remotelamp/control-lamp", content)
+                                     .GetAwaiter().GetResult();
+
+                return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            }
+        }
     }
         public class UploadResult
         {
@@ -291,4 +316,12 @@ namespace JtechnApi.Shares
                 Path = path;
             }
         }
+    public class RemoteLampRequest
+    {
+        public int Event { get; set; }
+        public string Chanel { get; set; }
+        public int Status { get; set; }
+        public string MessageText { get; set; }
+        public int Mode { get; set; }
+    }
 }

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace JtechnApi.Controllers
@@ -68,11 +69,54 @@ namespace JtechnApi.Controllers
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu Required", null);
             }
+            if(changeStatusTaskDto.Status == 1)
+            {
+                var __emp = _context.Employee.Where(x => x.Id == changeStatusTaskDto.Created_By).FirstOrDefault();
+                var notifyRequest = new RemoteLampRequest
+                {
+                    Event = 15,
+                    Chanel = "dencanhbao_cd_dap",
+                    Status = 0,
+                    Mode = 1,
+                    MessageText = JsonSerializer.Serialize(new
+                    {
+                        job_id = _required_rs.Id,
+                        job_name = _required_rs.Code,
+                        app = "task",
+                        code = __emp.Code,
+                        link = $"http://192.168.207.6:8088/admin/internalCommunication",
+                        status = changeStatusTaskDto.Status
+                    })
+                };
+                string __result = Helper.RemoteLampSync(notifyRequest);
+            }
+            else
+            {
+                var __emp = _context.Employee.Where(x => x.Id == _sig.Signature_id).FirstOrDefault();
+                var notifyRequest = new RemoteLampRequest
+                {
+                    Event = 15,
+                    Chanel = "dencanhbao_cd_dap",
+                    Status = 0,
+                    Mode = 1,
+                    MessageText = JsonSerializer.Serialize(new
+                    {
+                        job_id = _required_rs.Id,
+                        job_name = _required_rs.Code,
+                        app = "task",
+                        code = __emp.Code,
+                        link = $"http://192.168.207.6:8088/admin/internalCommunication",
+                        status = changeStatusTaskDto.Status
+                    })
+                };
+                string __result = Helper.RemoteLampSync(notifyRequest);
+            }
             _sig.Status = changeStatusTaskDto.Status;
             _sig.Signature_id = changeStatusTaskDto.Status == 1 ? changeStatusTaskDto.Created_By : 0;
             _sig.Updated_at = DateTime.Now;
             _context.SignatureSubmission.Update(_sig);
             _context.SaveChanges();
+            
             _sig = _context.SignatureSubmission.Where(u => u.Required_id == changeStatusTaskDto.Required_Id && u.Status == 0).FirstOrDefault();
             if (_sig == null)
             {
@@ -82,6 +126,7 @@ namespace JtechnApi.Controllers
             {
                 _required_rs.Status = 0;
             }
+           
             _context.Required.Update(_required_rs);
             _context.SaveChanges();
             return ApiResponseResult<object>(true, "Cập nhật thành công", null);

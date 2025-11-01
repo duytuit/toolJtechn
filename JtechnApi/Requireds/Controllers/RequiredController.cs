@@ -343,6 +343,24 @@ namespace JtechnApi.Controllers
                                 Positions = 0,
                             };
                             _signature.CreateSignatureSubmissiondAsync(sig);
+                        var __emp = _context.Employee.Where(x=>x.Id == intId).FirstOrDefault();
+                        var notifyRequest = new RemoteLampRequest
+                        {
+                            Event = 15,
+                            Chanel = "dencanhbao_cd_dap",
+                            Status = 0,
+                            Mode = 1,
+                            MessageText = JsonSerializer.Serialize(new
+                            {
+                                job_id = result.Result.Id,
+                                job_name = result.Result.Code,
+                                app = "task",
+                                code = __emp.Code,
+                                link = $"http://192.168.207.6:8088/admin/internalCommunication",
+                                status = 0
+                            })
+                        };
+                        string __result = Helper.RemoteLampSync(notifyRequest);
                     }
                     tx.Commit();
                     if (result != null)
@@ -424,6 +442,24 @@ namespace JtechnApi.Controllers
                             };
 
                              _signature.CreateSignatureSubmissiondAsync(signatureSubmission);
+                        var __emp = _context.Employee.Where(x => x.Id == intId).FirstOrDefault();
+                        var notifyRequest = new RemoteLampRequest
+                        {
+                            Event = 15,
+                            Chanel = "dencanhbao_cd_dap",
+                            Status = 0,
+                            Mode = 1,
+                            MessageText = JsonSerializer.Serialize(new
+                            {
+                                job_id = result.Result.Id,
+                                job_name = result.Result.Code,
+                                app = "task",
+                                code = __emp.Code,
+                                link = $"http://192.168.207.6:8088/admin/internalCommunication",
+                                status = 0
+                            })
+                        };
+                        string __result = Helper.RemoteLampSync(notifyRequest);
                     }
                     tx.Commit();
                     if (result != null)
@@ -547,6 +583,15 @@ namespace JtechnApi.Controllers
             if (!isDeleted)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            using (var _db = new clsKetNoi())
+            {
+                var whereEquals = new Dictionary<string, object>
+                {
+                    ["job_id"] = id,
+                    ["app"] = "task"
+                };
+                _db.DeleteWhere("Notifycation", whereEquals);
             }
             return ApiResponseResult<object>(true, "Xóa thành công", null);
         }

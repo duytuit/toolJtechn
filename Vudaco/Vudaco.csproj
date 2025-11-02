@@ -18,7 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Categorys\Controllers\" />
     <Folder Include="Vehicles\Dtos\" />
     <Folder Include="Customers\Controllers\" />
     <Folder Include="Customers\Dtos\" />

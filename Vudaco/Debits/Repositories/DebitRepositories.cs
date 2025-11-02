@@ -52,7 +52,8 @@ namespace Vudaco.Debits.Repositories
         }
         public async Task<PaginatedResultReact<object>> GetObjectTaskAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
         {
-             var whereEquals = new Dictionary<string, object>();
+            List<(string Sql, object[] Params)> whereCustoms = new();
+            var whereEquals = new Dictionary<string, object>();
             var whereLikes = new Dictionary<string, string>();
             var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
             var orderByList = new List<string> {  "updated_at desc" , "id"};
@@ -60,6 +61,17 @@ namespace Vudaco.Debits.Repositories
                 whereEquals["storage_id"] = DebitDto.StorageId;
             if (DebitDto.PartnerDetailId > 0)
                 whereEquals["partner_detail_id"] = DebitDto.PartnerDetailId;
+            if (DebitDto.Status > 0)
+                whereEquals["status"] = DebitDto.Status;
+            if (DebitDto.EmployeeStaffId > 0)
+            {
+                whereEquals["employee_staff_id"] = DebitDto.EmployeeStaffId;
+            }
+            else
+            {
+                whereCustoms.Add(("employee_staff_id IS NULL", Array.Empty<object>()));
+            }
+               
             if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
                 whereDateRange.Add(("accounting_date", DebitDto.FromDate.Value, DebitDto.ToDate.Value));
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
@@ -72,6 +84,7 @@ namespace Vudaco.Debits.Repositories
                         whereLikes: whereLikes,
                         dateRangeList: whereDateRange,
                         orderByList: orderByList,
+                        whereCustom: whereCustoms,
                         redisCache: _redis,
                         includeCount: false,
                         cancellationToken: cancellationToken

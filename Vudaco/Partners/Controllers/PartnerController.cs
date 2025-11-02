@@ -130,7 +130,7 @@ namespace Vudaco.Partners.Controllers
                 {
                     PartnerId = partner.Id,
                     Status = 0,
-                    Code = SqlServerHelpers.GenerateSoChungTu( _configuration.GetConnectionString("DefaultConnection"),"partner_details","code","KH", 4),
+                    Code = SqlServerHelpers.GenerateSoChungTu( _configuration.GetConnectionString("DefaultConnection"),"partner_details","code",dto.StorageId,"KH", 4),
                     StorageId = dto.StorageId,
                     CreatedBy = userId,
                     CreatedAt = DateTime.Now,
@@ -141,7 +141,7 @@ namespace Vudaco.Partners.Controllers
                 {
                     PartnerId = partner.Id,
                     Status = 0,
-                    Code = SqlServerHelpers.GenerateSoChungTu( _configuration.GetConnectionString("DefaultConnection"),"partner_details","code","NCC", 4),
+                    Code = SqlServerHelpers.GenerateSoChungTu( _configuration.GetConnectionString("DefaultConnection"),"partner_details","code",dto.StorageId,"NCC", 4),
                     StorageId = dto.StorageId,
                     CreatedBy = userId,
                     CreatedAt = DateTime.Now,

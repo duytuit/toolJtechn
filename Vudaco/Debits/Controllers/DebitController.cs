@@ -75,7 +75,7 @@ namespace Vudaco.Debits.Controllers
                     var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.PartnerDetailId == DebitDto.PartnerDetailId);
                     if (bill_Partner == null)
                     {
-                        var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn,tran.GetDbTransaction(), "bills", "bill_code", "HDK", 8);
+                        var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn,tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HDK", 8);
                         bill_Partner = new Bill
                         {
                             BillCode = BillCodePartner,
@@ -91,7 +91,7 @@ namespace Vudaco.Debits.Controllers
                         _context.Bills.Add(bill_Partner);
                         await _context.SaveChangesAsync();  // phải có
                     }
-                    var DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn,tran.GetDbTransaction(), "debits", "dispatch_code", "KS", 8);
+                    var DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn,tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "KS", 8);
 
                     var debit = new Debit
                     {
@@ -131,7 +131,7 @@ namespace Vudaco.Debits.Controllers
                     var bill_Supplier = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.PartnerDetailId == DebitDto.SupplierPartnerDetailId);
                     if (bill_Supplier == null)
                     {
-                        var BillCodeSupplier = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn,tran.GetDbTransaction(), "bills", "bill_code", "HDN", 8);
+                        var BillCodeSupplier = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn,tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HDN", 8);
 
                         bill_Supplier = new Bill
                         {
@@ -148,7 +148,7 @@ namespace Vudaco.Debits.Controllers
                         _context.Bills.Add(bill_Supplier);
                         await _context.SaveChangesAsync();  // phải có
                     }
-                    var DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", "KS", 8);
+                    var DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "KS", 8);
                     var debit = new Debit
                     {
                         BillId = bill_Supplier.Id,
@@ -198,7 +198,7 @@ namespace Vudaco.Debits.Controllers
         {
             using var tran = await _context.Database.BeginTransactionAsync();
             var conn = _context.Database.GetDbConnection();
-            var BillCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", "HDK", 8);
+            var BillCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HDK", 8);
             try
             {
                 int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
@@ -230,7 +230,7 @@ namespace Vudaco.Debits.Controllers
                             BillId = bill_Partner.Id,
                             PartnerDetailId = DebitDto.PartnerDetailId,
                             EmployeeStaffId = DebitDto.EmployeeStaffId,
-                            DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", "KS", 8),
+                            DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "KS", 8),
                             FileInfoId = DebitDto.FileInfoId,
                             StorageId = DebitDto.StorageId,
                             Type = 1,
@@ -254,7 +254,7 @@ namespace Vudaco.Debits.Controllers
                             PartnerDetailId = DebitDto.PartnerDetailId,
                             EmployeeStaffId = DebitDto.EmployeeStaffId,
                             FileInfoId = DebitDto.FileInfoId,
-                            DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", "KS", 8),
+                            DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId,"KS", 8),
                             StorageId = DebitDto.StorageId,
                             Type = 2,   
                             Name = item.Name,

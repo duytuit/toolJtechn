@@ -90,7 +90,7 @@ namespace Vudaco.Employees.Controllers
                 // ====== CREATE EMPLOYEE ======
                 var employee = new Employee
                 {
-                    Code = SqlServerHelpers.GenerateSoChungTu(_configuration.GetConnectionString("DefaultConnection"), "employees", "code", "NV", 4),
+                    Code = SqlServerHelpers.GenerateSoChungTu(_configuration.GetConnectionString("DefaultConnection"), "employees", "code",dto.StorageId, "NV", 4),
                     FirstName = dto.FirstName,
                     LastName = dto.LastName,
                     StorageId = dto.StorageId,

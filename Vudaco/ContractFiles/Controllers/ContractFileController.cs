@@ -1,17 +1,22 @@
 ﻿
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Vudaco.ContractFiles.Dtos;
 using Vudaco.ContractFiles.Models;
 using Vudaco.ContractFiles.Repositories;
 using Vudaco.Controllers;
+using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
 using Vudaco.Shares.Connects;
+using Vudaco.Shares.SqlServerHelper;
 
 namespace Vudaco.ContractFiles.Controllers
 {
@@ -23,13 +28,15 @@ namespace Vudaco.ContractFiles.Controllers
         private readonly IContractFileDetailRepository _repoContractFileDetail;
         private readonly ILogger<ContractFileController> _logger;
         private readonly VudacoDBContext _context;
+        private readonly IConfiguration _configuration;
         public int userId => (int)HttpContext.Items["UserId"];
-        public ContractFileController(ILogger<ContractFileController> logger, IContractFileDetailRepository repoContractFileDetail, IContractFileRepository repoContractFile, VudacoDBContext context)
+        public ContractFileController(ILogger<ContractFileController> logger, IConfiguration configuration, IContractFileDetailRepository repoContractFileDetail, IContractFileRepository repoContractFile, VudacoDBContext context)
         {
             _logger = logger;
             _repoContractFile = repoContractFile;
             _repoContractFileDetail = repoContractFileDetail;
             _context = context;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -43,14 +50,55 @@ namespace Vudaco.ContractFiles.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
+        [HttpGet("select")]
+        public async Task<IActionResult> GetSelectFileContact(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] FileInfoDto FileInfoDto = null)
+        {
+             var result = await _context.FileInfos
+                 .Where(x=>x.StorageId == FileInfoDto.StorageId)
+                 .Select(x => new { x.Id, x.FileNumber })
+                 .ToListAsync();
+
+            if (result == null || !result.Any())
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            var _results = new PaginatedResultReact<object>
+            {
+                PageNum = page,
+                PageSize = pageSize,
+                First = 0,
+                Total = 0,
+                Data = result.Cast<object>().ToList()
+            };
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", _results);
+        }
+        [HttpGet("codeFile")]
+        public IActionResult GetCodeFile(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] FileInfoDto FileInfoDto = null)
+        {
+            var result = SqlServerHelpers.GenerateSoChungTu(_configuration.GetConnectionString("DefaultConnection"), "file_infos", "file_number", FileInfoDto.StorageId, "KS", 8);
+
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            var _results = new PaginatedResultReact<object>
+            {
+                PageNum = page,
+                PageSize = pageSize,
+                First = 0,
+                Total = 0
+            };
+            _results.Extra["code"] = result;
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", _results);
+        }
         [HttpPost("create")]
         public async Task<IActionResult> Create([FromBody] FileInfoDto dto)
         {
             using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
             try
             {
-                if (string.IsNullOrWhiteSpace(dto.FileNumber))
-                    return ApiResponseResult<object>(false, "FileNumber bắt buộc", null);
+                var FileNumber = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "file_infos", "file_number", dto.StorageId, "HDK", 4);
 
                 if (dto.EmployeeIds == null || dto.EmployeeIds.Length == 0)
                     return ApiResponseResult<object>(false, "Nhân viên sales bắt buộc", null);
@@ -68,7 +116,7 @@ namespace Vudaco.ContractFiles.Controllers
                     PartnerDetailId = dto.PartnerDetailId,
                     AccountingDate = dto.AccountingDate,
                     StorageId = dto.StorageId,
-                    FileNumber = dto.FileNumber,
+                    FileNumber = FileNumber,
                     Declaration = dto.Declaration,
                     Bill = dto.Bill,
                     Quantity = dto.Quantity,

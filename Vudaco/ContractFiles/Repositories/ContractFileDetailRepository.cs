@@ -40,6 +40,99 @@ namespace Vudaco.ContractFiles.Repositories
             return Task.FromResult(FileInfoDetail);
         }
 
+        public async Task<PaginatedResultReact<object>> GetObjectByDispatchAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var sql = $@"
+              SELECT 
+                    f.*
+                FROM file_infos f
+                LEFT JOIN partner_details p ON p.id = f.partner_detail_id
+                WHERE 
+                    f.deleted_at IS NULL
+                    AND p.status = 1
+                    AND p.deleted_at IS NULL
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM debits d
+                        WHERE 
+                            d.file_info_id = f.id
+                            AND d.partner_detail_id = f.partner_detail_id
+                            AND d.deleted_at IS NULL
+                            AND d.employee_staff_id IS NULL
+                    )";
+            if (FileInfoDetailDto.StorageId > 0)
+            {
+                sql += $@" AND f.storage_id = {FileInfoDetailDto.StorageId}";
+            }
+            if (FileInfoDetailDto.FromDate.HasValue && FileInfoDetailDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = FileInfoDetailDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND f.accounting_date >= '{FileInfoDetailDto.FromDate.Value:yyyy-MM-dd}' 
+                AND f.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+
+            sql += " ORDER BY f.updated_at DESC";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
+        public async Task<PaginatedResultReact<object>> GetObjectByEmployeeAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var sql = $@"
+               SELECT 
+                    fdt.price,
+                    fdt.status,
+                    fdt.price,
+                    fdt.employee_id,
+                    f.*
+                FROM file_info_details fdt
+                LEFT JOIN file_infos f ON f.id = fdt.file_id
+                LEFT JOIN partner_details p on p.id = f.partner_detail_id
+                WHERE 
+                    fdt.deleted_at IS NULL
+                    AND fdt.status = 0
+                    AND f.deleted_at IS NULL
+                    AND p.status = 1
+					AND p.deleted_at IS NULL
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM debits d
+                        WHERE 
+                            d.file_info_id = f.id
+                            AND d.employee_staff_id = f.employee_id
+                            AND d.deleted_at IS NULL
+                    )";
+            if (FileInfoDetailDto.StorageId > 0) {
+
+                sql += $@" AND fdt.storage_id = {FileInfoDetailDto.StorageId}";
+            }
+            if (FileInfoDetailDto.EmployeeId > 0)
+            {
+                sql += $@" AND fdt.employee_id = {FileInfoDetailDto.EmployeeId}";
+            }
+            if (FileInfoDetailDto.FromDate.HasValue && FileInfoDetailDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = FileInfoDetailDto.ToDate.Value.Date.AddDays(1);
+
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND f.accounting_date >= '{FileInfoDetailDto.FromDate.Value:yyyy-MM-dd}' 
+                AND f.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+
+            sql += " ORDER BY f.updated_at DESC";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
         public async Task<PaginatedResultReact<object>> GetObjectTaskAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
         {
             var whereEquals = new Dictionary<string, object>();

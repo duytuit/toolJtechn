@@ -390,31 +390,38 @@ FROM {tableNameWithAlias} {joinSql}
             return Convert.ToInt32(result);
         }
         public static string GenerateSoChungTu(
-        string connectionString,
-        string tableName,
-        string columnName,
-        string prefix,
-        int numberLength)
+       string connectionString,
+       string tableName,
+       string columnName,
+       int storageId,
+       string prefix,
+       int numberLength)
         {
             using var conn = new SqlConnection(connectionString);
             conn.Open();
 
+            // Escape tên bảng và cột an toàn
             string sql = $@"
-                SELECT MAX({columnName})
-                FROM {tableName} WITH (UPDLOCK, HOLDLOCK)
-                WHERE {columnName} LIKE @prefix
+                SELECT MAX([{columnName}])
+                FROM [{tableName}] WITH (UPDLOCK, HOLDLOCK)
+                WHERE [{columnName}] LIKE @prefix
+                  AND [storage_id] = @storageId
             ";
 
             using var cmd = new SqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@prefix", prefix + "%");
+            cmd.Parameters.AddWithValue("@storageId", storageId);
 
             var scalar = cmd.ExecuteScalar();
-            string nextCode;
 
+            string nextCode;
             if (scalar != null && scalar != DBNull.Value)
             {
-                var maxCode = scalar.ToString();
-                var numberPart = maxCode.Substring(prefix.Length);
+                var maxCode = scalar.ToString() ?? "";
+                var numberPart = maxCode.Length > prefix.Length
+                    ? maxCode.Substring(prefix.Length)
+                    : "0";
+
                 int number = int.TryParse(numberPart, out var n) ? n : 0;
                 nextCode = prefix + (number + 1).ToString().PadLeft(numberLength, '0');
             }
@@ -430,13 +437,16 @@ FROM {tableNameWithAlias} {joinSql}
         DbTransaction? tran,
         string tableName,
         string columnName,
+        int storageId,
         string prefix,
         int numberLength)
         {
+            // Escape tên bảng và cột để tránh SQL keyword
             string sql = $@"
-                SELECT MAX({columnName})
-                FROM {tableName} WITH (UPDLOCK, HOLDLOCK)
-                WHERE {columnName} LIKE @prefix
+                SELECT MAX([{columnName}])
+                FROM [{tableName}] WITH (UPDLOCK, HOLDLOCK)
+                WHERE [{columnName}] LIKE @prefix
+                  AND [storage_id] = @storageId
             ";
 
             using var cmd = conn.CreateCommand();
@@ -444,18 +454,29 @@ FROM {tableNameWithAlias} {joinSql}
                 cmd.Transaction = tran;
 
             cmd.CommandText = sql;
-            var param = cmd.CreateParameter();
-            param.ParameterName = "@prefix";
-            param.Value = prefix + "%";
-            cmd.Parameters.Add(param);
+
+            // prefix param
+            var paramPrefix = cmd.CreateParameter();
+            paramPrefix.ParameterName = "@prefix";
+            paramPrefix.Value = prefix + "%";
+            cmd.Parameters.Add(paramPrefix);
+
+            // storageId param
+            var paramStorage = cmd.CreateParameter();
+            paramStorage.ParameterName = "@storageId";
+            paramStorage.Value = storageId;
+            cmd.Parameters.Add(paramStorage);
 
             var scalar = await cmd.ExecuteScalarAsync();
 
             string nextCode;
             if (scalar != null && scalar != DBNull.Value)
             {
-                var maxCode = scalar.ToString();
-                var numberPart = maxCode.Substring(prefix.Length);
+                var maxCode = scalar.ToString() ?? string.Empty;
+                var numberPart = maxCode.Length > prefix.Length
+                    ? maxCode.Substring(prefix.Length)
+                    : "0";
+
                 int number = int.TryParse(numberPart, out var n) ? n : 0;
                 nextCode = prefix + (number + 1).ToString().PadLeft(numberLength, '0');
             }

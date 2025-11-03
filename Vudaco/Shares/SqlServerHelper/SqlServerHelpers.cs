@@ -389,13 +389,117 @@ FROM {tableNameWithAlias} {joinSql}
             var result = await cmd.ExecuteScalarAsync(cancellationToken);
             return Convert.ToInt32(result);
         }
+        public static string GenerateFileNumber(
+            string connectionString,
+            string tableName,
+            string columnName,
+            int storageId,
+            string prefix,
+            int numberLength)
+        {
+            using var conn = new SqlConnection(connectionString);
+            conn.Open();
+
+            // Tạo phần prefix có kèm theo yyMM
+            string datePart = DateTime.Now.ToString("yyMM");
+            string fullPrefix = prefix + datePart;
+
+            // Truy vấn lấy mã lớn nhất cùng tháng và cùng storage
+            string sql = $@"
+                SELECT MAX([{columnName}])
+                FROM [{tableName}] WITH (UPDLOCK, HOLDLOCK)
+                WHERE [{columnName}] LIKE @prefix + '%'
+                AND [storage_id] = @storageId
+            ";
+
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@prefix", fullPrefix);
+            cmd.Parameters.AddWithValue("@storageId", storageId);
+
+            var scalar = cmd.ExecuteScalar();
+
+            string nextCode;
+            if (scalar != null && scalar != DBNull.Value)
+            {
+                var maxCode = scalar.ToString() ?? "";
+                var numberPart = maxCode.Length > fullPrefix.Length
+                    ? maxCode.Substring(fullPrefix.Length)
+                    : "0";
+
+                int number = int.TryParse(numberPart, out var n) ? n : 0;
+                nextCode = fullPrefix + (number + 1).ToString().PadLeft(numberLength, '0');
+            }
+            else
+            {
+                // Bắt đầu lại từ 1 nếu chưa có chứng từ trong tháng
+                nextCode = fullPrefix + "1".PadLeft(numberLength, '0');
+            }
+
+            return nextCode;
+        }
+        public static async Task<string> GenerateFileNumberEfAsync(
+            DbConnection conn,
+            DbTransaction? tran,
+            string tableName,
+            string columnName,
+            int storageId,
+            string prefix,
+            int numberLength)
+        {
+            // Sinh phần ngày tháng theo định dạng yyMM
+            string datePart = DateTime.Now.ToString("yyMM");
+            string fullPrefix = prefix + datePart;
+
+            // SQL truy vấn mã lớn nhất trong tháng hiện tại
+            string sql = $@"
+                SELECT MAX([{columnName}])
+                FROM [{tableName}] WITH (UPDLOCK, HOLDLOCK)
+                WHERE [{columnName}] LIKE @prefix + '%'
+                AND [storage_id] = @storageId
+            ";
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = sql;
+            if (tran != null)
+                cmd.Transaction = tran;
+
+            var paramPrefix = cmd.CreateParameter();
+            paramPrefix.ParameterName = "@prefix";
+            paramPrefix.Value = fullPrefix;
+            cmd.Parameters.Add(paramPrefix);
+
+            var paramStorage = cmd.CreateParameter();
+            paramStorage.ParameterName = "@storageId";
+            paramStorage.Value = storageId;
+            cmd.Parameters.Add(paramStorage);
+
+            var scalar = await cmd.ExecuteScalarAsync();
+
+            string nextCode;
+            if (scalar != null && scalar != DBNull.Value)
+            {
+                var maxCode = scalar.ToString() ?? string.Empty;
+                var numberPart = maxCode.Length > fullPrefix.Length
+                    ? maxCode.Substring(fullPrefix.Length)
+                    : "0";
+
+                int number = int.TryParse(numberPart, out var n) ? n : 0;
+                nextCode = fullPrefix + (number + 1).ToString().PadLeft(numberLength, '0');
+            }
+            else
+            {
+                nextCode = fullPrefix + "1".PadLeft(numberLength, '0');
+            }
+
+            return nextCode;
+        }
         public static string GenerateSoChungTu(
-       string connectionString,
-       string tableName,
-       string columnName,
-       int storageId,
-       string prefix,
-       int numberLength)
+        string connectionString,
+        string tableName,
+        string columnName,
+        int storageId,
+        string prefix,
+        int numberLength)
         {
             using var conn = new SqlConnection(connectionString);
             conn.Open();

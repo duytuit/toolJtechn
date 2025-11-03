@@ -73,9 +73,9 @@ namespace Vudaco.ContractFiles.Controllers
             return ApiResponseResult(true, "Lấy dữ liệu thành công", _results);
         }
         [HttpGet("codeFile")]
-        public IActionResult GetCodeFile(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] FileInfoDto FileInfoDto = null)
+        public IActionResult GetCodeFile(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] GetCodeDto GetCodeDto = null)
         {
-            var result = SqlServerHelpers.GenerateSoChungTu(_configuration.GetConnectionString("DefaultConnection"), "file_infos", "file_number", FileInfoDto.StorageId, "KS", 8);
+            var result = SqlServerHelpers.GenerateFileNumber(_configuration.GetConnectionString("DefaultConnection"), "file_infos", "file_number", GetCodeDto.StorageId, GetCodeDto.Type, 3);
 
             if (result == null)
             {
@@ -98,7 +98,7 @@ namespace Vudaco.ContractFiles.Controllers
             var conn = _context.Database.GetDbConnection();
             try
             {
-                var FileNumber = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "file_infos", "file_number", dto.StorageId, "HDK", 4);
+                var FileNumber = await SqlServerHelpers.GenerateFileNumberEfAsync(conn, tran.GetDbTransaction(), "file_infos", "file_number", dto.StorageId, dto.Feature == 0?"IS":"ES", 3);
 
                 if (dto.EmployeeIds == null || dto.EmployeeIds.Length == 0)
                     return ApiResponseResult<object>(false, "Nhân viên sales bắt buộc", null);

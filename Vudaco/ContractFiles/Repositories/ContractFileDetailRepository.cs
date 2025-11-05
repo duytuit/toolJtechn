@@ -104,7 +104,7 @@ namespace Vudaco.ContractFiles.Repositories
                         FROM debits d
                         WHERE 
                             d.file_info_id = f.id
-                            AND d.employee_staff_id = f.employee_id
+                            AND d.employee_staff_id = fdt.employee_id
                             AND d.deleted_at IS NULL
                     )";
             if (FileInfoDetailDto.StorageId > 0) {

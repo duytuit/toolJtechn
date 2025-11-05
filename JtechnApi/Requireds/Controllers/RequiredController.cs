@@ -36,8 +36,9 @@ namespace JtechnApi.Controllers
         private readonly ISignatureSubmissionRepository _signature;
        // private readonly IDbContextTransaction  _dbcontext;
         private readonly DBContext _context;
+        private readonly RedisService _redis;
 
-        public RequiredController(ILogger<ProductionPlanController> logger, ConnectionStrings c, IRequiredRepository r, IEmployeeRepository emp, ISignatureSubmissionRepository signature, DBContext context)
+        public RequiredController(ILogger<ProductionPlanController> logger, RedisService redis, ConnectionStrings c, IRequiredRepository r, IEmployeeRepository emp, ISignatureSubmissionRepository signature, DBContext context)
         {
             _logger = logger;
             con = c;
@@ -45,7 +46,8 @@ namespace JtechnApi.Controllers
             _emp = emp;
             _signature = signature;
             _context = context;
-           // _dbcontext = dbContext;
+            _redis = redis;
+            // _dbcontext = dbContext;
         }
 
         /// <summary>
@@ -73,6 +75,48 @@ namespace JtechnApi.Controllers
                     return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
                 }
                 return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet]
+        [Route("task/v2/getTeam")]
+        public async Task<IActionResult> GetTeam(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] RequestTeamSubLeaderDto RequestTeamSubLeaderDto = null)
+        {
+            try
+            {
+                var productionPlanCamUser = await _redis.GetAsync("jtec_hn_database_productionPlanCamUser");
+
+                // Chuyển sang list các dictionary
+                var list = JsonSerializer.Deserialize<List<Dictionary<string, JsonElement>>>(productionPlanCamUser);
+                // Mảng giá trị cần lọc
+                var listValue = RequestTeamSubLeaderDto.Code.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                      .Select(x => x.Trim())
+                      .ToList();
+                var codes = list
+                .Where(x => listValue.Contains(GetValue(x["ma_sp"])))
+                .Select(x => GetValue(x["code"])) // Lấy giá trị code
+                .Distinct()                       // Loại trùng
+                .ToList();
+                var emp = _context.Employee.Where(x => codes.Contains(x.Code)).Select(x => x.Id).ToList();
+
+                var _results = new PaginatedResultVue<object>
+                {
+                    Current_page = page,
+                    Per_page = pageSize,
+                    Last_page = 0,
+                    Total = 0
+                };
+                _results.Extra["emp_ids"] = emp;
+
+                if (_results == null)
+                {
+                    return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+                }
+                return ApiResponseResult(true, "Lấy dữ liệu thành công", _results);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponseResult<object>(false, ex.Message, null);
+            }
+           
         }
         // [HttpPost]
         // [Route("task/create")]
@@ -107,7 +151,7 @@ namespace JtechnApi.Controllers
         //     List<SelectEmployeeDto> rs_users = await _emp.GetByListCode(mergedUsers);
 
         //     var Content_form = new{info_users = rs_users};
-            
+
         //     var toDeptJson = firstDict.FirstOrDefault()?.Where(pair => pair.Key == "to_dept")
         //         .Select(pair => pair.Value as List<int>)
         //         .FirstOrDefault() ?? new List<int>();
@@ -132,7 +176,7 @@ namespace JtechnApi.Controllers
         //         Status = 0,
         //         Created_client = TaskRequiredDto.Created_client,
         //     };
-       
+
         //       /* 1️⃣  Lấy execution‑strategy */
         //     var strategy = _context.Database.CreateExecutionStrategy();
 
@@ -174,7 +218,7 @@ namespace JtechnApi.Controllers
         //             _logger.LogError(ex, "Lỗi thêm mới Required");
         //             return ApiResponseResult<object>(false, "Thêm mới thất bại", null);
         //         }
-              
+
         //     });
         // }
         [HttpPost]
@@ -310,6 +354,7 @@ namespace JtechnApi.Controllers
                 Size = 0,
                 Usage_status = 0,
                 Status = 0,
+                Created_by = TaskRequiredDto.UserId,
                 Created_client = TaskRequiredDto.Created_client,
             };
 
@@ -405,6 +450,7 @@ namespace JtechnApi.Controllers
             _required.Title = TaskRequiredDto.Code.Trim();
             _required.Code = TaskRequiredDto.Code.Trim();
             _required.Required_department_id = 0;
+            _required.Updated_by = TaskRequiredDto.UserId;
        
               /* 1️⃣  Lấy execution‑strategy */
             var strategy = _context.Database.CreateExecutionStrategy();
@@ -594,6 +640,17 @@ namespace JtechnApi.Controllers
                 _db.DeleteWhere("Notifycation", whereEquals);
             }
             return ApiResponseResult<object>(true, "Xóa thành công", null);
+        }
+        string GetValue(JsonElement el)
+        {
+            return el.ValueKind switch
+            {
+                JsonValueKind.String => el.GetString(),
+                JsonValueKind.Number => el.GetRawText(),  // Lấy số dạng chuỗi
+                JsonValueKind.True => "true",
+                JsonValueKind.False => "false",
+                _ => null
+            };
         }
     }
 }

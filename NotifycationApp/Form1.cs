@@ -29,6 +29,7 @@ namespace NotifycationApp
         private WebSocketClient _client;
         private CancellationTokenSource _cts;
         private List<notify> _notify = new List<notify>();
+        private ContextMenuStrip contextMenu;
         public Form1()
         {
             InitializeComponent();
@@ -57,7 +58,7 @@ namespace NotifycationApp
             connectSocket();
             //richTextBox1.AppendText("Mở website tại: http://192.168.207.6:8088/admin \n");
             getData();
-
+            CreateNotifyIcon();
         }
         private async void connectSocket()
         {
@@ -349,6 +350,29 @@ namespace NotifycationApp
 
             return false;
         }
+        private void CreateNotifyIcon()
+        {
+            // Tạo menu chuột phải
+            contextMenu = new ContextMenuStrip();
+            var menuOpen = new ToolStripMenuItem("Mở lại");
+            var menuClose = new ToolStripMenuItem("Thoát");
+
+            menuOpen.Click += (s, e) =>
+            {
+                this.Show();
+                this.WindowState = FormWindowState.Normal;
+            };
+            menuClose.Click += (s, e) =>
+            {
+                notifyIcon1.Visible = false;
+                Application.Exit();
+            };
+
+            contextMenu.Items.Add(menuOpen);
+            contextMenu.Items.Add(menuClose);
+
+            notifyIcon1.ContextMenuStrip = contextMenu;
+        }
         public void AppendColoredText(
             RichTextBox box,
             string text,
@@ -473,6 +497,21 @@ namespace NotifycationApp
         private void Form1_Load(object sender, EventArgs e)
         {
             checkUpdate();
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+
+        }
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;  // Ngăn không cho form đóng
+                this.Hide();      // Ẩn form (chạy ngầm)
+                notifyIcon1.Visible = true;
+            }
+            base.OnFormClosing(e);
         }
     }
     public class notify

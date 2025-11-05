@@ -48,7 +48,7 @@ namespace JtechnApi.Requireds.Repositories
             _redis = redis;
             _configuration = configuration;
         }
-
+       
         public async Task<PaginatedResult<Required>> GetPaginatedAsync(RequestRequiredDto RequestRequiredDto, int page, int pageSize)
         {
             // var totalItems = await _context.Required.CountAsync();

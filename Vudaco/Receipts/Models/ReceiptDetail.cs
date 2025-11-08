@@ -30,7 +30,6 @@ namespace Vudaco.Receipts.Models
         [Column("amount")]
         public int Amount { get; set; }
 
-        [Required]
         [Column("vat")]
         public int Vat { get; set; }
 

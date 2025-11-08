@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Vudaco.Controllers;
+using System.Linq;
 
 namespace Vudaco
 {
@@ -35,26 +36,48 @@ namespace Vudaco
         {
             int statusCode = (int)HttpStatusCode.InternalServerError;
             string message = "Internal Server Error";
+            string lineInfo = "";
+            string fullDetail = "";
 
-            if (exception is Microsoft.EntityFrameworkCore.DbUpdateException dbUpdateEx)
+            try
             {
-                statusCode = 500;
-                message = dbUpdateEx.InnerException?.Message ?? dbUpdateEx.Message;
-            }
-            else
-            {
+                Exception currentEx = exception;
+                int depth = 0;
+
+                // Lấy thông tin lỗi lồng nhau (InnerException)
+                while (currentEx != null)
+                {
+                    var trace = currentEx.StackTrace;
+                    var line = trace?
+                        .Split('\n')
+                        .LastOrDefault(l => l.Contains(":line"))?
+                        .Trim() ?? "No line info";
+
+                    fullDetail += $"\n[{depth}] {currentEx.GetType().Name}: {currentEx.Message} | {line}";
+                    currentEx = currentEx.InnerException;
+                    depth++;
+                }
+
                 message = exception.Message;
+                lineInfo = fullDetail;
+
+                _logger.LogError($"❌ Exception: {message}\nDetails:{fullDetail}");
+
+                var response = new ApiResponse<object>(false, $"{message} | {fullDetail}");
+
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = statusCode;
+
+                var json = JsonSerializer.Serialize(response);
+                await context.Response.WriteAsync(json);
             }
-            // Ghi log lỗi
-            _logger.LogError(message);
-            var response = new ApiResponse<object>(false,message);
-
-            context.Response.ContentType = "application/json";
-            context.Response.StatusCode = statusCode;
-
-            var json = JsonSerializer.Serialize(response);
-
-            await context.Response.WriteAsync(json);
+            catch (Exception ex)
+            {
+                // fallback tránh crash middleware
+                _logger.LogError($"[ExceptionMiddlewareError] {ex.Message}");
+                context.Response.StatusCode = 500;
+                await context.Response.WriteAsync("{\"success\":false,\"message\":\"Middleware error\"}");
+            }
         }
     }
 }

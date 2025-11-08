@@ -52,7 +52,7 @@ namespace Vudaco.Receipts.Repositories
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "receipts",
-                        new[] { "id","code_receipt","storage_id","partner_detail_id","accounting_date","employee_id","file_info_id","code_fund","code","bill","note","description","form_of_payment","type_receipt","type","account_number","bank_name","branch_name","account_holder","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},
+                        new[] { "id","code_receipt","storage_id","partner_detail_id","accounting_date","employee_id","file_info_id", "fund_id", "income_expense_category_id", "bill","note","description","form_of_payment","type_receipt","type", "bank_id", "data","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},
                         offset: null,
                         limit: null,
                         whereEquals: whereEquals,

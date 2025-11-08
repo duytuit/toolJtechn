@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ using Vudaco.Receipts.Dtos;
 using Vudaco.Receipts.Models;
 using Vudaco.Receipts.Repositories;
 using Vudaco.Shares.BaseRepository;
+using Vudaco.Shares.SqlServerHelper;
 
 namespace Vudaco.Receipts.Controllers
 {
@@ -44,27 +46,71 @@ namespace Vudaco.Receipts.Controllers
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
         [HttpPost]
-        [Route("create")]
-        public async Task<IActionResult> Create([FromBody] ReceiptDto ReceiptDto)
+        [Route("create/chigiaonhan")]
+        public async Task<IActionResult> CreateChiGiaoNhan([FromBody] ReceiptDto ReceiptDto)
         {
+            if (ReceiptDto.EmployeeId == null || ReceiptDto.EmployeeId == 0)
+                return ApiResponseResult<object>(false, "Nhân viên giao nhận bắt buộc", null);
+            if (ReceiptDto.FileInfoId == null || ReceiptDto.FileInfoId == 0)
+                return ApiResponseResult<object>(false, "so file bắt buộc", null);
+            if (ReceiptDto.FundId == null || ReceiptDto.FundId == 0)
+                return ApiResponseResult<object>(false, "Ma quy bắt buộc", null);
+            if (ReceiptDto.IncomeExpenseCategoryId == null || ReceiptDto.IncomeExpenseCategoryId == 0)
+                return ApiResponseResult<object>(false, "ly do chi bắt buộc", null);
             // Check trùng Name
             var entity = await _context.Receipts.FirstOrDefaultAsync(p => p.CodeReceipt == ReceiptDto.CodeReceipt);
             if (entity != null)
-                return ApiResponseResult<object>(false, "Tên dữ liệu đã tồn tại", null);
-            // Check trùng Code
-            entity = await _context.Receipts.FirstOrDefaultAsync(p => p.Code == ReceiptDto.Code);
-            if (entity != null)
-                return ApiResponseResult<object>(false, "code dữ liệu đã tồn tại", null);
-                
-            var Receipt = new Receipt
+                return ApiResponseResult<object>(false, "ma phieu chi đã tồn tại", null);
+
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
             {
-                StorageId = ReceiptDto.StorageId,
-                CreatedBy = userId,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
-            };
-            Receipt = await _repoReceipt.CreateAsync(Receipt);
-            return ApiResponseResult(true, "Thêm thành công", Receipt);
+                var code_receipt = await SqlServerHelpers.GenerateFileNumberEfAsync(conn, tran.GetDbTransaction(), "receipts", "code_receipt", ReceiptDto.StorageId, "PC", 4);
+
+                entity = new Receipt
+                {
+                    AccountingDate = ReceiptDto.AccountingDate,
+                    StorageId = ReceiptDto.StorageId,
+                    CodeReceipt = code_receipt,
+                    FileInfoId = ReceiptDto.FileInfoId,
+                    EmployeeId = ReceiptDto.EmployeeId,
+                    Bill = ReceiptDto.Bill,
+                    FundId = ReceiptDto.FundId,
+                    IncomeExpenseCategoryId = ReceiptDto.IncomeExpenseCategoryId,
+                    Note = ReceiptDto.Note,
+                    FormOfPayment = ReceiptDto.FormOfPayment,
+                    TypeReceipt = 1,
+                    BankId = ReceiptDto.FormOfPayment == 2 ? ReceiptDto.BankId : 0,
+                    Data = ReceiptDto.Data,
+                    CreatedBy = userId,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
+                _context.Receipts.Add(entity);
+                await _context.SaveChangesAsync();
+                var entity_detail = new ReceiptDetail
+                {
+                    ReceiptId = entity.Id,
+                    StorageId = ReceiptDto.StorageId,
+                    AccountingDate = ReceiptDto.AccountingDate,
+                    Amount = ReceiptDto.Amount,
+                    Vat = ReceiptDto.Vat,
+                    CreatedBy = userId,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+
+                };
+                _context.ReceiptDetails.Add(entity_detail);
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+                return ApiResponseResult(true, "Thêm thành công", entity);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
+            }
         }
         [HttpPost("update")]
         public async Task<IActionResult> Update([FromBody] ReceiptDto ReceiptDto)

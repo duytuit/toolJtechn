@@ -30,15 +30,13 @@ namespace Vudaco.Receipts.Models
         public int? Type { get; set; }
 
         [Column("accounting_date")]
-        public DateTime? AccountingDate { get; set; }
+        public DateTime AccountingDate { get; set; }
 
-        [MaxLength(50)]
-        [Column("code_fund")]
-        public string CodeFund { get; set; }
+        [Column("fund_id")]
+        public int? FundId { get; set; }
 
-        [MaxLength(50)]
-        [Column("code")]
-        public string Code { get; set; }
+        [Column("income_expense_category_id")]
+        public int? IncomeExpenseCategoryId { get; set; }
 
         [MaxLength(50)]
         [Column("bill")]
@@ -58,21 +56,11 @@ namespace Vudaco.Receipts.Models
         [Column("type_receipt")]
         public int TypeReceipt { get; set; }
 
-        [MaxLength(191)]
-        [Column("account_number")]
-        public string AccountNumber { get; set; }
+        [Column("bank_id")]
+        public int? BankId { get; set; }
 
-        [MaxLength(191)]
-        [Column("bank_name")]
-        public string BankName { get; set; }
-
-        [MaxLength(191)]
-        [Column("branch_name")]
-        public string BranchName { get; set; }
-
-        [MaxLength(191)]
-        [Column("account_holder")]
-        public string AccountHolder { get; set; }
+        [Column("data")]
+        public string Data { get; set; }
 
         [Column("created_by")]
         public int? CreatedBy { get; set; }

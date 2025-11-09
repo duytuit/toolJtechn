@@ -40,7 +40,7 @@ namespace Vudaco.ContractFiles.Repositories
             return Task.FromResult(FileInfoDetail);
         }
 
-        public async Task<PaginatedResultReact<object>> GetObjectByDispatchAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
+        public async Task<PaginatedResultReact<object>> GetObjectFileNotDispatchAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
         {
             var sql = $@"
               SELECT 
@@ -81,7 +81,7 @@ namespace Vudaco.ContractFiles.Repositories
             };
             return _results;
         }
-        public async Task<PaginatedResultReact<object>> GetObjectByEmployeeAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
+        public async Task<PaginatedResultReact<object>> GetObjectNotServiceAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
         {
             var sql = $@"
                SELECT 

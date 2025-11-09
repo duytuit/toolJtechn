@@ -13,8 +13,8 @@ namespace Vudaco.ContractFiles.Repositories
     public interface IContractFileDetailRepository : IBaseRepository<FileInfoDetail>
     {
         Task<PaginatedResultReact<object>> GetObjectTaskAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken);
-        Task<PaginatedResultReact<object>> GetObjectByEmployeeAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken);
-        Task<PaginatedResultReact<object>> GetObjectByDispatchAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<PaginatedResultReact<object>> GetObjectNotServiceAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<PaginatedResultReact<object>> GetObjectFileNotDispatchAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<FileInfoDetail> ShowAsync(int id);
         Task<FileInfoDetail> CreateAsync(FileInfoDetail FileInfoDetail);
         Task<FileInfoDetail> UpdateAsync(FileInfoDetail FileInfoDetail);

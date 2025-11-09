@@ -38,22 +38,22 @@ namespace Vudaco.ContractFiles.Controllers
             _context = context;
             _configuration = configuration;
         }
-        [HttpGet("getFileNotCreateChiPhi")]
+        [HttpGet("getFileNotService")]
         public async Task<IActionResult> GetFileNotCreateChiPhi(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] FileInfoDetailDto FileInfoDetailDto = null)
         {
             // test
-            var result = await _repoContractFileDetail.GetObjectByEmployeeAsync(FileInfoDetailDto, page, pageSize, cancellationToken);
+            var result = await _repoContractFileDetail.GetObjectNotServiceAsync(FileInfoDetailDto, page, pageSize, cancellationToken);
             if (result == null)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
-        [HttpGet("getFileNotCreateDispatch")]
+        [HttpGet("getFileNotDispatch")]
         public async Task<IActionResult> GetFileNotCreateDispatch(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] FileInfoDetailDto FileInfoDetailDto = null)
         {
             // test
-            var result = await _repoContractFileDetail.GetObjectByDispatchAsync(FileInfoDetailDto, page, pageSize, cancellationToken);
+            var result = await _repoContractFileDetail.GetObjectFileNotDispatchAsync(FileInfoDetailDto, page, pageSize, cancellationToken);
             if (result == null)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);

@@ -96,7 +96,8 @@ namespace Vudaco.ContractFiles.Controllers
         [HttpGet("codeFile")]
         public IActionResult GetCodeFile(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] GetCodeDto GetCodeDto = null)
         {
-            var result = SqlServerHelpers.GenerateFileNumber(_configuration.GetConnectionString("DefaultConnection"), "file_infos", "file_number", GetCodeDto.StorageId, GetCodeDto.Type, 3);
+            var prefix = GetCodeDto.Type + GetCodeDto.yearMonth.ToString("yyMM");
+            var result = SqlServerHelpers.GenerateFileNumber(_configuration.GetConnectionString("DefaultConnection"), "file_infos", "file_number", GetCodeDto.StorageId, prefix, 4);
 
             if (result == null)
             {
@@ -119,7 +120,8 @@ namespace Vudaco.ContractFiles.Controllers
             var conn = _context.Database.GetDbConnection();
             try
             {
-                var FileNumber = await SqlServerHelpers.GenerateFileNumberEfAsync(conn, tran.GetDbTransaction(), "file_infos", "file_number", dto.StorageId, dto.Feature == 0?"IS":"ES", 3);
+                var prefix = dto.Feature == 0 ?  "IS" + dto.AccountingDate.ToString("yyMM") : "ES"+ dto.AccountingDate.ToString("yyMM");
+                var FileNumber = await SqlServerHelpers.GenerateFileNumberEfAsync(conn, tran.GetDbTransaction(), "file_infos", "file_number", dto.StorageId, prefix, 4);
 
                 if (dto.EmployeeIds == null || dto.EmployeeIds.Length == 0)
                     return ApiResponseResult<object>(false, "Nhân viên sales bắt buộc", null);

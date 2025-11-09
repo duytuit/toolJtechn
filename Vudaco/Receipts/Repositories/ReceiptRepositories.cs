@@ -10,6 +10,7 @@ using Vudaco.Receipts.Dtos;
 using Vudaco.Receipts.Models;
 using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
+using Vudaco.Shares.MysqlHelper;
 using Vudaco.Shares.SqlServerHelper;
 
 namespace Vudaco.Receipts.Repositories
@@ -19,6 +20,8 @@ namespace Vudaco.Receipts.Repositories
         private readonly VudacoDBContext _context;
         private readonly IConfiguration _configuration;
         private readonly RedisService _redis;
+        public const int Thu = 0;
+        public const int ChiGiaoNhan = 1;
         public ReceiptRepositories(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;
@@ -48,17 +51,31 @@ namespace Vudaco.Receipts.Repositories
             var orderByList = new List<string> {  "updated_at desc" , "id"};
             if (ReceiptDto.StorageId > 0)
                 whereEquals["storage_id"] = ReceiptDto.StorageId;
-                whereEquals["type"] = ReceiptDto.Type;
+            if (ReceiptDto.TypeReceipt > 0)
+                whereEquals["type_receipt"] = ReceiptDto.TypeReceipt;
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "receipts",
-                        new[] { "id","code_receipt","storage_id","partner_detail_id","accounting_date","employee_id","file_info_id", "fund_id", "income_expense_category_id", "bill","note","description","form_of_payment","type_receipt","type", "bank_id", "data","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},
+                        new[] { "id", "code_receipt", "storage_id", "partner_detail_id", "accounting_date", "employee_id", "file_info_id", "fund_id", "income_expense_category_id", "bill", "note", "description", "form_of_payment", "type_receipt", "type", "bank_id", "data", "created_by", "updated_by", "deleted_by", "deleted_at", "created_at", "updated_at" },
                         offset: null,
                         limit: null,
                         whereEquals: whereEquals,
                         whereLikes: whereLikes,
                         dateRangeList: whereDateRange,
                         orderByList: orderByList,
+                        relations: new List<AdoRelation>
+                                {
+                                    new AdoRelation
+                                    {
+                                        Name = "receipt_details",
+                                        Table = "receipt_details",
+                                        Columns = new[] { "id","receipt_id","storage_id","debit_id","accounting_date","amount","vat","data","note","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},
+                                        ParentKey = "id",
+                                        ForeignKey = "receipt_id",
+                                        KeyName = "receipt_id",
+                                        IsCollection = true,
+                                    }
+                                },
                         redisCache: _redis,
                         includeCount: false,
                         cancellationToken: cancellationToken
@@ -80,9 +97,20 @@ namespace Vudaco.Receipts.Repositories
             return _results;
         }
 
-        public Task<Receipt> ShowAsync(int id)
+        public async Task<Receipt> ShowAsync(int id)
         {
-             return _context.Receipts.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            var entity = await _context.Receipts
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (entity == null) return null;
+
+            entity.ReceiptDetails = await _context.ReceiptDetails
+                .AsNoTracking()
+                .Where(d => d.ReceiptId == id)
+                .ToListAsync();
+
+            return entity;
         }
 
         public Task<Receipt> UpdateAsync(Receipt Receipt)

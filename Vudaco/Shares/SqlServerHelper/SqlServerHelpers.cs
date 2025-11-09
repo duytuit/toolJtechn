@@ -399,10 +399,8 @@ FROM {tableNameWithAlias} {joinSql}
         {
             using var conn = new SqlConnection(connectionString);
             conn.Open();
-
             // Tạo phần prefix có kèm theo yyMM
-            string datePart = DateTime.Now.ToString("yyMM");
-            string fullPrefix = prefix + datePart;
+            string fullPrefix = prefix;
 
             // Truy vấn lấy mã lớn nhất cùng tháng và cùng storage
             string sql = $@"
@@ -447,8 +445,7 @@ FROM {tableNameWithAlias} {joinSql}
             int numberLength)
         {
             // Sinh phần ngày tháng theo định dạng yyMM
-            string datePart = DateTime.Now.ToString("yyMM");
-            string fullPrefix = prefix + datePart;
+            string fullPrefix = prefix;
 
             // SQL truy vấn mã lớn nhất trong tháng hiện tại
             string sql = $@"
@@ -504,9 +501,7 @@ FROM {tableNameWithAlias} {joinSql}
             using var conn = new SqlConnection(connectionString);
             conn.Open();
 
-            // Tạo phần prefix có kèm theo yyMM
-            string datePart = DateTime.Now.ToString("yyMM");
-            string fullPrefix = prefix + datePart;
+            string fullPrefix = prefix;
 
             // Truy vấn lấy mã lớn nhất cùng tháng và cùng storage
             string sql = $@"
@@ -550,9 +545,7 @@ FROM {tableNameWithAlias} {joinSql}
             string prefix,
             int numberLength)
         {
-            // Sinh phần ngày tháng theo định dạng yyMM
-            string datePart = DateTime.Now.ToString("yyMM");
-            string fullPrefix = prefix + datePart;
+            string fullPrefix = prefix;
 
             // SQL truy vấn mã lớn nhất trong tháng hiện tại
             string sql = $@"

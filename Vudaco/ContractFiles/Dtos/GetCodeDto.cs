@@ -7,6 +7,7 @@ namespace Vudaco.ContractFiles.Dtos
 {
     public class GetCodeDto
     {
+        public DateTime yearMonth { get; set; }
         public string Type { get; set; }
         public int StorageId { get; set; }
     }

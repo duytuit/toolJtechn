@@ -18,8 +18,10 @@ namespace Vudaco.Debits.Models
         [Column("vehicle_id")]
         public int? VehicleId { get; set; }
 
-        [Column("partner_detail_id")]
-        public int? PartnerDetailId { get; set; }
+        [Column("customer_detail_id")]
+        public int CustomerDetailId { get; set; }
+        [Column("supplier_detail_id")]
+        public int? SupplierDetailId { get; set; }
 
         [Column("employee_staff_id")]
         public int? EmployeeStaffId { get; set; }

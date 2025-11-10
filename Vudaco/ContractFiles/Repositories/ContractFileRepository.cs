@@ -36,14 +36,14 @@ namespace Vudaco.ContractFiles.Repositories
             var orderByList = new List<string> {  "updated_at desc" , "id"};
             if (FileInfo.StorageId > 0)
                 whereEquals["storage_id"] = FileInfo.StorageId;
-            if (FileInfo.PartnerDetailId > 0)
-                whereEquals["partner_detail_id"] = FileInfo.PartnerDetailId;
+            if (FileInfo.CustomerDetailId > 0)
+                whereEquals["customer_detail_id"] = FileInfo.CustomerDetailId;
             if (FileInfo.FromDate.HasValue && FileInfo.ToDate.HasValue)
                 whereDateRange.Add(("accounting_date", FileInfo.FromDate.Value, FileInfo.ToDate.Value));
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "file_infos",
-                        new[] { "id", "partner_detail_id", "accounting_date", "storage_id", "file_number", "declaration", "bill", "quantity", "container_code", "sales", "type", "feature", "declaration_quantity", "declaration_type", "business", "occurrence", "note", "created_by", "updated_by", "deleted_by", "deleted_at", "created_at", "updated_at", },
+                        new[] { "id", "customer_detail_id", "accounting_date", "storage_id", "file_number", "declaration", "bill", "quantity", "container_code", "sales", "type", "feature", "declaration_quantity", "declaration_type", "business", "occurrence", "note", "created_by", "updated_by", "deleted_by", "deleted_at", "created_at", "updated_at", },
                         offset: null,
                         limit: null,
                         whereEquals: whereEquals,

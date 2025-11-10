@@ -54,8 +54,10 @@ namespace Vudaco.Receipts.Controllers
                 return ApiResponseResult<object>(false, "Nhân viên giao nhận bắt buộc", null);
             if (ReceiptDto.FileInfoId == null || ReceiptDto.FileInfoId == 0)
                 return ApiResponseResult<object>(false, "so file bắt buộc", null);
-            if (ReceiptDto.FundId == null || ReceiptDto.FundId == 0)
-                return ApiResponseResult<object>(false, "Ma quy bắt buộc", null);
+            if (ReceiptDto.FormOfPayment == 1 && (ReceiptDto.FundId == null || ReceiptDto.FundId == 0))
+                return ApiResponseResult<object>(false, "Mã quỹ bắt buộc", null);
+            if (ReceiptDto.FormOfPayment == 2 && (ReceiptDto.BankId == null || ReceiptDto.BankId == 0))
+                return ApiResponseResult<object>(false, "Mã Ngân hàng bắt buộc", null);
             if (ReceiptDto.IncomeExpenseCategoryId == null || ReceiptDto.IncomeExpenseCategoryId == 0)
                 return ApiResponseResult<object>(false, "ly do chi bắt buộc", null);
             // Check trùng Name
@@ -67,7 +69,7 @@ namespace Vudaco.Receipts.Controllers
             var conn = _context.Database.GetDbConnection();
             try
             {
-                var code_receipt = await SqlServerHelpers.GenerateFileNumberEfAsync(conn, tran.GetDbTransaction(), "receipts", "code_receipt", ReceiptDto.StorageId, "PC", 4);
+                var code_receipt = await SqlServerHelpers.GenerateCodeEfAsync(conn, tran.GetDbTransaction(), "receipts", "code_receipt", ReceiptDto.StorageId, "PC", 8);
 
                 entity = new Receipt
                 {
@@ -77,7 +79,7 @@ namespace Vudaco.Receipts.Controllers
                     FileInfoId = ReceiptDto.FileInfoId,
                     EmployeeId = ReceiptDto.EmployeeId,
                     Bill = ReceiptDto.Bill,
-                    FundId = ReceiptDto.FundId,
+                    FundId = ReceiptDto.FormOfPayment == 1 ? ReceiptDto.FundId : 0,
                     IncomeExpenseCategoryId = ReceiptDto.IncomeExpenseCategoryId,
                     Note = ReceiptDto.Note,
                     FormOfPayment = ReceiptDto.FormOfPayment,
@@ -122,8 +124,10 @@ namespace Vudaco.Receipts.Controllers
                 return ApiResponseResult<object>(false, "Nhân viên giao nhận bắt buộc", null);
             if (ReceiptDto.FileInfoId == null || ReceiptDto.FileInfoId == 0)
                 return ApiResponseResult<object>(false, "Số file bắt buộc", null);
-            if (ReceiptDto.FundId == null || ReceiptDto.FundId == 0)
+            if (ReceiptDto.FormOfPayment == 1 && (ReceiptDto.FundId == null || ReceiptDto.FundId == 0))
                 return ApiResponseResult<object>(false, "Mã quỹ bắt buộc", null);
+            if (ReceiptDto.FormOfPayment == 2 && (ReceiptDto.BankId == null || ReceiptDto.BankId == 0))
+                return ApiResponseResult<object>(false, "Mã Ngân hàng bắt buộc", null);
             if (ReceiptDto.IncomeExpenseCategoryId == null || ReceiptDto.IncomeExpenseCategoryId == 0)
                 return ApiResponseResult<object>(false, "Lý do chi bắt buộc", null);
 
@@ -141,7 +145,7 @@ namespace Vudaco.Receipts.Controllers
                 entity.FileInfoId = ReceiptDto.FileInfoId;
                 entity.EmployeeId = ReceiptDto.EmployeeId;
                 entity.Bill = ReceiptDto.Bill;
-                entity.FundId = ReceiptDto.FundId;
+                entity.FundId = ReceiptDto.FormOfPayment == 1 ? ReceiptDto.FundId : 0;
                 entity.IncomeExpenseCategoryId = ReceiptDto.IncomeExpenseCategoryId;
                 entity.Note = ReceiptDto.Note;
                 entity.FormOfPayment = ReceiptDto.FormOfPayment;

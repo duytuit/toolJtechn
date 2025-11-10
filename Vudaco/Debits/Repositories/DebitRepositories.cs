@@ -47,8 +47,8 @@ namespace Vudaco.Debits.Repositories
             var orderByList = new List<string> { "updated_at desc", "id" };
             if (DebitDto.StorageId > 0)
                 whereEquals["storage_id"] = DebitDto.StorageId;
-            if (DebitDto.PartnerDetailId > 0)
-                whereEquals["partner_detail_id"] = DebitDto.PartnerDetailId;
+            if (DebitDto.CustomerDetailId > 0)
+                whereEquals["customer_detail_id"] = DebitDto.CustomerDetailId;
             if (DebitDto.FileInfoId > 0)
                 whereEquals["file_info_id"] = DebitDto.FileInfoId;
 
@@ -61,7 +61,7 @@ namespace Vudaco.Debits.Repositories
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "debits",
-                        new[] { "id", "bill_id", "vehicle_id", "partner_detail_id", "file_info_id", "storage_id", "type", "name", "accounting_date", "purchase_price", "price", "vat", "status", "data", "note", "approved_by_user", "approval_time", "created_by", "updated_by", "deleted_by", "deleted_at", "created_at", "updated_at" },
+                        new[] { "id","bill_id","vehicle_id","customer_detail_id","supplier_detail_id","file_info_id","employee_staff_id","employee_driver_id","storage_id","type","dispatch_code","name","accounting_date","purchase_price","price","vat","driver_fee","meal_fee","ticket_fee","overnight_fee","penalty_fee","goods_fee","status","data","note","customer_vehicle_type","supplier_vehicle_type","approved_by_user","approval_time","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},
                         offset: null,
                         limit: null,
                         whereEquals: whereEquals,
@@ -98,8 +98,10 @@ namespace Vudaco.Debits.Repositories
             var orderByList = new List<string> {  "updated_at desc" , "id"};
             if (DebitDto.StorageId > 0)
                 whereEquals["storage_id"] = DebitDto.StorageId;
-            if (DebitDto.PartnerDetailId > 0)
-                whereEquals["partner_detail_id"] = DebitDto.PartnerDetailId;
+            if (DebitDto.CustomerDetailId > 0)
+                whereEquals["customer_detail_id"] = DebitDto.CustomerDetailId;
+            if (DebitDto.CustomerDetailId > 0)
+                whereEquals["supplier_detail_id"] = DebitDto.SupplierDetailId;
             if (DebitDto.Status > 0)
                 whereEquals["status"] = DebitDto.Status;
             if (DebitDto.FileInfoId > 0)
@@ -120,7 +122,7 @@ namespace Vudaco.Debits.Repositories
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "debits",
-                        new[] { "id","bill_id","vehicle_id","partner_detail_id","file_info_id","storage_id","type","name","accounting_date","purchase_price","price","vat","status","data","note","approved_by_user","approval_time","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at" },
+                        new[] { "id","bill_id","vehicle_id","customer_detail_id","supplier_detail_id","file_info_id","employee_staff_id","employee_driver_id","storage_id","type","dispatch_code","name","accounting_date","purchase_price","price","vat","driver_fee","meal_fee","ticket_fee","overnight_fee","penalty_fee","goods_fee","status","data","note","customer_vehicle_type","supplier_vehicle_type","approved_by_user","approval_time","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},
                         offset: null,
                         limit: null,
                         whereEquals: whereEquals,
@@ -157,8 +159,8 @@ namespace Vudaco.Debits.Repositories
             var orderByList = new List<string> { "updated_at desc", "id" };
             if (DebitDto.StorageId > 0)
                 whereEquals["storage_id"] = DebitDto.StorageId;
-            if (DebitDto.PartnerDetailId > 0)
-                whereEquals["partner_detail_id"] = DebitDto.PartnerDetailId;
+            if (DebitDto.CustomerDetailId > 0)
+                whereEquals["customer_detail_id"] = DebitDto.CustomerDetailId;
 
             if (DebitDto.FileInfoId > 0)
                 whereEquals["file_info_id"] = DebitDto.FileInfoId;
@@ -171,7 +173,7 @@ namespace Vudaco.Debits.Repositories
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "debits",
-                        new[] { "id", "bill_id", "vehicle_id", "partner_detail_id", "file_info_id", "storage_id", "type", "name", "accounting_date", "purchase_price", "price", "vat", "status", "data", "note", "approved_by_user", "approval_time", "created_by", "updated_by", "deleted_by", "deleted_at", "created_at", "updated_at" },
+                        new[] { "id","bill_id","vehicle_id","customer_detail_id","supplier_detail_id","file_info_id","employee_staff_id","employee_driver_id","storage_id","type","dispatch_code","name","accounting_date","purchase_price","price","vat","driver_fee","meal_fee","ticket_fee","overnight_fee","penalty_fee","goods_fee","status","data","note","customer_vehicle_type","supplier_vehicle_type","approved_by_user","approval_time","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at" },
                         offset: null,
                         limit: null,
                         whereEquals: whereEquals,

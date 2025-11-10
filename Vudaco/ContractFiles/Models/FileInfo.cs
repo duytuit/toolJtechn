@@ -12,8 +12,8 @@ namespace Vudaco.ContractFiles.Models
         [Column("id")]
         public int Id { get; set; }
 
-        [Column("partner_detail_id")]
-        public int? PartnerDetailId { get; set; }
+        [Column("customer_detail_id")]
+        public int? CustomerDetailId { get; set; }
 
         [Required]
         [Column("storage_id")]

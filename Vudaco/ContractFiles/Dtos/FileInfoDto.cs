@@ -8,7 +8,7 @@ namespace Vudaco.ContractFiles.Dtos
     public class FileInfoDto
     {
         public int Id { get; set; }
-        public int? PartnerDetailId { get; set; }
+        public int? CustomerDetailId { get; set; }
         public int StorageId { get; set; }
         public DateTime AccountingDate { get; set; }
         public string FileNumber { get; set; }

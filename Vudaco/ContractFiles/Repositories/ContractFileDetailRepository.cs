@@ -46,7 +46,7 @@ namespace Vudaco.ContractFiles.Repositories
               SELECT 
                     f.*
                 FROM file_infos f
-                LEFT JOIN partner_details p ON p.id = f.partner_detail_id
+                LEFT JOIN partner_details p ON p.id = f.customer_detail_id
                 WHERE 
                     f.deleted_at IS NULL
                     AND p.status = 1
@@ -56,7 +56,8 @@ namespace Vudaco.ContractFiles.Repositories
                         FROM debits d
                         WHERE 
                             d.file_info_id = f.id
-                            AND d.partner_detail_id = f.partner_detail_id
+                            AND d.customer_detail_id = f.customer_detail_id
+                            AND d.type = 0 
                             AND d.deleted_at IS NULL
                             AND d.employee_staff_id IS NULL
                     )";
@@ -84,27 +85,38 @@ namespace Vudaco.ContractFiles.Repositories
         public async Task<PaginatedResultReact<object>> GetObjectNotServiceAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
         {
             var sql = $@"
-               SELECT 
+                SELECT 
+                    f.*,
                     fdt.price,
                     fdt.status,
-                    fdt.price,
                     fdt.employee_id,
-                    f.*
+                    ISNULL(rdt_total.total, 0) AS total
                 FROM file_info_details fdt
-                LEFT JOIN file_infos f ON f.id = fdt.file_id
-                LEFT JOIN partner_details p on p.id = f.partner_detail_id
+                INNER JOIN file_infos f 
+                    ON f.id = fdt.file_id
+                LEFT JOIN partner_details p 
+                    ON p.id = f.customer_detail_id
+                OUTER APPLY (
+                    SELECT SUM(rdt.amount * rdt.vat / 100) + SUM(rdt.amount) AS total
+                    FROM receipts r
+                    INNER JOIN receipt_details rdt 
+                        ON rdt.receipt_id = r.id
+                    WHERE r.file_info_id = f.id 
+                    AND r.employee_id = fdt.employee_id
+                ) rdt_total
                 WHERE 
                     fdt.deleted_at IS NULL
-                    AND fdt.status = 0
                     AND f.deleted_at IS NULL
                     AND p.status = 1
-					AND p.deleted_at IS NULL
+                    AND p.deleted_at IS NULL
                     AND NOT EXISTS (
                         SELECT 1
                         FROM debits d
                         WHERE 
                             d.file_info_id = f.id
+                            AND d.customer_detail_id = f.customer_detail_id
                             AND d.employee_staff_id = fdt.employee_id
+                            AND d.type BETWEEN 1 AND 2
                             AND d.deleted_at IS NULL
                     )";
             if (FileInfoDetailDto.StorageId > 0) {

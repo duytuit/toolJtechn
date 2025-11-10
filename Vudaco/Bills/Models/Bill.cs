@@ -22,9 +22,10 @@ namespace Vudaco.Bills.Models
         [Column("storage_id")]
         public int StorageId { get; set; }
 
-        [Required]
-        [Column("partner_detail_id")]
-        public int? PartnerDetailId { get; set; }
+        [Column("customer_detail_id")]
+        public int? CustomerDetailId { get; set; }
+        [Column("supplier_detail_id")]
+        public int? SupplierDetailId { get; set; }
 
         [Required]
         [Column("accounting_date")]

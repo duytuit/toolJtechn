@@ -11,7 +11,8 @@ namespace Vudaco.Bills.Dtos
         public string BillCode { get; set; }
         public int? FileInfoId { get; set; }
         public int StorageId { get; set; }
-        public int PartnerDetailId { get; set; }
+        public int? CustomerDetailId { get; set; }
+        public int? SupplierDetailId { get; set; }
         public DateTime AccountingDate { get; set; }
         public string Name { get; set; }
         public int CycleName { get; set; }

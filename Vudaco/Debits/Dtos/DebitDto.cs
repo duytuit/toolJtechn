@@ -12,8 +12,8 @@ namespace Vudaco.Debits.Dtos
         public int? VehicleId { get; set; }
         public int? EmployeeStaffId { get; set; }
         public int? EmployeeDriverId { get; set; }
-        public int? PartnerDetailId { get; set; }
-        public int? SupplierPartnerDetailId { get; set; }
+        public int CustomerDetailId { get; set; }
+        public int? SupplierDetailId { get; set; }
         public int? FileInfoId { get; set; }
         public int StorageId { get; set; }
         public int Type { get; set; }

@@ -136,7 +136,7 @@ namespace Vudaco.ContractFiles.Controllers
 
                 var entity = new FileInfo
                 {
-                    PartnerDetailId = dto.PartnerDetailId,
+                    CustomerDetailId = dto.CustomerDetailId,
                     AccountingDate = dto.AccountingDate,
                     StorageId = dto.StorageId,
                     FileNumber = FileNumber,
@@ -211,7 +211,7 @@ namespace Vudaco.ContractFiles.Controllers
                 {
                     return ApiResponseResult<object>(false, "Số file này. đã được duyệt ứng: " + totalPrice, null);
                 }
-                entity.PartnerDetailId = dto.PartnerDetailId;
+                entity.CustomerDetailId = dto.CustomerDetailId;
                 entity.AccountingDate = dto.AccountingDate;
                 entity.StorageId = dto.StorageId;
                 entity.FileNumber = dto.FileNumber;

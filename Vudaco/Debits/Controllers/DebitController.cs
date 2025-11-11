@@ -94,7 +94,8 @@ namespace Vudaco.Debits.Controllers
                         CycleName = CycleName,
                         CreatedBy = userId,
                         CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow
+                        UpdatedAt = DateTime.UtcNow,
+                        UpdatedBy = userId
                     };
                     _context.Bills.Add(bill_Partner);
                     await _context.SaveChangesAsync();  // phải có
@@ -130,7 +131,8 @@ namespace Vudaco.Debits.Controllers
                     SupplierVehicleType = DebitDto.SupplierVehicleType,
                     CreatedBy = userId,
                     CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    UpdatedAt = DateTime.UtcNow,
+                    UpdatedBy = userId
                 };
                 _context.Debits.Add(debit);
                 await _context.SaveChangesAsync();  // phải có
@@ -169,7 +171,8 @@ namespace Vudaco.Debits.Controllers
                             CycleName = CycleName,
                             CreatedBy = userId,
                             CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow
+                            UpdatedAt = DateTime.UtcNow,
+                            UpdatedBy = userId
                         };
                         _context.Bills.Add(bill_Partner);
                          await _context.SaveChangesAsync();
@@ -197,7 +200,8 @@ namespace Vudaco.Debits.Controllers
                             Note = DebitDto.Note,
                             CreatedBy = userId,
                             CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow
+                            UpdatedAt = DateTime.UtcNow,
+                            UpdatedBy = userId
                         };
                         _context.Debits.Add(debit);
                         await _context.SaveChangesAsync();
@@ -224,7 +228,8 @@ namespace Vudaco.Debits.Controllers
                             Note = DebitDto.Note,
                             CreatedBy = userId,
                             CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow
+                            UpdatedAt = DateTime.UtcNow,
+                            UpdatedBy = userId
                         };
                          _context.Debits.Add(debit);
                          await _context.SaveChangesAsync();
@@ -306,6 +311,33 @@ namespace Vudaco.Debits.Controllers
             entity.DeletedBy = userId;
             entity.DeletedAt = DateTime.Now;
             await _repoDebit.DeleteSoftAsync(entity);
+            return ApiResponseResult<object>(true, "Xóa thành công", null);
+        }
+        [HttpPost("delete/multi")]
+        public async Task<IActionResult> DeleteMulti([FromBody] DebitDeleteMultiDto DebitDeleteMultiDto)
+        {
+            if (DebitDeleteMultiDto.Ids == null || !DebitDeleteMultiDto.Ids.Any())
+            {
+                return ApiResponseResult<object>(false, "Danh sách Id không tồn tại", null);
+            }
+
+            // Lấy danh sách entity theo Ids
+            var entities = await _context.Debits
+                .Where(d => DebitDeleteMultiDto.Ids.Contains(d.Id))
+                .ToListAsync();
+
+            if (entities.Count == 0)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu tương ứng với các Id đã gửi", null);
+            }
+            // Cập nhật thông tin xóa mềm
+            var now = DateTime.Now;
+            foreach (var item in entities)
+            {
+                item.DeletedBy = userId;
+                item.DeletedAt = now;
+            }
+            await _context.SaveChangesAsync();
             return ApiResponseResult<object>(true, "Xóa thành công", null);
         }
         [HttpGet("show")]

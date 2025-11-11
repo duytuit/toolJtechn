@@ -173,7 +173,10 @@ namespace Vudaco.ContractFiles.Repositories
                         CAST(d_total.total AS INT) AS debit_total,
                         d_total.service_id,
                         d_total.type as debit_type,
-                        d_total.id as debit_id
+                        d_total.id as debit_id,
+                        d_total.name as debit_name,
+                        d_total.updated_at as debit_updated_at,
+                        d_total.updated_by as debit_updated_by
                     FROM file_infos f
                     LEFT JOIN file_info_details fdt 
                         ON f.id = fdt.file_id
@@ -203,6 +206,9 @@ namespace Vudaco.ContractFiles.Repositories
                             service_id,
                             type,
                             id,
+                            name,
+                            updated_at,
+                            updated_by,
                             SUM(price) AS price,
                             MAX(vat) AS vat,
                             SUM(price * (vat / 100.0)) + SUM(price) AS total
@@ -216,7 +222,10 @@ namespace Vudaco.ContractFiles.Repositories
                             employee_staff_id,
                             service_id,
                             type,
-                            id
+                            id,
+                            name,
+                            updated_at,
+                            updated_by
                     ) AS d_total
                         ON d_total.file_info_id = f.id
                         AND d_total.customer_detail_id = f.customer_detail_id

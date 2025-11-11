@@ -19,7 +19,8 @@ namespace Vudaco.Debits.Models
         public int? VehicleId { get; set; }
 
         [Column("customer_detail_id")]
-        public int CustomerDetailId { get; set; }
+        [Required]
+        public int? CustomerDetailId { get; set; }
         [Column("supplier_detail_id")]
         public int? SupplierDetailId { get; set; }
 
@@ -39,6 +40,8 @@ namespace Vudaco.Debits.Models
         [Required]
         [Column("type")]
         public int Type { get; set; }
+        [Column("service_id")]
+        public int? ServiceId { get; set; }
 
         [MaxLength(255)]
         [Column("dispatch_code")]
@@ -92,6 +95,12 @@ namespace Vudaco.Debits.Models
 
         [Column("note")]
         public string Note { get; set; }
+        [Column("bill")]
+        public string Bill { get; set; }
+        [Column("link_bill")]
+        public string LinkBill { get; set; }
+        [Column("code_bill")]
+        public string CodeBill { get; set; }
 
         [MaxLength(50)]
         [Column("customer_vehicle_type")]

@@ -181,8 +181,12 @@ namespace Vudaco.Debits.Controllers
                         {
                             BillId = bill_Partner.Id,
                             CustomerDetailId = DebitDto.CustomerDetailId,
+                            ServiceId = item.ServiceId,
+                            Bill = item.Bill,
+                            LinkBill = item.LinkBill,
+                            CodeBill = item.CodeBill,
                             EmployeeStaffId = DebitDto.EmployeeStaffId,
-                            DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "CH"+DebitDto.AccountingDate.ToString("yyMM"), 4),
+                            DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "CH" + DebitDto.AccountingDate.ToString("yyMM"), 4),
                             FileInfoId = DebitDto.FileInfoId,
                             StorageId = DebitDto.StorageId,
                             Type = 1,
@@ -206,9 +210,13 @@ namespace Vudaco.Debits.Controllers
                             CustomerDetailId = DebitDto.CustomerDetailId,
                             EmployeeStaffId = DebitDto.EmployeeStaffId,
                             FileInfoId = DebitDto.FileInfoId,
-                            DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId,"HQ"+DebitDto.AccountingDate.ToString("yyMM"), 4),
+                            DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "HQ" + DebitDto.AccountingDate.ToString("yyMM"), 4),
                             StorageId = DebitDto.StorageId,
-                            Type = 2,   
+                            ServiceId = item.ServiceId,
+                            Bill = item.Bill,
+                            LinkBill = item.LinkBill,
+                            CodeBill = item.CodeBill,
+                            Type = 2,
                             Name = item.Name,
                             AccountingDate = DebitDto.AccountingDate,
                             Price = item.Price,
@@ -250,6 +258,7 @@ namespace Vudaco.Debits.Controllers
                 debit.EmployeeStaffId = DebitDto.EmployeeStaffId;   
                 debit.FileInfoId = DebitDto.FileInfoId;
                 debit.StorageId = DebitDto.StorageId;
+                debit.ServiceId = DebitDto.ServiceId;
                 debit.Type = DebitDto.Type;
                 debit.DispatchCode = DebitDto.DispatchCode;
                 debit.Name = DebitDto.Name;

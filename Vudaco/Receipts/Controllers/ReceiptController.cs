@@ -69,7 +69,7 @@ namespace Vudaco.Receipts.Controllers
             var conn = _context.Database.GetDbConnection();
             try
             {
-                var code_receipt = await SqlServerHelpers.GenerateCodeEfAsync(conn, tran.GetDbTransaction(), "receipts", "code_receipt", ReceiptDto.StorageId, "PC", 8);
+                var code_receipt = await SqlServerHelpers.GenerateCodeEfAsync(conn, tran.GetDbTransaction(), "receipts", "code_receipt", ReceiptDto.StorageId, "PC"+ReceiptDto.AccountingDate.ToString("yyMM"), 4);
 
                 entity = new Receipt
                 {

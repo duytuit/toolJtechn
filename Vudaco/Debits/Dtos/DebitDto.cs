@@ -12,11 +12,12 @@ namespace Vudaco.Debits.Dtos
         public int? VehicleId { get; set; }
         public int? EmployeeStaffId { get; set; }
         public int? EmployeeDriverId { get; set; }
-        public int CustomerDetailId { get; set; }
+        public int? CustomerDetailId { get; set; }
         public int? SupplierDetailId { get; set; }
         public int? FileInfoId { get; set; }
         public int StorageId { get; set; }
         public int Type { get; set; }
+        public int? ServiceId { get; set; }
         public string DispatchCode { get; set; }
         public string Name { get; set; } = null!;
         public DateTime AccountingDate { get; set; }
@@ -31,6 +32,9 @@ namespace Vudaco.Debits.Dtos
         public int? GoodsFee { get; set; }          // lượng hàng về
         public int Status { get; set; }
         public string Data { get; set; }
+        public string Bill { get; set; }
+        public string LinkBill { get; set; }
+        public string CodeBill { get; set; }
         public string Note { get; set; }
         public string CustomerVehicleType { get; set; }
         public string SupplierVehicleType { get; set; }
@@ -42,6 +46,7 @@ namespace Vudaco.Debits.Dtos
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
         public string Route { get; set; }
+
         public List<serviceDto> productChiho { get; set; }
         public List<serviceDto> productHaiquan { get; set; }
     }
@@ -49,6 +54,7 @@ namespace Vudaco.Debits.Dtos
 
 public class serviceDto
 {
+    public int ServiceId { get; set; }
     public string Name { get; set; }
     public int Price { get; set; }
     public string Bill { get; set; }

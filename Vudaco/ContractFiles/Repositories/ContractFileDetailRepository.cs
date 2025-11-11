@@ -85,43 +85,52 @@ namespace Vudaco.ContractFiles.Repositories
         public async Task<PaginatedResultReact<object>> GetObjectNotServiceAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
         {
             var sql = $@"
-                SELECT 
-                    f.*,
-                    fdt.price,
-                    fdt.status,
-                    fdt.employee_id,
-                    ISNULL(rdt_total.total, 0) AS total
-                FROM file_info_details fdt
-                INNER JOIN file_infos f 
-                    ON f.id = fdt.file_id
-                LEFT JOIN partner_details p 
-                    ON p.id = f.customer_detail_id
-                OUTER APPLY (
-                    SELECT SUM(rdt.amount * rdt.vat / 100) + SUM(rdt.amount) AS total
-                    FROM receipts r
-                    INNER JOIN receipt_details rdt 
-                        ON rdt.receipt_id = r.id
-                    WHERE r.file_info_id = f.id 
-                    AND r.employee_id = fdt.employee_id
-                ) rdt_total
-                WHERE 
-                    fdt.deleted_at IS NULL
-                    AND f.deleted_at IS NULL
-                    AND p.status = 1
-                    AND p.deleted_at IS NULL
-                    AND NOT EXISTS (
-                        SELECT 1
-                        FROM debits d
+                    SELECT 
+                        f.*,
+                        fdt.price,
+                        fdt.status,
+                        fdt.employee_id,
+                        CAST(rdt_total.amount AS INT) AS amount,
+                        CAST(rdt_total.vat AS INT) AS vat,
+                        CAST(rdt_total.total AS INT) AS total
+                    FROM file_infos f 
+                    LEFT JOIN file_info_details fdt 
+                        ON f.id = fdt.file_id
+                    LEFT JOIN partner_details p 
+                        ON p.id = f.customer_detail_id
+                    OUTER APPLY (
+                        SELECT 
+                            SUM(rdt.amount) AS amount,
+                            MAX(rdt.vat) AS vat,  -- nếu mỗi receipt_detail có cùng VAT, dùng MAX() hoặc MIN() để hợp lệ
+                            SUM(rdt.amount * (rdt.vat / 100.0)) + SUM(rdt.amount) AS total
+                        FROM receipts r
+                        LEFT JOIN receipt_details rdt 
+                            ON rdt.receipt_id = r.id
                         WHERE 
-                            d.file_info_id = f.id
-                            AND d.customer_detail_id = f.customer_detail_id
-                            AND d.employee_staff_id = fdt.employee_id
-                            AND d.type BETWEEN 1 AND 2
-                            AND d.deleted_at IS NULL
-                    )";
+                            r.file_info_id = f.id 
+                            AND r.employee_id = fdt.employee_id
+                            AND r.deleted_at IS NULL
+                            AND rdt.deleted_at IS NULL
+                    ) AS rdt_total
+                    WHERE 
+                        fdt.deleted_at IS NULL
+                        AND f.deleted_at IS NULL
+                        AND p.status = 1
+                        AND p.deleted_at IS NULL
+                        AND rdt_total.total > 0
+                        AND NOT EXISTS (
+                            SELECT 1
+                            FROM debits d
+                            WHERE 
+                                d.file_info_id = f.id
+                                AND d.customer_detail_id = f.customer_detail_id
+                                AND d.employee_staff_id = fdt.employee_id
+                                AND d.type BETWEEN 1 AND 2
+                                AND d.deleted_at IS NULL
+                        )";
             if (FileInfoDetailDto.StorageId > 0) {
 
-                sql += $@" AND fdt.storage_id = {FileInfoDetailDto.StorageId}";
+                sql += $@" AND f.storage_id = {FileInfoDetailDto.StorageId}";
             }
             if (FileInfoDetailDto.EmployeeId > 0)
             {

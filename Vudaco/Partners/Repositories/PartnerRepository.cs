@@ -46,6 +46,11 @@ namespace Vudaco.Partners.Repositories
             var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
             var orderByList = new List<string> { "id" };
 
+            if (PartnerDto.Status > 0)
+                whereEquals["status"] = PartnerDto.Status;
+            if (PartnerDto.StorageId > 0)
+                whereEquals["storage_id"] = PartnerDto.StorageId;
+
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "partners",

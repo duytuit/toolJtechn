@@ -45,7 +45,8 @@ namespace Vudaco.Employees.Repositories
             var whereLikes = new Dictionary<string, string>();
             var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
             var orderByList = new List<string> { "id" };
-
+            if (EmployeeDto.StorageId > 0)
+                whereEquals["storage_id"] = EmployeeDto.StorageId;
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "employees",

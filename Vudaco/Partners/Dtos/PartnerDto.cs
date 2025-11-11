@@ -21,6 +21,7 @@ namespace Vudaco.Partners.Dtos
         public int? AllowedDebtDays { get; set; }
         public double? MaxDebt { get; set; }
         public string Note { get; set; }
+        public int Status { get; set; }
         public int StorageId { get; set; }
         public string Abbreviation { get; set; }
         public int? CreatedBy { get; set; }

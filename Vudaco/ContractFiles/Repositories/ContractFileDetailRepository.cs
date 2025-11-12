@@ -57,13 +57,156 @@ namespace Vudaco.ContractFiles.Repositories
                         WHERE 
                             d.file_info_id = f.id
                             AND d.customer_detail_id = f.customer_detail_id
-                            AND d.type = 0 
+                            AND d.type = 1 
                             AND d.deleted_at IS NULL
                             AND d.employee_staff_id IS NULL
                     )";
             if (FileInfoDetailDto.StorageId > 0)
             {
                 sql += $@" AND f.storage_id = {FileInfoDetailDto.StorageId}";
+            }
+            if (FileInfoDetailDto.FromDate.HasValue && FileInfoDetailDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = FileInfoDetailDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND f.accounting_date >= '{FileInfoDetailDto.FromDate.Value:yyyy-MM-dd}' 
+                AND f.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+
+            sql += " ORDER BY f.updated_at DESC";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
+        public async Task<PaginatedResultReact<object>> GetObjectNotNangHaAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var sql = $@"
+                    SELECT 
+                        f.*,
+                        fdt.price,
+                        fdt.status,
+                        fdt.employee_id
+                    FROM file_infos f 
+                    LEFT JOIN file_info_details fdt 
+                        ON f.id = fdt.file_id
+                    LEFT JOIN partner_details p 
+                        ON p.id = f.customer_detail_id
+                    WHERE 
+                        fdt.deleted_at IS NULL
+                        AND f.deleted_at IS NULL
+                        AND p.status = 1
+                        AND p.deleted_at IS NULL
+                        AND NOT EXISTS (
+                            SELECT 1
+                            FROM debits d
+                            WHERE 
+                                d.file_info_id = f.id
+                                AND d.customer_detail_id = f.customer_detail_id
+                                AND d.employee_staff_id = fdt.employee_id
+                                AND d.type = 3
+                                AND d.deleted_at IS NULL
+                        )";
+            if (FileInfoDetailDto.StorageId > 0)
+            {
+
+                sql += $@" AND f.storage_id = {FileInfoDetailDto.StorageId}";
+            }
+            if (FileInfoDetailDto.EmployeeId > 0)
+            {
+                sql += $@" AND fdt.employee_id = {FileInfoDetailDto.EmployeeId}";
+            }
+            if (FileInfoDetailDto.FromDate.HasValue && FileInfoDetailDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = FileInfoDetailDto.ToDate.Value.Date.AddDays(1);
+
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND f.accounting_date >= '{FileInfoDetailDto.FromDate.Value:yyyy-MM-dd}' 
+                AND f.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+
+            sql += " ORDER BY f.updated_at DESC";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
+        public async Task<PaginatedResultReact<object>> GetObjectHasNangHaAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var sql = $@"
+                    SELECT 
+                        f.*,
+                        fdt.price AS detail_price,
+                        fdt.status,
+                        fdt.employee_id,
+                        -- Debit totals (phải tồn tại)
+                        CAST(d_total.price AS INT) AS debit_price,
+                        CAST(d_total.vat AS INT) AS debit_vat,
+                        CAST(d_total.total AS INT) AS debit_total,
+                        CAST(d_total.purchase_price AS INT) AS debit_purchase_price,
+                        d_total.service_id,
+                        d_total.type as debit_type,
+                        d_total.id as debit_id,
+                        d_total.name as debit_name,
+                        d_total.updated_at as debit_updated_at,
+                        d_total.updated_by as debit_updated_by
+                    FROM file_infos f
+                    LEFT JOIN file_info_details fdt 
+                        ON f.id = fdt.file_id
+                    LEFT JOIN partner_details p 
+                        ON p.id = f.customer_detail_id
+                    -- ✅ Debit phải tồn tại (INNER JOIN)
+                    INNER JOIN (
+                        SELECT 
+                            file_info_id,
+                            customer_detail_id,
+                            employee_staff_id,
+                            service_id,
+                            type,
+                            id,
+                            name,
+                            updated_at,
+                            updated_by,
+                            SUM(price) AS price,
+                            SUM(purchase_price) AS purchase_price,
+                            MAX(vat) AS vat,
+                            SUM(price * (vat / 100.0)) + SUM(price) AS total
+                        FROM debits
+                        WHERE 
+                            type = 3
+                            AND deleted_at IS NULL
+                        GROUP BY 
+                            file_info_id,
+                            customer_detail_id,
+                            employee_staff_id,
+                            service_id,
+                            type,
+                            id,
+                            name,
+                            updated_at,
+                            updated_by
+                    ) AS d_total
+                        ON d_total.file_info_id = f.id
+                        AND d_total.customer_detail_id = f.customer_detail_id
+                        AND d_total.employee_staff_id = fdt.employee_id
+                    WHERE 
+                        fdt.deleted_at IS NULL
+                        AND f.deleted_at IS NULL
+                        AND p.status = 1
+                        AND p.deleted_at IS NULL";
+            if (FileInfoDetailDto.StorageId > 0) {
+
+                sql += $@" AND f.storage_id = {FileInfoDetailDto.StorageId}";
+            }
+            if (FileInfoDetailDto.EmployeeId > 0)
+            {
+                sql += $@" AND fdt.employee_id = {FileInfoDetailDto.EmployeeId}";
             }
             if (FileInfoDetailDto.FromDate.HasValue && FileInfoDetailDto.ToDate.HasValue)
             {
@@ -125,7 +268,7 @@ namespace Vudaco.ContractFiles.Repositories
                                 d.file_info_id = f.id
                                 AND d.customer_detail_id = f.customer_detail_id
                                 AND d.employee_staff_id = fdt.employee_id
-                                AND d.type BETWEEN 1 AND 2
+                                AND d.type IN (0, 2)
                                 AND d.deleted_at IS NULL
                         )";
             if (FileInfoDetailDto.StorageId > 0)
@@ -155,7 +298,7 @@ namespace Vudaco.ContractFiles.Repositories
             };
             return _results;
         }
-         public async Task<PaginatedResultReact<object>> GetObjectHasDebitServiceAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
+        public async Task<PaginatedResultReact<object>> GetObjectHasDebitServiceAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
         {
             var sql = $@"
                     SELECT 
@@ -168,6 +311,7 @@ namespace Vudaco.ContractFiles.Repositories
                         CAST(ISNULL(rdt_total.vat, 0) AS INT) AS receipt_vat,
                         CAST(ISNULL(rdt_total.total, 0) AS INT) AS receipt_total,
                         -- Debit totals (phải tồn tại)
+                        CAST(d_total.purchase_price AS INT) AS debit_purchase_price,
                         CAST(d_total.price AS INT) AS debit_price,
                         CAST(d_total.vat AS INT) AS debit_vat,
                         CAST(d_total.total AS INT) AS debit_total,
@@ -209,12 +353,13 @@ namespace Vudaco.ContractFiles.Repositories
                             name,
                             updated_at,
                             updated_by,
+                            SUM(purchase_price) AS purchase_price,
                             SUM(price) AS price,
                             MAX(vat) AS vat,
                             SUM(price * (vat / 100.0)) + SUM(price) AS total
                         FROM debits
                         WHERE 
-                            type BETWEEN 1 AND 2
+                            type IN (0, 2)
                             AND deleted_at IS NULL
                         GROUP BY 
                             file_info_id,

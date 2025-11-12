@@ -49,14 +49,16 @@ namespace Vudaco.Debits.Dtos
 
         public List<serviceDto> productChiho { get; set; }
         public List<serviceDto> productHaiquan { get; set; }
+        public List<serviceDto> productNangha { get; set; }
     }
 }
 
 public class serviceDto
 {
     public int ServiceId { get; set; }
+    public int SupplierDetailId { get; set; }
     public string Name { get; set; }
-    public int Price { get; set; }
+    public int PurchasePrice { get; set; }
     public string Bill { get; set; }
     public string LinkBill { get; set; }
     public string CodeBill { get; set; }

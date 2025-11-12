@@ -112,7 +112,7 @@ namespace Vudaco.Debits.Controllers
                     EmployeeStaffId = DebitDto.EmployeeStaffId,
                     FileInfoId = DebitDto.FileInfoId,
                     StorageId = DebitDto.StorageId,
-                    Type = 0,
+                    Type =  DebitRepositories.PhiVanChuyen,
                     DispatchCode = DispatchCode,
                     Name = DebitDto.Route,
                     AccountingDate = DebitDto.AccountingDate,
@@ -152,6 +152,105 @@ namespace Vudaco.Debits.Controllers
         {
             using var tran = await _context.Database.BeginTransactionAsync();
             var conn = _context.Database.GetDbConnection();
+            var BillCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HD" + DebitDto.AccountingDate.ToString("yyMM"), 4);
+            try
+            {
+                int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
+                if (DebitDto.CustomerDetailId > 0)
+                {
+                    var bill_Partner = await _context.Bills.AsNoTracking().FirstOrDefaultAsync(x => x.CycleName == CycleName);
+                    if (bill_Partner == null)
+                    {
+                        bill_Partner = new Bill
+                        {
+                            BillCode = BillCode,
+                            StorageId = DebitDto.StorageId,
+                            Name = CycleName.ToString(),
+                            AccountingDate = DebitDto.AccountingDate,
+                            CustomerDetailId = DebitDto.CustomerDetailId,
+                            CycleName = CycleName,
+                            CreatedBy = userId,
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow,
+                            UpdatedBy = userId
+                        };
+                        _context.Bills.Add(bill_Partner);
+                        await _context.SaveChangesAsync();
+
+                    }
+                    foreach (var item in DebitDto.productChiho)
+                    {
+                        var debit = new Debit
+                        {
+                            BillId = bill_Partner.Id,
+                            CustomerDetailId = DebitDto.CustomerDetailId,
+                            ServiceId = item.ServiceId,
+                            Bill = item.Bill,
+                            LinkBill = item.LinkBill,
+                            CodeBill = item.CodeBill,
+                            EmployeeStaffId = DebitDto.EmployeeStaffId,
+                            DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "CH" + DebitDto.AccountingDate.ToString("yyMM"), 4),
+                            FileInfoId = DebitDto.FileInfoId,
+                            StorageId = DebitDto.StorageId,
+                            Type =  DebitRepositories.PhiChiHo,
+                            Name = item.Name,
+                            AccountingDate = DebitDto.AccountingDate,
+                            PurchasePrice = item.PurchasePrice,
+                            Data = DebitDto.Data,
+                            Note = DebitDto.Note,
+                            CreatedBy = userId,
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow,
+                            UpdatedBy = userId
+                        };
+                        _context.Debits.Add(debit);
+                        await _context.SaveChangesAsync();
+                    }
+                    foreach (var item in DebitDto.productHaiquan)
+                    {
+                        var debit = new Debit
+                        {
+                            BillId = bill_Partner.Id,
+                            CustomerDetailId = DebitDto.CustomerDetailId,
+                            EmployeeStaffId = DebitDto.EmployeeStaffId,
+                            FileInfoId = DebitDto.FileInfoId,
+                            DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "HQ" + DebitDto.AccountingDate.ToString("yyMM"), 4),
+                            StorageId = DebitDto.StorageId,
+                            ServiceId = item.ServiceId,
+                            Bill = item.Bill,
+                            LinkBill = item.LinkBill,
+                            CodeBill = item.CodeBill,
+                            Type =  DebitRepositories.PhiHaiQuan,
+                            Name = item.Name,
+                            AccountingDate = DebitDto.AccountingDate,
+                            PurchasePrice = item.PurchasePrice,
+                            Data = DebitDto.Data,
+                            Note = DebitDto.Note,
+                            CreatedBy = userId,
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow,
+                            UpdatedBy = userId
+                        };
+                        _context.Debits.Add(debit);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                await tran.CommitAsync();
+                return ApiResponseResult<object>(true, "Thêm thành công", null);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
+            }
+
+        }
+        [HttpPost]
+        [Route("nangha/create")]
+        public async Task<IActionResult> NangHaCreate([FromBody] DebitDto DebitDto)
+        {
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
             var BillCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HD"+DebitDto.AccountingDate.ToString("yyMM"), 4);
             try
             {
@@ -178,7 +277,7 @@ namespace Vudaco.Debits.Controllers
                          await _context.SaveChangesAsync();
                      
                     }
-                    foreach (var item in DebitDto.productChiho)
+                    foreach (var item in DebitDto.productNangha)
                     {
                         var debit = new Debit
                         {
@@ -189,13 +288,13 @@ namespace Vudaco.Debits.Controllers
                             LinkBill = item.LinkBill,
                             CodeBill = item.CodeBill,
                             EmployeeStaffId = DebitDto.EmployeeStaffId,
-                            DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "CH" + DebitDto.AccountingDate.ToString("yyMM"), 4),
+                            DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "NH" + DebitDto.AccountingDate.ToString("yyMM"), 4),
                             FileInfoId = DebitDto.FileInfoId,
                             StorageId = DebitDto.StorageId,
-                            Type = 1,
+                            Type =  DebitRepositories.PhiNangHa,
                             Name = item.Name,
                             AccountingDate = DebitDto.AccountingDate,
-                            Price = item.Price,
+                            PurchasePrice = item.PurchasePrice,
                             Data = DebitDto.Data,
                             Note = DebitDto.Note,
                             CreatedBy = userId,
@@ -203,37 +302,11 @@ namespace Vudaco.Debits.Controllers
                             UpdatedAt = DateTime.UtcNow,
                             UpdatedBy = userId
                         };
+                        debit.SupplierDetailId = (item.SupplierDetailId > 0) ? item.SupplierDetailId : null;
                         _context.Debits.Add(debit);
-                        await _context.SaveChangesAsync();
+
                     }
-                    foreach (var item in DebitDto.productHaiquan)
-                    {
-                        var debit = new Debit
-                        {
-                            BillId = bill_Partner.Id,
-                            CustomerDetailId = DebitDto.CustomerDetailId,
-                            EmployeeStaffId = DebitDto.EmployeeStaffId,
-                            FileInfoId = DebitDto.FileInfoId,
-                            DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "HQ" + DebitDto.AccountingDate.ToString("yyMM"), 4),
-                            StorageId = DebitDto.StorageId,
-                            ServiceId = item.ServiceId,
-                            Bill = item.Bill,
-                            LinkBill = item.LinkBill,
-                            CodeBill = item.CodeBill,
-                            Type = 2,
-                            Name = item.Name,
-                            AccountingDate = DebitDto.AccountingDate,
-                            Price = item.Price,
-                            Data = DebitDto.Data,
-                            Note = DebitDto.Note,
-                            CreatedBy = userId,
-                            CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow,
-                            UpdatedBy = userId
-                        };
-                         _context.Debits.Add(debit);
-                         await _context.SaveChangesAsync();
-                    }
+                    await _context.SaveChangesAsync();
                 }
                 await tran.CommitAsync();
                 return ApiResponseResult<object>(true, "Thêm thành công", null);

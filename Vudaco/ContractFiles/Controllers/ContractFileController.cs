@@ -38,6 +38,28 @@ namespace Vudaco.ContractFiles.Controllers
             _context = context;
             _configuration = configuration;
         }
+         [HttpGet("getFileHasDebitNangHa")]
+        public async Task<IActionResult> GetFileHasDebitNangHa(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] FileInfoDetailDto FileInfoDetailDto = null)
+        {
+            // test
+            var result = await _repoContractFileDetail.GetObjectHasNangHaAsync(FileInfoDetailDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet("getFileNotDebitNangHa")]
+        public async Task<IActionResult> GetFileNotDebitNangHa(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] FileInfoDetailDto FileInfoDetailDto = null)
+        {
+            // test
+            var result = await _repoContractFileDetail.GetObjectNotNangHaAsync(FileInfoDetailDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
         [HttpGet("getFileHasDebitService")]
         public async Task<IActionResult> GetFileHasDebitService(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] FileInfoDetailDto FileInfoDetailDto = null)
         {

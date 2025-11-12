@@ -18,6 +18,11 @@ namespace Vudaco.Debits.Repositories
         private readonly VudacoDBContext _context;
         private readonly IConfiguration _configuration;
         private readonly RedisService _redis;
+
+        public const int PhiHaiQuan = 0;
+        public const int PhiVanChuyen = 1;
+        public const int PhiChiHo = 2;
+        public const int PhiNangHa = 3;
         public DebitRepositories(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;
@@ -52,7 +57,7 @@ namespace Vudaco.Debits.Repositories
             if (DebitDto.FileInfoId > 0)
                 whereEquals["file_info_id"] = DebitDto.FileInfoId;
 
-            whereEquals["type"] = 0;
+            whereEquals["type"] = PhiVanChuyen;
             whereEquals["status"] = 0;
             whereCustoms.Add(("employee_staff_id IS NULL", Array.Empty<object>()));
 

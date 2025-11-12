@@ -28,6 +28,7 @@ namespace Vudaco.ContractFiles.Repositories
             _configuration = configuration;
             _redis = redis;
         }
+      
         public async Task<PaginatedResultReact<object>> GetObjectTaskAsync(FileInfoDto FileInfo, int page, int pageSize, CancellationToken cancellationToken)
         {
             var whereEquals = new Dictionary<string, object>();
@@ -118,6 +119,87 @@ namespace Vudaco.ContractFiles.Repositories
             _context.SaveChanges();
             return Task.FromResult(FileInfo);
         }
-      
+        public async Task<PaginatedResultReact<object>> GetObjectNotFileGia(FileInfoDto FileInfo, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var sql = $@"
+                    SELECT 
+                            f.*
+                    FROM file_infos f 
+                    LEFT JOIN partner_details p 
+                            ON p.id = f.customer_detail_id
+                    WHERE 
+                        p.status = 1
+                        AND f.deleted_at IS NULL
+                        AND p.deleted_at IS NULL
+                        AND EXISTS (
+                                SELECT 1
+                                FROM debits d
+                                WHERE 
+                                    d.file_info_id = f.id
+                                    AND d.customer_detail_id = f.customer_detail_id
+                                    AND d.status = 0
+                                    AND d.deleted_at IS NULL
+                            )";
+            if (FileInfo.StorageId > 0)
+            {
+                sql += $@" AND f.storage_id = {FileInfo.StorageId}";
+            }
+            if (FileInfo.FromDate.HasValue && FileInfo.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = FileInfo.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND f.accounting_date >= '{FileInfo.FromDate.Value:yyyy-MM-dd}' 
+                AND f.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            sql += " ORDER BY f.updated_at DESC";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
+        public async Task<PaginatedResultReact<object>> GetObjectHasFileGia(FileInfoDto FileInfo, int page, int pageSize, CancellationToken cancellationToken)
+        {
+           var sql = $@"
+                    SELECT 
+                            f.*
+                    FROM file_infos f 
+                    LEFT JOIN partner_details p 
+                            ON p.id = f.customer_detail_id
+                    WHERE 
+                        p.status = 1
+                        AND f.deleted_at IS NULL
+                        AND p.deleted_at IS NULL
+                        AND EXISTS (
+                                SELECT 1
+                                FROM debits d
+                                WHERE 
+                                    d.file_info_id = f.id
+                                    AND d.customer_detail_id = f.customer_detail_id
+                                    AND d.status = 1
+                                    AND d.deleted_at IS NULL
+                            )";
+            if (FileInfo.StorageId > 0)
+            {
+                sql += $@" AND f.storage_id = {FileInfo.StorageId}";
+            }
+            if (FileInfo.FromDate.HasValue && FileInfo.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = FileInfo.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND f.accounting_date >= '{FileInfo.FromDate.Value:yyyy-MM-dd}' 
+                AND f.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            sql += " ORDER BY f.updated_at DESC";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
     }
 }

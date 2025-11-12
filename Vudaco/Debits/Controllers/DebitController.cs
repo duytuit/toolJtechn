@@ -49,17 +49,6 @@ namespace Vudaco.Debits.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
-        [HttpGet("service")]
-        public async Task<IActionResult> GetTaskService(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
-        {
-            // test
-            var result = await _repoDebit.GetObjectDebitServiceAsync(DebitDto, page, pageSize, cancellationToken);
-            if (result == null)
-            {
-                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
-            }
-            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
-        }
         [HttpGet]
         public async Task<IActionResult> GetTask(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
         {
@@ -81,7 +70,7 @@ namespace Vudaco.Debits.Controllers
             try
             {
                 int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
-                var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName);
+                var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitDto.CustomerDetailId);
                 if (bill_Partner == null)
                 {
                     var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HD"+DebitDto.AccountingDate.ToString("yyMM"),4);
@@ -89,6 +78,7 @@ namespace Vudaco.Debits.Controllers
                     {
                         BillCode = BillCodePartner,
                         StorageId = DebitDto.StorageId,
+                        CustomerDetailId =  DebitDto.CustomerDetailId,
                         Name = CycleName.ToString(),
                         AccountingDate = DebitDto.AccountingDate,
                         CycleName = CycleName,
@@ -158,7 +148,7 @@ namespace Vudaco.Debits.Controllers
                 int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
                 if (DebitDto.CustomerDetailId > 0)
                 {
-                    var bill_Partner = await _context.Bills.AsNoTracking().FirstOrDefaultAsync(x => x.CycleName == CycleName);
+                    var bill_Partner = await _context.Bills.AsNoTracking().FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitDto.CustomerDetailId);
                     if (bill_Partner == null)
                     {
                         bill_Partner = new Bill
@@ -196,6 +186,7 @@ namespace Vudaco.Debits.Controllers
                             Name = item.Name,
                             AccountingDate = DebitDto.AccountingDate,
                             PurchasePrice = item.PurchasePrice,
+                            Price = item.PurchasePrice,
                             Data = DebitDto.Data,
                             Note = DebitDto.Note,
                             CreatedBy = userId,
@@ -257,7 +248,7 @@ namespace Vudaco.Debits.Controllers
                 int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
                 if (DebitDto.CustomerDetailId > 0)
                 {
-                    var bill_Partner = await _context.Bills.AsNoTracking().FirstOrDefaultAsync(x => x.CycleName == CycleName);
+                    var bill_Partner = await _context.Bills.AsNoTracking().FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitDto.CustomerDetailId);
                     if (bill_Partner == null)
                     {
                         bill_Partner = new Bill
@@ -295,6 +286,7 @@ namespace Vudaco.Debits.Controllers
                             Name = item.Name,
                             AccountingDate = DebitDto.AccountingDate,
                             PurchasePrice = item.PurchasePrice,
+                            Price = item.PurchasePrice,
                             Data = DebitDto.Data,
                             Note = DebitDto.Note,
                             CreatedBy = userId,
@@ -421,6 +413,20 @@ namespace Vudaco.Debits.Controllers
                 return ApiResponseResult<object>(false, "Id không tồn tại", null);
             }
             var entity = await _repoDebit.ShowAsync(id);
+            if (entity == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", entity);
+        }
+        [HttpGet("show/byFileId")]
+        public async Task<IActionResult> ShowByFileId([FromQuery] int FileId)
+        {
+            if (FileId <= 0)
+            {
+                return ApiResponseResult<object>(false, "Id không tồn tại", null);
+            }
+            var entity = await _repoDebit.ShowByFileIdAsync(FileId);
             if (entity == null)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);

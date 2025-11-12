@@ -14,8 +14,8 @@ namespace Vudaco.Debits.Repositories
     {
         Task<PaginatedResultReact<object>> GetObjectTaskAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectDebitDispatchAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
-        Task<PaginatedResultReact<object>> GetObjectDebitServiceAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<Debit> ShowAsync(int id);
+        Task<List<Debit>> ShowByFileIdAsync(int id);
         Task<Debit> CreateAsync(Debit Debit);
         Task<Debit> UpdateAsync(Debit Debit);
         Task<Debit> DeleteSoftAsync(Debit Debit);

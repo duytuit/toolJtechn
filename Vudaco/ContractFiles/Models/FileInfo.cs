@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Vudaco.Debits.Models;
 
 namespace Vudaco.ContractFiles.Models
 {
@@ -86,6 +87,8 @@ namespace Vudaco.ContractFiles.Models
         public DateTime? UpdatedAt { get; set; }
         [NotMapped]
         public List<FileInfoDetail> FileInfoDetails { get; set; }
+        [NotMapped]
+        public List<Debit> Debits { get; set; }
 
     }
 }

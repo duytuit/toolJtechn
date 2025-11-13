@@ -20,6 +20,10 @@ namespace Vudaco.Debits.Dtos
         public int? ServiceId { get; set; }
         public string DispatchCode { get; set; }
         public string Name { get; set; } = null!;
+        public int PurchaseVat { get; set; }
+        public int PurchaseStatus { get; set; }
+        public string PurchaseNote { get; set; }
+        public string PurchaseBill { get; set; }
         public DateTime AccountingDate { get; set; }
         public int PurchasePrice { get; set; }      // Cước mua
         public int Price { get; set; }

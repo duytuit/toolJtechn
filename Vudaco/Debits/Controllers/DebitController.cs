@@ -83,8 +83,8 @@ namespace Vudaco.Debits.Controllers
                         AccountingDate = DebitDto.AccountingDate,
                         CycleName = CycleName,
                         CreatedBy = userId,
-                        CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now,
                         UpdatedBy = userId
                     };
                     _context.Bills.Add(bill_Partner);
@@ -102,7 +102,7 @@ namespace Vudaco.Debits.Controllers
                     EmployeeStaffId = DebitDto.EmployeeStaffId,
                     FileInfoId = DebitDto.FileInfoId,
                     StorageId = DebitDto.StorageId,
-                    Type =  DebitRepositories.PhiVanChuyen,
+                    Type = DebitRepositories.PhiVanChuyen,
                     DispatchCode = DispatchCode,
                     Name = DebitDto.Route,
                     AccountingDate = DebitDto.AccountingDate,
@@ -119,9 +119,11 @@ namespace Vudaco.Debits.Controllers
                     Note = DebitDto.Note,
                     CustomerVehicleType = DebitDto.CustomerVehicleType,
                     SupplierVehicleType = DebitDto.SupplierVehicleType,
+                    PurchaseStatus = DebitDto.PurchaseStatus,
+                    PurchaseVat = DebitDto.PurchaseVat,
                     CreatedBy = userId,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
                     UpdatedBy = userId
                 };
                 _context.Debits.Add(debit);
@@ -160,8 +162,8 @@ namespace Vudaco.Debits.Controllers
                             CustomerDetailId = DebitDto.CustomerDetailId,
                             CycleName = CycleName,
                             CreatedBy = userId,
-                            CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow,
+                            CreatedAt = DateTime.Now,
+                            UpdatedAt = DateTime.Now,
                             UpdatedBy = userId
                         };
                         _context.Bills.Add(bill_Partner);
@@ -182,16 +184,18 @@ namespace Vudaco.Debits.Controllers
                             DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "CH" + DebitDto.AccountingDate.ToString("yyMM"), 4),
                             FileInfoId = DebitDto.FileInfoId,
                             StorageId = DebitDto.StorageId,
-                            Type =  DebitRepositories.PhiChiHo,
+                            Type = DebitRepositories.PhiChiHo,
                             Name = item.Name,
                             AccountingDate = DebitDto.AccountingDate,
                             PurchasePrice = item.PurchasePrice,
                             Price = item.PurchasePrice,
                             Data = DebitDto.Data,
                             Note = DebitDto.Note,
+                            PurchaseStatus = DebitDto.PurchaseStatus,
+                            PurchaseVat = DebitDto.PurchaseVat,
                             CreatedBy = userId,
-                            CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow,
+                            CreatedAt = DateTime.Now,
+                            UpdatedAt = DateTime.Now,
                             UpdatedBy = userId
                         };
                         _context.Debits.Add(debit);
@@ -211,15 +215,18 @@ namespace Vudaco.Debits.Controllers
                             Bill = item.Bill,
                             LinkBill = item.LinkBill,
                             CodeBill = item.CodeBill,
-                            Type =  DebitRepositories.PhiHaiQuan,
+                            Type = DebitRepositories.PhiHaiQuan,
                             Name = item.Name,
                             AccountingDate = DebitDto.AccountingDate,
                             PurchasePrice = item.PurchasePrice,
+                            Price = item.PurchasePrice,
                             Data = DebitDto.Data,
                             Note = DebitDto.Note,
+                            PurchaseStatus = DebitDto.PurchaseStatus,
+                            PurchaseVat = DebitDto.PurchaseVat,
                             CreatedBy = userId,
-                            CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow,
+                            CreatedAt = DateTime.Now,
+                            UpdatedAt = DateTime.Now,
                             UpdatedBy = userId
                         };
                         _context.Debits.Add(debit);
@@ -260,8 +267,8 @@ namespace Vudaco.Debits.Controllers
                             CustomerDetailId = DebitDto.CustomerDetailId,
                             CycleName = CycleName,
                             CreatedBy = userId,
-                            CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow,
+                            CreatedAt = DateTime.Now,
+                            UpdatedAt = DateTime.Now,
                             UpdatedBy = userId
                         };
                         _context.Bills.Add(bill_Partner);
@@ -282,16 +289,18 @@ namespace Vudaco.Debits.Controllers
                             DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "NH" + DebitDto.AccountingDate.ToString("yyMM"), 4),
                             FileInfoId = DebitDto.FileInfoId,
                             StorageId = DebitDto.StorageId,
-                            Type =  DebitRepositories.PhiNangHa,
+                            Type = DebitRepositories.PhiNangHa,
                             Name = item.Name,
                             AccountingDate = DebitDto.AccountingDate,
                             PurchasePrice = item.PurchasePrice,
                             Price = item.PurchasePrice,
                             Data = DebitDto.Data,
                             Note = DebitDto.Note,
+                            PurchaseStatus = DebitDto.PurchaseStatus,
+                            PurchaseVat = DebitDto.PurchaseVat,
                             CreatedBy = userId,
-                            CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow,
+                            CreatedAt = DateTime.Now,
+                            UpdatedAt = DateTime.Now,
                             UpdatedBy = userId
                         };
                         debit.SupplierDetailId = (item.SupplierDetailId > 0) ? item.SupplierDetailId : null;
@@ -310,46 +319,55 @@ namespace Vudaco.Debits.Controllers
             }
 
         }
-        [HttpPost("update")]
-        public async Task<IActionResult> Update([FromBody] DebitDto DebitDto)
+        [HttpPost("updateFileGia")]
+        public async Task<IActionResult> UpdateFileGia([FromBody] ConfirmFileDto ConfirmFileDto)
         {
             using var tran = await _context.Database.BeginTransactionAsync();
             try
             {
-                var debit = await _context.Debits.FirstOrDefaultAsync(x => x.Id == DebitDto.Id);
-                if (debit == null)
-                    return ApiResponseResult<object>(false, "Không tìm thấy debit", null);
+                var now = DateTime.Now;
 
-                // cập nhật các field theo DebitDto
-                debit.VehicleId = DebitDto.VehicleId;
-                debit.CustomerDetailId = DebitDto.CustomerDetailId;
-                debit.SupplierDetailId = DebitDto.SupplierDetailId;
-                debit.EmployeeDriverId = DebitDto.EmployeeDriverId;
-                debit.EmployeeStaffId = DebitDto.EmployeeStaffId;   
-                debit.FileInfoId = DebitDto.FileInfoId;
-                debit.StorageId = DebitDto.StorageId;
-                debit.ServiceId = DebitDto.ServiceId;
-                debit.Type = DebitDto.Type;
-                debit.DispatchCode = DebitDto.DispatchCode;
-                debit.Name = DebitDto.Name;
-                debit.AccountingDate = DebitDto.AccountingDate;
-                debit.PurchasePrice = DebitDto.PurchasePrice;
-                debit.Price = DebitDto.Price;
-                debit.Vat = DebitDto.Vat;
-                debit.DriverFee = DebitDto.DriverFee;
-                debit.MealFee = DebitDto.MealFee;
-                debit.TicketFee = DebitDto.TicketFee;
-                debit.OvernightFee = DebitDto.OvernightFee;
-                debit.PenaltyFee = DebitDto.PenaltyFee;
-                debit.GoodsFee = DebitDto.GoodsFee;
-                debit.Status = DebitDto.Status;
-                debit.Data = JsonSerializer.Serialize(DebitDto);
-                debit.Note = DebitDto.Note;
-                debit.CustomerVehicleType = DebitDto.CustomerVehicleType;
-                debit.SupplierVehicleType = DebitDto.SupplierVehicleType;
-                debit.UpdatedBy = userId;
-                debit.UpdatedAt = DateTime.UtcNow;
-
+                foreach (var item in ConfirmFileDto.DebitDtos)
+                {
+                    var debit = await _context.Debits.FirstOrDefaultAsync(x => x.Id == item.Id);
+                    if (debit == null) continue;
+                    // Chỉ update Price nếu Type == 0
+                    if (item.Type == 0)
+                    {
+                        debit.Price = item.Price;
+                    }
+                    debit.AccountingDate = ConfirmFileDto.AccountingDate;
+                    debit.Vat = item.Vat;
+                    debit.Status = 1; // đã tạo file giá
+                    debit.Bill = item.Bill;
+                    debit.UpdatedBy = userId;
+                    debit.UpdatedAt = now;
+                   
+                   
+                }
+                var confirm_file = await _context.ConfirmFiles.FirstOrDefaultAsync(x => x.FileInfoId == ConfirmFileDto.FileInfoId && x.PartnerDetailId == ConfirmFileDto.PartnerDetailId); // debit khách hàng
+                if (confirm_file == null)
+                {
+                    var entity = new ConfirmFile
+                    {
+                        FileInfoId = ConfirmFileDto.FileInfoId,
+                        StorageId = ConfirmFileDto.StorageId,
+                        PartnerDetailId = ConfirmFileDto.PartnerDetailId,
+                        CreatedBy = userId,
+                        CreatedAt = now,
+                    };
+                    await _context.ConfirmFiles.AddAsync(entity);
+                }
+                else
+                {
+                    confirm_file.FileInfoId = ConfirmFileDto.FileInfoId;
+                    confirm_file.StorageId = ConfirmFileDto.StorageId;
+                    confirm_file.PartnerDetailId = ConfirmFileDto.PartnerDetailId;
+                    confirm_file.Status = 0;
+                    confirm_file.UpdatedAt = null;
+                    confirm_file.UpdatedBy = null;
+                    _context.ConfirmFiles.Update(confirm_file);
+                }
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
 

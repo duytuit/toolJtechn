@@ -16,6 +16,7 @@ namespace Vudaco.ContractFiles.Repositories
         Task<PaginatedResultReact<object>> GetObjectHasFileGia(FileInfoDto FileInfo, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectTaskAsync(FileInfoDto FileInfo, int page, int pageSize, CancellationToken cancellationToken);
         Task<FileInfo> ShowAsync(int id);
+        Task<FileInfo> ShowWithDebitAsync(int id);
         Task<FileInfo> CreateAsync(FileInfo FileInfo);
         Task<FileInfo> UpdateAsync(FileInfo FileInfo);
         Task<FileInfo> DeleteSoftAsync(FileInfo FileInfo);

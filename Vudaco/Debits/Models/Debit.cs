@@ -67,6 +67,9 @@ namespace Vudaco.Debits.Models
         [Required]
         [Column("vat")]
         public int Vat { get; set; }
+        [Required]
+        [Column("purchase_vat")]
+        public int PurchaseVat { get; set; }
 
         [Column("driver_fee")]
         public int? DriverFee { get; set; }
@@ -90,13 +93,21 @@ namespace Vudaco.Debits.Models
         [Column("status")]
         public int Status { get; set; }
 
+        [Required]
+        [Column("purchase_status")]
+        public int PurchaseStatus { get; set; }
+
         [Column("data")]
         public string Data { get; set; }
 
         [Column("note")]
         public string Note { get; set; }
+        [Column("purchase_note")]
+        public string PurchaseNote { get; set; }
         [Column("bill")]
         public string Bill { get; set; }
+        [Column("purchase_bill")]
+        public string PurchaseBill { get; set; }
         [Column("link_bill")]
         public string LinkBill { get; set; }
         [Column("code_bill")]

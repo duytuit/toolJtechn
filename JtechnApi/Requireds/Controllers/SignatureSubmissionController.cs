@@ -7,6 +7,7 @@ using JtechnApi.Shares.Connects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -72,6 +73,16 @@ namespace JtechnApi.Controllers
             if(changeStatusTaskDto.Status == 1)
             {
                 var __emp = _context.Employee.Where(x => x.Id == changeStatusTaskDto.Created_By).FirstOrDefault();
+                using (var _db = new clsKetNoi())
+                {
+                    var whereEquals = new Dictionary<string, object>
+                    {
+                        ["job_id"] = _required_rs.Id,
+                        ["app"] = "task",
+                        ["code"] = __emp.Code
+                    };
+                    _db.DeleteWhere("Notifycation", whereEquals);
+                }
                 var notifyRequest = new RemoteLampRequest
                 {
                     Event = 15,
@@ -88,6 +99,7 @@ namespace JtechnApi.Controllers
                         status = changeStatusTaskDto.Status
                     })
                 };
+
                 string __result = Helper.RemoteLampSync(notifyRequest);
             }
             else
@@ -109,6 +121,20 @@ namespace JtechnApi.Controllers
                         status = changeStatusTaskDto.Status
                     })
                 };
+                var newNotify_object = new
+                {
+                    id = 0,
+                    job_id = _required_rs.Id,
+                    job_name = _required_rs.Code + "lúc:" + _required_rs.Created_at,
+                    app = "task",
+                    code = __emp.Code,
+                    link = $"http://192.168.207.6:8088/admin/internalCommunication",
+                    status = 0
+                };
+                using (var _db = new clsKetNoi())
+                {
+                    _db.UpsertFromObject("Notifycation", newNotify_object);
+                }
                 string __result = Helper.RemoteLampSync(notifyRequest);
             }
             _sig.Status = changeStatusTaskDto.Status;

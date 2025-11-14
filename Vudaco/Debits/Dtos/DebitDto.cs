@@ -18,6 +18,7 @@ namespace Vudaco.Debits.Dtos
         public int StorageId { get; set; }
         public int Type { get; set; }
         public int? ServiceId { get; set; }
+        public string ServiceDetail { get; set; }
         public string DispatchCode { get; set; }
         public string Name { get; set; } = null!;
         public int PurchaseVat { get; set; }

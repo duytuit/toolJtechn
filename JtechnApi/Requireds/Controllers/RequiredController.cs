@@ -389,6 +389,20 @@ namespace JtechnApi.Controllers
                             };
                             _signature.CreateSignatureSubmissiondAsync(sig);
                         var __emp = _context.Employee.Where(x=>x.Id == intId).FirstOrDefault();
+                        var newNotify_object = new
+                        {
+                            id = 0,
+                            job_id = result.Result.Id,
+                            job_name = result.Result.Code + "lúc:" + result.Result.Created_at,
+                            app = "task",
+                            code = __emp.Code,
+                            link = $"http://192.168.207.6:8088/admin/internalCommunication",
+                            status = 0
+                        };
+                        using (var _db = new clsKetNoi())
+                        {
+                            _db.UpsertFromObject("Notifycation", newNotify_object);
+                        }
                         var notifyRequest = new RemoteLampRequest
                         {
                             Event = 15,
@@ -398,7 +412,7 @@ namespace JtechnApi.Controllers
                             MessageText = JsonSerializer.Serialize(new
                             {
                                 job_id = result.Result.Id,
-                                job_name = result.Result.Code,
+                                job_name = result.Result.Code + "lúc:"+ result.Result.Created_at,
                                 app = "task",
                                 code = __emp.Code,
                                 link = $"http://192.168.207.6:8088/admin/internalCommunication",
@@ -498,7 +512,7 @@ namespace JtechnApi.Controllers
                             MessageText = JsonSerializer.Serialize(new
                             {
                                 job_id = result.Result.Id,
-                                job_name = result.Result.Code,
+                                job_name = result.Result.Code + "lúc:" + result.Result.Created_at,
                                 app = "task",
                                 code = __emp.Code,
                                 link = $"http://192.168.207.6:8088/admin/internalCommunication",
@@ -639,6 +653,20 @@ namespace JtechnApi.Controllers
                 };
                 _db.DeleteWhere("Notifycation", whereEquals);
             }
+            var notifyRequest = new RemoteLampRequest
+            {
+                Event = 15,
+                Chanel = "dencanhbao_cd_dap",
+                Status = 0,
+                Mode = 1,
+                MessageText = JsonSerializer.Serialize(new
+                {
+                    job_id = id,
+                    app = "task",
+                    status = 3
+                })
+            };
+            Helper.RemoteLampSync(notifyRequest);
             return ApiResponseResult<object>(true, "Xóa thành công", null);
         }
         string GetValue(JsonElement el)

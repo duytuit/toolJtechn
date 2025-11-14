@@ -52,7 +52,7 @@ namespace TestNotify
                 Chanel = "dencanhbao_cd_dap",
                 MessageText = JsonConvert.SerializeObject(new
                 {
-                    job_id = 123,
+                    job_id = 1223,
                     app = "task",
                     job_name = "34ACVEG6",
                     code = "240404",

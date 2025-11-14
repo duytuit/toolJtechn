@@ -260,7 +260,6 @@ namespace Vudaco.ContractFiles.Repositories
                         AND f.deleted_at IS NULL
                         AND p.status = 1
                         AND p.deleted_at IS NULL
-                        AND rdt_total.total > 0
                         AND NOT EXISTS (
                             SELECT 1
                             FROM debits d
@@ -379,8 +378,7 @@ namespace Vudaco.ContractFiles.Repositories
                         fdt.deleted_at IS NULL
                         AND f.deleted_at IS NULL
                         AND p.status = 1
-                        AND p.deleted_at IS NULL
-                        AND ISNULL(rdt_total.total, 0) > 0";
+                        AND p.deleted_at IS NULL";
             if (FileInfoDetailDto.StorageId > 0) {
 
                 sql += $@" AND f.storage_id = {FileInfoDetailDto.StorageId}";

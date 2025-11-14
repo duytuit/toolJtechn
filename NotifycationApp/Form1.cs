@@ -57,7 +57,7 @@ namespace NotifycationApp
             shakeTimer.Start();
             connectSocket();
             //richTextBox1.AppendText("Mở website tại: http://192.168.207.6:8088/admin \n");
-            getData();
+          
             CreateNotifyIcon();
         }
         private async void connectSocket()
@@ -123,11 +123,7 @@ namespace NotifycationApp
 
                                 // Tạo hình tròn nằm trên ảnh
                                 DrawCircleAbovePicture(pic, _notify.Count, 405, 18);
-                                // Ghi vào DB
-                                using (var _db = new clsKetNoi())
-                                {
-                                    _db.UpsertFromObject("Notifycation", newNotify_object);
-                                }
+                              
                             }
                             else
                             {
@@ -148,13 +144,37 @@ namespace NotifycationApp
                                         var whereEquals = new Dictionary<string, object>
                                         {
                                             ["job_id"] = job_id,
-                                            ["app"] = app
+                                            ["app"] = app,
+                                            ["code"] = code
                                         };
                                         _db.DeleteWhere("Notifycation", whereEquals);
                                     }
 
                                 }
                             }
+                        }
+                        if (status == 3) // xóa all
+                        {
+                            richTextBox1.Text = "";
+                            _notify.RemoveAll(x => x.JobId == job_id && x.App == app);
+                            foreach (var item in _notify)
+                            {
+                                string _title = $"Công việc - {item.JobName}:\n";
+                                AppendColoredText(richTextBox1, _title, Color.Yellow, Color.Black, bold: true);
+                                string _link = $"{item.Link}\n";
+                                AppendColoredText(richTextBox1, _link);
+                            }
+                            DrawCircleAbovePicture(pic, _notify.Count, 405, 18);
+                            using (var _db = new clsKetNoi())
+                            {
+                                var whereEquals = new Dictionary<string, object>
+                                {
+                                    ["job_id"] = job_id,
+                                    ["app"] = app
+                                };
+                                _db.DeleteWhere("Notifycation", whereEquals);
+                            }
+
                         }
 
                     }
@@ -267,42 +287,80 @@ namespace NotifycationApp
             }
             
         }
-        private void getData()
+        private async Task LoadDataAsync()
         {
-            _notify.Clear();
-            richTextBox1.Text = "";
-            DrawCircleAbovePicture(pic, _notify.Count, 405, 18);
-            if (txtCodeNV.Text != null)
+            try
             {
-                string code = txtCodeNV.Text;
-                using (var _db = new clsKetNoi())
-                {
-                    string sql = $@"select * from Notifycation where code = N'{code}'";
-                    DataTable table = _db.LoadTable(sql);
-                    if (table.Rows.Count > 0)
-                    {
-                        foreach (DataRow row in table.Rows)
-                        {
-                            var notify = new notify
-                            {
-                                JobId = Convert.ToInt32(row["job_id"]),
-                                JobName = row["job_name"].ToString(),
-                                App = row["app"].ToString(),
-                                Code = row["code"].ToString(),
-                                Link = row["link"].ToString(),
-                                Status = Convert.ToInt32(row["status"])
-                            };
+                // Xóa giao diện
+                richTextBox1.Clear();
+                _notify.Clear();
 
-                            _notify.Add(notify);
-                            string _title = $"Công việc - {row["job_name"].ToString()}:\n";
-                            AppendColoredText(richTextBox1, _title, Color.Yellow, Color.Black, bold: true);
-                            string _link = $"{ row["link"].ToString()}\n";
-                            AppendColoredText(richTextBox1, _link);
-                        }
-                        DrawCircleAbovePicture(pic, _notify.Count, 405, 18);
-                    }
+                // Ẩn hình tròn lúc mới load
+                if (circle != null)
+                {
+                    circle.Visible = false;
                 }
+
+                string code = txtCodeNV.Text;
+                DataTable tb = null;
+
+                // 🔥 THREAD PHỤ: chạy DB
+                await Task.Run(() =>
+                {
+                    using (var db = new clsKetNoi())
+                    {
+                        string sql = $@"SELECT job_id, job_name, app, code, link, status 
+                                FROM Notifycation 
+                                WHERE code = N'{code}'";
+
+                        tb = db.LoadTable(sql);
+                    }
+                });
+
+                // Nếu null thì thoát
+                if (tb == null || tb.Rows.Count == 0)
+                {
+                    DrawCircleAbovePicture(pic, 0, 405, 18); // hiện số 0
+                    return;
+                }
+
+                // 🔥 UI THREAD – xử lý dữ liệu
+                foreach (DataRow row in tb.Rows)
+                {
+                    var notify = new notify
+                    {
+                        JobId = Convert.ToInt32(row["job_id"]),
+                        JobName = row["job_name"].ToString(),
+                        App = row["app"].ToString(),
+                        Code = row["code"].ToString(),
+                        Link = row["link"].ToString(),
+                        Status = Convert.ToInt32(row["status"])
+                    };
+
+                    _notify.Add(notify);
+
+                    string title = $"Công việc - {notify.JobName}:\n";
+                    AppendColoredText(richTextBox1, title, Color.Yellow, Color.Black, true);
+
+                    AppendColoredText(richTextBox1, notify.Link + "\n");
+                }
+
+                // 🔥 VẼ LẠI HÌNH TRÒN SAU KHI ĐÃ LOAD XONG HẾT
+                DrawCircleAbovePicture(pic, _notify.Count, 405, 18);
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi LoadDataAsync: " + ex.Message);
+            }
+        }
+        private async void button1_Click(object sender, EventArgs e)
+        {
+            Environment.SetEnvironmentVariable("MY_APP_CODENV", txtCodeNV.Text, EnvironmentVariableTarget.User);
+            await LoadDataAsync();
+        }
+        private async void timer1_Tick(object sender, EventArgs e)
+        {
+            await LoadDataAsync();
         }
         private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
@@ -318,11 +376,7 @@ namespace NotifycationApp
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            Environment.SetEnvironmentVariable("MY_APP_CODENV", txtCodeNV.Text, EnvironmentVariableTarget.User);
-            getData();
-        }
+    
         private void RichTextBox1_LinkClicked(object sender, LinkClickedEventArgs e)
         {
             try
@@ -410,10 +464,7 @@ namespace NotifycationApp
             // Bỏ chọn
             box.Select(box.TextLength, 0);
         }
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            getData();
-        }
+       
         public void checkUpdate()
         {
             try
@@ -494,9 +545,10 @@ namespace NotifycationApp
             catch { return false; }
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private async void Form1_Load(object sender, EventArgs e)
         {
             checkUpdate();
+            await LoadDataAsync();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)

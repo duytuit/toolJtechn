@@ -42,6 +42,8 @@ namespace Vudaco.Debits.Models
         public int Type { get; set; }
         [Column("service_id")]
         public int? ServiceId { get; set; }
+        [Column("service_detail")]
+        public string ServiceDetail { get; set; }
 
         [MaxLength(255)]
         [Column("dispatch_code")]

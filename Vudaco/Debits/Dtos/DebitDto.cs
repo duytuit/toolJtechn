@@ -70,4 +70,5 @@ public class serviceDto
     public string LinkBill { get; set; }
     public string CodeBill { get; set; }
     public string Note { get; set; }
+    public string NoteConfirm { get; set; }
 }

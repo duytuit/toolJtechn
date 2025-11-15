@@ -372,6 +372,35 @@ namespace Vudaco.Debits.Controllers
             }
 
         }
+        [HttpPost("confirmChiPhiHaiQuan")]
+        public async Task<IActionResult> ConfirmChiPhiHaiQuan([FromBody] DebitDto DebitDto)
+        {
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                var now = DateTime.Now;
+                var debit = await _context.Debits.FirstOrDefaultAsync(x => x.Id == DebitDto.Id);
+                if (debit == null)  return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu chi phí hải quan", null);
+                var confirm_file = await _context.ConfirmFiles.FirstOrDefaultAsync(x => x.FileInfoId == DebitDto.FileInfoId && x.PartnerDetailId == DebitDto.CustomerDetailId && x.Status == ContractFileRepository.statusDichVu && x.DebitId == debit.Id); // tạo phần duyệt file giá
+                if (confirm_file == null)  return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu xác nhận", null);
+                debit.PurchasePrice =   DebitDto.productHaiquan.Sum(x => x.PurchasePrice);
+                debit.ServiceDetail =  JsonSerializer.Serialize(DebitDto.productHaiquan);
+                debit.UpdatedBy = userId;
+                debit.UpdatedAt = now;
+                confirm_file.StatusConfirm = 1;
+                confirm_file.UpdatedBy = userId;
+                confirm_file.UpdatedAt = now;
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+                return ApiResponseResult<object>(true, "Cập nhật thành công", null);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi cập nhật: " + ex.InnerException?.Message, null);
+            }
+        }
         [HttpPost("updateFileGia")]
         public async Task<IActionResult> UpdateFileGia([FromBody] ConfirmFileDto ConfirmFileDto)
         {
@@ -396,7 +425,7 @@ namespace Vudaco.Debits.Controllers
                     debit.Bill = item.Bill;
                     debit.UpdatedBy = userId;
                     debit.UpdatedAt = now;
-                    var confirm_file = await _context.ConfirmFiles.FirstOrDefaultAsync(x => x.FileInfoId == ConfirmFileDto.FileInfoId && x.PartnerDetailId == ConfirmFileDto.PartnerDetailId && x.Status == ContractFileRepository.statusFileGia && x.DebitId == debit.Id); // tạo phần duyệt file giá
+                    var confirm_file = await _context.ConfirmFiles.FirstOrDefaultAsync(x => x.FileInfoId == ConfirmFileDto.FileInfoId && x.PartnerDetailId == ConfirmFileDto.PartnerDetailId && x.Status == ContractFileRepository.statusDichVu && x.DebitId == debit.Id); // tạo phần duyệt file giá
                     if (confirm_file == null)
                     {
                         var entity = new ConfirmFile

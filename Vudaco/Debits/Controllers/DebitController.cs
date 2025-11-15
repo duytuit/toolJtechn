@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Vudaco.Bills.Models;
@@ -17,6 +16,8 @@ using Vudaco.Debits.Models;
 using Vudaco.Debits.Repositories;
 using Vudaco.Shares.BaseRepository;
 using Vudaco.Shares.SqlServerHelper;
+using System.Text.Json;
+using Vudaco.ContractFiles.Repositories;
 
 namespace Vudaco.Debits.Controllers
 {
@@ -69,6 +70,7 @@ namespace Vudaco.Debits.Controllers
             var conn = _context.Database.GetDbConnection();
             try
             {
+                var now = DateTime.Now;
                 int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
                 var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitDto.CustomerDetailId);
                 if (bill_Partner == null)
@@ -83,8 +85,8 @@ namespace Vudaco.Debits.Controllers
                         AccountingDate = DebitDto.AccountingDate,
                         CycleName = CycleName,
                         CreatedBy = userId,
-                        CreatedAt = DateTime.Now,
-                        UpdatedAt = DateTime.Now,
+                        CreatedAt = now,
+                        UpdatedAt = now,
                         UpdatedBy = userId
                     };
                     _context.Bills.Add(bill_Partner);
@@ -122,12 +124,25 @@ namespace Vudaco.Debits.Controllers
                     PurchaseStatus = DebitDto.PurchaseStatus,
                     PurchaseVat = DebitDto.PurchaseVat,
                     CreatedBy = userId,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now,
+                    CreatedAt = now,
+                    UpdatedAt = now,
                     UpdatedBy = userId
                 };
                 _context.Debits.Add(debit);
                 await _context.SaveChangesAsync();  // phải có
+                var entity = new ConfirmFile
+                {
+                    FileInfoId = DebitDto.FileInfoId,
+                    StorageId = DebitDto.StorageId,
+                    DebitId = debit.Id,
+                    PartnerDetailId = DebitDto.CustomerDetailId,
+                    Status = ContractFileRepository.statusDichVu,
+                    StatusConfirm = 0,
+                    CreatedBy = userId,
+                    CreatedAt = now,
+                };
+                _context.ConfirmFiles.Add(entity);
+                await _context.SaveChangesAsync();
                 await tran.CommitAsync();
                 return ApiResponseResult<object>(true, "Thêm thành công", null);
             }
@@ -148,6 +163,7 @@ namespace Vudaco.Debits.Controllers
             try
             {
                 int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
+                var now = DateTime.Now;
                 if (DebitDto.CustomerDetailId > 0)
                 {
                     var bill_Partner = await _context.Bills.AsNoTracking().FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitDto.CustomerDetailId);
@@ -162,8 +178,8 @@ namespace Vudaco.Debits.Controllers
                             CustomerDetailId = DebitDto.CustomerDetailId,
                             CycleName = CycleName,
                             CreatedBy = userId,
-                            CreatedAt = DateTime.Now,
-                            UpdatedAt = DateTime.Now,
+                            CreatedAt = now,
+                            UpdatedAt = now,
                             UpdatedBy = userId
                         };
                         _context.Bills.Add(bill_Partner);
@@ -191,17 +207,31 @@ namespace Vudaco.Debits.Controllers
                             Price = item.PurchasePrice,
                             Data = DebitDto.Data,
                             Note = DebitDto.Note,
+                            ServiceDetail =  JsonSerializer.Serialize(new[] { item }),
                             PurchaseStatus = DebitDto.PurchaseStatus,
                             PurchaseVat = DebitDto.PurchaseVat,
                             CreatedBy = userId,
-                            CreatedAt = DateTime.Now,
-                            UpdatedAt = DateTime.Now,
+                            CreatedAt = now,
+                            UpdatedAt = now,
                             UpdatedBy = userId
                         };
                         _context.Debits.Add(debit);
                         await _context.SaveChangesAsync();
+                        var entity = new ConfirmFile
+                        {
+                            FileInfoId = DebitDto.FileInfoId,
+                            DebitId = debit.Id,
+                            StorageId = DebitDto.StorageId,
+                            PartnerDetailId = DebitDto.CustomerDetailId,
+                            Status = ContractFileRepository.statusDichVu,
+                            StatusConfirm = 0,
+                            CreatedBy = userId,
+                            CreatedAt = now,
+                        };
+                        _context.ConfirmFiles.Add(entity);
+                        await _context.SaveChangesAsync();
                     }
-                    foreach (var item in DebitDto.productHaiquan)
+                    if (DebitDto.productHaiquan.Count > 0)
                     {
                         var debit = new Debit
                         {
@@ -211,25 +241,34 @@ namespace Vudaco.Debits.Controllers
                             FileInfoId = DebitDto.FileInfoId,
                             DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "HQ" + DebitDto.AccountingDate.ToString("yyMM"), 4),
                             StorageId = DebitDto.StorageId,
-                            ServiceId = item.ServiceId,
-                            Bill = item.Bill,
-                            LinkBill = item.LinkBill,
-                            CodeBill = item.CodeBill,
                             Type = DebitRepositories.PhiHaiQuan,
-                            Name = item.Name,
+                            Name = "Chi phí hải quan",
                             AccountingDate = DebitDto.AccountingDate,
-                            PurchasePrice = item.PurchasePrice,
-                            Price = item.PurchasePrice,
+                            PurchasePrice = DebitDto.productHaiquan.Sum(x => x.PurchasePrice),
                             Data = DebitDto.Data,
                             Note = DebitDto.Note,
+                            ServiceDetail = JsonSerializer.Serialize(DebitDto.productHaiquan),
                             PurchaseStatus = DebitDto.PurchaseStatus,
                             PurchaseVat = DebitDto.PurchaseVat,
                             CreatedBy = userId,
-                            CreatedAt = DateTime.Now,
-                            UpdatedAt = DateTime.Now,
+                            CreatedAt = now,
+                            UpdatedAt = now,
                             UpdatedBy = userId
                         };
                         _context.Debits.Add(debit);
+                        await _context.SaveChangesAsync();
+                        var entity = new ConfirmFile
+                        {
+                            FileInfoId = DebitDto.FileInfoId,
+                            StorageId = DebitDto.StorageId,
+                            DebitId = debit.Id,
+                            PartnerDetailId = DebitDto.CustomerDetailId,
+                            Status = ContractFileRepository.statusDichVu,
+                            StatusConfirm = 0,
+                            CreatedBy = userId,
+                            CreatedAt = now,
+                        };
+                        _context.ConfirmFiles.Add(entity);
                         await _context.SaveChangesAsync();
                     }
                 }
@@ -253,6 +292,7 @@ namespace Vudaco.Debits.Controllers
             try
             {
                 int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
+                var now = DateTime.Now;
                 if (DebitDto.CustomerDetailId > 0)
                 {
                     var bill_Partner = await _context.Bills.AsNoTracking().FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitDto.CustomerDetailId);
@@ -267,15 +307,15 @@ namespace Vudaco.Debits.Controllers
                             CustomerDetailId = DebitDto.CustomerDetailId,
                             CycleName = CycleName,
                             CreatedBy = userId,
-                            CreatedAt = DateTime.Now,
-                            UpdatedAt = DateTime.Now,
+                            CreatedAt = now,
+                            UpdatedAt = now,
                             UpdatedBy = userId
                         };
                         _context.Bills.Add(bill_Partner);
                          await _context.SaveChangesAsync();
                      
                     }
-                    foreach (var item in DebitDto.productNangha)
+                    foreach (var item in DebitDto.productNangha) 
                     {
                         var debit = new Debit
                         {
@@ -299,15 +339,28 @@ namespace Vudaco.Debits.Controllers
                             PurchaseStatus = DebitDto.PurchaseStatus,
                             PurchaseVat = DebitDto.PurchaseVat,
                             CreatedBy = userId,
-                            CreatedAt = DateTime.Now,
-                            UpdatedAt = DateTime.Now,
+                            CreatedAt = now,
+                            UpdatedAt = now,
                             UpdatedBy = userId
                         };
                         debit.SupplierDetailId = (item.SupplierDetailId > 0) ? item.SupplierDetailId : null;
                         _context.Debits.Add(debit);
-
+                        await _context.SaveChangesAsync();
+                        var entity = new ConfirmFile
+                        {
+                            FileInfoId = DebitDto.FileInfoId,
+                            DebitId = debit.Id,
+                            StorageId = DebitDto.StorageId,
+                            PartnerDetailId = DebitDto.CustomerDetailId,
+                            Status = ContractFileRepository.statusDichVu,
+                            StatusConfirm = 0,
+                            CreatedBy = userId,
+                            CreatedAt = now,
+                        };
+                        _context.ConfirmFiles.Add(entity);
+                        await _context.SaveChangesAsync();
                     }
-                    await _context.SaveChangesAsync();
+                  
                 }
                 await tran.CommitAsync();
                 return ApiResponseResult<object>(true, "Thêm thành công", null);
@@ -323,6 +376,7 @@ namespace Vudaco.Debits.Controllers
         public async Task<IActionResult> UpdateFileGia([FromBody] ConfirmFileDto ConfirmFileDto)
         {
             using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
             try
             {
                 var now = DateTime.Now;
@@ -338,36 +392,103 @@ namespace Vudaco.Debits.Controllers
                     }
                     debit.AccountingDate = ConfirmFileDto.AccountingDate;
                     debit.Vat = item.Vat;
-                    debit.Status = 1; // đã tạo file giá
+                    debit.Status =  ContractFileRepository.statusFileGia; 
                     debit.Bill = item.Bill;
                     debit.UpdatedBy = userId;
                     debit.UpdatedAt = now;
-                   
-                   
-                }
-                var confirm_file = await _context.ConfirmFiles.FirstOrDefaultAsync(x => x.FileInfoId == ConfirmFileDto.FileInfoId && x.PartnerDetailId == ConfirmFileDto.PartnerDetailId); // debit khách hàng
-                if (confirm_file == null)
-                {
-                    var entity = new ConfirmFile
+                    var confirm_file = await _context.ConfirmFiles.FirstOrDefaultAsync(x => x.FileInfoId == ConfirmFileDto.FileInfoId && x.PartnerDetailId == ConfirmFileDto.PartnerDetailId && x.Status == ContractFileRepository.statusFileGia && x.DebitId == debit.Id); // tạo phần duyệt file giá
+                    if (confirm_file == null)
                     {
-                        FileInfoId = ConfirmFileDto.FileInfoId,
+                        var entity = new ConfirmFile
+                        {
+                            FileInfoId = ConfirmFileDto.FileInfoId,
+                            StorageId = ConfirmFileDto.StorageId,
+                            DebitId = debit.Id,
+                            PartnerDetailId = ConfirmFileDto.PartnerDetailId,
+                            Status = ContractFileRepository.statusFileGia,
+                            StatusConfirm = 0,
+                            CreatedBy = userId,
+                            CreatedAt = now,
+                        };
+                        _context.ConfirmFiles.Add(entity);
+                    }
+                    else
+                    {
+                        confirm_file.FileInfoId = ConfirmFileDto.FileInfoId;
+                        confirm_file.StorageId = ConfirmFileDto.StorageId;
+                        confirm_file.PartnerDetailId = ConfirmFileDto.PartnerDetailId;
+                        confirm_file.Status = ContractFileRepository.statusFileGia;
+                        confirm_file.StatusConfirm = 0;
+                        confirm_file.UpdatedAt = null;
+                        confirm_file.UpdatedBy = null;
+                        _context.ConfirmFiles.Update(confirm_file);
+                    }
+                }
+                int CycleName = int.Parse(ConfirmFileDto.AccountingDate.ToString("MMyyyy"));
+
+                var bill_Partner = await _context.Bills.AsNoTracking().FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == ConfirmFileDto.PartnerDetailId);
+                if (bill_Partner == null)
+                {
+                    var BillCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", ConfirmFileDto.StorageId, "HD"+ConfirmFileDto.AccountingDate.ToString("yyMM"), 4);
+                    bill_Partner = new Bill
+                    {
+                        BillCode = BillCode,
                         StorageId = ConfirmFileDto.StorageId,
-                        PartnerDetailId = ConfirmFileDto.PartnerDetailId,
+                        Name = CycleName.ToString(),
+                        AccountingDate = ConfirmFileDto.AccountingDate,
+                        CustomerDetailId = ConfirmFileDto.PartnerDetailId,
+                        CycleName = CycleName,
                         CreatedBy = userId,
                         CreatedAt = now,
+                        UpdatedAt = now,
+                        UpdatedBy = userId
                     };
-                    await _context.ConfirmFiles.AddAsync(entity);
+                    _context.Bills.Add(bill_Partner);
+                    await _context.SaveChangesAsync();
+                    
                 }
-                else
+                foreach (var item in ConfirmFileDto.Chiphikhac)
                 {
-                    confirm_file.FileInfoId = ConfirmFileDto.FileInfoId;
-                    confirm_file.StorageId = ConfirmFileDto.StorageId;
-                    confirm_file.PartnerDetailId = ConfirmFileDto.PartnerDetailId;
-                    confirm_file.Status = 0;
-                    confirm_file.UpdatedAt = null;
-                    confirm_file.UpdatedBy = null;
-                    _context.ConfirmFiles.Update(confirm_file);
+                     var debit = new Debit
+                        {
+                            BillId = bill_Partner.Id,
+                            CustomerDetailId = ConfirmFileDto.PartnerDetailId,
+                            FileInfoId = ConfirmFileDto.FileInfoId,
+                            DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", ConfirmFileDto.StorageId, "PK" + ConfirmFileDto.AccountingDate.ToString("yyMM"), 4),
+                            StorageId = ConfirmFileDto.StorageId,
+                            Type = DebitRepositories.PhiKhac,
+                            Name = item.Name,
+                            AccountingDate = ConfirmFileDto.AccountingDate,
+                            PurchasePrice = item.PurchasePrice,
+                            Price = item.Price,
+                            Vat = item.Vat,
+                            Status = ContractFileRepository.statusFileGia,
+                            Data =  JsonSerializer.Serialize(new{fileNumber=ConfirmFileDto.FileNumber}),
+                            Note = item.Note,
+                            ServiceDetail = JsonSerializer.Serialize(new []{item}),
+                            PurchaseStatus = 0,
+                            PurchaseVat = 0,
+                            CreatedBy = userId,
+                            CreatedAt = now,
+                            UpdatedAt = now,
+                            UpdatedBy = userId
+                        };
+                        _context.Debits.Add(debit);
+                        await _context.SaveChangesAsync();
+                        var entity = new ConfirmFile
+                        {
+                            FileInfoId = ConfirmFileDto.FileInfoId,
+                            StorageId = ConfirmFileDto.StorageId,
+                            DebitId = debit.Id,
+                            PartnerDetailId = ConfirmFileDto.PartnerDetailId,
+                            Status = ContractFileRepository.statusFileGia,
+                            StatusConfirm = 0,
+                            CreatedBy = userId,
+                            CreatedAt = now,
+                        };
+                        _context.ConfirmFiles.Add(entity);
                 }
+               
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
 

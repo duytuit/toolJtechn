@@ -22,6 +22,9 @@ namespace Vudaco.ContractFiles.Repositories
         private readonly VudacoDBContext _context;
         private readonly IConfiguration _configuration;
         private readonly RedisService _redis;
+        public const int statusDichVu = 0;
+        public const int statusFileGia = 1;
+        public const int statusDebit = 2;
         public ContractFileRepository(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;
@@ -186,6 +189,7 @@ namespace Vudaco.ContractFiles.Repositories
                         d_total.customer_detail_id AS debit_customer_detail_id,
                         d_total.employee_staff_id AS debit_employee_staff_id,
                         d_total.service_id AS debit_service_id,
+                        d_total.service_detail AS debit_service_detail,
                         d_total.type AS debit_type,
                         d_total.id AS debit_id,
                         d_total.name AS debit_name,
@@ -216,6 +220,7 @@ namespace Vudaco.ContractFiles.Repositories
                             d.customer_detail_id,
                             d.employee_staff_id,
                             d.service_id,
+                            d.service_detail,
                             d.type,
                             d.id,
                             d.bill,
@@ -239,6 +244,7 @@ namespace Vudaco.ContractFiles.Repositories
                             d.data,
                             d.employee_staff_id,
                             d.service_id,
+                            d.service_detail,
                             d.type,
                             d.id,
                             d.bill,
@@ -250,10 +256,12 @@ namespace Vudaco.ContractFiles.Repositories
                             d.accounting_date,
                             d.status
                     ) AS d_total
-                        ON d_total.file_info_id = f.id
-                        AND d_total.customer_detail_id = f.customer_detail_id
+                        ON d_total.file_info_id = cf.file_info_id
+                        AND d_total.customer_detail_id = cf.partner_detail_id
+                        AND d_total.id = cf.debit_id
                     WHERE 
                         p.status = 1
+                        AND cf.status = 1
                         AND cf.deleted_at IS NULL
                         AND f.deleted_at IS NULL
                         AND p.deleted_at IS NULL";

@@ -14,6 +14,9 @@ namespace Vudaco.Debits.Models
         [Required]
         [Column("file_info_id")]
         public int? FileInfoId { get; set; }
+        [Required]
+        [Column("debit_id")]
+        public int DebitId { get; set; }
         [Column("partner_detail_id")]
         [Required]
         public int? PartnerDetailId { get; set; }
@@ -25,6 +28,9 @@ namespace Vudaco.Debits.Models
         [Required]
         [Column("status")]
         public int? Status { get; set; }
+
+        [Column("status_confirm")]
+        public int StatusConfirm { get; set; }
        
 
         [MaxLength(500)]

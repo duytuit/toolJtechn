@@ -60,10 +60,12 @@ namespace Vudaco.Debits.Dtos
 
 public class serviceDto
 {
-    public int ServiceId { get; set; }
-    public int SupplierDetailId { get; set; }
+    public int? ServiceId { get; set; }
+    public int? SupplierDetailId { get; set; }
     public string Name { get; set; }
     public int PurchasePrice { get; set; }
+    public int Vat { get; set; }
+    public int Price { get; set; }
     public string Bill { get; set; }
     public string LinkBill { get; set; }
     public string CodeBill { get; set; }

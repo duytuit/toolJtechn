@@ -18,6 +18,7 @@ using Vudaco.Shares.BaseRepository;
 using Vudaco.Shares.SqlServerHelper;
 using System.Text.Json;
 using Vudaco.ContractFiles.Repositories;
+using Vudaco.ContractFiles.Dtos;
 
 namespace Vudaco.Debits.Controllers
 {
@@ -26,24 +27,26 @@ namespace Vudaco.Debits.Controllers
     public class DebitController : BaseApiController
     {
         private readonly IDebitRepositories _repoDebit;
+        private readonly IContractFileDetailRepository _repoContractFileDetail;
         private readonly ILogger<DebitController> _logger;
         private readonly VudacoDBContext _context;
 
         private readonly IConfiguration _configuration;
         public int userId => (int)HttpContext.Items["UserId"];
 
-        public DebitController(ILogger<DebitController> logger, IConfiguration configuration, IDebitRepositories repoDebit, VudacoDBContext context)
+        public DebitController(ILogger<DebitController> logger,  IContractFileDetailRepository repoContractFileDetail,IConfiguration configuration, IDebitRepositories repoDebit, VudacoDBContext context)
         {
             _logger = logger;
             _repoDebit = repoDebit;
             _context = context;
             _configuration = configuration;
+            _repoContractFileDetail = repoContractFileDetail;
         }
         [HttpGet("dispatch")]
-        public async Task<IActionResult> GetTaskDispatch(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        public async Task<IActionResult> GetTaskDispatch(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] FileInfoDetailDto FileInfoDetailDto = null)
         {
             // test
-            var result = await _repoDebit.GetObjectDebitDispatchAsync(DebitDto, page, pageSize, cancellationToken);
+            var result = await _repoContractFileDetail.GetObjectFileHasDispatchAsync(FileInfoDetailDto, page, pageSize, cancellationToken);
             if (result == null)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
@@ -427,7 +430,7 @@ namespace Vudaco.Debits.Controllers
                     debit.Status = ContractFileRepository.statusDebit; 
                     debit.UpdatedBy = userId;
                     debit.UpdatedAt = now;
-                    confirm_file.StatusConfirm = 1;
+                    confirm_file.StatusConfirm = ConfirmFileDto.StatusConfirm;
                     confirm_file.UpdatedBy = userId;
                     confirm_file.UpdatedAt = now;
                 }

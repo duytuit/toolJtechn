@@ -82,6 +82,53 @@ namespace Vudaco.ContractFiles.Repositories
             };
             return _results;
         }
+        public async Task<PaginatedResultReact<object>> GetObjectFileHasDispatchAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var sql = $@"
+                    SELECT 
+                        d.*,
+                        f.accounting_date AS f_accounting_date,
+                        cf.note AS cf_note,
+                        cf.status AS cf_status,
+                        cf.status_confirm AS cf_status_confirm,
+                        cf.updated_at AS cf_updated_at,
+                        cf.updated_by AS cf_updated_by
+                    FROM debits d
+                    LEFT JOIN file_infos f 
+                        ON d.file_info_id = f.id
+                        AND d.customer_detail_id = f.customer_detail_id
+                    LEFT JOIN partner_details p 
+                        ON p.id = f.customer_detail_id
+                    LEFT JOIN confirm_file_infos cf 
+                         ON d.id = cf.debit_id
+                    WHERE 
+                        d.type = 1
+                        AND p.status = 1
+                        AND d.deleted_at IS NULL
+                        AND p.deleted_at IS NULL
+                        AND f.deleted_at IS NULL
+                        AND cf.deleted_at IS NULL";
+            if (FileInfoDetailDto.StorageId > 0)
+            {
+                sql += $@" AND f.storage_id = {FileInfoDetailDto.StorageId}";
+            }
+            if (FileInfoDetailDto.FromDate.HasValue && FileInfoDetailDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = FileInfoDetailDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND f.accounting_date >= '{FileInfoDetailDto.FromDate.Value:yyyy-MM-dd}' 
+                AND f.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+
+            sql += " ORDER BY f.updated_at DESC";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
         public async Task<PaginatedResultReact<object>> GetObjectNotNangHaAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
         {
             var sql = $@"
@@ -155,12 +202,20 @@ namespace Vudaco.ContractFiles.Repositories
                         d_total.id as debit_id,
                         d_total.name as debit_name,
                         d_total.updated_at as debit_updated_at,
-                        d_total.updated_by as debit_updated_by
+                        d_total.updated_by as debit_updated_by,
+                        cf.note AS cf_note,
+                        cf.status AS cf_status,
+                        cf.status_confirm AS cf_status_confirm,
+                        cf.updated_at AS cf_updated_at,
+                        cf.updated_by AS cf_updated_by
                     FROM file_infos f
                     LEFT JOIN file_info_details fdt 
                         ON f.id = fdt.file_id
                     LEFT JOIN partner_details p 
                         ON p.id = f.customer_detail_id
+                    LEFT JOIN confirm_file_infos cf 
+                        ON cf.file_info_id = f.id
+                        AND cf.partner_detail_id = f.customer_detail_id
                     -- ✅ Debit phải tồn tại (INNER JOIN)
                     INNER JOIN (
                         SELECT 
@@ -195,11 +250,13 @@ namespace Vudaco.ContractFiles.Repositories
                         ON d_total.file_info_id = f.id
                         AND d_total.customer_detail_id = f.customer_detail_id
                         AND d_total.employee_staff_id = fdt.employee_id
+                        AND d_total.id = cf.debit_id
                     WHERE 
                         fdt.deleted_at IS NULL
                         AND f.deleted_at IS NULL
                         AND p.status = 1
-                        AND p.deleted_at IS NULL";
+                        AND p.deleted_at IS NULL
+                        AND cf.deleted_at IS NULL";
             if (FileInfoDetailDto.StorageId > 0) {
 
                 sql += $@" AND f.storage_id = {FileInfoDetailDto.StorageId}";
@@ -319,12 +376,20 @@ namespace Vudaco.ContractFiles.Repositories
                         d_total.id as debit_id,
                         d_total.name as debit_name,
                         d_total.updated_at as debit_updated_at,
-                        d_total.updated_by as debit_updated_by
+                        d_total.updated_by as debit_updated_by,
+                        cf.note AS cf_note,
+                        cf.status AS cf_status,
+                        cf.status_confirm AS cf_status_confirm,
+                        cf.updated_at AS cf_updated_at,
+                        cf.updated_by AS cf_updated_by
                     FROM file_infos f
                     LEFT JOIN file_info_details fdt 
                         ON f.id = fdt.file_id
                     LEFT JOIN partner_details p 
                         ON p.id = f.customer_detail_id
+                    LEFT JOIN confirm_file_infos cf 
+                        ON cf.file_info_id = f.id
+                        AND cf.partner_detail_id = f.customer_detail_id
                     -- ✅ Tổng receipts
                     OUTER APPLY (
                         SELECT 
@@ -374,11 +439,13 @@ namespace Vudaco.ContractFiles.Repositories
                         ON d_total.file_info_id = f.id
                         AND d_total.customer_detail_id = f.customer_detail_id
                         AND d_total.employee_staff_id = fdt.employee_id
+                        AND d_total.id = cf.debit_id
                     WHERE 
                         fdt.deleted_at IS NULL
                         AND f.deleted_at IS NULL
                         AND p.status = 1
-                        AND p.deleted_at IS NULL";
+                        AND p.deleted_at IS NULL
+                        AND cf.deleted_at IS NULL";
             if (FileInfoDetailDto.StorageId > 0) {
 
                 sql += $@" AND f.storage_id = {FileInfoDetailDto.StorageId}";
@@ -396,7 +463,7 @@ namespace Vudaco.ContractFiles.Repositories
                 AND f.accounting_date < '{toDateNext:yyyy-MM-dd}'";
             }
 
-            sql += " ORDER BY f.updated_at DESC";
+            sql += " ORDER BY d_total.type,f.updated_at DESC";
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
             {

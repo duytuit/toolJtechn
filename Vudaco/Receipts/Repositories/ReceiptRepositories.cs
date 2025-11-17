@@ -22,6 +22,8 @@ namespace Vudaco.Receipts.Repositories
         private readonly RedisService _redis;
         public const int Thu = 0;
         public const int ChiGiaoNhan = 1;
+        public const int ChiHoanUngGiaoNhan = 2;
+        public const int ThuHoanUngGiaoNhan = 3;
         public ReceiptRepositories(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;

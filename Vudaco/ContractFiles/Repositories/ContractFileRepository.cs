@@ -205,6 +205,7 @@ namespace Vudaco.ContractFiles.Repositories
                         CAST(d_total.total_price AS INT) AS debit_total_price,
                         cf.note AS cf_note,
                         cf.status AS cf_status,
+                        cf.status_confirm AS cf_status_confirm,
                         cf.updated_at AS cf_updated_at,
                         cf.updated_by AS cf_updated_by
                     FROM file_infos f
@@ -236,7 +237,7 @@ namespace Vudaco.ContractFiles.Repositories
                             SUM(d.price) AS price,
                             SUM(d.price * (d.vat / 100.0)) + SUM(d.price) AS total_price
                         FROM debits d
-                        WHERE d.status = 1 
+                        WHERE d.status >= 1 
                         AND d.deleted_at IS NULL
                         GROUP BY 
                             d.file_info_id,
@@ -261,7 +262,7 @@ namespace Vudaco.ContractFiles.Repositories
                         AND d_total.id = cf.debit_id
                     WHERE 
                         p.status = 1
-                        AND cf.status = 1
+                        AND cf.status >= 1
                         AND cf.deleted_at IS NULL
                         AND f.deleted_at IS NULL
                         AND p.deleted_at IS NULL";

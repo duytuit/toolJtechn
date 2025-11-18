@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
@@ -45,6 +46,68 @@ namespace Vudaco.Receipts.Controllers
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpPost]
+        [Route("create/hoanUngGiaoNhan")]
+        public async Task<IActionResult> CreateHoanUngGiaoNhan([FromBody] ReceiptHoanUngGiaoNhanDto ReceiptHoanUngGiaoNhanDto)
+        {
+            if (ReceiptHoanUngGiaoNhanDto.EmployeeId == null || ReceiptHoanUngGiaoNhanDto.EmployeeId == 0)
+                return ApiResponseResult<object>(false, "Nhân viên giao nhận bắt buộc", null);
+            if (ReceiptHoanUngGiaoNhanDto.FormOfPayment == 1 && (ReceiptHoanUngGiaoNhanDto.FundId == null || ReceiptHoanUngGiaoNhanDto.FundId == 0))
+                return ApiResponseResult<object>(false, "Mã quỹ bắt buộc", null);
+            if (ReceiptHoanUngGiaoNhanDto.FormOfPayment == 2 && (ReceiptHoanUngGiaoNhanDto.BankId == null || ReceiptHoanUngGiaoNhanDto.BankId == 0))
+                return ApiResponseResult<object>(false, "Mã Ngân hàng bắt buộc", null);
+
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                var PrefixCode = ReceiptHoanUngGiaoNhanDto.TypeReceipt == ReceiptRepositories.ChiHoanUngGiaoNhan ? "PC"+ReceiptHoanUngGiaoNhanDto.AccountingDate.ToString("yyMM"):"PT"+ReceiptHoanUngGiaoNhanDto.AccountingDate.ToString("yyMM");
+                var code_receipt = await SqlServerHelpers.GenerateCodeEfAsync(conn, tran.GetDbTransaction(), "receipts", "code_receipt", ReceiptHoanUngGiaoNhanDto.StorageId, PrefixCode , 4);
+
+                var entity = new Receipt
+                {
+                    AccountingDate = ReceiptHoanUngGiaoNhanDto.AccountingDate,
+                    StorageId = ReceiptHoanUngGiaoNhanDto.StorageId,
+                    CodeReceipt = code_receipt,
+                    EmployeeId = ReceiptHoanUngGiaoNhanDto.EmployeeId,
+                    Bill = ReceiptHoanUngGiaoNhanDto.Bill,
+                    FundId = ReceiptHoanUngGiaoNhanDto.FormOfPayment == 1 ? ReceiptHoanUngGiaoNhanDto.FundId : 0,
+                    Note = ReceiptHoanUngGiaoNhanDto.Note,
+                    FormOfPayment = ReceiptHoanUngGiaoNhanDto.FormOfPayment,
+                    TypeReceipt = ReceiptRepositories.ChiGiaoNhan,
+                    BankId = ReceiptHoanUngGiaoNhanDto.FormOfPayment == 2 ? ReceiptHoanUngGiaoNhanDto.BankId : 0,
+                    Data = ReceiptHoanUngGiaoNhanDto.Data,
+                    CreatedBy = userId,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                    UpdatedBy = userId,
+                };
+
+                _context.Receipts.Add(entity);
+                await _context.SaveChangesAsync();
+                var entity_detail = new ReceiptDetail
+                {
+                    ReceiptId = entity.Id,
+                    StorageId = ReceiptHoanUngGiaoNhanDto.StorageId,
+                    AccountingDate = ReceiptHoanUngGiaoNhanDto.AccountingDate,
+                    Amount = ReceiptHoanUngGiaoNhanDto.Amount,
+                    Vat = ReceiptHoanUngGiaoNhanDto.Vat,
+                    CreatedBy = userId,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+
+                };
+                _context.ReceiptDetails.Add(entity_detail);
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+                return ApiResponseResult(true, "Thêm thành công", entity);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
+            }
         }
         [HttpPost]
         [Route("create/chigiaonhan")]

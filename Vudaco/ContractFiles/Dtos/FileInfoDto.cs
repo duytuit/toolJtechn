@@ -24,6 +24,7 @@ namespace Vudaco.ContractFiles.Dtos
         public int? Business { get; set; }
         public int? Occurrence { get; set; }
         public string Note { get; set; }
+        public int? ReceiptId { get; set; }
         public int? CreatedBy { get; set; }
         public int? UpdatedBy { get; set; }
         public int? DeletedBy { get; set; }

@@ -67,6 +67,8 @@ namespace Vudaco.ContractFiles.Models
 
         [Column("note", TypeName = "nvarchar(max)")]
         public string Note { get; set; }
+        [Column("receipt_id")]
+        public int? ReceiptId { get; set; }
 
         [Column("created_by")]
         public int? CreatedBy { get; set; }

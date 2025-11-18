@@ -59,6 +59,8 @@ namespace Vudaco.Receipts.Models
 
         [Column("bank_id")]
         public int? BankId { get; set; }
+        [Column("status")]
+        public int? Status { get; set; }
 
         [Column("data")]
         public string Data { get; set; }

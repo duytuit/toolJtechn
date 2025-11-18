@@ -23,6 +23,7 @@ namespace Vudaco.Receipts.Dtos
         public int FormOfPayment { get; set; }
         public int TypeReceipt { get; set; }
         public int? BankId { get; set; }
+        public int? Status { get; set; }
         public int Amount { get; set; }
         public int Vat { get; set; }
         public string Data { get; set; }

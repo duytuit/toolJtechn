@@ -385,7 +385,16 @@ namespace Vudaco.Debits.Controllers
                 var now = DateTime.Now;
                 var debit = await _context.Debits.FirstOrDefaultAsync(x => x.Id == DebitDto.Id);
                 if (debit == null)  return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu file giá", null);
-                var confirm_file = await _context.ConfirmFiles.FirstOrDefaultAsync(x => x.FileInfoId == DebitDto.FileInfoId && x.PartnerDetailId == DebitDto.CustomerDetailId && x.Status == ContractFileRepository.statusDichVu && x.DebitId == debit.Id); // tạo phần duyệt file giá
+                var confirm_file = await _context.ConfirmFiles
+                .Where(x =>
+                    x.FileInfoId == DebitDto.FileInfoId &&
+                    x.PartnerDetailId == DebitDto.CustomerDetailId &&
+                    (x.Status == ContractFileRepository.statusDichVu ||
+                    x.Status == ContractFileRepository.statusFileGia) &&
+                    x.DebitId == debit.Id
+                )
+                .OrderBy(x => x.Status == ContractFileRepository.statusDichVu ? 0 : 1) // ưu tiên
+                .FirstOrDefaultAsync();
                 if (confirm_file == null)  return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu xác nhận", null);
                 debit.PurchasePrice =   DebitDto.productHaiquan.Sum(x => x.PurchasePrice);
                 debit.ServiceDetail =  JsonSerializer.Serialize(DebitDto.productHaiquan);

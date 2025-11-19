@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -12,10 +13,9 @@ namespace Vudaco.Shares.Connects
     {
         private SqlConnection con;
         private SqlTransaction _tran; // transaction hiện tại
-        public AdoVudacoDB(IConfiguration configuration)
+        public AdoVudacoDB(IOptions<ConnectionStrings> opt)
         {
-            string connStr = configuration.GetConnectionString("DefaultConnection");
-            con = new SqlConnection(connStr);
+            con = new SqlConnection(opt.Value.DefaultConnection);
             if (con.State == ConnectionState.Closed)
                 con.Open();
         }

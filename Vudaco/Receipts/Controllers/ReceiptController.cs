@@ -1,19 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Vudaco.Controllers;
 using Vudaco.Receipts.Dtos;
 using Vudaco.Receipts.Models;
 using Vudaco.Receipts.Repositories;
-using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
+using Vudaco.Shares.Connects;
 using Vudaco.Shares.SqlServerHelper;
 
 namespace Vudaco.Receipts.Controllers
@@ -26,15 +26,16 @@ namespace Vudaco.Receipts.Controllers
         private readonly IReceiptRepositories _repoReceipt;
         private readonly ILogger<ReceiptController> _logger;
         private readonly VudacoDBContext _context;
-
+        private readonly AdoVudacoDB _db;
         public int userId => (int)HttpContext.Items["UserId"];
 
-        public ReceiptController(ILogger<ReceiptController> logger, IReceiptDetailRepositories repoReceiptDetail, IReceiptRepositories repoReceipt, VudacoDBContext context)
+        public ReceiptController(ILogger<ReceiptController> logger,AdoVudacoDB db, IReceiptDetailRepositories repoReceiptDetail, IReceiptRepositories repoReceipt, VudacoDBContext context)
         {
             _logger = logger;
             _repoReceiptDetail = repoReceiptDetail;
             _repoReceipt = repoReceipt;
             _context = context;
+            _db = db;
         }
         [HttpGet]
         public async Task<IActionResult> GetReceipt(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] ReceiptDto ReceiptDto = null)
@@ -48,20 +49,19 @@ namespace Vudaco.Receipts.Controllers
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
         [HttpPost]
-        [Route("create/hoanUngGiaoNhan")]
-        public async Task<IActionResult> CreateHoanUngGiaoNhan([FromBody] ReceiptHoanUngGiaoNhanDto ReceiptHoanUngGiaoNhanDto)
+        [Route("create/giayHoanUng")]
+        public async Task<IActionResult> CreateGiayHoanUng([FromBody] ReceiptHoanUngGiaoNhanDto ReceiptHoanUngGiaoNhanDto)
         {
             if (ReceiptHoanUngGiaoNhanDto.EmployeeId == null || ReceiptHoanUngGiaoNhanDto.EmployeeId == 0)
                 return ApiResponseResult<object>(false, "Nhân viên giao nhận bắt buộc", null);
-            if (ReceiptHoanUngGiaoNhanDto.FormOfPayment == 1 && (ReceiptHoanUngGiaoNhanDto.FundId == null || ReceiptHoanUngGiaoNhanDto.FundId == 0))
-                return ApiResponseResult<object>(false, "Mã quỹ bắt buộc", null);
-            if (ReceiptHoanUngGiaoNhanDto.FormOfPayment == 2 && (ReceiptHoanUngGiaoNhanDto.BankId == null || ReceiptHoanUngGiaoNhanDto.BankId == 0))
-                return ApiResponseResult<object>(false, "Mã Ngân hàng bắt buộc", null);
+            if (ReceiptHoanUngGiaoNhanDto.Amount <= 0 )
+                return ApiResponseResult<object>(false, "Chưa có thông tin hoàn ứng", null);
 
             using var tran = await _context.Database.BeginTransactionAsync();
             var conn = _context.Database.GetDbConnection();
             try
             {
+                var now = DateTime.Now;
                 var PrefixCode = ReceiptHoanUngGiaoNhanDto.TypeReceipt == ReceiptRepositories.ChiHoanUngGiaoNhan ? "PC"+ReceiptHoanUngGiaoNhanDto.AccountingDate.ToString("yyMM"):"PT"+ReceiptHoanUngGiaoNhanDto.AccountingDate.ToString("yyMM");
                 var code_receipt = await SqlServerHelpers.GenerateCodeEfAsync(conn, tran.GetDbTransaction(), "receipts", "code_receipt", ReceiptHoanUngGiaoNhanDto.StorageId, PrefixCode , 4);
 
@@ -72,15 +72,15 @@ namespace Vudaco.Receipts.Controllers
                     CodeReceipt = code_receipt,
                     EmployeeId = ReceiptHoanUngGiaoNhanDto.EmployeeId,
                     Bill = ReceiptHoanUngGiaoNhanDto.Bill,
-                    FundId = ReceiptHoanUngGiaoNhanDto.FormOfPayment == 1 ? ReceiptHoanUngGiaoNhanDto.FundId : 0,
                     Note = ReceiptHoanUngGiaoNhanDto.Note,
+                    Description =  ReceiptHoanUngGiaoNhanDto.Description,
                     FormOfPayment = ReceiptHoanUngGiaoNhanDto.FormOfPayment,
-                    TypeReceipt = ReceiptRepositories.ChiGiaoNhan,
-                    BankId = ReceiptHoanUngGiaoNhanDto.FormOfPayment == 2 ? ReceiptHoanUngGiaoNhanDto.BankId : 0,
+                    TypeReceipt = ReceiptHoanUngGiaoNhanDto.TypeReceipt,
                     Data = ReceiptHoanUngGiaoNhanDto.Data,
+                    Status = 0,
                     CreatedBy = userId,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now,
+                    CreatedAt = now,
+                    UpdatedAt = now,
                     UpdatedBy = userId,
                 };
 
@@ -101,6 +101,20 @@ namespace Vudaco.Receipts.Controllers
                 _context.ReceiptDetails.Add(entity_detail);
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
+                if ( !string.IsNullOrEmpty(ReceiptHoanUngGiaoNhanDto.Data))
+                {
+                    var list = JsonSerializer.Deserialize<List<JsonElement>>(ReceiptHoanUngGiaoNhanDto.Data);
+                    foreach (var item in list)
+                    {
+                        int fileInfoId = item.GetProperty("fileInfoId").GetInt32();
+                        var file_infos_object = new
+                        {
+                            id = fileInfoId,
+                            receipt_id = entity.Id
+                        };
+                        _db.UpsertFromObject("file_infos", file_infos_object,"id");
+                    }
+                }
                 return ApiResponseResult(true, "Thêm thành công", entity);
             }
             catch (DbUpdateException ex)

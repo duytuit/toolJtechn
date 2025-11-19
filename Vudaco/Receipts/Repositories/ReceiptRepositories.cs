@@ -53,8 +53,7 @@ namespace Vudaco.Receipts.Repositories
             var orderByList = new List<string> {  "updated_at desc" , "id"};
             if (ReceiptDto.StorageId > 0)
                 whereEquals["storage_id"] = ReceiptDto.StorageId;
-            if (ReceiptDto.TypeReceipt > 0)
-                whereEquals["type_receipt"] = ReceiptDto.TypeReceipt;
+            whereEquals["type_receipt"] = ChiGiaoNhan;
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "receipts",

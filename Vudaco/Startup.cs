@@ -30,6 +30,7 @@ using Vudaco.Debits;
 using Vudaco.Departments;
 using Vudaco.Receipts;
 using Vudaco.Vehicles;
+using Vudaco.Shares.Connects;
 
 namespace Vudaco
 {
@@ -67,6 +68,9 @@ namespace Vudaco
             services.AddDbContext<VudacoDBContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))
             );
+            // kết nối sql server kiểu ado
+            services.Configure<ConnectionStrings>(Configuration.GetSection("ConnectionStrings"));
+            services.AddTransient<AdoVudacoDB>();
             // kết nối sql server vudaco cũ
             services.AddDbContext<VudacoOldDBContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("DefaultConnectionVuDaCo"))

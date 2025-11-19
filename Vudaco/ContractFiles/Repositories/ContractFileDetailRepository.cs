@@ -381,7 +381,10 @@ namespace Vudaco.ContractFiles.Repositories
                         cf.status AS cf_status,
                         cf.status_confirm AS cf_status_confirm,
                         cf.updated_at AS cf_updated_at,
-                        cf.updated_by AS cf_updated_by
+                        cf.updated_by AS cf_updated_by,
+                        re.code_receipt,
+                        re.status AS re_status,
+                        re.employee_id AS re_employee_id
                     FROM file_infos f
                     LEFT JOIN file_info_details fdt 
                         ON f.id = fdt.file_id
@@ -390,6 +393,8 @@ namespace Vudaco.ContractFiles.Repositories
                     LEFT JOIN confirm_file_infos cf 
                         ON cf.file_info_id = f.id
                         AND cf.partner_detail_id = f.customer_detail_id
+                    LEFT JOIN receipts re 
+                        ON re.id = f.receipt_id
                     -- ✅ Tổng receipts
                     OUTER APPLY (
                         SELECT 

@@ -378,7 +378,7 @@ namespace Vudaco.Debits.Controllers
         [HttpPost("confirmChiPhiHaiQuan")]
         public async Task<IActionResult> ConfirmChiPhiHaiQuan([FromBody] DebitDto DebitDto)
         {
-            using var tran = await _context.Database.BeginTransactionAsync();
+             using var tran = await _context.Database.BeginTransactionAsync();
             var conn = _context.Database.GetDbConnection();
             try
             {
@@ -434,7 +434,7 @@ namespace Vudaco.Debits.Controllers
                     if (confirm_file == null)
                     {
                         await tran.RollbackAsync();
-                        return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu xác nhận chi phí. Hãy duyệt chi phí hải quan", null);
+                        return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu xác nhận chi phí. Hãy duyệt chi phí hải quan" +debit.Id, null);
                     }
                     debit.Status = ContractFileRepository.statusDebit; 
                     debit.UpdatedBy = userId;

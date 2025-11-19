@@ -48,6 +48,17 @@ namespace Vudaco.Receipts.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
+        [HttpGet("XacNhanChiPhiGiaoNhan")]
+        public async Task<IActionResult> GetXacNhanChiPhiGiaoNhan(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] ReceiptDto ReceiptDto = null)
+        {
+            // test
+            var result = await _repoReceipt.GetXacNhanChiPhiGiaoNhanAsync(ReceiptDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
         [HttpPost]
         [Route("create/giayHoanUng")]
         public async Task<IActionResult> CreateGiayHoanUng([FromBody] ReceiptHoanUngGiaoNhanDto ReceiptHoanUngGiaoNhanDto)
@@ -116,6 +127,64 @@ namespace Vudaco.Receipts.Controllers
                     }
                 }
                 return ApiResponseResult(true, "Thêm thành công", entity);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
+            }
+        }
+        [HttpPost]
+        [Route("update/HoanUngGiaoNhan")]
+        public async Task<IActionResult> UpdateHoanUngGiaoNhan([FromBody] ReceiptDto ReceiptDto)
+        {
+            if (ReceiptDto.Status == 1)
+            {
+                if (ReceiptDto.FormOfPayment == 1 && (ReceiptDto.FundId == null || ReceiptDto.FundId == 0))
+                    return ApiResponseResult<object>(false, "Mã quỹ bắt buộc", null);
+                if (ReceiptDto.FormOfPayment == 2 && (ReceiptDto.BankId == null || ReceiptDto.BankId == 0))
+                    return ApiResponseResult<object>(false, "Mã Ngân hàng bắt buộc", null);
+                if (ReceiptDto.IncomeExpenseCategoryId == null || ReceiptDto.IncomeExpenseCategoryId == 0)
+                    return ApiResponseResult<object>(false, "ly do chi bắt buộc", null);
+            }
+            var entity = await _context.Receipts.FirstOrDefaultAsync(p => p.Id == ReceiptDto.Id);
+            if (entity == null)
+                return ApiResponseResult<object>(false, "Mã yêu cầu không tồn tại", null);
+
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                if (ReceiptDto.Status == 1)
+                {
+                    entity.AccountingDate = ReceiptDto.AccountingDate;
+                    entity.FundId = ReceiptDto.FormOfPayment == 1 ? ReceiptDto.FundId : 0;
+                    entity.IncomeExpenseCategoryId = ReceiptDto.IncomeExpenseCategoryId;
+                    entity.Note = ReceiptDto.Note;
+                    entity.FormOfPayment = ReceiptDto.FormOfPayment;
+                    entity.BankId = ReceiptDto.FormOfPayment == 2 ? ReceiptDto.BankId : 0;
+                    entity.Status = ReceiptDto.Status;
+                    entity.UpdatedAt = DateTime.Now;
+                    entity.UpdatedBy = userId;
+                    _context.Receipts.Update(entity);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    entity.FundId = null;
+                    entity.IncomeExpenseCategoryId = null;
+                    entity.Note =  null;
+                    entity.FormOfPayment = ReceiptDto.FormOfPayment;
+                    entity.BankId = null;
+                    entity.Status = ReceiptDto.Status;
+                    entity.UpdatedAt = DateTime.Now;
+                    entity.UpdatedBy = userId;
+                    _context.Receipts.Update(entity);
+                    await _context.SaveChangesAsync();
+                }
+              
+                await tran.CommitAsync();
+                return ApiResponseResult(true, "Cập nhật thành công", entity);
             }
             catch (DbUpdateException ex)
             {

@@ -13,6 +13,7 @@ namespace Vudaco.Receipts.Repositories
     public interface IReceiptRepositories : IBaseRepository<Receipt>
     {
         Task<PaginatedResultReact<object>> GetObjectTaskAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<PaginatedResultReact<object>> GetXacNhanChiPhiGiaoNhanAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<Receipt> ShowAsync(int id);
         Task<Receipt> CreateAsync(Receipt Receipt);
         Task<Receipt> UpdateAsync(Receipt Receipt);

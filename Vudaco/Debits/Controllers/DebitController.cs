@@ -439,6 +439,7 @@ namespace Vudaco.Debits.Controllers
                     debit.Status = ContractFileRepository.statusDebit; 
                     debit.UpdatedBy = userId;
                     debit.UpdatedAt = now;
+                    confirm_file.Status = ContractFileRepository.statusDebit; 
                     confirm_file.StatusConfirm = ConfirmFileDto.StatusConfirm;
                     confirm_file.UpdatedBy = userId;
                     confirm_file.UpdatedAt = now;

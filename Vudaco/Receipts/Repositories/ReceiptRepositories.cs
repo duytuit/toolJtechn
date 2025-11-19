@@ -53,17 +53,77 @@ namespace Vudaco.Receipts.Repositories
             var orderByList = new List<string> {  "updated_at desc" , "id"};
             if (ReceiptDto.StorageId > 0)
                 whereEquals["storage_id"] = ReceiptDto.StorageId;
-            whereEquals["type_receipt"] = ChiGiaoNhan;
+            if (ReceiptDto.EmployeeId > 0)
+                whereEquals["employee_id"] = ReceiptDto.EmployeeId;
+            whereEquals["type_receipt"] = ReceiptDto.TypeReceipt;
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "receipts",
-                        new[] { "id", "code_receipt", "storage_id", "partner_detail_id", "accounting_date", "employee_id", "file_info_id", "fund_id", "income_expense_category_id", "bill", "note", "description", "form_of_payment", "type_receipt", "type", "bank_id", "data", "created_by", "updated_by", "deleted_by", "deleted_at", "created_at", "updated_at" },
+                        new[] { "id","code_receipt","storage_id","partner_detail_id","accounting_date","employee_id","file_info_id","fund_id","income_expense_category_id","bill","note","description","form_of_payment","type_receipt","type","bank_id","status","data","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at" },
                         offset: null,
                         limit: null,
                         whereEquals: whereEquals,
                         whereLikes: whereLikes,
                         dateRangeList: whereDateRange,
                         orderByList: orderByList,
+                        relations: new List<AdoRelation>
+                                {
+                                    new AdoRelation
+                                    {
+                                        Name = "receipt_details",
+                                        Table = "receipt_details",
+                                        Columns = new[] { "id","receipt_id","storage_id","debit_id","accounting_date","amount","vat","data","note","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},
+                                        ParentKey = "id",
+                                        ForeignKey = "receipt_id",
+                                        KeyName = "receipt_id",
+                                        IsCollection = true,
+                                    }
+                                },
+                        redisCache: _redis,
+                        includeCount: false,
+                        cancellationToken: cancellationToken
+                    );
+            int totalItems = results.Count;
+            var objectList = new List<object>();
+            objectList.AddRange(results.Data);
+            var _results = new PaginatedResultReact<object>
+            {
+                PageNum = page,
+                PageSize = pageSize,
+                First = (int)Math.Ceiling((double)totalItems / pageSize),
+                Total = totalItems,
+                Data = objectList,
+            };
+            objectList = null;
+            results = null;
+            whereEquals?.Clear(); whereLikes?.Clear(); whereDateRange?.Clear(); orderByList?.Clear();
+            return _results;
+        }
+         public async Task<PaginatedResultReact<object>> GetXacNhanChiPhiGiaoNhanAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+             List<(string Sql, object[] Params)> whereCustoms = new();
+            var whereEquals = new Dictionary<string, object>();
+            var whereLikes = new Dictionary<string, string>();
+            var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
+            var orderByList = new List<string> {  "updated_at desc" , "id"};
+            if (ReceiptDto.StorageId > 0)
+                whereEquals["storage_id"] = ReceiptDto.StorageId;
+            if (ReceiptDto.EmployeeId > 0)
+                whereEquals["employee_id"] = ReceiptDto.EmployeeId;
+
+            whereCustoms.Add(("type_receipt IN (2,3)", Array.Empty<object>()));
+
+            dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
+                        _configuration.GetConnectionString("DefaultConnection"),
+                        "receipts",
+                        new[] { "id","code_receipt","storage_id","partner_detail_id","accounting_date","employee_id","file_info_id","fund_id","income_expense_category_id","bill","note","description","form_of_payment","type_receipt","type","bank_id","status","data","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at" },
+                        offset: null,
+                        limit: null,
+                        whereEquals: whereEquals,
+                        whereLikes: whereLikes,
+                        dateRangeList: whereDateRange,
+                        orderByList: orderByList,
+                        whereCustom:whereCustoms,
                         relations: new List<AdoRelation>
                                 {
                                     new AdoRelation

@@ -87,7 +87,6 @@ namespace Vudaco.ContractFiles.Repositories
             var sql = $@"
                     SELECT 
                         d.*,
-                        f.accounting_date AS f_accounting_date,
                         cf.note AS cf_note,
                         cf.status AS cf_status,
                         cf.status_confirm AS cf_status_confirm,
@@ -98,7 +97,7 @@ namespace Vudaco.ContractFiles.Repositories
                         ON d.file_info_id = f.id
                         AND d.customer_detail_id = f.customer_detail_id
                     LEFT JOIN partner_details p 
-                        ON p.id = f.customer_detail_id
+                        ON p.id = d.customer_detail_id
                     LEFT JOIN confirm_file_infos cf 
                          ON d.id = cf.debit_id
                     WHERE 
@@ -110,18 +109,22 @@ namespace Vudaco.ContractFiles.Repositories
                         AND cf.deleted_at IS NULL";
             if (FileInfoDetailDto.StorageId > 0)
             {
-                sql += $@" AND f.storage_id = {FileInfoDetailDto.StorageId}";
+                sql += $@" AND d.storage_id = {FileInfoDetailDto.StorageId}";
+            }
+            if (FileInfoDetailDto.CustomerDetailId > 0)
+            {
+                sql += $@" AND d.customer_detail_id = {FileInfoDetailDto.CustomerDetailId}";
             }
             if (FileInfoDetailDto.FromDate.HasValue && FileInfoDetailDto.ToDate.HasValue)
             {
                 // Cộng thêm 1 ngày cho ToDate
                 var toDateNext = FileInfoDetailDto.ToDate.Value.Date.AddDays(1);
                 // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
-                sql += $@" AND f.accounting_date >= '{FileInfoDetailDto.FromDate.Value:yyyy-MM-dd}' 
-                AND f.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                sql += $@" AND d.accounting_date >= '{FileInfoDetailDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
             }
 
-            sql += " ORDER BY f.updated_at DESC";
+            sql += " ORDER BY d.updated_at DESC";
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
             {

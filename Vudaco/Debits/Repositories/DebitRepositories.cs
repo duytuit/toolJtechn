@@ -24,6 +24,10 @@ namespace Vudaco.Debits.Repositories
         public const int PhiChiHo = 2;
         public const int PhiNangHa = 3;
         public const int PhiKhac = 4;
+        public const int DauKyKH = 5;
+        public const int DauKyNCC = 6;
+        public const int MuaHangNCC = 7;
+        public const int BanHangKH = 8;
         public DebitRepositories(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;

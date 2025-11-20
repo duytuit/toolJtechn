@@ -430,7 +430,7 @@ namespace Vudaco.Debits.Controllers
                         await tran.RollbackAsync();
                         return ApiResponseResult<object>(false, "Chưa nhập giá bán cho phí hải quan.", null);
                     }
-                    var confirm_file = await _context.ConfirmFiles.FirstOrDefaultAsync(x => x.FileInfoId == item.FileInfoId && x.PartnerDetailId == item.CustomerDetailId && x.Status == ContractFileRepository.statusFileGia && x.DebitId == debit.Id); // duyệt file giá
+                    var confirm_file = await _context.ConfirmFiles.FirstOrDefaultAsync(x => x.FileInfoId == item.FileInfoId && x.PartnerDetailId == item.CustomerDetailId && x.DebitId == debit.Id); // duyệt file giá
                     if (confirm_file == null)
                     {
                         await tran.RollbackAsync();
@@ -439,10 +439,14 @@ namespace Vudaco.Debits.Controllers
                     debit.Status = ContractFileRepository.statusDebit; 
                     debit.UpdatedBy = userId;
                     debit.UpdatedAt = now;
-                    confirm_file.Status = ContractFileRepository.statusDebit; 
-                    confirm_file.StatusConfirm = ConfirmFileDto.StatusConfirm;
-                    confirm_file.UpdatedBy = userId;
-                    confirm_file.UpdatedAt = now;
+                    if (confirm_file.Status == 1 || confirm_file.Status == 2)
+                    {
+                        confirm_file.Status = ContractFileRepository.statusDebit;
+                        confirm_file.StatusConfirm = ConfirmFileDto.StatusConfirm;
+                        confirm_file.UpdatedBy = userId;
+                        confirm_file.UpdatedAt = now;
+                    }
+
                 }
                
                 await _context.SaveChangesAsync();

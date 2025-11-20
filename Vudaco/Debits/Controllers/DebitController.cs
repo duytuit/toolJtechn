@@ -384,25 +384,25 @@ namespace Vudaco.Debits.Controllers
             {
                 var now = DateTime.Now;
                 var debit = await _context.Debits.FirstOrDefaultAsync(x => x.Id == DebitDto.Id);
-                if (debit == null)  return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu file giá", null);
+                if (debit == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu file giá", null);
                 var confirm_file = await _context.ConfirmFiles
                 .Where(x =>
                     x.FileInfoId == DebitDto.FileInfoId &&
                     x.PartnerDetailId == DebitDto.CustomerDetailId &&
-                    (x.Status == ContractFileRepository.statusDichVu ||
-                    x.Status == ContractFileRepository.statusFileGia) &&
                     x.DebitId == debit.Id
-                )
-                .OrderBy(x => x.Status == ContractFileRepository.statusDichVu ? 0 : 1) // ưu tiên
-                .FirstOrDefaultAsync();
-                if (confirm_file == null)  return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu xác nhận", null);
-                debit.PurchasePrice =   DebitDto.productHaiquan.Sum(x => x.PurchasePrice);
-                debit.ServiceDetail =  JsonSerializer.Serialize(DebitDto.productHaiquan);
+                ).FirstOrDefaultAsync();
+                if (confirm_file == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu xác nhận", null);
+                debit.PurchasePrice = DebitDto.productHaiquan.Sum(x => x.PurchasePrice);
+                debit.ServiceDetail = JsonSerializer.Serialize(DebitDto.productHaiquan);
                 debit.UpdatedBy = userId;
                 debit.UpdatedAt = now;
-                confirm_file.StatusConfirm = 1;
-                confirm_file.UpdatedBy = userId;
-                confirm_file.UpdatedAt = now;
+                if (confirm_file.Status == 0 || confirm_file.Status == 1)
+                {
+                    confirm_file.Status = 1;
+                    confirm_file.StatusConfirm = 1;
+                    confirm_file.UpdatedBy = userId;
+                    confirm_file.UpdatedAt = now;
+                }
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
                 return ApiResponseResult<object>(true, "Cập nhật thành công", null);
@@ -484,7 +484,7 @@ namespace Vudaco.Debits.Controllers
                     debit.Bill = item.Bill;
                     debit.UpdatedBy = userId;
                     debit.UpdatedAt = now;
-                    var confirm_file = await _context.ConfirmFiles.FirstOrDefaultAsync(x => x.FileInfoId == ConfirmFileDto.FileInfoId && x.PartnerDetailId == ConfirmFileDto.PartnerDetailId && x.Status == ContractFileRepository.statusDichVu && x.DebitId == debit.Id); // tạo phần duyệt file giá
+                    var confirm_file = await _context.ConfirmFiles.FirstOrDefaultAsync(x => x.FileInfoId == ConfirmFileDto.FileInfoId && x.PartnerDetailId == ConfirmFileDto.PartnerDetailId && x.DebitId == debit.Id); // tạo phần duyệt file giá
                     if (confirm_file == null)
                     {
                         var entity = new ConfirmFile
@@ -502,14 +502,18 @@ namespace Vudaco.Debits.Controllers
                     }
                     else
                     {
-                        confirm_file.FileInfoId = ConfirmFileDto.FileInfoId;
-                        confirm_file.StorageId = ConfirmFileDto.StorageId;
-                        confirm_file.PartnerDetailId = ConfirmFileDto.PartnerDetailId;
-                        confirm_file.Status = ContractFileRepository.statusFileGia;
-                        confirm_file.StatusConfirm = 0;
-                        confirm_file.UpdatedAt = null;
-                        confirm_file.UpdatedBy = null;
-                        _context.ConfirmFiles.Update(confirm_file);
+                        if (confirm_file.Status == 0 || confirm_file.Status == 1)
+                        {
+                            confirm_file.FileInfoId = ConfirmFileDto.FileInfoId;
+                            confirm_file.StorageId = ConfirmFileDto.StorageId;
+                            confirm_file.PartnerDetailId = ConfirmFileDto.PartnerDetailId;
+                            confirm_file.Status = ContractFileRepository.statusFileGia;
+                            confirm_file.StatusConfirm = 0;
+                            confirm_file.UpdatedAt = null;
+                            confirm_file.UpdatedBy = null;
+                            _context.ConfirmFiles.Update(confirm_file);
+                        }
+                      
                     }
                 }
                 int CycleName = int.Parse(ConfirmFileDto.AccountingDate.ToString("MMyyyy"));

@@ -24,6 +24,9 @@ namespace Vudaco.Receipts.Repositories
         public const int ChiGiaoNhan = 1;
         public const int ChiHoanUngGiaoNhan = 2;
         public const int ThuHoanUngGiaoNhan = 3;
+        public const int ChiMuaHangNCC = 4;
+        public const int ThuBanHangKH = 5;
+        public const int ThuBanHangNV = 6;
         public ReceiptRepositories(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;
@@ -179,6 +182,20 @@ namespace Vudaco.Receipts.Repositories
              _context.Receipts.Update(Receipt);
             _context.SaveChanges();
             return Task.FromResult(Receipt);
+        }
+
+        public async Task<ReceiptDetail> ShowWithDebitAsync(int id)
+        {
+            var entity = await _context.ReceiptDetails
+                .FirstOrDefaultAsync(x => x.ReceiptId == id);
+
+            if (entity == null) return null;
+
+            entity.Debit = await _context.Debits
+                .Where(d => d.Id == entity.DebitId)
+                .FirstOrDefaultAsync();
+
+            return entity;
         }
     }
 }

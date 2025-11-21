@@ -405,5 +405,19 @@ namespace Vudaco.Receipts.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", entity);
         }
+        [HttpGet("showWithDebit")]
+        public async Task<IActionResult> ShowWithDebit([FromQuery] int id)
+        {
+            if (id <= 0)
+            {
+                return ApiResponseResult<object>(false, "Id không tồn tại", null);
+            }
+            var entity =  await _repoReceipt.ShowWithDebitAsync(id);
+            if (entity == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", entity);
+        }
     }
 }

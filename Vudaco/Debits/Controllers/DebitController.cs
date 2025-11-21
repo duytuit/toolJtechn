@@ -19,6 +19,8 @@ using Vudaco.Shares.SqlServerHelper;
 using System.Text.Json;
 using Vudaco.ContractFiles.Repositories;
 using Vudaco.ContractFiles.Dtos;
+using Vudaco.Receipts.Models;
+using Vudaco.Receipts.Repositories;
 
 namespace Vudaco.Debits.Controllers
 {
@@ -47,6 +49,169 @@ namespace Vudaco.Debits.Controllers
         {
             // test
             var result = await _repoContractFileDetail.GetObjectFileHasDispatchAsync(FileInfoDetailDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpPost]
+        [Route("create/muaban")]
+        public async Task<IActionResult> CreateMuaBan([FromBody] DebitMuaBanDto DebitMuaBanDto)
+        {
+            if (DebitMuaBanDto.FormOfPayment == 1 && (DebitMuaBanDto.FundId == null || DebitMuaBanDto.FundId == 0))
+                return ApiResponseResult<object>(false, "Mã quỹ bắt buộc", null);
+            if (DebitMuaBanDto.FormOfPayment == 2 && (DebitMuaBanDto.BankId == null || DebitMuaBanDto.BankId == 0))
+                return ApiResponseResult<object>(false, "Mã Ngân hàng bắt buộc", null);
+            if (DebitMuaBanDto.IncomeExpenseCategoryId == null || DebitMuaBanDto.IncomeExpenseCategoryId == 0)
+                return ApiResponseResult<object>(false, "ly do bắt buộc", null);
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                var now = DateTime.Now;
+                int CycleName = int.Parse(DebitMuaBanDto.AccountingDate.ToString("MMyyyy"));
+                var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitMuaBanDto.CustomerDetailId);
+                if (bill_Partner == null)
+                {
+                    var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitMuaBanDto.StorageId, "HD"+DebitMuaBanDto.AccountingDate.ToString("yyMM"),4);
+                    bill_Partner = new Bill
+                    {
+                        BillCode = BillCodePartner,
+                        StorageId = DebitMuaBanDto.StorageId,
+                        CustomerDetailId =  DebitMuaBanDto.CustomerDetailId,
+                        Name = CycleName.ToString(),
+                        AccountingDate = DebitMuaBanDto.AccountingDate,
+                        CycleName = CycleName,
+                        CreatedBy = userId,
+                        CreatedAt = now,
+                        UpdatedAt = now,
+                        UpdatedBy = userId
+                    };
+                    _context.Bills.Add(bill_Partner);
+                    await _context.SaveChangesAsync();  // phải có
+                }
+                var DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn,tran.GetDbTransaction(), "debits", "dispatch_code", DebitMuaBanDto.StorageId, "BHKH"+DebitMuaBanDto.AccountingDate.ToString("yyMM"),4);
+
+                var debit = new Debit
+                {
+                    BillId = bill_Partner.Id,
+                    CustomerDetailId = DebitMuaBanDto.CustomerDetailId,
+                    StorageId = DebitMuaBanDto.StorageId,
+                    Type = DebitRepositories.BanHangKH,
+                    DispatchCode = DispatchCode,
+                    Name = DebitMuaBanDto.Note,
+                    AccountingDate = DebitMuaBanDto.AccountingDate,
+                    PurchasePrice = DebitMuaBanDto.Price,
+                    Price = DebitMuaBanDto.Price,
+                    Data = DebitMuaBanDto.Data,
+                    Note = DebitMuaBanDto.Note,
+                    CreatedBy = userId,
+                    CreatedAt = now,
+                    UpdatedAt = now,
+                    UpdatedBy = userId
+                };
+                _context.Debits.Add(debit);
+                await _context.SaveChangesAsync();  // phải có
+                var entity = new ConfirmFile
+                {
+                    StorageId = DebitMuaBanDto.StorageId,
+                    DebitId = debit.Id,
+                    PartnerDetailId = DebitMuaBanDto.CustomerDetailId,
+                    Status = ContractFileRepository.statusDebit,
+                    StatusConfirm = 0,
+                    CreatedBy = userId,
+                    CreatedAt = now,
+                };
+                _context.ConfirmFiles.Add(entity);
+                await _context.SaveChangesAsync();
+
+                 var code_receipt = await SqlServerHelpers.GenerateCodeEfAsync(conn, tran.GetDbTransaction(), "receipts", "code_receipt", DebitMuaBanDto.StorageId, "PT"+DebitMuaBanDto.AccountingDate.ToString("yyMM"), 4);
+
+                var receipt = new Receipt
+                {
+                    AccountingDate = DebitMuaBanDto.AccountingDate,
+                    StorageId = DebitMuaBanDto.StorageId,
+                    CodeReceipt = code_receipt,
+                    FundId = DebitMuaBanDto.FormOfPayment == 1 ? DebitMuaBanDto.FundId : 0,
+                    IncomeExpenseCategoryId = DebitMuaBanDto.IncomeExpenseCategoryId,
+                    Note = DebitMuaBanDto.Note,
+                    FormOfPayment = DebitMuaBanDto.FormOfPayment,
+                    TypeReceipt = ReceiptRepositories.ThuBanHangKH,
+                    BankId = DebitMuaBanDto.FormOfPayment == 2 ? DebitMuaBanDto.BankId : 0,
+                    Data = DebitMuaBanDto.Data,
+                    CreatedBy = userId,
+                    CreatedAt = now,
+                    UpdatedAt = now,
+                    UpdatedBy = userId,
+                };
+
+                _context.Receipts.Add(receipt);
+                await _context.SaveChangesAsync();
+                var entity_detail = new ReceiptDetail
+                {
+                    ReceiptId = receipt.Id,
+                    StorageId = DebitMuaBanDto.StorageId,
+                    DebitId = debit.Id,
+                    AccountingDate = DebitMuaBanDto.AccountingDate,
+                    Amount = DebitMuaBanDto.Price,
+                    Vat = DebitMuaBanDto.Vat,
+                    CreatedBy = userId,
+                    CreatedAt = now,
+                    UpdatedAt = now,
+                    UpdatedBy = userId,
+
+                };
+                _context.ReceiptDetails.Add(entity_detail);
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+                return ApiResponseResult<object>(true, "Thêm thành công", null);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
+            }
+            
+        }
+        [HttpGet("muaban")]
+        public async Task<IActionResult> GetTaskMuaBan(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectDebitMuaBanAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet("cuoctamthu")]
+        public async Task<IActionResult> GetTaskCuocTamThu(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectDebitCuocTamThuAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet("daukykh")]
+        public async Task<IActionResult> GetTaskDauKyKH(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectDebitDauKyKHAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet("daukyncc")]
+        public async Task<IActionResult> GetTaskDauKyNCC(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectDebitDauKyNCCAsync(DebitDto, page, pageSize, cancellationToken);
             if (result == null)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
@@ -155,6 +320,214 @@ namespace Vudaco.Debits.Controllers
                 return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
             }
             
+        }
+        [HttpPost]
+        [Route("create/daukykh")]
+        public async Task<IActionResult> CreateDauKyKH([FromBody] DebitDto DebitDto)
+        {
+
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                var now = DateTime.Now;
+                int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
+                var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitDto.CustomerDetailId);
+                if (bill_Partner == null)
+                {
+                    var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HD"+DebitDto.AccountingDate.ToString("yyMM"),4);
+                    bill_Partner = new Bill
+                    {
+                        BillCode = BillCodePartner,
+                        StorageId = DebitDto.StorageId,
+                        CustomerDetailId =  DebitDto.CustomerDetailId,
+                        Name = CycleName.ToString(),
+                        AccountingDate = DebitDto.AccountingDate,
+                        CycleName = CycleName,
+                        CreatedBy = userId,
+                        CreatedAt = now,
+                        UpdatedAt = now,
+                        UpdatedBy = userId
+                    };
+                    _context.Bills.Add(bill_Partner);
+                    await _context.SaveChangesAsync();  // phải có
+                }
+                var DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn,tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "DKKH"+DebitDto.AccountingDate.ToString("yyMM"),4);
+
+                var debit = new Debit
+                {
+                    BillId = bill_Partner.Id,
+                    CustomerDetailId = DebitDto.CustomerDetailId,
+                    StorageId = DebitDto.StorageId,
+                    Type = DebitRepositories.DauKyKH,
+                    DispatchCode = DispatchCode,
+                    Name = DebitDto.Name,
+                    AccountingDate = DebitDto.AccountingDate,
+                    PurchasePrice = DebitDto.Price,
+                    Price = DebitDto.Price,
+                    Data = DebitDto.Data,
+                    Note = DebitDto.Note,
+                    CreatedBy = userId,
+                    CreatedAt = now,
+                    UpdatedAt = now,
+                    UpdatedBy = userId
+                };
+                _context.Debits.Add(debit);
+                await _context.SaveChangesAsync();  // phải có
+                var entity = new ConfirmFile
+                {
+                    StorageId = DebitDto.StorageId,
+                    DebitId = debit.Id,
+                    PartnerDetailId = DebitDto.CustomerDetailId,
+                    Status = ContractFileRepository.statusDebit,
+                    StatusConfirm = 0,
+                    CreatedBy = userId,
+                    CreatedAt = now,
+                };
+                _context.ConfirmFiles.Add(entity);
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+                return ApiResponseResult<object>(true, "Thêm thành công", null);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
+            }
+            
+        }
+        [HttpPost]
+        [Route("create/daukyncc")]
+        public async Task<IActionResult> CreateDauKyNCC([FromBody] DebitDto DebitDto)
+        {
+
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                var now = DateTime.Now;
+                int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
+                var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.SupplierDetailId == DebitDto.SupplierDetailId);
+                if (bill_Partner == null)
+                {
+                    var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HD"+DebitDto.AccountingDate.ToString("yyMM"),4);
+                    bill_Partner = new Bill
+                    {
+                        BillCode = BillCodePartner,
+                        StorageId = DebitDto.StorageId,
+                        SupplierDetailId =  DebitDto.SupplierDetailId,
+                        Name = CycleName.ToString(),
+                        AccountingDate = DebitDto.AccountingDate,
+                        CycleName = CycleName,
+                        CreatedBy = userId,
+                        CreatedAt = now,
+                        UpdatedAt = now,
+                        UpdatedBy = userId
+                    };
+                    _context.Bills.Add(bill_Partner);
+                    await _context.SaveChangesAsync();  // phải có
+                }
+                var DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn,tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "DKNCC"+DebitDto.AccountingDate.ToString("yyMM"),4);
+
+                var debit = new Debit
+                {
+                    BillId = bill_Partner.Id,
+                    SupplierDetailId = DebitDto.SupplierDetailId,
+                    StorageId = DebitDto.StorageId,
+                    Type = DebitRepositories.DauKyNCC,
+                    DispatchCode = DispatchCode,
+                    Name = DebitDto.Name,
+                    AccountingDate = DebitDto.AccountingDate,
+                    PurchasePrice = DebitDto.Price,
+                    Price = DebitDto.Price,
+                    Data = DebitDto.Data,
+                    Note = DebitDto.Note,
+                    CreatedBy = userId,
+                    CreatedAt = now,
+                    UpdatedAt = now,
+                    UpdatedBy = userId
+                };
+                _context.Debits.Add(debit);
+                await _context.SaveChangesAsync();  // phải có
+                var entity = new ConfirmFile
+                {
+                    StorageId = DebitDto.StorageId,
+                    DebitId = debit.Id,
+                    PartnerDetailId = DebitDto.SupplierDetailId,
+                    Status = ContractFileRepository.statusDebit,
+                    StatusConfirm = 0,
+                    CreatedBy = userId,
+                    CreatedAt = now,
+                };
+                _context.ConfirmFiles.Add(entity);
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+                return ApiResponseResult<object>(true, "Thêm thành công", null);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
+            }
+            
+        }
+        [HttpPost]
+        [Route("update/daukyvamuaban")]
+        public async Task<IActionResult> UpdateDauKy([FromBody] DebitDto DebitDto)
+        {
+            if (DebitDto.Id <= 0)
+            {
+                return ApiResponseResult<object>(false, "Id không tồn tại", null);
+            }
+            var entity = _context.Debits.Find(DebitDto.Id);
+            if (entity == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                var now = DateTime.Now;
+                int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
+                var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitDto.CustomerDetailId);
+                if (bill_Partner == null)
+                {
+                    var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HD" + DebitDto.AccountingDate.ToString("yyMM"), 4);
+                    bill_Partner = new Bill
+                    {
+                        BillCode = BillCodePartner,
+                        StorageId = DebitDto.StorageId,
+                        CustomerDetailId = DebitDto.CustomerDetailId,
+                        Name = CycleName.ToString(),
+                        AccountingDate = DebitDto.AccountingDate,
+                        CycleName = CycleName,
+                        CreatedBy = userId,
+                        CreatedAt = now,
+                        UpdatedAt = now,
+                        UpdatedBy = userId
+                    };
+                    _context.Bills.Add(bill_Partner);
+                    await _context.SaveChangesAsync();  // phải có
+                }
+                entity.BillId = bill_Partner.Id;
+                entity.Name = DebitDto.Name;
+                entity.AccountingDate = DebitDto.AccountingDate;
+                entity.PurchasePrice = DebitDto.Price;
+                entity.Price = DebitDto.Price;
+                entity.Data = DebitDto.Data;
+                entity.UpdatedAt = now;
+                entity.UpdatedBy = userId;
+                _context.Debits.Update(entity);
+                await _context.SaveChangesAsync();  // phải có
+                await tran.CommitAsync();
+                return ApiResponseResult<object>(true, "Cập nhật thành công", null);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
+            }
         }
         [HttpPost]
         [Route("service/create")]

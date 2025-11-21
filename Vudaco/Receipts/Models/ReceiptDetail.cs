@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Vudaco.Debits.Models;
 
 namespace Vudaco.Receipts.Models
 {
@@ -55,5 +56,7 @@ namespace Vudaco.Receipts.Models
 
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
+        [NotMapped]
+        public Debit Debit { get; set; }
     }
 }

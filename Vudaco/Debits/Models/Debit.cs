@@ -19,7 +19,6 @@ namespace Vudaco.Debits.Models
         public int? VehicleId { get; set; }
 
         [Column("customer_detail_id")]
-        [Required]
         public int? CustomerDetailId { get; set; }
         [Column("supplier_detail_id")]
         public int? SupplierDetailId { get; set; }

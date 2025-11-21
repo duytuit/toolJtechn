@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Vudaco.Debits.Models;
 
 namespace Vudaco.Receipts.Models
 {
@@ -84,5 +85,6 @@ namespace Vudaco.Receipts.Models
         public DateTime? UpdatedAt { get; set; }
         [NotMapped]
         public List<ReceiptDetail> ReceiptDetails { get; set; }
+        
     }
 }

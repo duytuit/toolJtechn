@@ -359,7 +359,7 @@ namespace Vudaco.Debits.Controllers
                     BillId = bill_Partner.Id,
                     CustomerDetailId = DebitDto.CustomerDetailId,
                     StorageId = DebitDto.StorageId,
-                    Type = DebitRepositories.DauKyKH,
+                    Type = DebitDto.Type,
                     DispatchCode = DispatchCode,
                     Name = DebitDto.Name,
                     AccountingDate = DebitDto.AccountingDate,
@@ -434,7 +434,7 @@ namespace Vudaco.Debits.Controllers
                     BillId = bill_Partner.Id,
                     SupplierDetailId = DebitDto.SupplierDetailId,
                     StorageId = DebitDto.StorageId,
-                    Type = DebitRepositories.DauKyNCC,
+                    Type = DebitDto.Type,
                     DispatchCode = DispatchCode,
                     Name = DebitDto.Name,
                     AccountingDate = DebitDto.AccountingDate,
@@ -512,6 +512,7 @@ namespace Vudaco.Debits.Controllers
                 }
                 entity.BillId = bill_Partner.Id;
                 entity.Name = DebitDto.Name;
+                entity.Type = DebitDto.Type;
                 entity.AccountingDate = DebitDto.AccountingDate;
                 entity.PurchasePrice = DebitDto.Price;
                 entity.Price = DebitDto.Price;

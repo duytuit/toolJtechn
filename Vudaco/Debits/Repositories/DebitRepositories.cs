@@ -24,11 +24,13 @@ namespace Vudaco.Debits.Repositories
         public const int PhiChiHo = 2;
         public const int PhiNangHa = 3;
         public const int PhiKhac = 4;
-        public const int DauKyKH = 5;
-        public const int DauKyNCC = 6;
+        public const int PhiDichVuDK_KH = 5;
+        public const int PhiChihoDK_KH = 6;
         public const int MuaHangNCC = 7;
         public const int BanHangKH = 8;
         public const int BanHangNV = 9;
+        public const int PhiDichVuDK_NCC = 10;
+        public const int PhiChihoDK_NCC = 11;
         public DebitRepositories(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;
@@ -250,7 +252,7 @@ namespace Vudaco.Debits.Repositories
                     LEFT JOIN confirm_file_infos cf 
                          ON d.id = cf.debit_id
                     WHERE 
-                        d.type = 5
+                        d.type in (5,6)
                         AND p.status = 1
                         AND d.deleted_at IS NULL
                         AND p.deleted_at IS NULL
@@ -301,7 +303,7 @@ namespace Vudaco.Debits.Repositories
                     LEFT JOIN confirm_file_infos cf 
                          ON d.id = cf.debit_id
                     WHERE 
-                        d.type = 6
+                        d.type in (10,11)
                         AND p.status = 2
                         AND d.deleted_at IS NULL
                         AND p.deleted_at IS NULL

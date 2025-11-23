@@ -44,6 +44,17 @@ namespace Vudaco.Debits.Controllers
             _configuration = configuration;
             _repoContractFileDetail = repoContractFileDetail;
         }
+        [HttpGet("congnochitietkh")]
+        public async Task<IActionResult> GetCongNoChiTietKH(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectDebitChiTietKHAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
         [HttpGet("dispatch")]
         public async Task<IActionResult> GetTaskDispatch(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] FileInfoDetailDto FileInfoDetailDto = null)
         {
@@ -365,6 +376,7 @@ namespace Vudaco.Debits.Controllers
                     AccountingDate = DebitDto.AccountingDate,
                     PurchasePrice = DebitDto.Price,
                     Price = DebitDto.Price,
+                    Status = ContractFileRepository.statusDebit,
                     Data = DebitDto.Data,
                     Note = DebitDto.Note,
                     CreatedBy = userId,
@@ -440,6 +452,7 @@ namespace Vudaco.Debits.Controllers
                     AccountingDate = DebitDto.AccountingDate,
                     PurchasePrice = DebitDto.Price,
                     Price = DebitDto.Price,
+                    Status = ContractFileRepository.statusDebit,
                     Data = DebitDto.Data,
                     Note = DebitDto.Note,
                     CreatedBy = userId,

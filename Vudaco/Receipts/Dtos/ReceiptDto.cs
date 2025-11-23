@@ -27,6 +27,7 @@ namespace Vudaco.Receipts.Dtos
         public int Amount { get; set; }
         public int Vat { get; set; }
         public string Data { get; set; }
+        public string Debits { get; set; }
         public int? CreatedBy { get; set; }
         public int? UpdatedBy { get; set; }
         public int? DeletedBy { get; set; }

@@ -60,6 +60,100 @@ namespace Vudaco.Receipts.Controllers
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
         [HttpPost]
+        [Route("create/phieuthukh")]
+        public async Task<IActionResult> CreatePhieuThuKH([FromBody] ReceiptDto ReceiptDto)
+        {
+            if (ReceiptDto.Amount <= 0 )
+                return ApiResponseResult<object>(false, "Chưa có kiểm tra lại công nợ", null);
+            if (ReceiptDto.FormOfPayment == 1 && (ReceiptDto.FundId == null || ReceiptDto.FundId == 0))
+                return ApiResponseResult<object>(false, "Mã quỹ bắt buộc", null);
+            if (ReceiptDto.FormOfPayment == 2 && (ReceiptDto.BankId == null || ReceiptDto.BankId == 0))
+                return ApiResponseResult<object>(false, "Mã Ngân hàng bắt buộc", null);
+            // Kiểm tra chi tiết phiếu thu
+            if (string.IsNullOrEmpty(ReceiptDto.Debits))
+            {
+                return ApiResponseResult<object>(false, "Không có chi tiết phiếu thu", null);
+            }
+            List<JsonElement> list = null;
+            try
+            {
+                list = JsonSerializer.Deserialize<List<JsonElement>>(ReceiptDto.Debits);
+            }
+            catch
+            {
+                return ApiResponseResult<object>(false, "Dữ liệu chi tiết phiếu thu không hợp lệ", null);
+            }
+
+            if (list == null || list.Count == 0)
+            {
+                return ApiResponseResult<object>(false, "Không có chi tiết phiếu thu", null);
+            }
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                var now = DateTime.Now;
+                var PrefixCode = "PT"+ReceiptDto.AccountingDate.ToString("yyMM");
+                var code_receipt = await SqlServerHelpers.GenerateCodeEfAsync(conn, tran.GetDbTransaction(), "receipts", "code_receipt", ReceiptDto.StorageId, PrefixCode , 4);
+
+                var entity = new Receipt
+                {
+                    AccountingDate = ReceiptDto.AccountingDate,
+                    StorageId = ReceiptDto.StorageId,
+                    CodeReceipt = code_receipt,
+                    Note = ReceiptDto.Note,
+                    Description =  ReceiptDto.Description,
+                    FormOfPayment = ReceiptDto.FormOfPayment,
+                    TypeReceipt = ReceiptRepositories.ThuKH,
+                    FundId = ReceiptDto.FormOfPayment == 1 ? ReceiptDto.FundId : 0,
+                    BankId = ReceiptDto.FormOfPayment == 2 ? ReceiptDto.BankId : 0,
+                    Data = ReceiptDto.Data,
+                    CreatedBy = userId,
+                    CreatedAt = now,
+                    UpdatedAt = now,
+                    UpdatedBy = userId,
+                };
+
+                _context.Receipts.Add(entity);
+                await _context.SaveChangesAsync();
+                foreach (var item in list)
+                {
+                    int debit_id = item.GetProperty("id").GetInt32();
+                    int conlai_dv = item.GetProperty("conlai_dv").GetInt32();
+                    int conlai_ch = item.GetProperty("conlai_ch").GetInt32();
+                    int price = item.GetProperty("price").GetInt32();
+                    int receipt_total = item.GetProperty("receipt_total").GetInt32();
+                    if (price - receipt_total <= 0)
+                    {
+                        continue;
+                    }
+                    int new_price = (conlai_dv+conlai_ch) >0 ?(conlai_dv+conlai_ch) :price;
+                    // ✔️ Dùng GetDateTime() vì dữ liệu là ISO-8601
+                    var accountingDate = item.GetProperty("accounting_date").GetDateTime();
+                    var entity_detail = new ReceiptDetail
+                    {
+                        ReceiptId = entity.Id,
+                        DebitId = debit_id,
+                        StorageId = ReceiptDto.StorageId,
+                        AccountingDate = accountingDate,
+                        Amount = new_price,
+                        CreatedBy = userId,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
+                    };
+                    _context.ReceiptDetails.Add(entity_detail);
+                }
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+                return ApiResponseResult(true, "Thêm thành công", entity);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
+            }
+        }
+        [HttpPost]
         [Route("create/giayHoanUng")]
         public async Task<IActionResult> CreateGiayHoanUng([FromBody] ReceiptHoanUngGiaoNhanDto ReceiptHoanUngGiaoNhanDto)
         {

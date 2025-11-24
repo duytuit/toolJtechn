@@ -11,21 +11,18 @@ namespace Vudaco.Debits.Models
         [Column("id")]
         public int Id { get; set; }
 
-        [Required]
         [Column("file_info_id")]
         public int? FileInfoId { get; set; }
         [Required]
         [Column("debit_id")]
         public int DebitId { get; set; }
         [Column("partner_detail_id")]
-        [Required]
         public int? PartnerDetailId { get; set; }
 
         [Required]
         [Column("storage_id")]
         public int StorageId { get; set; }
 
-        [Required]
         [Column("status")]
         public int? Status { get; set; }
 

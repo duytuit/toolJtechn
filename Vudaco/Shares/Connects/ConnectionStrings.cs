@@ -9,4 +9,8 @@ namespace Vudaco.Shares.Connects
     {
         public string DefaultConnection { get; set; }
     }
+    public class TelegramSettings
+    {
+        public string BotToken { get; set; }
+    }
 }

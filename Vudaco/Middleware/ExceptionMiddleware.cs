@@ -6,6 +6,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Vudaco.Controllers;
 using System.Linq;
+using Vudaco.Shares;
 
 namespace Vudaco
 {
@@ -60,7 +61,7 @@ namespace Vudaco
 
                 message = exception.Message;
                 lineInfo = fullDetail;
-
+                await Helper.SendTelegramMessageAsync($"❌ Exception: {message}");
                 _logger.LogError($"❌ Exception: {message}\nDetails:{fullDetail}");
 
                 var response = new ApiResponse<object>(false, $"{message} | {fullDetail}");
@@ -75,6 +76,7 @@ namespace Vudaco
             {
                 // fallback tránh crash middleware
                 _logger.LogError($"[ExceptionMiddlewareError] {ex.Message}");
+                await Helper.SendTelegramMessageAsync($"[ExceptionMiddlewareError] {ex.Message}");
                 context.Response.StatusCode = 500;
                 await context.Response.WriteAsync("{\"success\":false,\"message\":\"Middleware error\"}");
             }

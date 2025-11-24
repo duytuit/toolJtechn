@@ -31,6 +31,7 @@ using Vudaco.Departments;
 using Vudaco.Receipts;
 using Vudaco.Vehicles;
 using Vudaco.Shares.Connects;
+using Microsoft.Extensions.Options;
 
 namespace Vudaco
 {
@@ -46,6 +47,7 @@ namespace Vudaco
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<TelegramSettings>(Configuration.GetSection("Telegram"));
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll",
@@ -109,6 +111,8 @@ namespace Vudaco
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            var telegramConfig = app.ApplicationServices.GetRequiredService<IOptions<TelegramSettings>>();
+            Helper.ConfigureTelegram(telegramConfig.Value);
             //if (env.IsDevelopment())
             //{
             //    app.UseDeveloperExceptionPage();

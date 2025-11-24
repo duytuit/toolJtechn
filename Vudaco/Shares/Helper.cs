@@ -6,16 +6,42 @@ using System.Data.Common;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore.Query.Internal;
+using Vudaco.Shares.Connects;
 
 namespace Vudaco.Shares
 {
     public static class Helper
     {
-      
+
+        private static string _botToken;
+        private static readonly HttpClient _http = new HttpClient();
+
+        // Gọi lúc Startup để nạp token từ appsettings
+        public static void ConfigureTelegram(TelegramSettings settings)
+        {
+            _botToken = settings.BotToken;
+        }
+
+        // Gửi tin nhắn Telegram
+        public static async Task<bool> SendTelegramMessageAsync(string message)
+        {
+            if (string.IsNullOrEmpty(_botToken))
+                throw new Exception("Bot token chưa được cấu hình từ appsettings.");
+
+            string text = HttpUtility.UrlEncode(message);
+
+            string url = $"{_botToken}{text}";
+
+            var response = await _http.GetAsync(url);
+
+            return response.IsSuccessStatusCode;
+        }
         public static List<Dictionary<string, object>> ConfigFormType(int type)
         {
             var result = new List<Dictionary<string, object>>();

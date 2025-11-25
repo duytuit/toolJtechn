@@ -127,6 +127,16 @@ namespace Vudaco.Debits.Models
 
         [Column("approval_time")]
         public DateTime? ApprovalTime { get; set; }
+        [Column("vehicle_number")]
+        public string VehicleNumber { get; set; }
+        [Column("cus_bill")]
+        public string CusBill { get; set; }
+        [Column("cus_bill_date", TypeName = "date")]
+        public DateTime? CusBillDate { get; set; }
+         [Column("sup_bill")]
+        public string SupBill { get; set; }
+        [Column("sup_bill_date", TypeName = "date")]
+        public DateTime? SupBillDate { get; set; }
 
         [Column("created_by")]
         public int? CreatedBy { get; set; }

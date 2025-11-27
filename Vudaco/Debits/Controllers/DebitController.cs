@@ -288,7 +288,10 @@ namespace Vudaco.Debits.Controllers
         [Route("create")]
         public async Task<IActionResult> Create([FromBody] DebitDto DebitDto)
         {
-
+            if (string.IsNullOrEmpty(DebitDto.VehicleNumber))
+            {
+                return ApiResponseResult<object>(false, "Chưa nhập biển số xe", null);
+            }
             using var tran = await _context.Database.BeginTransactionAsync();
             var conn = _context.Database.GetDbConnection();
             try
@@ -321,6 +324,7 @@ namespace Vudaco.Debits.Controllers
                 {
                     BillId = bill_Partner.Id,
                     VehicleId = DebitDto.VehicleId,
+                    VehicleNumber = DebitDto.VehicleNumber,
                     CustomerDetailId = DebitDto.CustomerDetailId,
                     SupplierDetailId = DebitDto.SupplierDetailId,
                     EmployeeDriverId = DebitDto.EmployeeDriverId,
@@ -1466,6 +1470,25 @@ namespace Vudaco.Debits.Controllers
             } 
             await _context.SaveChangesAsync();
             return ApiResponseResult<object>(true, "Xóa thành công", null);
+        }
+        [HttpPost("showWithIds")]
+        public async Task<IActionResult> ShowWithIds([FromBody] DebitDeleteMultiDto DebitDeleteMultiDto)
+        {
+            if (DebitDeleteMultiDto.Ids == null || !DebitDeleteMultiDto.Ids.Any())
+            {
+                return ApiResponseResult<object>(false, "Danh sách Id không tồn tại", null);
+            }
+
+            // Lấy danh sách entity theo Ids
+            var entities = await _context.Debits
+                .Where(d => DebitDeleteMultiDto.Ids.Contains(d.Id))
+                .ToListAsync();
+
+            if (entities.Count == 0)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu tương ứng với các Id đã gửi", null);
+            }
+            return ApiResponseResult<object>(true, "lấy dữ liệu thành công", entities);
         }
         [HttpGet("show")]
         public async Task<IActionResult> Show([FromQuery] int id)

@@ -45,6 +45,11 @@ namespace Vudaco.Debits.Dtos
         public string SupplierVehicleType { get; set; }
         public int? ApprovedByUser { get; set; }
         public DateTime? ApprovalTime { get; set; }
+        public string VehicleNumber { get; set; }
+        public string CusBill { get; set; }
+        public DateTime? CusBillDate { get; set; }
+        public string SupBill { get; set; }
+        public DateTime? SupBillDate { get; set; }
         public int? CreatedBy { get; set; }
         public int? UpdatedBy { get; set; }
         public int? DeletedBy { get; set; }

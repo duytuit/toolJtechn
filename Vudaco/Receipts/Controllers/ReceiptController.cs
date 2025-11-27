@@ -444,6 +444,23 @@ namespace Vudaco.Receipts.Controllers
                 return ApiResponseResult<object>(false, "Lỗi không xác định: " + ex.Message, null);
             }
         }
+        [HttpPost("confirmCancelGiaoNhan")]
+        public async Task<IActionResult> ConfirmCancelGiaoNhan([FromBody]  ReceiptDto ReceiptDto)
+        {
+             if (ReceiptDto.Id <= 0)
+                return ApiResponseResult<object>(false, "Id không hợp lệ", null);
+             var entity = await _context.Receipts
+                    .AsTracking()
+                    .FirstOrDefaultAsync(p => p.Id == ReceiptDto.Id);
+
+                if (entity == null)
+                    return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            entity.Status = 0;
+            entity.UpdatedAt = DateTime.Now;
+            entity.UpdatedBy = userId;
+            await _context.SaveChangesAsync();
+             return ApiResponseResult<object>(true, "Xóa thành công", null);
+        }
         [HttpPost("delete")]
         public async Task<IActionResult> Delete([FromBody]  ReceiptDto ReceiptDto)
         {

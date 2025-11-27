@@ -1430,6 +1430,9 @@ namespace Vudaco.Debits.Controllers
             var entities = await _context.Debits
                 .Where(d => DebitDeleteMultiDto.Ids.Contains(d.Id))
                 .ToListAsync();
+            var entitie_confirms = await _context.ConfirmFiles
+                .Where(d => DebitDeleteMultiDto.Ids.Contains(d.DebitId))
+                .ToListAsync();
 
             if (entities.Count == 0)
             {
@@ -1439,9 +1442,28 @@ namespace Vudaco.Debits.Controllers
             var now = DateTime.Now;
             foreach (var item in entities)
             {
-                item.DeletedBy = userId;
-                item.DeletedAt = now;
+                if (item.Type == 0)
+                {
+                    item.Price = 0;
+                }
+                if (item.Type == 4)
+                {
+                    item.Price = 0;
+                    item.DeletedAt = now;
+                    item.DeletedBy = userId;
+                }
+                item.Status = 0;
+                item.Vat = 0;
+                item.UpdatedAt = now;
+                item.UpdatedBy = userId;
             }
+            foreach (var item in entitie_confirms)
+            {
+                item.Status = 0;
+                item.StatusConfirm = 0;
+                item.UpdatedAt = now;
+                item.UpdatedBy = userId;
+            } 
             await _context.SaveChangesAsync();
             return ApiResponseResult<object>(true, "Xóa thành công", null);
         }

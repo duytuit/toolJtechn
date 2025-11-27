@@ -147,6 +147,7 @@ namespace Vudaco.ContractFiles.Repositories
                         ON p.id = f.customer_detail_id
                     WHERE 
                         fdt.deleted_at IS NULL
+                        AND f.type = 1
                         AND f.deleted_at IS NULL
                         AND p.status = 1
                         AND p.deleted_at IS NULL
@@ -164,10 +165,6 @@ namespace Vudaco.ContractFiles.Repositories
             {
 
                 sql += $@" AND f.storage_id = {FileInfoDetailDto.StorageId}";
-            }
-            if (FileInfoDetailDto.EmployeeId > 0)
-            {
-                sql += $@" AND fdt.employee_id = {FileInfoDetailDto.EmployeeId}";
             }
             if (FileInfoDetailDto.FromDate.HasValue && FileInfoDetailDto.ToDate.HasValue)
             {
@@ -256,6 +253,7 @@ namespace Vudaco.ContractFiles.Repositories
                         AND d_total.id = cf.debit_id
                     WHERE 
                         fdt.deleted_at IS NULL
+                        AND f.type = 1
                         AND f.deleted_at IS NULL
                         AND p.status = 1
                         AND p.deleted_at IS NULL
@@ -263,10 +261,6 @@ namespace Vudaco.ContractFiles.Repositories
             if (FileInfoDetailDto.StorageId > 0) {
 
                 sql += $@" AND f.storage_id = {FileInfoDetailDto.StorageId}";
-            }
-            if (FileInfoDetailDto.EmployeeId > 0)
-            {
-                sql += $@" AND fdt.employee_id = {FileInfoDetailDto.EmployeeId}";
             }
             if (FileInfoDetailDto.FromDate.HasValue && FileInfoDetailDto.ToDate.HasValue)
             {

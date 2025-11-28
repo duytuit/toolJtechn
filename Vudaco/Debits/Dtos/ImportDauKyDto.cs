@@ -5,12 +5,10 @@ using System.Threading.Tasks;
 
 namespace Vudaco.Debits.Dtos
 {
-    public class ConfirmDebitNoFileDto
+    public class ImportDauKyDto
     {
         public DateTime AccountingDate { get; set; }
         public int StorageId { get; set; }
         public string Data { get; set; }
-        public int Type { get; set; } // neu type = 1 thi xuat hoa don
-        public string Bill { get; set; }
     }
 }

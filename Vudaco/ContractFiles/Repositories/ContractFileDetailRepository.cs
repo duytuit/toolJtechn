@@ -157,7 +157,6 @@ namespace Vudaco.ContractFiles.Repositories
                             WHERE 
                                 d.file_info_id = f.id
                                 AND d.customer_detail_id = f.customer_detail_id
-                                AND d.employee_staff_id = fdt.employee_id
                                 AND d.type = 3
                                 AND d.deleted_at IS NULL
                         )";
@@ -249,7 +248,6 @@ namespace Vudaco.ContractFiles.Repositories
                     ) AS d_total
                         ON d_total.file_info_id = f.id
                         AND d_total.customer_detail_id = f.customer_detail_id
-                        AND d_total.employee_staff_id = fdt.employee_id
                         AND d_total.id = cf.debit_id
                     WHERE 
                         fdt.deleted_at IS NULL

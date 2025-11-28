@@ -64,7 +64,30 @@ namespace Vudaco.ContractFiles.Repositories
                                         ParentKey = "id",
                                         ForeignKey = "file_id",
                                         KeyName = "file_id",
+                                        IsCollection = true
+                                    },
+                                    new AdoRelation
+                                    {
+                                        Name = "receipts",
+                                        Table = "receipts",
+                                        Columns = new[] { "id", "file_info_id","storage_id","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},
+                                        ParentKey = "id",
+                                        ForeignKey = "file_info_id",
+                                        KeyName = "file_info_id",
                                         IsCollection = true,
+                                        SubRelations = new List<AdoRelation>
+                                        {
+                                            new AdoRelation
+                                            {
+                                                    Name = "receipt_details",
+                                                    Table = "receipt_details",
+                                                    Columns = new[] { "id", "receipt_id", "amount","storage_id","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},
+                                                    ParentKey = "id",
+                                                    ForeignKey = "receipt_id",
+                                                    KeyName = "receipt_id",
+                                                    IsCollection = false,
+                                            }
+                                        }
                                     }
                                 },
                         redisCache: _redis,

@@ -293,6 +293,10 @@ namespace Vudaco.ContractFiles.Repositories
             {
                 sql += $@" AND f.storage_id = {FileInfo.StorageId}";
             }
+            if (FileInfo.Id > 0)
+            {
+                sql += $@" AND f.id = {FileInfo.Id}";
+            }
             if (FileInfo.FromDate.HasValue && FileInfo.ToDate.HasValue)
             {
                 // Cộng thêm 1 ngày cho ToDate

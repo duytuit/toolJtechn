@@ -24,9 +24,10 @@ namespace Vudaco.Receipts.Repositories
         public const int ChiGiaoNhan = 1;
         public const int ChiHoanUngGiaoNhan = 2;
         public const int ThuHoanUngGiaoNhan = 3;
-        public const int ChiMuaHangNCC = 4;
-        public const int ThuBanHangKH = 5;
-        public const int ThuBanHangNV = 6;
+        public const int ChiNCC = 7;
+        public const int ChiMuaHangNCC = 4; // chưa dùng
+        public const int ThuBanHangKH = 5; // chưa dùng
+        public const int ThuBanHangNV = 6; // chưa dùng
         public ReceiptRepositories(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;
@@ -196,6 +197,90 @@ namespace Vudaco.Receipts.Repositories
                 .FirstOrDefaultAsync();
 
             return entity;
+        }
+
+        public async Task<PaginatedResultReact<object>> GetPhieuThuAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var sql = $@"
+                    SELECT 
+                        r.*,
+                        sums.amount,
+                        sums.total
+                    FROM receipts r
+                    LEFT JOIN (
+                        SELECT 
+                            receipt_id,
+                            SUM(amount) AS amount,
+                            SUM(amount * (vat / 100.0)) + SUM(amount) AS total
+                        FROM receipt_details
+                        WHERE deleted_at IS NULL
+                        GROUP BY receipt_id
+                    ) AS sums ON sums.receipt_id = r.id
+                    WHERE 
+                        r.type_receipt IN (0, 3)
+                        AND r.deleted_at IS NULL";
+            if (ReceiptDto.StorageId > 0)
+            {
+                sql += $@" AND r.storage_id = {ReceiptDto.StorageId}";
+            }
+           
+            if (ReceiptDto.FromDate.HasValue && ReceiptDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = ReceiptDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND r.accounting_date >= '{ReceiptDto.FromDate.Value:yyyy-MM-dd}' 
+                AND r.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            sql += " ORDER BY r.updated_at DESC";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
+
+        public async Task<PaginatedResultReact<object>> GetPhieuChiAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var sql = $@"
+                    SELECT 
+                        r.*,
+                        sums.amount,
+                        sums.total
+                    FROM receipts r
+                    LEFT JOIN (
+                        SELECT 
+                            receipt_id,
+                            SUM(amount) AS amount,
+                            SUM(amount * (vat / 100.0)) + SUM(amount) AS total
+                        FROM receipt_details
+                        WHERE deleted_at IS NULL
+                        GROUP BY receipt_id
+                    ) AS sums ON sums.receipt_id = r.id
+                    WHERE 
+                        r.type_receipt IN (1,2,7)
+                        AND r.deleted_at IS NULL";
+            if (ReceiptDto.StorageId > 0)
+            {
+                sql += $@" AND r.storage_id = {ReceiptDto.StorageId}";
+            }
+           
+            if (ReceiptDto.FromDate.HasValue && ReceiptDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = ReceiptDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND r.accounting_date >= '{ReceiptDto.FromDate.Value:yyyy-MM-dd}' 
+                AND r.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            sql += " ORDER BY r.updated_at DESC";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
         }
     }
 }

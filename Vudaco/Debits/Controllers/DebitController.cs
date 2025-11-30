@@ -77,6 +77,17 @@ namespace Vudaco.Debits.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
+         [HttpGet("congnochitietncc")]
+        public async Task<IActionResult> GetCongNoChiTietNCC(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectDebitChiTietNCCAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
         [HttpGet("dispatch")]
         public async Task<IActionResult> GetTaskDispatch(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] FileInfoDetailDto FileInfoDetailDto = null)
         {
@@ -337,7 +348,6 @@ namespace Vudaco.Debits.Controllers
                     SupplierDetailId = DebitDto.SupplierDetailId,
                     EmployeeDriverId = DebitDto.EmployeeDriverId,
                     EmployeeStaffId = DebitDto.EmployeeStaffId,
-                    FileInfoId = DebitDto.FileInfoId,
                     StorageId = DebitDto.StorageId,
                     Type = DebitRepositories.PhiVanChuyen,
                     DispatchCode = DispatchCode,
@@ -363,6 +373,7 @@ namespace Vudaco.Debits.Controllers
                     UpdatedAt = now,
                     UpdatedBy = userId
                 };
+                if (DebitDto.FileInfoId > 0)debit.FileInfoId = DebitDto.FileInfoId;
                 _context.Debits.Add(debit);
                 await _context.SaveChangesAsync();  // phải có
                 var entity = new ConfirmFile
@@ -1233,7 +1244,7 @@ namespace Vudaco.Debits.Controllers
                             DispatchCode = DispatchCode,
                             Name = noi_dung,
                             AccountingDate = ngay,
-                            Price = tien_dv,
+                            Price = tien_ch,
                             Status = ContractFileRepository.statusDebit,
                             CreatedBy = userId,
                             CreatedAt = now,
@@ -1247,6 +1258,146 @@ namespace Vudaco.Debits.Controllers
                             StorageId = ImportDauKyDto.StorageId,
                             DebitId = debit.Id,
                             PartnerDetailId = _kh_detail.Id,
+                            Status = ContractFileRepository.statusDebit,
+                            StatusConfirm = 0,
+                            CreatedBy = userId,
+                            CreatedAt = now,
+                        };
+                        _context.ConfirmFiles.Add(entity);
+                        await _context.SaveChangesAsync();
+                    }
+
+                }
+
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+                return ApiResponseResult<object>(true, "Cập nhật thành công", null);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi cập nhật: " + ex.InnerException?.Message, null);
+            }
+        }
+         [HttpPost("importDauKyNCC")]
+        public async Task<IActionResult> ImportDauKyNCC([FromBody] ImportDauKyDto ImportDauKyDto)
+        {
+            // Kiểm tra chi tiết phiếu thu
+            if (string.IsNullOrEmpty(ImportDauKyDto.Data))
+            {
+                return ApiResponseResult<object>(false, "Không có chi tiết", null);
+            }
+            List<JsonElement> list = null;
+            try
+            {
+                list = JsonSerializer.Deserialize<List<JsonElement>>(ImportDauKyDto.Data);
+            }
+            catch
+            {
+                return ApiResponseResult<object>(false, "Dữ liệu chi tiết không hợp lệ", null);
+            }
+
+            if (list == null || list.Count == 0)
+            {
+                return ApiResponseResult<object>(false, "Không có chi tiết", null);
+            }
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                var now = DateTime.Now;
+                foreach (var item in list)
+                {
+                    string ten_ncc = item.GetProperty("ten_ncc").GetString();
+                    int tien_dv = item.GetProperty("tien_dv").GetInt32();
+                    int tien_ch = item.GetProperty("tien_ch").GetInt32();
+                    string noi_dung = item.GetProperty("noi_dung").GetString();
+                    DateTime ngay = Convert.ToDateTime(item.GetProperty("ngay").GetString());
+                    var _ncc = await _context.Partners.Where(x => x.Abbreviation.Contains(ten_ncc)).FirstOrDefaultAsync();
+                    if (_ncc == null) continue;
+                    var _ncc_detail = await _context.PartnerDetails.Where(x => x.PartnerId == _ncc.Id && x.Status == 2).FirstOrDefaultAsync();
+                    if (_ncc_detail == null) continue;
+                    int CycleName = int.Parse(ngay.ToString("MMyyyy"));
+                    var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.SupplierDetailId == _ncc_detail.Id);
+                    if (bill_Partner == null)
+                    {
+                        var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", ImportDauKyDto.StorageId, "HD" + ngay.ToString("yyMM"), 4);
+                        bill_Partner = new Bill
+                        {
+                            BillCode = BillCodePartner,
+                            StorageId = ImportDauKyDto.StorageId,
+                            SupplierDetailId = _ncc_detail.Id,
+                            Name = CycleName.ToString(),
+                            AccountingDate = ngay,
+                            CycleName = CycleName,
+                            CreatedBy = userId,
+                            CreatedAt = now,
+                            UpdatedAt = now,
+                            UpdatedBy = userId
+                        };
+                        _context.Bills.Add(bill_Partner);
+                        await _context.SaveChangesAsync();  // phải có
+                    }
+                    var DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", ImportDauKyDto.StorageId, "DKNCC" + ngay.ToString("yyMM"), 4);
+
+                    if (tien_dv > 0)
+                    {
+                        var debit = new Debit
+                        {
+                            BillId = bill_Partner.Id,
+                            SupplierDetailId = _ncc_detail.Id,
+                            StorageId = ImportDauKyDto.StorageId,
+                            Type = 10,
+                            DispatchCode = DispatchCode,
+                            Name = noi_dung,
+                            AccountingDate = ngay,
+                            Price = tien_dv,
+                            Status = ContractFileRepository.statusDebit,
+                            CreatedBy = userId,
+                            CreatedAt = now,
+                            UpdatedAt = now,
+                            UpdatedBy = userId
+                        };
+                        _context.Debits.Add(debit);
+                        await _context.SaveChangesAsync();  // phải có
+                        var entity = new ConfirmFile
+                        {
+                            StorageId = ImportDauKyDto.StorageId,
+                            DebitId = debit.Id,
+                            PartnerDetailId = _ncc_detail.Id,
+                            Status = ContractFileRepository.statusDebit,
+                            StatusConfirm = 0,
+                            CreatedBy = userId,
+                            CreatedAt = now,
+                        };
+                        _context.ConfirmFiles.Add(entity);
+                        await _context.SaveChangesAsync();
+                    }
+                    if (tien_ch > 0)
+                    {
+                        var debit = new Debit
+                        {
+                            BillId = bill_Partner.Id,
+                            SupplierDetailId = _ncc_detail.Id,
+                            StorageId = ImportDauKyDto.StorageId,
+                            Type = 11,
+                            DispatchCode = DispatchCode,
+                            Name = noi_dung,
+                            AccountingDate = ngay,
+                            Price = tien_ch,
+                            Status = ContractFileRepository.statusDebit,
+                            CreatedBy = userId,
+                            CreatedAt = now,
+                            UpdatedAt = now,
+                            UpdatedBy = userId
+                        };
+                        _context.Debits.Add(debit);
+                        await _context.SaveChangesAsync();  // phải có
+                        var entity = new ConfirmFile
+                        {
+                            StorageId = ImportDauKyDto.StorageId,
+                            DebitId = debit.Id,
+                            PartnerDetailId = _ncc_detail.Id,
                             Status = ContractFileRepository.statusDebit,
                             StatusConfirm = 0,
                             CreatedBy = userId,
@@ -1442,6 +1593,12 @@ namespace Vudaco.Debits.Controllers
                         }
                       
                     }
+                    if (item.Type == 2) // duyệt luôn phần chi hộ
+                    {
+                         confirm_file.StatusConfirm = 1;
+                        _context.ConfirmFiles.Update(confirm_file);
+                    }
+
                 }
                 int CycleName = int.Parse(ConfirmFileDto.AccountingDate.ToString("MMyyyy"));
 

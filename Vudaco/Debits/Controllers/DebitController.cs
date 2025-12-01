@@ -1487,7 +1487,7 @@ namespace Vudaco.Debits.Controllers
                 return ApiResponseResult<object>(false, "Lỗi khi cập nhật: " + ex.InnerException?.Message, null);
             }
         }
-        [HttpPost("confirmFileGia")]
+          [HttpPost("confirmFileGia")]
         public async Task<IActionResult> ConfirmFileGia([FromBody] ConfirmFileDto ConfirmFileDto)
         {
             using var tran = await _context.Database.BeginTransactionAsync();
@@ -1523,6 +1523,72 @@ namespace Vudaco.Debits.Controllers
 
                 }
                
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+                return ApiResponseResult<object>(true, "Cập nhật thành công", null);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi cập nhật: " + ex.InnerException?.Message, null);
+            }
+        }
+        [HttpPost("updateVATFileGia")]
+        public async Task<IActionResult> UpdateVATFileGia([FromBody] ConfirmFileDto ConfirmFileDto)
+        {
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                var now = DateTime.Now;
+                foreach (var item in ConfirmFileDto.DebitDtos)
+                {
+                    var debit = await _context.Debits.FirstOrDefaultAsync(x => x.Id == item.Id);
+                    if (debit == null) continue;
+                    
+                    debit.UpdatedBy = userId;
+                    debit.UpdatedAt = now;
+                    debit.Vat = item.Vat;
+                }
+               
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+                return ApiResponseResult<object>(true, "Cập nhật thành công", null);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi cập nhật: " + ex.InnerException?.Message, null);
+            }
+        }
+          [HttpPost("updateBillCustomerFileGia")]
+        public async Task<IActionResult> UpdateBillCustomerFileGia([FromBody] BillDebitDto BillDebitDto)
+        {
+          
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                var now = DateTime.Now;
+                var debits = await _context.Debits.Where(x => BillDebitDto.Ids.Contains((int)x.FileInfoId)).ToListAsync();
+                foreach (var debit in debits)
+                {
+                    if (string.IsNullOrEmpty(BillDebitDto.CusBill))
+                    {
+                        debit.UpdatedBy = userId;
+                        debit.UpdatedAt = now;
+                        debit.CusBillDate = null;
+                        debit.CusBill = null;
+                    }
+                    else
+                    {
+                        debit.UpdatedBy = userId;
+                        debit.UpdatedAt = now;
+                        debit.CusBillDate = BillDebitDto.CusBillDate;
+                        debit.CusBill = BillDebitDto.CusBill;
+                    }
+                   
+                }
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
                 return ApiResponseResult<object>(true, "Cập nhật thành công", null);

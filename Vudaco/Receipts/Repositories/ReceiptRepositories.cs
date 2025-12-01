@@ -24,6 +24,7 @@ namespace Vudaco.Receipts.Repositories
         public const int ChiGiaoNhan = 1;
         public const int ChiHoanUngGiaoNhan = 2;
         public const int ThuHoanUngGiaoNhan = 3;
+        public const int ChiNoiBo = 8;
         public const int ChiNCC = 7;
         public const int ChiMuaHangNCC = 4; // chưa dùng
         public const int ThuBanHangKH = 5; // chưa dùng
@@ -204,18 +205,18 @@ namespace Vudaco.Receipts.Repositories
             var sql = $@"
                     SELECT 
                         r.*,
-                        sums.amount,
-                        sums.total
+                        d.amount,
+                        d.total
                     FROM receipts r
                     LEFT JOIN (
                         SELECT 
                             receipt_id,
                             SUM(amount) AS amount,
-                            SUM(amount * (vat / 100.0)) + SUM(amount) AS total
+                            SUM(amount * (1 + vat / 100.0)) AS total
                         FROM receipt_details
                         WHERE deleted_at IS NULL
                         GROUP BY receipt_id
-                    ) AS sums ON sums.receipt_id = r.id
+                    ) d ON d.receipt_id = r.id
                     WHERE 
                         r.type_receipt IN (0, 3)
                         AND r.deleted_at IS NULL";
@@ -246,20 +247,20 @@ namespace Vudaco.Receipts.Repositories
             var sql = $@"
                     SELECT 
                         r.*,
-                        sums.amount,
-                        sums.total
+                        d.amount,
+                        d.total
                     FROM receipts r
                     LEFT JOIN (
                         SELECT 
                             receipt_id,
                             SUM(amount) AS amount,
-                            SUM(amount * (vat / 100.0)) + SUM(amount) AS total
+                            SUM(amount * (1 + vat / 100.0)) AS total
                         FROM receipt_details
                         WHERE deleted_at IS NULL
                         GROUP BY receipt_id
-                    ) AS sums ON sums.receipt_id = r.id
+                    ) d ON d.receipt_id = r.id
                     WHERE 
-                        r.type_receipt IN (1,2,7)
+                        r.type_receipt IN (1,2,7,8)
                         AND r.deleted_at IS NULL";
             if (ReceiptDto.StorageId > 0)
             {

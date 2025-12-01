@@ -403,6 +403,158 @@ namespace Vudaco.Receipts.Controllers
             }
         }
         [HttpPost]
+        [Route("create/chinoibo")]
+        public async Task<IActionResult> CreateChiNoiBo([FromBody] ReceiptDto ReceiptDto)
+        {
+            if (ReceiptDto.EmployeeId == null || ReceiptDto.EmployeeId == 0)
+                return ApiResponseResult<object>(false, "Nhân viên bắt buộc", null);
+            if (ReceiptDto.FormOfPayment == 1 && (ReceiptDto.FundId == null || ReceiptDto.FundId == 0))
+                return ApiResponseResult<object>(false, "Mã quỹ bắt buộc", null);
+            if (ReceiptDto.FormOfPayment == 2 && (ReceiptDto.BankId == null || ReceiptDto.BankId == 0))
+                return ApiResponseResult<object>(false, "Mã Ngân hàng bắt buộc", null);
+            if (ReceiptDto.IncomeExpenseCategoryId == null || ReceiptDto.IncomeExpenseCategoryId == 0)
+                return ApiResponseResult<object>(false, "ly do chi bắt buộc", null);
+            // Check trùng Name
+            var entity = await _context.Receipts.FirstOrDefaultAsync(p => p.CodeReceipt == ReceiptDto.CodeReceipt);
+            if (entity != null)
+                return ApiResponseResult<object>(false, "ma phieu chi đã tồn tại", null);
+
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                var code_receipt = await SqlServerHelpers.GenerateCodeEfAsync(conn, tran.GetDbTransaction(), "receipts", "code_receipt", ReceiptDto.StorageId, "PC"+ReceiptDto.AccountingDate.ToString("yyMM"), 4);
+
+                entity = new Receipt
+                {
+                    AccountingDate = ReceiptDto.AccountingDate,
+                    StorageId = ReceiptDto.StorageId,
+                    CodeReceipt = code_receipt,
+                    EmployeeId = ReceiptDto.EmployeeId,
+                    Bill = ReceiptDto.Bill,
+                    FundId = ReceiptDto.FormOfPayment == 1 ? ReceiptDto.FundId : 0,
+                    IncomeExpenseCategoryId = ReceiptDto.IncomeExpenseCategoryId,
+                    Note = ReceiptDto.Note,
+                    FormOfPayment = ReceiptDto.FormOfPayment,
+                    TypeReceipt = ReceiptRepositories.ChiNoiBo,
+                    BankId = ReceiptDto.FormOfPayment == 2 ? ReceiptDto.BankId : 0,
+                    Data = ReceiptDto.Data,
+                    CreatedBy = userId,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                    UpdatedBy = userId,
+                };
+
+                _context.Receipts.Add(entity);
+                await _context.SaveChangesAsync();
+                var entity_detail = new ReceiptDetail
+                {
+                    ReceiptId = entity.Id,
+                    StorageId = ReceiptDto.StorageId,
+                    AccountingDate = ReceiptDto.AccountingDate,
+                    Amount = ReceiptDto.Amount,
+                    Vat = ReceiptDto.Vat,
+                    CreatedBy = userId,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+
+                };
+                _context.ReceiptDetails.Add(entity_detail);
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+                return ApiResponseResult(true, "Thêm thành công", entity);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
+            }
+        }
+        [HttpPost("update/chinoibo")]
+        public async Task<IActionResult> UpdateChiNoiBo([FromBody] ReceiptDto ReceiptDto)
+        {
+            if (ReceiptDto.EmployeeId == null || ReceiptDto.EmployeeId == 0)
+                return ApiResponseResult<object>(false, "Nhân viên bắt buộc", null);
+            if (ReceiptDto.FormOfPayment == 1 && (ReceiptDto.FundId == null || ReceiptDto.FundId == 0))
+                return ApiResponseResult<object>(false, "Mã quỹ bắt buộc", null);
+            if (ReceiptDto.FormOfPayment == 2 && (ReceiptDto.BankId == null || ReceiptDto.BankId == 0))
+                return ApiResponseResult<object>(false, "Mã Ngân hàng bắt buộc", null);
+            if (ReceiptDto.IncomeExpenseCategoryId == null || ReceiptDto.IncomeExpenseCategoryId == 0)
+                return ApiResponseResult<object>(false, "Lý do chi bắt buộc", null);
+
+            // Tìm entity hiện có
+            var entity = await _context.Receipts.FirstOrDefaultAsync(p => p.Id == ReceiptDto.Id);
+            if (entity == null)
+                return ApiResponseResult<object>(false, "Không tìm thấy phiếu chi giao nhận", null);
+
+            using var tran = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // Cập nhật thông tin phiếu chi
+                entity.AccountingDate = ReceiptDto.AccountingDate;
+                entity.StorageId = ReceiptDto.StorageId;
+                entity.EmployeeId = ReceiptDto.EmployeeId;
+                entity.Bill = ReceiptDto.Bill;
+                entity.FundId = ReceiptDto.FormOfPayment == 1 ? ReceiptDto.FundId : 0;
+                entity.IncomeExpenseCategoryId = ReceiptDto.IncomeExpenseCategoryId;
+                entity.Note = ReceiptDto.Note;
+                entity.FormOfPayment = ReceiptDto.FormOfPayment;
+                entity.BankId = ReceiptDto.FormOfPayment == 2 ? ReceiptDto.BankId : 0;
+                entity.Data = ReceiptDto.Data;
+                entity.UpdatedAt = DateTime.Now;
+                entity.UpdatedBy = userId;
+
+                _context.Receipts.Update(entity);
+                await _context.SaveChangesAsync();
+
+                // Cập nhật chi tiết phiếu chi
+                var detail = await _context.ReceiptDetails.FirstOrDefaultAsync(d => d.ReceiptId == entity.Id);
+                if (detail != null)
+                {
+                    detail.StorageId = ReceiptDto.StorageId;
+                    detail.AccountingDate = ReceiptDto.AccountingDate;
+                    detail.Amount = ReceiptDto.Amount;
+                    detail.Vat = ReceiptDto.Vat;
+                    detail.UpdatedAt = DateTime.Now;
+                    detail.UpdatedBy = userId;
+
+                    _context.ReceiptDetails.Update(detail);
+                }
+                else
+                {
+                    // Nếu chưa có chi tiết thì thêm mới
+                    var newDetail = new ReceiptDetail
+                    {
+                        ReceiptId = entity.Id,
+                        StorageId = ReceiptDto.StorageId,
+                        AccountingDate = ReceiptDto.AccountingDate,
+                        Amount = ReceiptDto.Amount,
+                        Vat = ReceiptDto.Vat,
+                        CreatedBy = userId,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now,
+                        UpdatedBy = userId
+                    };
+                    _context.ReceiptDetails.Add(newDetail);
+                }
+
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+
+                return ApiResponseResult(true, "Cập nhật thành công", entity);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi cập nhật: " + ex.InnerException?.Message, null);
+            }
+            catch (Exception ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi không xác định: " + ex.Message, null);
+            }
+        }
+        [HttpPost]
         [Route("create/chigiaonhan")]
         public async Task<IActionResult> CreateChiGiaoNhan([FromBody] ReceiptDto ReceiptDto)
         {
@@ -473,8 +625,8 @@ namespace Vudaco.Receipts.Controllers
                 return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
             }
         }
-        [HttpPost("update/chigiaonhan")]
-        public async Task<IActionResult> Update([FromBody] ReceiptDto ReceiptDto)
+         [HttpPost("update/chigiaonhan")]
+        public async Task<IActionResult> UpdateChiGiaoNhan([FromBody] ReceiptDto ReceiptDto)
         {
             if (ReceiptDto.EmployeeId == null || ReceiptDto.EmployeeId == 0)
                 return ApiResponseResult<object>(false, "Nhân viên giao nhận bắt buộc", null);
@@ -488,7 +640,7 @@ namespace Vudaco.Receipts.Controllers
                 return ApiResponseResult<object>(false, "Lý do chi bắt buộc", null);
 
             // Tìm entity hiện có
-            var entity = await _context.Receipts.FirstOrDefaultAsync(p => p.Id == ReceiptDto.Id && p.TypeReceipt == ReceiptRepositories.ChiGiaoNhan);
+            var entity = await _context.Receipts.FirstOrDefaultAsync(p => p.Id == ReceiptDto.Id);
             if (entity == null)
                 return ApiResponseResult<object>(false, "Không tìm thấy phiếu chi giao nhận", null);
 

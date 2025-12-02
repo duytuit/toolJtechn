@@ -365,34 +365,17 @@ namespace Vudaco.Receipts.Controllers
             var conn = _context.Database.GetDbConnection();
             try
             {
-                if (ReceiptDto.Status == 1)
-                {
-                    entity.AccountingDate = ReceiptDto.AccountingDate;
-                    entity.FundId = ReceiptDto.FormOfPayment == 1 ? ReceiptDto.FundId : 0;
-                    entity.IncomeExpenseCategoryId = ReceiptDto.IncomeExpenseCategoryId;
-                    entity.Note = ReceiptDto.Note;
-                    entity.FormOfPayment = ReceiptDto.FormOfPayment;
-                    entity.BankId = ReceiptDto.FormOfPayment == 2 ? ReceiptDto.BankId : 0;
-                    entity.Status = ReceiptDto.Status;
-                    entity.UpdatedAt = DateTime.Now;
-                    entity.UpdatedBy = userId;
-                    _context.Receipts.Update(entity);
-                    await _context.SaveChangesAsync();
-                }
-                else
-                {
-                    entity.FundId = null;
-                    entity.IncomeExpenseCategoryId = null;
-                    entity.Note =  null;
-                    entity.FormOfPayment = ReceiptDto.FormOfPayment;
-                    entity.BankId = null;
-                    entity.Status = ReceiptDto.Status;
-                    entity.UpdatedAt = DateTime.Now;
-                    entity.UpdatedBy = userId;
-                    _context.Receipts.Update(entity);
-                    await _context.SaveChangesAsync();
-                }
-              
+                entity.AccountingDate = ReceiptDto.AccountingDate;
+                entity.FundId = ReceiptDto.FormOfPayment == 1 ? ReceiptDto.FundId : 0;
+                entity.IncomeExpenseCategoryId = ReceiptDto.IncomeExpenseCategoryId;
+                entity.Note = ReceiptDto.Note;
+                entity.FormOfPayment = ReceiptDto.FormOfPayment;
+                entity.BankId = ReceiptDto.FormOfPayment == 2 ? ReceiptDto.BankId : 0;
+                entity.Status = null;
+                entity.UpdatedAt = DateTime.Now;
+                entity.UpdatedBy = userId;
+                _context.Receipts.Update(entity);
+                await _context.SaveChangesAsync();
                 await tran.CommitAsync();
                 return ApiResponseResult(true, "Cập nhật thành công", entity);
             }
@@ -724,6 +707,7 @@ namespace Vudaco.Receipts.Controllers
                 if (entity == null)
                     return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
             entity.Status = 0;
+            entity.Note = null;
             entity.UpdatedAt = DateTime.Now;
             entity.UpdatedBy = userId;
             await _context.SaveChangesAsync();

@@ -219,6 +219,7 @@ namespace Vudaco.Receipts.Repositories
                     ) d ON d.receipt_id = r.id
                     WHERE 
                         r.type_receipt IN (0, 3)
+                        AND r.status IS NULL
                         AND r.deleted_at IS NULL";
             if (ReceiptDto.StorageId > 0)
             {
@@ -261,6 +262,7 @@ namespace Vudaco.Receipts.Repositories
                     ) d ON d.receipt_id = r.id
                     WHERE 
                         r.type_receipt IN (1,2,7,8)
+                        AND r.status IS NULL
                         AND r.deleted_at IS NULL";
             if (ReceiptDto.StorageId > 0)
             {

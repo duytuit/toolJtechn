@@ -270,7 +270,7 @@ namespace Vudaco.ContractFiles.Repositories
                             SUM(d.price) AS price,
                             SUM(d.price * (d.vat / 100.0)) + SUM(d.price) AS total_price
                         FROM debits d
-                        WHERE d.status >= 1 
+                        WHERE d.status = 2 
                         AND d.deleted_at IS NULL
                         GROUP BY 
                             d.file_info_id,
@@ -300,7 +300,7 @@ namespace Vudaco.ContractFiles.Repositories
                         AND d_total.id = cf.debit_id
                     WHERE 
                         p.status = 1
-                        AND cf.status >= 1
+                        AND cf.status = 2
                         AND cf.deleted_at IS NULL
                         AND f.deleted_at IS NULL
                         AND p.deleted_at IS NULL";

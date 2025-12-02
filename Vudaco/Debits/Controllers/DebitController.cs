@@ -1561,7 +1561,67 @@ namespace Vudaco.Debits.Controllers
                 return ApiResponseResult<object>(false, "Lỗi khi cập nhật: " + ex.InnerException?.Message, null);
             }
         }
-          [HttpPost("updateBillCustomerFileGia")]
+          [HttpPost("updateVATDebitNoFile")]
+        public async Task<IActionResult> UpdateVATDebitNoFile([FromBody] DebitDto DebitDto)
+        {
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                var now = DateTime.Now;
+                var debit = await _context.Debits.FirstOrDefaultAsync(x => x.Id == DebitDto.Id);
+                if (debit == null)  return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu debit", null);
+                debit.UpdatedBy = userId;
+                debit.UpdatedAt = now;
+                debit.Vat = DebitDto.Vat;
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+                return ApiResponseResult<object>(true, "Cập nhật thành công", null);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi cập nhật: " + ex.InnerException?.Message, null);
+            }
+        }
+        [HttpPost("updateBillDebitNoFile")]
+        public async Task<IActionResult> UpdateBillDebitNoFile([FromBody] BillDebitDto BillDebitDto)
+        {
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                var now = DateTime.Now;
+                var debits = await _context.Debits.Where(x => BillDebitDto.Ids.Contains((int)x.Id)).ToListAsync();
+                foreach (var debit in debits)
+                {
+                    if (string.IsNullOrEmpty(BillDebitDto.CusBill))
+                    {
+                        debit.UpdatedBy = userId;
+                        debit.UpdatedAt = now;
+                        debit.CusBillDate = null;
+                        debit.CusBill = null;
+                    }
+                    else
+                    {
+                        debit.UpdatedBy = userId;
+                        debit.UpdatedAt = now;
+                        debit.CusBillDate = BillDebitDto.CusBillDate;
+                        debit.CusBill = BillDebitDto.CusBill;
+                    }
+                   
+                }
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+                return ApiResponseResult<object>(true, "Cập nhật thành công", null);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi cập nhật: " + ex.InnerException?.Message, null);
+            }
+        }
+        [HttpPost("updateBillCustomerFileGia")]
         public async Task<IActionResult> UpdateBillCustomerFileGia([FromBody] BillDebitDto BillDebitDto)
         {
           

@@ -12,6 +12,8 @@ namespace Vudaco.Receipts.Dtos
         public int StorageId { get; set; }
         public int? PartnerDetailId { get; set; }
         public int? FileInfoId { get; set; }
+        public string Objtec { get; set; }
+        public int? ObjtecId { get; set; }
         public int? EmployeeId { get; set; }
         public int? Type { get; set; }
         public DateTime AccountingDate { get; set; }

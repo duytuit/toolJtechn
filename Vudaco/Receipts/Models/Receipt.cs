@@ -26,6 +26,10 @@ namespace Vudaco.Receipts.Models
         public int? PartnerDetailId { get; set; }
         [Column("file_info_id")]
         public int? FileInfoId { get; set; }
+        [Column("objtec")]
+        public string Objtec { get; set; }
+        [Column("objtec_id")]
+        public int? ObjtecId { get; set; }
          [Column("employee_id")]
         public int? EmployeeId { get; set; }
         [Column("type")]

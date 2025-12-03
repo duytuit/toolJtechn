@@ -178,7 +178,7 @@ namespace Vudaco.ContractFiles.Repositories
                                 WHERE 
                                     d.file_info_id = f.id
                                     AND d.customer_detail_id = f.customer_detail_id
-                                    AND d.status = 0
+                                    AND d.status < 2
                                     AND d.deleted_at IS NULL
                             )";
             if (FileInfo.StorageId > 0)

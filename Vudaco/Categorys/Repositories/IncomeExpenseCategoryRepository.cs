@@ -51,7 +51,7 @@ namespace Vudaco.Categorys.Repositories
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "income_expense_categorys",
-                        new[] { "id","code","name","type","parent_id","storage_id","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at",},
+                        new[] { "id","code","name","type","parent_id","status","enable","storage_id","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at",},
                         offset: null,
                         limit: null,
                         whereEquals: whereEquals,

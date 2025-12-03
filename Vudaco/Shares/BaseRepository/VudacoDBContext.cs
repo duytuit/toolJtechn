@@ -44,6 +44,7 @@ namespace Vudaco.Shares.BaseRepository
         public DbSet<Bill> Bills { get; set; }
         public DbSet<Debit> Debits { get; set; }
         public DbSet<ConfirmFile> ConfirmFiles { get; set; }
+        public DbSet<Offset> Offsets { get; set; }
         public VudacoDBContext(DbContextOptions<VudacoDBContext> options) : base(options)
         {
 
@@ -74,6 +75,7 @@ namespace Vudaco.Shares.BaseRepository
             modelBuider.Entity<Receipt>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<ReceiptDetail>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<ConfirmFile>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<Offset>().HasQueryFilter(e => e.DeletedAt == null);
         }           
     }
 }

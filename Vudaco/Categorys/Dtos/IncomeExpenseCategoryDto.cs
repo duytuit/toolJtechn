@@ -12,6 +12,8 @@ namespace Vudaco.Categorys.Dtos
         public string Name { get; set; }
         public int ParentId { get; set; }
         public int Type { get; set; }
+        public int Enable { get; set; }
+        public int Status { get; set; }
         public int? StorageId { get; set; }
         public int? CreatedBy { get; set; }
         public int? UpdatedBy { get; set; }

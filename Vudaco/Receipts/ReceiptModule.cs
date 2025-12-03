@@ -1,8 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Vudaco.Receipts.Repositories;
 
 namespace Vudaco.Receipts
@@ -13,6 +9,7 @@ namespace Vudaco.Receipts
         {
             services.AddScoped<IReceiptDetailRepositories, ReceiptDetailRepositories>();
             services.AddScoped<IReceiptRepositories, ReceiptRepositories>();
+            services.AddScoped<IOffsetRepositories, OffsetRepositories>();
             return services;
         }
     }

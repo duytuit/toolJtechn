@@ -253,6 +253,72 @@ namespace Vudaco.Shares
 
             return JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
         }
+        public static string NumberToVietnameseWords(double number)
+        {
+            if (number == 0) return "Không đồng";
+
+            string[] unitNumbers = { "không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín" };
+            string[] placeValues = { "", "nghìn", "triệu", "tỷ" };
+
+            string sNumber = number.ToString("#");
+            int length = sNumber.Length;
+            int placeValue = 0;
+            string result = "";
+            string suffix = "";
+
+            while (length > 0)
+            {
+                int threeDigits = (length >= 3) ? int.Parse(sNumber.Substring(length - 3, 3)) : int.Parse(sNumber.Substring(0, length));
+                length -= 3;
+
+                if (threeDigits > 0 || placeValue == 3)
+                {
+                    string group = ReadThreeDigits(threeDigits, unitNumbers);
+                    result = group + " " + placeValues[placeValue] + " " + suffix + result;
+                    suffix = "";
+                }
+                placeValue++;
+                if (placeValue > 3) placeValue = 1;
+            }
+
+            result = result.Trim();
+            result = char.ToUpper(result[0]) + result.Substring(1) + " đồng";
+            return result;
+        }
+
+        public static string ReadThreeDigits(int number, string[] unitNumbers)
+        {
+            int hundreds = number / 100;
+            int tens = (number % 100) / 10;
+            int units = number % 10;
+            string result = "";
+
+            if (hundreds > 0)
+            {
+                result += unitNumbers[hundreds] + " trăm";
+                if (tens == 0 && units > 0) result += " linh";
+            }
+
+            if (tens > 1)
+            {
+                result += " " + unitNumbers[tens] + " mươi";
+                if (units == 1) result += " mốt";
+                else if (units == 5) result += " lăm";
+                else if (units > 0) result += " " + unitNumbers[units];
+            }
+            else if (tens == 1)
+            {
+                result += " mười";
+                if (units == 5) result += " lăm";
+                else if (units > 0) result += " " + unitNumbers[units];
+            }
+            else if (tens == 0 && units > 0)
+            {
+                result += " " + unitNumbers[units];
+            }
+
+            return result.Trim();
+        }
     }
         public class UploadResult
         {

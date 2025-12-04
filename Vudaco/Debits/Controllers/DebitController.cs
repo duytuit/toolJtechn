@@ -21,6 +21,9 @@ using Vudaco.ContractFiles.Repositories;
 using Vudaco.ContractFiles.Dtos;
 using Vudaco.Receipts.Models;
 using Vudaco.Receipts.Repositories;
+using System.IO;
+using ClosedXML.Excel;
+using Vudaco.Shares;
 
 namespace Vudaco.Debits.Controllers
 {
@@ -77,7 +80,133 @@ namespace Vudaco.Debits.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
-         [HttpGet("congnochitietncc")]
+        [HttpGet("excel/congnokh")]
+        public async Task<IActionResult> ExportCongNoKH(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+                // ==== LẤY THÔNG TIN KHÁCH HÀNG ====
+                var kh = await _context.PartnerDetails.FirstOrDefaultAsync(x => x.Id == DebitDto.CustomerDetailId);
+                if (kh == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu khách hàng", null);
+
+                var info_kh = await _context.Partners.FirstOrDefaultAsync(x => x.Id == kh.PartnerId);
+                if (info_kh == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu khách hàng", null);
+
+                var result = await _repoDebit.GetObjectDebitChiTietKHAsync(DebitDto, page, pageSize, cancellationToken);
+                if (result == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+
+                // Bạn cần tự group lại dữ liệu
+                var groupedData = result.Data;
+              
+
+                // ==== TẠO FILE EXCEL ====
+                using var wb = new XLWorkbook();
+                var ws = wb.Worksheets.Add("bảng kê chi tiết");
+
+                // ==== TIÊU ĐỀ ====
+                ws.Range("A1:Q1").Merge();
+                ws.Cell("A1").Value = "BẢNG KÊ CHI TIẾT";
+                ws.Cell("A1").Style.Font.SetBold().Font.SetFontSize(16)
+                    .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+                string tg = $"Từ ngày {DebitDto.FromDate:dd/MM/yyyy} - Đến ngày {DebitDto.ToDate:dd/MM/yyyy}";
+                ws.Range("A2:Q2").Merge();
+                ws.Cell("A2").Value = tg;
+                ws.Cell("A2").Style.Font.SetBold()
+                    .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+                ws.Range("A3:K3").Merge();
+
+                // ==== THÔNG TIN ĐƠN VỊ ====
+                var cell_benban = ws.Cell("A5");
+                cell_benban.Clear();
+                cell_benban.GetRichText().AddText("Đơn vị bán hàng: ").SetBold();
+                cell_benban.GetRichText().AddText("Công ty TNHH VUDACO");
+
+                ws.Cell("A6").Value = "Địa chỉ: Số 6C/195 Kiều Hạ, Hải Phòng";
+                ws.Cell("A7").Value = "MST: 0201723721";
+
+                var cell_benmua = ws.Cell("A9");
+                cell_benmua.Clear();
+                cell_benmua.GetRichText().AddText("Đơn vị mua hàng: ").SetBold();
+                cell_benmua.GetRichText().AddText(info_kh.Name);
+
+                ws.Cell("A10").Value = "Địa chỉ: " + info_kh.Address;
+                ws.Cell("A11").Value = "Mã số thuế: " + info_kh.TaxCode;
+
+                // ==== HEADER ====
+                int headerRow1 = 13;
+                int headerRow2 = 14;
+
+                ws.Range(headerRow1, 1, headerRow2, 1).Merge().Value = "STT";
+                ws.Range(headerRow1, 2, headerRow2, 2).Merge().Value = "NGÀY";
+                ws.Range(headerRow1, 3, headerRow2, 3).Merge().Value = "LOẠI XE";
+                ws.Range(headerRow1, 4, headerRow2, 4).Merge().Value = "SỐ XE";
+                ws.Range(headerRow1, 5, headerRow2, 5).Merge().Value = "TUYẾN VẬN CHUYỂN";
+                ws.Range(headerRow1, 6, headerRow2, 6).Merge().Value = "ĐƠN VỊ";
+                ws.Range(headerRow1, 7, headerRow2, 7).Merge().Value = "SỐ LƯỢNG";
+                ws.Range(headerRow1, 8, headerRow2, 8).Merge().Value = "ĐƠN GIÁ";
+                ws.Range(headerRow1, 9, headerRow2, 9).Merge().Value = "THUẾ SUẤT";
+                ws.Range(headerRow1, 10, headerRow2, 10).Merge().Value = "TIỀN THUẾ GTGT";
+                ws.Range(headerRow1, 11, headerRow2, 11).Merge().Value = "THÀNH TIỀN";
+                ws.Range(headerRow1, 12, headerRow2, 12).Merge().Value = "CHI HỘ";
+                ws.Range(headerRow1, 13, headerRow2, 13).Merge().Value = "TỔNG CỘNG";
+                ws.Range(headerRow1, 14, headerRow2, 14).Merge().Value = "SỐ FILE";
+                ws.Range(headerRow1, 15, headerRow2, 15).Merge().Value = "Số bill/booking";
+                ws.Range(headerRow1, 16, headerRow2, 16).Merge().Value = "Số HĐ";
+                ws.Range(headerRow1, 17, headerRow2, 17).Merge().Value = "ND chi hộ";
+                ws.Range(headerRow1, 18, headerRow2, 18).Merge().Value = "Ghi chú";
+
+                var headerRange = ws.Range(headerRow1, 1, headerRow2, 18);
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                headerRange.Style.Alignment.WrapText = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
+
+                // ==== DỮ LIỆU ====
+                int row = 15;
+
+              
+
+                int dataStart = 15;
+                int dataEnd = row - 1;
+
+                // ==== TỔNG CỘNG ====
+                int totalRow = dataEnd + 1;
+
+                ws.Range(totalRow, 1, totalRow, 7).Merge();
+                ws.Cell(totalRow, 1).Value = "TỔNG CỘNG";
+                ws.Cell(totalRow, 1).Style.Font.Bold = true;
+
+                ws.Cell(totalRow, 8).FormulaA1 = $"SUM(H{dataStart}:H{dataEnd})";
+                ws.Cell(totalRow, 10).FormulaA1 = $"SUM(J{dataStart}:J{dataEnd})";
+                ws.Cell(totalRow, 11).FormulaA1 = $"SUM(K{dataStart}:K{dataEnd})";
+                ws.Cell(totalRow, 12).FormulaA1 = $"SUM(L{dataStart}:L{dataEnd})";
+                ws.Cell(totalRow, 13).FormulaA1 = $"SUM(M{dataStart}:M{dataEnd})";
+
+                // ==== SỐ TIỀN BẰNG CHỮ ====
+                int textRow = totalRow + 2;
+
+                ws.Range(textRow, 1, textRow, 7).Merge();
+                ws.Cell(textRow, 1).Value = "Số tiền bằng chữ:";
+
+                ws.Range(textRow, 8, textRow, 17).Merge();
+                ws.Cell(textRow, 8).Value = Helper.NumberToVietnameseWords(
+                    ws.Cell(totalRow, 13).Value.GetNumber()
+                );
+
+                // ==== EXPORT ====
+                using var stream = new MemoryStream();
+                wb.SaveAs(stream);
+                stream.Position = 0;
+
+                return File(
+                    stream.ToArray(),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "BangKeChiTiet.xlsx"
+                );
+
+        }
+        [HttpGet("congnochitietncc")]
         public async Task<IActionResult> GetCongNoChiTietNCC(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
         {
             // test

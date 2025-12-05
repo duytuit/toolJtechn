@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DocumentFormat.OpenXml.Drawing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -448,6 +449,55 @@ namespace Vudaco.Debits.Repositories
                 Data = results,
             };
             return _results;
+        }
+         public async Task<List<object>> GetObjectDebitDuNoDKKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+             var sql = $@"
+                    SELECT 
+                         CAST(SUM(ISNULL(d_total.total, 0)) AS INT) AS total_debit,
+                         CAST(SUM(ISNULL(rdt_total.total, 0)) AS INT) AS total_receipt
+                    FROM debits d
+                    LEFT JOIN partner_details p ON p.id = d.customer_detail_id
+
+                    -- Tổng receipts
+                    OUTER APPLY (
+                        SELECT 
+                            SUM(rdt.amount) AS amount,
+                            MAX(rdt.vat) AS vat,
+                            SUM(rdt.amount * (rdt.vat / 100.0)) + SUM(rdt.amount) AS total
+                        FROM receipts r
+                        LEFT JOIN receipt_details rdt ON rdt.receipt_id = r.id
+                        WHERE 
+                            d.id = rdt.debit_id 
+                            AND r.type_receipt = 0
+                            AND r.deleted_at IS NULL
+                            AND rdt.deleted_at IS NULL
+                    ) AS rdt_total
+
+                    -- Tổng debit (giá + VAT)
+                    OUTER APPLY (
+                        SELECT 
+                            SUM(d1.price * (d1.vat / 100.0)) + SUM(d1.price) AS total
+                        FROM debits d1
+                        WHERE d1.id = d.id
+                    ) AS d_total
+
+                    WHERE
+                        p.status = 1
+                        AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
+                        AND (d.service_id NOT IN (19) OR d.service_id IS NULL)
+                        AND p.deleted_at IS NULL
+                        AND d.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.CustomerDetailId > 0)
+            {
+                sql += $@" AND d.customer_detail_id = {DebitDto.CustomerDetailId}";
+            }
+            sql += $@" AND d.accounting_date < '{DebitDto.FromDate.Value:yyyy-MM-dd}'";
+            return await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
         }
 
         public async Task<PaginatedResultReact<object>> GetObjectNoDebitDispatchNoFileKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)

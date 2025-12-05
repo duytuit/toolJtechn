@@ -414,6 +414,9 @@ namespace Vudaco.Debits.Controllers
                 var result = await _repoDebit.GetObjectDebitChiTietKHAsync(DebitDto, page, pageSize, cancellationToken);
                 if (result == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
 
+                var result_duno_dauky = await _repoDebit.GetObjectDebitDuNoDKKHAsync(DebitDto, page, pageSize, cancellationToken);
+                dynamic duno_dauky = result_duno_dauky.FirstOrDefault();
+                int duno = duno_dauky.total_debit - duno_dauky.total_receipt;
                 // Chuẩn hóa dữ liệu về dynamic để đọc property
                 var data = result.Data.Select(x => (dynamic)x);
 
@@ -467,9 +470,7 @@ namespace Vudaco.Debits.Controllers
                 string tg = string.Format("Từ ngày {0} - Đến ngày {1}", DebitDto.FromDate?.ToString("dd/MM/yyyy"), DebitDto.ToDate?.ToString("dd/MM/yyyy"));
                 ws.Range("A2:Q2").Merge();
                 ws.Cell("A2").Value = tg;
-                ws.Cell("A2").Style
-                    .Font.SetBold()
-                    .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+                ws.Cell("A2").Style.Font.SetBold().Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
 
                 ws.Range("A3:K3").Merge(); // merge trống theo mẫu
 
@@ -491,7 +492,19 @@ namespace Vudaco.Debits.Controllers
                 ws.Cell("A9").Value = "Địa chỉ: "+info_kh.Address.ToString();
                 ws.Cell("A10").Value = "Mã số thuế: "+info_kh.TaxCode.ToString();
 
-                ws.Cell("A12").Value = "Đầu kỳ: ..........  -  Phát sinh: ..........  -  Cuối kỳ: ..........";
+                ws.Range("A12:L12").Merge();
+                ws.Range("A12:L12").Merge().Value = "Dư nợ đầu kỳ (0)";
+                ws.Range("A12:L12").Merge().Style.Font.SetBold().Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+                ws.Range("A12:L12").Merge().Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                ws.Range("A12:L12").Merge().Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+               
+                ws.Range("M12:O12").Merge();
+                ws.Range("M12:O12").Merge().Value = duno;
+                ws.Range("M12:O12").Merge().Style.NumberFormat.Format = "#,##0";
+                ws.Range("M12:O12").Merge().Style.Font.SetBold().Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+                ws.Range("M12:O12").Merge().Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                ws.Range("M12:O12").Merge().Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
                 // ==== HEADER BẢNG ====
                 // bắt đầu từ dòng 13, header chiếm 2 dòng: 13 và 14
                 int headerRow1 = 13;
@@ -554,140 +567,115 @@ namespace Vudaco.Debits.Controllers
 
                     // Lấy bản ghi đầu tiên trong group (để lấy thông tin chung)
                     var first = group.Items.First();
-                   //return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", first);
+                   　//return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", first);
                         // Tính tổng và count
-                    int soLuong = group.Items.Where(x=> x.type == 1 && x.file_info_id == (long)first.file_info_id).Count();
-                    decimal price = data.Where(x => new int[] { 0,1, 4, 5 }.Contains((int)x.type) && x.file_info_id == (long)first.file_info_id).Sum(x => x.price);
-                    decimal price_dv = data
-                            .Where(x => new int[] { 0,1, 4, 5 }.Contains((int)x.type) && x.file_info_id == (long)first.file_info_id)
-                                            .Sum(x =>
-                                            {
-                                                decimal price = (decimal)x.price;
-                                                decimal vat = (decimal)x.vat;
-                                                return price + (price * vat / 100m); // giá + VAT
-                                            });
-                    decimal price_thue = data.Where(x => x.file_info_id == (long)first.file_info_id).Sum(x =>(decimal)x.price * (decimal)x.vat / 100);
-                    decimal price_ch = data.Where(x => new int[] { 2, 3, 6 }.Contains((int)x.type) && x.file_info_id == (long)first.file_info_id)
-                                                    .Sum(x =>
-                                                    {
-                                                        decimal price = (decimal)x.price;
-                                                        decimal vat = (decimal)x.vat;
-                                                        return price + (price * vat / 100m); // giá + VAT
-                                                    });
-                    decimal thanhtien = data.Where(x => x.file_info_id == (long)first.file_info_id).Sum(x => (decimal)x.price + ((decimal)x.price * (decimal)x.vat / 100));
-                   // return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", first);
-                    ws.Cell(row, 1).Value = i + 1; // STT
-                    ws.Cell(row, 2).Value = first.accounting_date.ToString("dd/MM/yyyy");
-                    ws.Cell(row, 3).Value = first.customer_vehicle_type ?? "";
-                    ws.Cell(row, 4).Value = first.vehicle_number ?? "";
-                    ws.Cell(row, 5).Value = first.name;
-                    ws.Cell(row, 6).Value = "Chuyến";
-                    ws.Cell(row, 7).Value = soLuong; // count
-
-                    ws.Cell(row, 8).Value = price;
-                    ws.Cell(row, 8).Style.NumberFormat.Format = "#,##0";
-
-                    ws.Cell(row, 9).Value = first.vat; // thuế suất, nếu cố định thì gán %
-                    ws.Cell(row, 10).Value = price_thue;
-                    ws.Cell(row, 10).Style.NumberFormat.Format = "#,##0";
-
-                    ws.Cell(row, 11).Value = price_dv;
-                    ws.Cell(row, 11).Style.NumberFormat.Format = "#,##0";
-
-                    ws.Cell(row, 12).Value = price_ch;
-                    ws.Cell(row, 12).Style.NumberFormat.Format = "#,##0";
-
-                    ws.Cell(row, 13).Value = thanhtien;
-                    ws.Cell(row, 13).Style.NumberFormat.Format = "#,##0";
                     ContractFiles.Models.FileInfo _fileInfo = new ContractFiles.Models.FileInfo();
                     if ( first.file_info_id > 0)
                     {
                         _fileInfo = list_file.FirstOrDefault(x => x.Id == (long)first.file_info_id);
                     }
-                    ws.Cell(row, 14).Value = _fileInfo != null ? _fileInfo.FileNumber : "";
-                    ws.Cell(row, 15).Value = _fileInfo != null ? (_fileInfo.Bill ?? _fileInfo.Declaration) : "";
-                    ws.Cell(row, 16).Value = first.cus_bill ?? "";
-                    // Nối TenDichVu + ThanhTien
-                   var dichVuStr = string.Join("; ",
-                        data.Where(x => new int[] { 2, 3, 6 }.Contains((int)x.type) && x.file_info_id == (long)first.file_info_id)
-                            .Select(x =>
-                            {
-                                decimal price = (decimal)x.price;
-                                decimal vat = (decimal)x.vat;
-
-                                decimal total = price + (price * vat / 100m); // giá + VAT
-
-                                return $"{x.name}: {total:N0}";
-                            })
-                    );
-                    ws.Cell(row, 17).Value = dichVuStr;
-                    // Nối GhiChu
-                    var ghiChuStr = string.Join("; ",
-                             data.Where(x => !string.IsNullOrEmpty((string)x.note) && x.file_info_id == (long)first.file_info_id)
-                            .Select(x => (string)x.note)
-                    );
-                    ws.Cell(row, 18).Value = ghiChuStr;
+                  
+                   // return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", first);
+                    ws.Cell(row, 1).Value = i + 1; // STT
+                    ws.Cell(row, 2).Value = _fileInfo != null ? _fileInfo.FileNumber : first.dispatch_code;
+                    ws.Cell(row, 3).Value = first.cus_bill ?? "";
+                    ws.Cell(row, 4).Value = first.accounting_date.ToString("dd/MM/yyyy");;
+                    ws.Cell(row, 5).Value =  _fileInfo != null ? _fileInfo.Declaration ??"" : "";
+                    ws.Cell(row, 6).Value =  _fileInfo != null ? _fileInfo.Bill ?? "" : "";
+                    ws.Cell(row, 7).Value =  _fileInfo != null ? _fileInfo.ContainerCode ?? "" : "";
+                    ws.Cell(row, 8).Value =  _fileInfo != null ? _fileInfo.Quantity ?? "" : "";
+                    ws.Cell(row, 9).Value =  first.customer_vehicle_type ??"";
+                    ws.Cell(row, 10).Value =  first.vehicle_number ??"";
                     row++;
+                    // Lấy danh sách bản ghi của group theo file_info_id
+                    var serviceList = data
+                        .Where(x => x.file_info_id == (long)first.file_info_id)
+                        .OrderBy(x=>x.type)
+                        .ToList();
+
+                    // Nếu không có bản ghi → bỏ qua
+                    if (!serviceList.Any())
+                        continue;
+
+                    // DUYỆT TỪNG BẢN GHI TRONG DATA (đúng theo mẫu bạn yêu cầu)
+                    foreach (var svc in serviceList)
+                    {
+                        // Tính giá
+                        decimal price = (decimal)svc.price;
+
+                        decimal vatAmount = price * (decimal)svc.vat / 100m;
+
+                        decimal price_dv = new int[] { 0,1, 4, 5}.Contains((int)svc.type)
+                            ? (price + vatAmount)
+                            : 0;
+
+                        decimal price_thue = vatAmount;
+
+                        decimal price_ch = new int[] { 2, 3, 6 }.Contains((int)svc.type)
+                            ? (price + vatAmount)
+                            : 0;
+
+                        // --- GHI DÒNG CHI TIẾT ---
+                        ws.Cell(row, 11).Value = svc.note ?? "";
+                        ws.Cell(row, 12).Value = svc.name ?? "";
+
+                        ws.Cell(row, 13).Value = price;
+                        ws.Cell(row, 13).Style.NumberFormat.Format = "#,##0";
+
+                        ws.Cell(row, 14).Value = price_thue;
+                        ws.Cell(row, 14).Style.NumberFormat.Format = "#,##0";
+
+                        ws.Cell(row, 15).Value = price_dv;
+                        ws.Cell(row, 15).Style.NumberFormat.Format = "#,##0";
+
+                        ws.Cell(row, 16).Value = price_ch;
+                        ws.Cell(row, 16).Style.NumberFormat.Format = "#,##0";
+
+                        row++;
+                    }
+                                                
                 }
           
-
                 int dataStartRow = 15;
                 int dataEndRow = ws.LastRowUsed().RowNumber();
                 int totalRow = dataEndRow + 1;
+
+                // ghi chữ "TỔNG CỘNG"
+                ws.Range(totalRow, 1, totalRow, 12).Merge();
+                ws.Cell(totalRow, 1).Value = "Tổng cộng";
+                ws.Range(totalRow, 1, totalRow, 12).Style.Font.Bold = true;
+                ws.Range(totalRow, 1, totalRow, 12).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                // Tổng công nợ phải thu (12) =  (9) + (10)
+                ws.Range(totalRow+1, 1, totalRow+1, 12).Merge();
+                ws.Cell(totalRow+1, 1).Value = "Tổng công nợ phải thu (12) =  (9) + (10)";
+                ws.Range(totalRow+1, 1, totalRow+1, 12).Style.Font.Bold = true;
+                ws.Range(totalRow+1, 1, totalRow+1, 12).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                ws.Cell(totalRow, 13).FormulaA1 = $"SUM(M{dataStartRow}:M{dataEndRow})";  // TỔNG CỘNG
+                ws.Cell(totalRow, 13).Style.NumberFormat.Format = "#,##0";
+                ws.Cell(totalRow, 14).FormulaA1 = $"SUM(N{dataStartRow}:N{dataEndRow})";  // TỔNG CỘNG
+                ws.Cell(totalRow, 14).Style.NumberFormat.Format = "#,##0";
+                ws.Cell(totalRow, 15).FormulaA1 = $"SUM(O{dataStartRow}:O{dataEndRow})";  // TỔNG CỘNG
+                ws.Cell(totalRow, 15).Style.NumberFormat.Format = "#,##0";
+                ws.Cell(totalRow, 16).FormulaA1 = $"SUM(P{dataStartRow}:P{dataEndRow})";  // TỔNG CỘNG
+                ws.Cell(totalRow, 16).Style.NumberFormat.Format = "#,##0";
+
+                 ws.Range(totalRow+1, 13, totalRow+1, 15).Merge();
+                ws.Range(totalRow+1, 13, totalRow+1, 15).Style.Font.Bold = true;
+                ws.Range(totalRow+1, 13, totalRow+1, 15).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+                ws.Cell(totalRow+1, 13).FormulaA1 = $"SUM(O{dataStartRow}:O{dataEndRow}) + SUM(P{dataStartRow}:P{dataEndRow})";
+                ws.Cell(totalRow+1, 13).Style.NumberFormat.Format = "#,##0";
+             
+                dataEndRow = ws.LastRowUsed().RowNumber();
+                totalRow = dataEndRow + 1;
+
+
                 // range dữ liệu (A..Q)
-                var dataRange = ws.Range(dataStartRow, 1, dataEndRow, 17);
+                var dataRange = ws.Range(dataStartRow, 1, dataEndRow, 16);
                 // set border all
                 dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
                 dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-
-
-                // ghi chữ "TỔNG CỘNG"
-                ws.Range(totalRow, 1, totalRow, 7).Merge();
-                ws.Cell(totalRow, 1).Value = "TỔNG CỘNG";
-                ws.Range(totalRow, 1, totalRow, 7).Style.Font.Bold = true;
-                ws.Range(totalRow, 1, totalRow, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                // công thức SUM cho các cột cần cộng
-                ws.Cell(totalRow, 8).FormulaA1 = $"SUM(H{dataStartRow}:H{dataEndRow})";   // ĐƠN GIÁ
-                ws.Cell(totalRow, 8).Style.NumberFormat.Format = "#,##0"; // format có dấu phẩy
-                // ws.Cell(totalRow, 9).FormulaA1 = $"SUM(I{dataStartRow}:I{dataEndRow})";   // THUẾ SUẤT
-                ws.Cell(totalRow, 10).FormulaA1 = $"SUM(J{dataStartRow}:J{dataEndRow})";  // TIỀN THUẾ GTGT
-                ws.Cell(totalRow, 10).Style.NumberFormat.Format = "#,##0";
-                ws.Cell(totalRow, 11).FormulaA1 = $"SUM(K{dataStartRow}:K{dataEndRow})";  // THÀNH TIỀN
-                ws.Cell(totalRow, 11).Style.NumberFormat.Format = "#,##0";
-                ws.Cell(totalRow, 12).FormulaA1 = $"SUM(L{dataStartRow}:L{dataEndRow})";  // CHI HỘ
-                ws.Cell(totalRow, 12).Style.NumberFormat.Format = "#,##0";
-                ws.Cell(totalRow, 13).FormulaA1 = $"SUM(M{dataStartRow}:M{dataEndRow})";  // TỔNG CỘNG
-                ws.Cell(totalRow, 13).Style.NumberFormat.Format = "#,##0";
-
-                // style cho dòng tổng
-                var totalRange = ws.Range(totalRow, 1, totalRow, 18);
-                totalRange.Style.Font.Bold = true;
-                totalRange.Style.Fill.BackgroundColor = XLColor.LightGray;
-                totalRange.Style.Border.TopBorder = XLBorderStyleValues.Thin;
-                var fullRange = ws.Range(dataStartRow, 1, totalRow, 18);
-                fullRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                fullRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-
-                double tongCong = ws.Cell(totalRow, 13).GetDouble();
-                dataEndRow = ws.LastRowUsed().RowNumber();
-                // Lấy giá trị tổng cộng ở cột 13 (cột M)
-                int textRow = dataEndRow + 1;
-                // Thêm tiêu đề "Số tiền bằng chữ"
-                ws.Range(textRow, 1, textRow, 7).Merge();
-                ws.Cell(textRow, 1).Value = "Số tiền bằng chữ:";
-                ws.Range(textRow, 1, textRow, 7).Style.Font.Bold = true;
-                ws.Range(textRow, 1, textRow, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-
-                ws.Range(textRow, 8, textRow, 17).Merge();
-                ws.Cell(textRow, 8).Value = Helper.NumberToVietnameseWords(tongCong) + "./.";
-                ws.Range(textRow, 8, textRow, 17).Style.Font.Bold = true;
-                ws.Range(textRow, 8, textRow, 17).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
-                fullRange = ws.Range(textRow, 1, textRow, 17);
-                fullRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                fullRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-
                 // ==== EXPORT ====
                 using var stream = new MemoryStream();
                 wb.SaveAs(stream);

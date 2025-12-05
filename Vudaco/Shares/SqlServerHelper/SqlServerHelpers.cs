@@ -719,5 +719,22 @@ FROM {tableNameWithAlias} {joinSql}
 
             return result;
         }
+        public static async Task<decimal> ExecuteQuerySqlSumAsync(
+            string connectionString,
+            string sql,
+            CancellationToken cancellationToken = default)
+        {
+            await using var conn = new SqlConnection(connectionString);
+            await conn.OpenAsync(cancellationToken);
+
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = sql;
+
+            var result = await cmd.ExecuteScalarAsync(cancellationToken);
+
+            return result == null || result == DBNull.Value
+                ? 0m
+                : Convert.ToDecimal(result);
+        }
     }
 }

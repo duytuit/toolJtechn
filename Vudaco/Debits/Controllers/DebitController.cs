@@ -70,6 +70,28 @@ namespace Vudaco.Debits.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
+        [HttpGet("congNoGiaoNhan")]
+        public async Task<IActionResult> GetCongNoGiaoNhan(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectDebitGiaoNhanAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet("congNoLaiXe")]
+        public async Task<IActionResult> GetCongNoLaiXe(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectDebitLaiXeAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
         [HttpGet("congnochitietkh")]
         public async Task<IActionResult> GetCongNoChiTietKH(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
         {
@@ -1015,6 +1037,84 @@ namespace Vudaco.Debits.Controllers
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
                 return ApiResponseResult<object>(true, "Thêm thành công", null);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
+            }
+            
+        }
+        [HttpPost]
+        [Route("updateDebit")]
+        public async Task<IActionResult> UpdateDebit([FromBody] DebitDto DebitDto)
+        {
+            if (!DebitDto.CustomerDetailId.HasValue || DebitDto.CustomerDetailId <= 0)
+            {
+                return ApiResponseResult<object>(false, "Không được để trống khách hàng", null);
+            }
+            var debit = await _context.Debits.FirstOrDefaultAsync(x=>x.Id == DebitDto.Id);
+            if(debit == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                var now = DateTime.Now;
+                int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
+                var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitDto.CustomerDetailId);
+                if (bill_Partner == null)
+                {
+                    var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HD"+DebitDto.AccountingDate.ToString("yyMM"),4);
+                    bill_Partner = new Bill
+                    {
+                        BillCode = BillCodePartner,
+                        StorageId = DebitDto.StorageId,
+                        CustomerDetailId =  DebitDto.CustomerDetailId,
+                        Name = CycleName.ToString(),
+                        AccountingDate = DebitDto.AccountingDate,
+                        CycleName = CycleName,
+                        CreatedBy = userId,
+                        CreatedAt = now,
+                        UpdatedAt = now,
+                        UpdatedBy = userId
+                    };
+                    _context.Bills.Add(bill_Partner);
+                    await _context.SaveChangesAsync();  // phải có
+                }
+
+                debit.BillId = bill_Partner.Id;
+                debit.VehicleId = DebitDto.VehicleId;
+                debit.VehicleNumber = DebitDto.VehicleNumber;
+                debit.CustomerDetailId = DebitDto.CustomerDetailId;
+                debit.SupplierDetailId = DebitDto.SupplierDetailId;
+                debit.EmployeeDriverId = DebitDto.EmployeeDriverId;
+                debit.EmployeeStaffId = DebitDto.EmployeeStaffId;
+                debit.StorageId = DebitDto.StorageId;
+                debit.Type = DebitRepositories.PhiVanChuyen;
+                debit.Name = DebitDto.Route;
+                debit.AccountingDate = DebitDto.AccountingDate;
+                debit.PurchasePrice = DebitDto.PurchasePrice;
+                debit.Price = DebitDto.Price;
+                debit.Vat = DebitDto.Vat;
+                debit.DriverFee = DebitDto.DriverFee;
+                debit.MealFee = DebitDto.MealFee;
+                debit.TicketFee = DebitDto.TicketFee;
+                debit.OvernightFee = DebitDto.OvernightFee;
+                debit.PenaltyFee = DebitDto.PenaltyFee;
+                debit.GoodsFee = DebitDto.GoodsFee;
+                debit.Data = DebitDto.Data;
+                debit.Note = DebitDto.Note;
+                debit.CustomerVehicleType = DebitDto.CustomerVehicleType;
+                debit.SupplierVehicleType = DebitDto.SupplierVehicleType;
+                debit.PurchaseStatus = DebitDto.PurchaseStatus;
+                debit.PurchaseVat = DebitDto.PurchaseVat;
+                debit.UpdatedAt = now;
+                debit.UpdatedBy = userId;
+                if (DebitDto.FileInfoId > 0)debit.FileInfoId = DebitDto.FileInfoId;
+                _context.Debits.Update(debit);
+                await _context.SaveChangesAsync();  // phải có
+                await tran.CommitAsync();
+                return ApiResponseResult<object>(true, "Sửa thành công", null);
             }
             catch (DbUpdateException ex)
             {
@@ -2575,6 +2675,20 @@ namespace Vudaco.Debits.Controllers
                 return ApiResponseResult<object>(false, "Id không tồn tại", null);
             }
             var entity = await _repoDebit.ShowAsync(id);
+            if (entity == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", entity);
+        }
+        [HttpGet("ShowWithFileInfoAsync")]
+        public async Task<IActionResult> ShowWithFileInfoAsync([FromQuery] int id)
+        {
+            if (id <= 0)
+            {
+                return ApiResponseResult<object>(false, "Id không tồn tại", null);
+            }
+            var entity = await _repoDebit.ShowWithFileInfoAsync(id);
             if (entity == null)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);

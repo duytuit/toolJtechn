@@ -19,6 +19,8 @@ namespace Vudaco.Debits.Repositories
         Task<PaginatedResultReact<object>> GetObjectDebitDauKyKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectDebitDauKyNCCAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectDebitMuaBanAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<PaginatedResultReact<object>> GetObjectDebitGiaoNhanAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<PaginatedResultReact<object>> GetObjectDebitLaiXeAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectDebitChiTietKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<List<object>> GetObjectDebitDuNoDKKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectDebitChiTietNCCAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
@@ -27,6 +29,7 @@ namespace Vudaco.Debits.Repositories
         Task<PaginatedResultReact<object>> GetObjectBanHangKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectMuaHangNCCAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<Debit> ShowAsync(int id);
+        Task<Debit> ShowWithFileInfoAsync(int id);
         Task<List<Debit>> ShowByFileIdAsync(int id);
         Task<Debit> CreateAsync(Debit Debit);
         Task<Debit> UpdateAsync(Debit Debit);

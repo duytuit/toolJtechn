@@ -48,6 +48,8 @@ namespace Vudaco.Categorys.Repositories
                 whereEquals["storage_id"] = IncomeExpenseCategoryDto.StorageId;
             if (IncomeExpenseCategoryDto.Type >= 0)
                 whereEquals["type"] = IncomeExpenseCategoryDto.Type;
+            if (IncomeExpenseCategoryDto.Enable >= 0)
+                whereEquals["enable"] = IncomeExpenseCategoryDto.Enable;
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "income_expense_categorys",

@@ -151,6 +151,32 @@ namespace Vudaco.Partners.Repositories
             return _results;
         }
 
+        public async Task<PaginatedResultReact<object>> GetPartnerKHAndNCCDetail(PartnerDetailDto PartnerDetailDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+             var sql = $@"
+                   SELECT *
+                    FROM partners p
+                    WHERE EXISTS (
+                        SELECT 1 FROM partner_details d1
+                        WHERE d1.partner_id = p.id AND d1.status = 1
+                    )
+                    AND EXISTS (
+                        SELECT 1 FROM partner_details d2
+                        WHERE d2.partner_id = p.id AND d2.status = 2
+                    )
+                    AND p.deleted_at is null";
+            if (PartnerDetailDto.StorageId > 0)
+            {
+                sql += $@" AND p.storage_id = {PartnerDetailDto.StorageId}";
+            }
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
+
         public Task<Partner> ShowAsync(int id)
         {
             return _context.Partners.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);

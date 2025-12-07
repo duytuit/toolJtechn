@@ -325,7 +325,7 @@ namespace JtechnApi.Controllers
             int rs_check = await repo.CheckDuplicateTitle(TaskRequiredDto.Title, RequiredRepository.from_type_task, TaskRequiredDto.Created_client);
             if (rs_check > 0)
             {
-                return ApiResponseResult<object>(false, "Tiêu đề đã tồn tại", null);
+                return ApiResponseResult<object>(false, "Liên lạc đã tồn tại", null);
             }
             string requireCode = "R_" + DateTime.Now.ToString("yyyyMMddHHmmss");
             //List<SelectEmployeeDto> rs_users = await _emp.GetByListCode(mergedUsers);

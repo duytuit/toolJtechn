@@ -284,5 +284,85 @@ namespace JtechnApi.Requireds.Repositories
             _context.SaveChanges();
             return Task.FromResult(true);   
         }
+
+        public async Task<PaginatedResultVue<object>> GetCutEDPAsync(RequestRequiredDto RequestRequiredDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var whereEquals = new Dictionary<string, object>();
+            var whereLikes = new Dictionary<string, string>();
+            var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
+            var orderByList = new List<string> { "id Desc" };
+            if (RequestRequiredDto.Status.HasValue)
+                whereEquals["status"] = RequestRequiredDto.Status.Value;
+
+            if (!string.IsNullOrWhiteSpace(RequestRequiredDto.Code))
+                whereLikes["code"] = RequestRequiredDto.Code;
+
+            if (!string.IsNullOrWhiteSpace(RequestRequiredDto.Title))
+                whereLikes["title"] = RequestRequiredDto.Title;
+
+            if (!string.IsNullOrWhiteSpace(RequestRequiredDto.Code_nv))
+                whereLikes["code_nv"] = RequestRequiredDto.Code_nv;
+
+            if (RequestRequiredDto.From_type.HasValue)
+                whereEquals["from_type"] = RequestRequiredDto.From_type.Value;
+
+            if (RequestRequiredDto.Created_client.HasValue)
+                whereEquals["created_client"] = RequestRequiredDto.Created_client.Value;
+
+            if (RequestRequiredDto.Created_at.HasValue && RequestRequiredDto.Created_at.HasValue)
+                whereDateRange.Add(("created_at", RequestRequiredDto.Created_at.Value, RequestRequiredDto.Created_at.Value.AddDays(1)));
+            dynamic results = await AdoRelationQuery.WithRelationsAdoAsync(
+                        _configuration.GetConnectionString("DefaultConnection"),
+                        "requireds",
+                        new[] { "id", "code_required", "code", "content", "attach", "quantity", "receiving_department_ids", "required_department_id", "status", "from_type", "date_completed", "created_by", "completed_by", "updated_by", "created_at", "updated_at", "content_form", "type", "confirm_form" },
+                        offset: (page - 1) * pageSize,
+                        limit: pageSize,
+                        whereEquals: whereEquals,
+                        whereLikes: whereLikes,
+                        dateRangeList: whereDateRange,
+                        orderByList: orderByList,
+                        relations: new List<AdoRelation>
+                        {
+                            new AdoRelation
+                            {
+                                Name = "employee",
+                                Table = "employees",
+                                Columns = new[] { "id","code","first_name","last_name","deleted_at"},
+                                ParentKey = "created_by",
+                                ForeignKey = "id",
+                                KeyName = "id",
+                                IsCollection = false,
+                            },
+                            new AdoRelation
+                            {
+                                Name = "department",
+                                Table = "departments",
+                                Columns = new[] { "id","code","name","deleted_at"},
+                                ParentKey = "required_department_id",
+                                ForeignKey = "id",
+                                KeyName = "id",
+                                IsCollection = false,
+                            }
+                        },
+                        redisCache: _redis,
+                        includeCount: true,
+                        cancellationToken: cancellationToken
+                    );
+            int totalItems = results.Count;
+            var objectList = new List<object>();
+            objectList.AddRange(results.Data);
+            var _results = new PaginatedResultVue<object>
+            {
+                Current_page = page,
+                Per_page = pageSize,
+                Last_page = (int)Math.Ceiling((double)totalItems / pageSize),
+                Total = totalItems,
+                Data = objectList,
+            };
+            objectList = null;
+            results = null;
+            whereEquals?.Clear(); whereLikes?.Clear(); whereDateRange?.Clear(); orderByList?.Clear();
+            return _results;
+        }
     }
 }

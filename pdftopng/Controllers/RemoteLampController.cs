@@ -40,7 +40,7 @@ namespace pdftopng.Controllers
                     Mode= request.Mode
                 };
                 string jsonData = JsonConvert.SerializeObject(obj);
-                await _webSocketClientService.SendMessage(jsonData, stoppingToken);
+                await _webSocketClientService.Send(jsonData, stoppingToken);
                 return StatusCode(200, "thành công");
             }
             catch (Exception ex)

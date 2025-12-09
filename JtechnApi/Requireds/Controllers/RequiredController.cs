@@ -77,6 +77,18 @@ namespace JtechnApi.Controllers
                 return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
         [HttpGet]
+        [Route("cutEdp")]
+        public async Task<IActionResult> GetCutEdp(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] RequestRequiredDto RequestRequiredDto = null)
+        {
+
+            var result = await repo.GetCutEDPAsync(RequestRequiredDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet]
         [Route("task/v2/getTeam")]
         public async Task<IActionResult> GetTeam(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] RequestTeamSubLeaderDto RequestTeamSubLeaderDto = null)
         {

@@ -1,4 +1,5 @@
 ﻿using JtechnApi.Accessorys;
+using JtechnApi.BorrowProducts;
 using JtechnApi.Departments;
 using JtechnApi.Employees;
 using JtechnApi.Exams;
@@ -101,6 +102,7 @@ namespace JtechnApi
             services.AddUsersModule();
             services.AddUploadDatasModule();
             services.AddEmployeesModule();
+            services.AddBorrowProductModule();
             services.AddHttpClient(); // Add HttpClient factory
             //services.AddResponseCompression(options =>
             //{

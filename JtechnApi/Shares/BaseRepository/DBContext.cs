@@ -1,4 +1,5 @@
 ﻿using JtechnApi.Accessorys.Models;
+using JtechnApi.BorrowProducts.Models;
 using JtechnApi.Departments.Models;
 using JtechnApi.Employees.Models;
 using JtechnApi.Exams.Models;
@@ -27,6 +28,7 @@ namespace JtechnApi.Shares.BaseRepository
         public DbSet<Required> Required { get; set; }
         public DbSet<TempRequired> TempRequired { get; set; }
         public DbSet<KTNQ> KTNQ { get; set; }
+        public DbSet<BorrowProduct> BorrowProduct { get; set; }
         public DBContext(DbContextOptions<DBContext> options) : base(options)
         {
 
@@ -45,7 +47,7 @@ namespace JtechnApi.Shares.BaseRepository
             modelBuider.Entity<Umesen>().HasQueryFilter(e => e.Deleted_at == null);
             modelBuider.Entity<KTNQ>().HasQueryFilter(e => e.Deleted_at == null);
             modelBuider.Entity<EmployeeDepartment>().HasQueryFilter(e => e.Deleted_at == null);
-            modelBuider.Entity<KTNQ>().HasQueryFilter(e => e.Deleted_at == null);
+            modelBuider.Entity<BorrowProduct>().HasQueryFilter(e => e.DeletedAt == null);
         }           
     }
 }

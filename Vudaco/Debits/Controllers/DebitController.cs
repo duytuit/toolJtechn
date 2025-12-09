@@ -641,7 +641,7 @@ namespace Vudaco.Debits.Controllers
                         ws.Cell(row, 11).Value = svc.note ?? "";
                         ws.Cell(row, 12).Value = svc.name ?? "";
 
-                        ws.Cell(row, 13).Value = price;
+                        ws.Cell(row, 13).Value = (svc.type == 0 || svc.type == 1 || svc.type == 4 || svc.type == 5)? price:0;
                         ws.Cell(row, 13).Style.NumberFormat.Format = "#,##0";
 
                         ws.Cell(row, 14).Value = price_thue;

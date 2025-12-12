@@ -38,6 +38,28 @@ namespace Vudaco.ContractFiles.Controllers
             _context = context;
             _configuration = configuration;
         }
+         [HttpGet("noDebitHasFileNCC")]
+        public async Task<IActionResult> GetNoDebitHasFileNCC(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] FileInfoDto FileInfoDto = null)
+        {
+            // test
+            var result = await _repoContractFile.GetObjectNoDebitHasFileNCCAsync(FileInfoDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet("hasDebitHasFileNCC")]
+        public async Task<IActionResult> GetHasDebitHasFileNCC(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] FileInfoDto FileInfoDto = null)
+        {
+            // test
+            var result = await _repoContractFile.GetObjectHasDebitHasFileNCCAsync(FileInfoDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
          [HttpGet("getFileHasDebitNangHa")]
         public async Task<IActionResult> GetFileHasDebitNangHa(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] FileInfoDetailDto FileInfoDetailDto = null)
         {
@@ -386,6 +408,20 @@ namespace Vudaco.ContractFiles.Controllers
                 return ApiResponseResult<object>(false, "Id không tồn tại", null);
             }
             var entity = await _repoContractFile.ShowWithDebitAsync(id);
+            if (entity == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", entity);
+        }
+        [HttpGet("ShowWithDebitHasNCC")]
+        public async Task<IActionResult> ShowWithDebitHasNCC([FromQuery] int id)
+        {
+            if (id <= 0)
+            {
+                return ApiResponseResult<object>(false, "Id không tồn tại", null);
+            }
+            var entity = await _repoContractFile.ShowWithDebitHasNCCAsync(id);
             if (entity == null)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);

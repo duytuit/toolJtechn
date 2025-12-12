@@ -25,6 +25,7 @@ namespace Vudaco.Debits.Dtos
         public int PurchaseStatus { get; set; }
         public string PurchaseNote { get; set; }
         public string PurchaseBill { get; set; }
+        public DateTime? PurchaseAccountingDate { get; set; }
         public DateTime AccountingDate { get; set; }
         public int PurchasePrice { get; set; }      // Cước mua
         public int Price { get; set; }

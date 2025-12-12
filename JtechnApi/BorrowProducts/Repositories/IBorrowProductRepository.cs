@@ -14,6 +14,7 @@ namespace JtechnApi.BorrowProducts.Repositories
         Task<BorrowProduct> ShowAsync(int id);
         Task<BorrowProduct> CreateAsync(BorrowProduct BorrowProduct);
         Task<BorrowProduct> UpdateAsync(BorrowProduct BorrowProduct);
+        Task<BorrowProduct> ChangeStatusAsync(BorrowProduct BorrowProduct);
         Task<BorrowProduct> DeleteSoftAsync(BorrowProduct BorrowProduct);
     }
 }

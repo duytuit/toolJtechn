@@ -23,11 +23,16 @@ namespace Vudaco.Debits.Repositories
         Task<PaginatedResultReact<object>> GetObjectDebitLaiXeAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectDebitChiTietKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<List<object>> GetObjectDebitDuNoDKKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<List<object>> GetObjectDebitDuNoDKNCCAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectDebitBuTruKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectDebitBuTruNCCAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectDebitChiTietNCCAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectNoDebitDispatchNoFileKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectHasDebitDispatchNoFileKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<PaginatedResultReact<object>> GetObjectNoDebitNoFileNCCAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<PaginatedResultReact<object>> GetObjectHasDebitNoFileNCCAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<PaginatedResultReact<object>> GetObjectNoDebitNCCAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<PaginatedResultReact<object>> GetObjectHasDebitNCCAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectBanHangKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectMuaHangNCCAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<Debit> ShowAsync(int id);

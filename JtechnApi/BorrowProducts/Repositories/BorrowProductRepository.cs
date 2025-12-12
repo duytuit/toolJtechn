@@ -114,6 +114,10 @@ namespace JtechnApi.BorrowProducts.Repositories
         public Task<BorrowProduct> UpdateAsync(BorrowProduct BorrowProduct)
         {
             throw new System.NotImplementedException();
+        } 
+        public Task<BorrowProduct> ChangeStatusAsync(BorrowProduct BorrowProduct)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

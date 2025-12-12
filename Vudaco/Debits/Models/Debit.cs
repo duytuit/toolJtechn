@@ -48,16 +48,15 @@ namespace Vudaco.Debits.Models
         [MaxLength(255)]
         [Column("dispatch_code")]
         public string DispatchCode { get; set; }
-
         [Required]
         [MaxLength(255)]
         [Column("name")]
         public string Name { get; set; }
-
         [Required]
         [Column("accounting_date", TypeName = "date")]
         public DateTime AccountingDate { get; set; }
-
+        [Column("purchase_accounting_date", TypeName = "date")]
+        public DateTime? PurchaseAccountingDate { get; set; }
         [Required]
         [Column("purchase_price")]
         public int PurchasePrice { get; set; }

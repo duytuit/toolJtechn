@@ -48,6 +48,29 @@ namespace Vudaco.Debits.Controllers
             _configuration = configuration;
             _repoContractFileDetail = repoContractFileDetail;
         }
+        [HttpGet("noDebitNoFileNCC")]
+        public async Task<IActionResult> GetNoDebitNoFileNCC(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectNoDebitNoFileNCCAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet("hasDebitNoFileNCC")]
+        public async Task<IActionResult> GetHasDebitNoFileNCC(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectHasDebitNoFileNCCAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        
         [HttpGet("noDebitNoFileDispatchKH")]
         public async Task<IActionResult> GetNoDebitNoFileDispatchKH(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
         {
@@ -97,6 +120,28 @@ namespace Vudaco.Debits.Controllers
         {
             // test
             var result = await _repoDebit.GetObjectDebitChiTietKHAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet("GetObjectDebitDuNoDKKHAsync")]
+        public async Task<IActionResult> GetObjectDebitDuNoDKKHAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectDebitDuNoDKKHAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet("GetObjectDebitDuNoDKNCCAsync")]
+        public async Task<IActionResult> GetObjectDebitDuNoDKNCCAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectDebitDuNoDKNCCAsync(DebitDto, page, pageSize, cancellationToken);
             if (result == null)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
@@ -264,25 +309,25 @@ namespace Vudaco.Debits.Controllers
                     var first = group.Items.First();
                    //return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", first);
                         // Tính tổng và count
-                    int soLuong = group.Items.Where(x=> x.type == 1 && x.file_info_id == (long)first.file_info_id).Count();
-                    decimal price = data.Where(x => new int[] { 0,1, 4, 5 }.Contains((int)x.type) && x.file_info_id == (long)first.file_info_id).Sum(x => x.price);
+                    int soLuong = group.Items.Where(x=> x.type == 1 && x.file_info_id == first.file_info_id).Count();
+                    decimal price = data.Where(x => new int[] { 0,1, 4, 5 }.Contains((int)x.type) && x.file_info_id == first.file_info_id).Sum(x => x.price);
                     decimal price_dv = data
-                            .Where(x => new int[] { 0,1, 4, 5 }.Contains((int)x.type) && x.file_info_id == (long)first.file_info_id)
+                            .Where(x => new int[] { 0,1, 4, 5 }.Contains((int)x.type) && x.file_info_id == first.file_info_id)
                                             .Sum(x =>
                                             {
                                                 decimal price = (decimal)x.price;
                                                 decimal vat = (decimal)x.vat;
                                                 return price + (price * vat / 100m); // giá + VAT
                                             });
-                    decimal price_thue = data.Where(x => x.file_info_id == (long)first.file_info_id).Sum(x =>(decimal)x.price * (decimal)x.vat / 100);
-                    decimal price_ch = data.Where(x => new int[] { 2, 3, 6 }.Contains((int)x.type) && x.file_info_id == (long)first.file_info_id)
+                    decimal price_thue = data.Where(x => x.file_info_id == first.file_info_id).Sum(x =>(decimal)x.price * (decimal)x.vat / 100);
+                    decimal price_ch = data.Where(x => new int[] { 2, 3, 6 }.Contains((int)x.type) && x.file_info_id == first.file_info_id)
                                                     .Sum(x =>
                                                     {
                                                         decimal price = (decimal)x.price;
                                                         decimal vat = (decimal)x.vat;
                                                         return price + (price * vat / 100m); // giá + VAT
                                                     });
-                    decimal thanhtien = data.Where(x => x.file_info_id == (long)first.file_info_id).Sum(x => (decimal)x.price + ((decimal)x.price * (decimal)x.vat / 100));
+                    decimal thanhtien = data.Where(x => x.file_info_id == first.file_info_id).Sum(x => (decimal)x.price + ((decimal)x.price * (decimal)x.vat / 100));
                    // return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", first);
                     ws.Cell(row, 1).Value = i + 1; // STT
                     ws.Cell(row, 2).Value = first.accounting_date.ToString("dd/MM/yyyy");
@@ -312,12 +357,12 @@ namespace Vudaco.Debits.Controllers
                     {
                         _fileInfo = list_file.FirstOrDefault(x => x.Id == (long)first.file_info_id);
                     }
-                    ws.Cell(row, 14).Value = _fileInfo != null ? _fileInfo.FileNumber : "";
-                    ws.Cell(row, 15).Value = _fileInfo != null ? (_fileInfo.Bill ?? _fileInfo.Declaration) : "";
+                    ws.Cell(row, 14).Value = _fileInfo != null ? (_fileInfo.FileNumber??"") : "";
+                    ws.Cell(row, 15).Value = _fileInfo != null ? (_fileInfo.Bill ?? _fileInfo.Declaration ?? "") : "";
                      ws.Cell(row, 16).Value = first.cus_bill ?? "";
                     // Nối TenDichVu + ThanhTien
                    var dichVuStr = string.Join("; ",
-                        data.Where(x => new int[] { 2, 3, 6 }.Contains((int)x.type) && x.file_info_id == (long)first.file_info_id)
+                        data.Where(x => new int[] { 2, 3, 6 }.Contains((int)x.type) && x.file_info_id == first.file_info_id)
                             .Select(x =>
                             {
                                 decimal price = (decimal)x.price;
@@ -331,7 +376,7 @@ namespace Vudaco.Debits.Controllers
                     ws.Cell(row, 17).Value = dichVuStr;
                     // Nối GhiChu
                     var ghiChuStr = string.Join("; ",
-                             data.Where(x => !string.IsNullOrEmpty((string)x.note) && x.file_info_id == (long)first.file_info_id)
+                             data.Where(x => !string.IsNullOrEmpty((string)x.note) && x.file_info_id == first.file_info_id)
                             .Select(x => (string)x.note)
                     );
                     ws.Cell(row, 18).Value = ghiChuStr;
@@ -599,7 +644,7 @@ namespace Vudaco.Debits.Controllers
                   
                    // return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", first);
                     ws.Cell(row, 1).Value = i + 1; // STT
-                    ws.Cell(row, 2).Value = _fileInfo != null ? _fileInfo.FileNumber : first.dispatch_code;
+                    ws.Cell(row, 2).Value = _fileInfo != null ? (_fileInfo.FileNumber??"") : first.dispatch_code;
                     ws.Cell(row, 3).Value = first.cus_bill ?? "";
                     ws.Cell(row, 4).Value = first.accounting_date.ToString("dd/MM/yyyy");;
                     ws.Cell(row, 5).Value =  _fileInfo != null ? _fileInfo.Declaration ??"" : "";
@@ -611,7 +656,7 @@ namespace Vudaco.Debits.Controllers
                     row++;
                     // Lấy danh sách bản ghi của group theo file_info_id
                     var serviceList = data
-                        .Where(x => x.file_info_id == (long)first.file_info_id)
+                        .Where(x => x.file_info_id == first.file_info_id)
                         .OrderBy(x=>x.type)
                         .ToList();
 
@@ -728,6 +773,28 @@ namespace Vudaco.Debits.Controllers
         {
             // test
             var result = await _repoDebit.GetObjectDebitChiTietNCCAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet("GetObjectNoDebitNCCAsync")]
+        public async Task<IActionResult> GetObjectNoDebitNCCAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectNoDebitNCCAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet("GetObjectHasDebitNCCAsync")]
+        public async Task<IActionResult> GetObjectHasDebitNCCAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectHasDebitNCCAsync(DebitDto, page, pageSize, cancellationToken);
             if (result == null)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
@@ -2097,7 +2164,7 @@ namespace Vudaco.Debits.Controllers
                             DispatchCode = DispatchCode,
                             Name = noi_dung,
                             AccountingDate = ngay,
-                            Price = tien_dv,
+                            PurchasePrice = tien_dv,
                             Status = ContractFileRepository.statusDebit,
                             CreatedBy = userId,
                             CreatedAt = now,
@@ -2130,7 +2197,7 @@ namespace Vudaco.Debits.Controllers
                             DispatchCode = DispatchCode,
                             Name = noi_dung,
                             AccountingDate = ngay,
-                            Price = tien_ch,
+                            PurchasePrice = tien_ch,
                             Status = ContractFileRepository.statusDebit,
                             CreatedBy = userId,
                             CreatedAt = now,
@@ -2535,6 +2602,88 @@ namespace Vudaco.Debits.Controllers
                             CreatedAt = now,
                         };
                         _context.ConfirmFiles.Add(entity);
+                }
+               
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+
+                return ApiResponseResult<object>(true, "Cập nhật thành công", null);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi cập nhật: " + ex.InnerException?.Message, null);
+            }
+        }
+        [HttpPost("updateFileGiaNCC")]
+        public async Task<IActionResult> updateFileGiaNCC([FromBody] ConfirmFileDto ConfirmFileDto)
+        {
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                var now = DateTime.Now;
+
+                foreach (var item in ConfirmFileDto.DebitDtos)
+                {
+                    var debit = await _context.Debits.FirstOrDefaultAsync(x => x.Id == item.Id);
+                    if (debit == null) continue;
+                    debit.PurchaseAccountingDate = ConfirmFileDto.AccountingDate;
+                    debit.PurchaseVat = item.Vat;
+                    debit.PurchaseStatus = 1; 
+                    debit.PurchaseNote = ConfirmFileDto.Note; 
+                    debit.UpdatedBy = userId;
+                    debit.UpdatedAt = now;
+                }
+                int CycleName = int.Parse(ConfirmFileDto.AccountingDate.ToString("MMyyyy"));
+
+                var bill_Partner = await _context.Bills.AsNoTracking().FirstOrDefaultAsync(x => x.CycleName == CycleName && x.SupplierDetailId == ConfirmFileDto.PartnerDetailId);
+                if (bill_Partner == null)
+                {
+                    var BillCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", ConfirmFileDto.StorageId, "HD"+ConfirmFileDto.AccountingDate.ToString("yyMM"), 4);
+                    bill_Partner = new Bill
+                    {
+                        BillCode = BillCode,
+                        StorageId = ConfirmFileDto.StorageId,
+                        Name = CycleName.ToString(),
+                        AccountingDate = ConfirmFileDto.AccountingDate,
+                        SupplierDetailId = ConfirmFileDto.PartnerDetailId,
+                        CycleName = CycleName,
+                        CreatedBy = userId,
+                        CreatedAt = now,
+                        UpdatedAt = now,
+                        UpdatedBy = userId
+                    };
+                    _context.Bills.Add(bill_Partner);
+                    await _context.SaveChangesAsync();
+                    
+                }
+                foreach (var item in ConfirmFileDto.Chiphikhac)
+                {
+                     var debit = new Debit
+                        {
+                            BillId = bill_Partner.Id,
+                            SupplierDetailId = ConfirmFileDto.PartnerDetailId,
+                            FileInfoId = ConfirmFileDto.FileInfoId,
+                            DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", ConfirmFileDto.StorageId, "PKNCC" + ConfirmFileDto.AccountingDate.ToString("yyMM"), 4),
+                            StorageId = ConfirmFileDto.StorageId,
+                            Type = DebitRepositories.PhiKhacNCC,
+                            Name = item.Name,
+                            PurchaseAccountingDate = ConfirmFileDto.AccountingDate,
+                            PurchasePrice = item.PurchasePrice,
+                            PurchaseVat = item.Vat,
+                            Status = ContractFileRepository.statusDebit,
+                            Data =  JsonSerializer.Serialize(new{fileNumber=ConfirmFileDto.FileNumber}),
+                            PurchaseNote = item.Note,
+                            ServiceDetail = JsonSerializer.Serialize(new []{item}),
+                            PurchaseStatus = 1,
+                            CreatedBy = userId,
+                            CreatedAt = now,
+                            UpdatedAt = now,
+                            UpdatedBy = userId
+                        };
+                        _context.Debits.Add(debit);
+                        await _context.SaveChangesAsync();
                 }
                
                 await _context.SaveChangesAsync();

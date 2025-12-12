@@ -85,5 +85,34 @@ namespace JtechnApi.BorrowProducts
             _context.SaveChanges();
             return ApiResponseResult<object>(true, "Xóa thành công", null);
         }
+        [HttpPost("changeStatus")]
+        public async Task<IActionResult> ChangeStatus([FromBody] BorrowProductDto BorrowProductDto)
+        {
+            if (BorrowProductDto.Id <= 0)
+            {
+                return ApiResponseResult<object>(false, "Id không tồn tại", null);
+            }
+            var entity = await _context.BorrowProduct.FindAsync(BorrowProductDto.Id);
+            if (entity == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            if (BorrowProductDto.Status == 0)
+            {
+                entity.Status = BorrowProductDto.Status;
+                entity.UpdatedBy = null;
+                entity.UpdatedAt = null;
+            }
+            else
+            {
+                entity.Status = BorrowProductDto.Status;
+                entity.UpdatedBy = BorrowProductDto.UserId;
+                entity.UpdatedAt = DateTime.Now;
+            }
+          
+            _context.BorrowProduct.Update(entity);
+            _context.SaveChanges();
+            return ApiResponseResult<object>(true, "thay đổi trạng thái thành công", null);
+        }
     }
 }

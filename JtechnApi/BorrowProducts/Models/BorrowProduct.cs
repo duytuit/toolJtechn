@@ -24,7 +24,7 @@ namespace JtechnApi.BorrowProducts.Models
         [Column("created_by")]
         public int CreatedBy { get; set; }
         [Column("updated_by")]
-        public int UpdatedBy { get; set; }
+        public int? UpdatedBy { get; set; }
         [Column("created_at")]
         public DateTime? CreatedAt { get; set; }
         [Column("updated_at")]

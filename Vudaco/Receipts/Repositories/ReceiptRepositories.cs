@@ -25,12 +25,17 @@ namespace Vudaco.Receipts.Repositories
         public const int ChiHoanUngGiaoNhan = 2;
         public const int ThuHoanUngGiaoNhan = 3;
         public const int ChuyenTienNoiBo = 10;
+        public const int DoiTruCongNo = 11;
         public const int ChiNoiBo = 8; // chi khách hàng
         public const int ChiNCC = 7;
         public const int ChiNV = 9;
         public const int ChiMuaHangNCC = 4; // chưa dùng
         public const int ThuBanHangKH = 5; // chưa dùng
         public const int ThuBanHangNV = 6; // chưa dùng
+        //=============================================
+        public const int DoiTuongKH = 0;
+        public const int DoiTuongNCC = 1;
+        public const int DoiTuongNV = 2;
         public ReceiptRepositories(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;

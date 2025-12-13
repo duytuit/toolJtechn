@@ -127,6 +127,7 @@ namespace Vudaco.Receipts.Controllers
                     Description =  ReceiptDto.Description,
                     FormOfPayment = ReceiptDto.FormOfPayment,
                     TypeReceipt = ReceiptRepositories.ThuKH,
+                    IncomeExpenseCategoryId = 24,//thu kh
                     FundId = ReceiptDto.FormOfPayment == 1 ? ReceiptDto.FundId : 0,
                     BankId = ReceiptDto.FormOfPayment == 2 ? ReceiptDto.BankId : 0,
                     Data = ReceiptDto.Data,
@@ -221,6 +222,7 @@ namespace Vudaco.Receipts.Controllers
                     Description =  ReceiptDto.Description,
                     FormOfPayment = ReceiptDto.FormOfPayment,
                     TypeReceipt = ReceiptRepositories.ChiNCC,
+                    IncomeExpenseCategoryId = 25,//Chi NCC
                     FundId = ReceiptDto.FormOfPayment == 1 ? ReceiptDto.FundId : 0,
                     BankId = ReceiptDto.FormOfPayment == 2 ? ReceiptDto.BankId : 0,
                     Data = ReceiptDto.Data,
@@ -292,6 +294,8 @@ namespace Vudaco.Receipts.Controllers
                     StorageId = ReceiptHoanUngGiaoNhanDto.StorageId,
                     CodeReceipt = code_receipt,
                     EmployeeId = ReceiptHoanUngGiaoNhanDto.EmployeeId,
+                    Object = ReceiptRepositories.DoiTuongNV,
+                    ObjectId = ReceiptHoanUngGiaoNhanDto.EmployeeId,
                     Bill = ReceiptHoanUngGiaoNhanDto.Bill,
                     Note = ReceiptHoanUngGiaoNhanDto.Note,
                     Description =  ReceiptHoanUngGiaoNhanDto.Description,
@@ -392,8 +396,8 @@ namespace Vudaco.Receipts.Controllers
         [Route("create/chinoibo")]
         public async Task<IActionResult> CreateChiNoiBo([FromBody] ReceiptDto ReceiptDto)
         {
-            if (ReceiptDto.EmployeeId == null || ReceiptDto.EmployeeId == 0)
-                return ApiResponseResult<object>(false, "Nhân viên bắt buộc", null);
+            if (ReceiptDto.Object == null || ReceiptDto.ObjectId == 0)
+                return ApiResponseResult<object>(false, "Doi tuong bắt buộc", null);
             if (ReceiptDto.FormOfPayment == 1 && (ReceiptDto.FundId == null || ReceiptDto.FundId == 0))
                 return ApiResponseResult<object>(false, "Mã quỹ bắt buộc", null);
             if (ReceiptDto.FormOfPayment == 2 && (ReceiptDto.BankId == null || ReceiptDto.BankId == 0))
@@ -416,7 +420,8 @@ namespace Vudaco.Receipts.Controllers
                     AccountingDate = ReceiptDto.AccountingDate,
                     StorageId = ReceiptDto.StorageId,
                     CodeReceipt = code_receipt,
-                    EmployeeId = ReceiptDto.EmployeeId,
+                    Object = ReceiptDto.Object,
+                    ObjectId = ReceiptDto.ObjectId,
                     Bill = ReceiptDto.Bill,
                     FundId = ReceiptDto.FormOfPayment == 1 ? ReceiptDto.FundId : 0,
                     IncomeExpenseCategoryId = ReceiptDto.IncomeExpenseCategoryId,
@@ -459,8 +464,8 @@ namespace Vudaco.Receipts.Controllers
         [HttpPost("update/chinoibo")]
         public async Task<IActionResult> UpdateChiNoiBo([FromBody] ReceiptDto ReceiptDto)
         {
-            if (ReceiptDto.EmployeeId == null || ReceiptDto.EmployeeId == 0)
-                return ApiResponseResult<object>(false, "Nhân viên bắt buộc", null);
+            if (ReceiptDto.ObjectId == null || ReceiptDto.Object == 0)
+                return ApiResponseResult<object>(false, "Doi tuong bắt buộc", null);
             if (ReceiptDto.FormOfPayment == 1 && (ReceiptDto.FundId == null || ReceiptDto.FundId == 0))
                 return ApiResponseResult<object>(false, "Mã quỹ bắt buộc", null);
             if (ReceiptDto.FormOfPayment == 2 && (ReceiptDto.BankId == null || ReceiptDto.BankId == 0))
@@ -479,7 +484,8 @@ namespace Vudaco.Receipts.Controllers
                 // Cập nhật thông tin phiếu chi
                 entity.AccountingDate = ReceiptDto.AccountingDate;
                 entity.StorageId = ReceiptDto.StorageId;
-                entity.EmployeeId = ReceiptDto.EmployeeId;
+                entity.Object = ReceiptDto.Object;
+                entity.ObjectId = ReceiptDto.ObjectId;
                 entity.Bill = ReceiptDto.Bill;
                 entity.FundId = ReceiptDto.FormOfPayment == 1 ? ReceiptDto.FundId : 0;
                 entity.IncomeExpenseCategoryId = ReceiptDto.IncomeExpenseCategoryId;
@@ -572,6 +578,8 @@ namespace Vudaco.Receipts.Controllers
                     CodeReceipt = code_receipt,
                     FileInfoId = ReceiptDto.FileInfoId,
                     EmployeeId = ReceiptDto.EmployeeId,
+                    Object = ReceiptRepositories.DoiTuongNV,
+                    ObjectId = ReceiptDto.EmployeeId,
                     Bill = ReceiptDto.Bill,
                     FundId = ReceiptDto.FormOfPayment == 1 ? ReceiptDto.FundId : 0,
                     IncomeExpenseCategoryId = ReceiptDto.IncomeExpenseCategoryId,
@@ -638,6 +646,7 @@ namespace Vudaco.Receipts.Controllers
                 entity.StorageId = ReceiptDto.StorageId;
                 entity.FileInfoId = ReceiptDto.FileInfoId;
                 entity.EmployeeId = ReceiptDto.EmployeeId;
+                entity.ObjectId = ReceiptDto.EmployeeId;
                 entity.Bill = ReceiptDto.Bill;
                 entity.FundId = ReceiptDto.FormOfPayment == 1 ? ReceiptDto.FundId : 0;
                 entity.IncomeExpenseCategoryId = ReceiptDto.IncomeExpenseCategoryId;

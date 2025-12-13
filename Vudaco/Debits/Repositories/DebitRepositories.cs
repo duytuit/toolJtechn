@@ -1182,6 +1182,7 @@ namespace Vudaco.Debits.Repositories
                     WHERE
                     p.status = 2
                     AND d.purchase_status = 0
+                    AND d.type NOT IN (10,11)
                     AND d.supplier_detail_id IS NOT NULL
                     AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
                     AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
@@ -1223,6 +1224,7 @@ namespace Vudaco.Debits.Repositories
                     WHERE
                     p.status = 2
                     AND d.purchase_status = 1
+                    AND d.type NOT IN (10,11)
                     AND d.supplier_detail_id IS NOT NULL
                     AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
                     AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)

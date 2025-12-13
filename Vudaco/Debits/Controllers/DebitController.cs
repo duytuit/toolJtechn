@@ -2685,6 +2685,7 @@ namespace Vudaco.Debits.Controllers
                         {
                             BillId = bill_Partner.Id,
                             CustomerDetailId = ConfirmFileDto.PartnerDetailId,
+                            SupplierDetailId = item.SupplierDetailId,
                             FileInfoId = ConfirmFileDto.FileInfoId,
                             DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", ConfirmFileDto.StorageId, "PK" + ConfirmFileDto.AccountingDate.ToString("yyMM"), 4),
                             StorageId = ConfirmFileDto.StorageId,

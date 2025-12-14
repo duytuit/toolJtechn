@@ -210,12 +210,14 @@ namespace Vudaco.Receipts.Repositories
         public async Task<PaginatedResultReact<object>> GetSoQuyAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken)
         {
             var sql = $@"
-                    SELECT 
+                    SELECT
                         r.*,
+                        iecat.type AS iecat_type,
+                        iecat.name AS iecat_name,
                         d.amount,
                         d.total
                     FROM receipts r
-                    LEFT JOIN (
+                     LEFT JOIN (
                         SELECT 
                             receipt_id,
                             SUM(amount) AS amount,
@@ -224,15 +226,26 @@ namespace Vudaco.Receipts.Repositories
                         WHERE deleted_at IS NULL
                         GROUP BY receipt_id
                     ) d ON d.receipt_id = r.id
-                    WHERE 
-                        r.type_receipt IN (0, 3)
-                        AND r.status IS NULL
-                        AND r.deleted_at IS NULL";
+                    LEFT JOIN income_expense_categorys iecat
+                        ON iecat.id = r.income_expense_category_id
+                        AND iecat.deleted_at IS NULL
+                    WHERE r.type_receipt NOT IN (12) AND r.deleted_at IS NULL";
             if (ReceiptDto.StorageId > 0)
             {
                 sql += $@" AND r.storage_id = {ReceiptDto.StorageId}";
             }
-
+            if (ReceiptDto.FormOfPayment > 0)
+            {
+                sql += $@" AND r.form_of_payment = {ReceiptDto.FormOfPayment}";
+            }
+            if (ReceiptDto.BankId > 0)
+            {
+                sql += $@" AND r.bank_id = {ReceiptDto.BankId}";
+            }
+            if (ReceiptDto.FundId > 0)
+            {
+                sql += $@" AND r.fund_id = {ReceiptDto.FundId}";
+            }
             if (ReceiptDto.FromDate.HasValue && ReceiptDto.ToDate.HasValue)
             {
                 // Cộng thêm 1 ngày cho ToDate
@@ -241,13 +254,59 @@ namespace Vudaco.Receipts.Repositories
                 sql += $@" AND r.accounting_date >= '{ReceiptDto.FromDate.Value:yyyy-MM-dd}' 
                 AND r.accounting_date < '{toDateNext:yyyy-MM-dd}'";
             }
-            sql += " ORDER BY r.updated_at DESC";
+            sql += " ORDER BY r.accounting_date, r.id";
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
             {
                 Data = results,
             };
             return _results;
+        }
+        public async Task<object> GetSoQuyDKAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var sql = $@"
+                   SELECT
+                        SUM(CASE WHEN iecat.type = 0 THEN COALESCE(d.total,0) ELSE 0 END) AS tong_thu,
+                        SUM(CASE WHEN iecat.type = 1 THEN COALESCE(d.total,0) ELSE 0 END) AS tong_chi,
+                        SUM(
+                            CASE
+                                WHEN iecat.type = 0 THEN COALESCE(d.total,0)
+                                WHEN iecat.type = 1 THEN -COALESCE(d.total,0)
+                                ELSE 0
+                            END
+                        ) AS so_du_dau_ky
+                    FROM receipts r
+                    LEFT JOIN (
+                        SELECT 
+                            receipt_id,
+                            SUM(amount * (1 + vat / 100.0)) AS total
+                        FROM receipt_details
+                        WHERE deleted_at IS NULL
+                        GROUP BY receipt_id
+                    ) d ON d.receipt_id = r.id
+                    LEFT JOIN income_expense_categorys iecat
+                        ON iecat.id = r.income_expense_category_id
+                        AND iecat.deleted_at IS NULL
+                    WHERE r.type_receipt NOT IN (12)
+                      AND r.deleted_at IS NULL";
+            if (ReceiptDto.StorageId > 0)
+            {
+                sql += $@" AND r.storage_id = {ReceiptDto.StorageId}";
+            }
+            if (ReceiptDto.FormOfPayment > 0)
+            {
+                sql += $@" AND r.form_of_payment = {ReceiptDto.FormOfPayment}";
+            }
+            if (ReceiptDto.BankId > 0)
+            {
+                sql += $@" AND r.bank_id = {ReceiptDto.BankId}";
+            }
+            if (ReceiptDto.FundId > 0)
+            {
+                sql += $@" AND r.fund_id = {ReceiptDto.FundId}";
+            }
+            sql += $@" AND r.accounting_date < '{ReceiptDto.FromDate.Value:yyyy-MM-dd}'";
+            return await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
         }
         public async Task<PaginatedResultReact<object>> GetPhieuThuAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken)
         {

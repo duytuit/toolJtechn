@@ -943,6 +943,8 @@ namespace Vudaco.Debits.Repositories
                     CAST(ISNULL(rdt_total.vat, 0) AS INT) AS receipt_vat,
                     CAST(ISNULL(rdt_total.total, 0) AS INT) AS receipt_total
                     FROM debits d
+                    LEFT JOIN file_infos f
+                    ON f.id = d.file_info_id
                     LEFT JOIN partner_details p 
                     ON p.id = d.customer_detail_id
                     -- ✅ Tổng receipts
@@ -965,6 +967,7 @@ namespace Vudaco.Debits.Repositories
                     AND d.status = 2
                     AND d.service_id IN (19,33)
                     AND p.deleted_at IS NULL
+                    AND f.deleted_at IS NULL
                     AND d.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
@@ -1000,6 +1003,8 @@ namespace Vudaco.Debits.Repositories
                     CAST(ISNULL(rdt_total.vat, 0) AS INT) AS receipt_vat,
                     CAST(ISNULL(rdt_total.total, 0) AS INT) AS receipt_total
                     FROM debits d
+                    LEFT JOIN file_infos f
+                    ON f.id = d.file_info_id
                     LEFT JOIN partner_details p 
                     ON p.id = d.customer_detail_id
                     -- ✅ Tổng receipts
@@ -1022,6 +1027,7 @@ namespace Vudaco.Debits.Repositories
                     AND d.status = 2
                     AND d.type = 1 AND driver_fee > 0
                     AND p.deleted_at IS NULL
+                    AND f.deleted_at IS NULL
                     AND d.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {

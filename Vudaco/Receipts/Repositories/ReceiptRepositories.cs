@@ -26,6 +26,7 @@ namespace Vudaco.Receipts.Repositories
         public const int ThuHoanUngGiaoNhan = 3;
         public const int ChuyenTienNoiBo = 10;
         public const int DoiTruCongNo = 11;
+        public const int HoanTraTamThuGiaoNhan = 12;
         public const int ChiNoiBo = 8; // chi khách hàng
         public const int ChiNCC = 7;
         public const int ChiNV = 9;
@@ -206,7 +207,48 @@ namespace Vudaco.Receipts.Repositories
 
             return entity;
         }
+        public async Task<PaginatedResultReact<object>> GetSoQuyAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var sql = $@"
+                    SELECT 
+                        r.*,
+                        d.amount,
+                        d.total
+                    FROM receipts r
+                    LEFT JOIN (
+                        SELECT 
+                            receipt_id,
+                            SUM(amount) AS amount,
+                            SUM(amount * (1 + vat / 100.0)) AS total
+                        FROM receipt_details
+                        WHERE deleted_at IS NULL
+                        GROUP BY receipt_id
+                    ) d ON d.receipt_id = r.id
+                    WHERE 
+                        r.type_receipt IN (0, 3)
+                        AND r.status IS NULL
+                        AND r.deleted_at IS NULL";
+            if (ReceiptDto.StorageId > 0)
+            {
+                sql += $@" AND r.storage_id = {ReceiptDto.StorageId}";
+            }
 
+            if (ReceiptDto.FromDate.HasValue && ReceiptDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = ReceiptDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND r.accounting_date >= '{ReceiptDto.FromDate.Value:yyyy-MM-dd}' 
+                AND r.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            sql += " ORDER BY r.updated_at DESC";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
         public async Task<PaginatedResultReact<object>> GetPhieuThuAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken)
         {
             var sql = $@"

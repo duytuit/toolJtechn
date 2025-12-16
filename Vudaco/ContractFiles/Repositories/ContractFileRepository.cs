@@ -225,7 +225,7 @@ namespace Vudaco.ContractFiles.Repositories
             if (FileInfo.CustomerDetailId > 0)
                 whereEquals["customer_detail_id"] = FileInfo.CustomerDetailId;
             if (FileInfo.FromDate.HasValue && FileInfo.ToDate.HasValue)
-                whereDateRange.Add(("accounting_date", FileInfo.FromDate.Value, FileInfo.ToDate.Value));
+                whereDateRange.Add(("accounting_date", FileInfo.FromDate.Value, FileInfo.ToDate.Value.AddDays(1)));
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "file_infos",
@@ -317,7 +317,7 @@ namespace Vudaco.ContractFiles.Repositories
 
             file.Debits = await _context.Debits
                 .AsNoTracking()
-                .Where(d => d.FileInfoId == id && d.ServiceId != 19 && d.ServiceId != 33)
+                .Where(d => d.FileInfoId == id)
                 .OrderBy(d=>d.Type)
                 .ToListAsync();
             file.FileInfoDetails = await _context.FileInfoDetails

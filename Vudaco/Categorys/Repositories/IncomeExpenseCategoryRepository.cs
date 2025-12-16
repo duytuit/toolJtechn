@@ -18,6 +18,11 @@ namespace Vudaco.Categorys.Repositories
         private readonly VudacoDBContext _context;
         private readonly IConfiguration _configuration;
         private readonly RedisService _redis;
+
+        //================IncomeExpenseCategoryId=============================
+        public const int ThuDK = 33;
+        public const int ChiChuyenTienNoiBo = 26; // chi
+        public const int ThuChuyenTienNoiBo = 27; // thu
         public IncomeExpenseCategoryRepository(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;

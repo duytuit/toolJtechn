@@ -9,8 +9,8 @@ namespace Vudaco.Receipts.Dtos
     public class OffsetDto
     {
         public int Id { get; set; }
-        public string AReceiptId { get; set; }
-        public string BReceiptId { get; set; }
+        public int? AReceiptId { get; set; }
+        public int? BReceiptId { get; set; }
         public int StorageId { get; set; }
         public DateTime AccountingDate { get; set; }
         public int Price { get; set; }
@@ -21,6 +21,5 @@ namespace Vudaco.Receipts.Dtos
         public int? DeletedBy { get; set; }
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
-        
     }
 }

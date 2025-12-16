@@ -6,7 +6,7 @@ using Vudaco.Debits.Models;
 
 namespace Vudaco.Receipts.Models
 {
-    [Table("offsets")]
+    [Table("off_sets")]
     public class Offset
     {
         [Key]
@@ -14,9 +14,9 @@ namespace Vudaco.Receipts.Models
         public int Id { get; set; }
 
         [Column("a_receipt_id")]
-        public string AReceiptId { get; set; }
+        public int? AReceiptId { get; set; }
         [Column("b_receipt_id")]
-        public string BReceiptId { get; set; }
+        public int? BReceiptId { get; set; }
         [Required]
         [Column("storage_id")]
         public int StorageId { get; set; }

@@ -35,5 +35,13 @@ namespace Vudaco.Receipts.Dtos
         public int? DeletedBy { get; set; }
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
+        public ChuyenTienNoiBo? ChuyenTu { get; set; }
+        public ChuyenTienNoiBo? ChuyenDen { get; set; }
+    }
+    public class ChuyenTienNoiBo
+    {
+        public int? BankId { get; set; }
+        public int FormOfPayment { get; set; }
+        public int? FundId { get; set; }
     }
 }

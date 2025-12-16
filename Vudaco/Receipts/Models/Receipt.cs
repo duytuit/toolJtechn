@@ -62,6 +62,8 @@ namespace Vudaco.Receipts.Models
         [Column("type_receipt")]
         public int TypeReceipt { get; set; }
 
+        [Column("offset_id")]
+        public int? OffsetId { get; set; }
         [Column("bank_id")]
         public int? BankId { get; set; }
         [Column("status")]

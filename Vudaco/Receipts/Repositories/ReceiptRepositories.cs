@@ -37,6 +37,7 @@ namespace Vudaco.Receipts.Repositories
         public const int DoiTuongKH = 0;
         public const int DoiTuongNCC = 1;
         public const int DoiTuongNV = 2;
+
         public ReceiptRepositories(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;
@@ -316,6 +317,8 @@ namespace Vudaco.Receipts.Repositories
                         d.amount,
                         d.total
                     FROM receipts r
+                    LEFT JOIN income_expense_categorys iecat
+                    ON iecat.id = r.income_expense_category_id
                     LEFT JOIN (
                         SELECT 
                             receipt_id,
@@ -326,8 +329,8 @@ namespace Vudaco.Receipts.Repositories
                         GROUP BY receipt_id
                     ) d ON d.receipt_id = r.id
                     WHERE 
-                        r.type_receipt IN (0, 3)
-                        AND r.status IS NULL
+                        r.status IS NULL
+                        AND iecat.type = 0
                         AND r.deleted_at IS NULL";
             if (ReceiptDto.StorageId > 0)
             {
@@ -359,6 +362,8 @@ namespace Vudaco.Receipts.Repositories
                         d.amount,
                         d.total
                     FROM receipts r
+                    LEFT JOIN income_expense_categorys iecat
+                    ON iecat.id = r.income_expense_category_id
                     LEFT JOIN (
                         SELECT 
                             receipt_id,
@@ -369,8 +374,53 @@ namespace Vudaco.Receipts.Repositories
                         GROUP BY receipt_id
                     ) d ON d.receipt_id = r.id
                     WHERE 
-                        r.type_receipt IN (1,2,7,8)
-                        AND r.status IS NULL
+                        r.status IS NULL
+                        AND iecat.type = 1
+                        AND r.deleted_at IS NULL";
+            if (ReceiptDto.StorageId > 0)
+            {
+                sql += $@" AND r.storage_id = {ReceiptDto.StorageId}";
+            }
+           
+            if (ReceiptDto.FromDate.HasValue && ReceiptDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = ReceiptDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND r.accounting_date >= '{ReceiptDto.FromDate.Value:yyyy-MM-dd}' 
+                AND r.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            sql += " ORDER BY r.updated_at DESC";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
+
+        public async Task<PaginatedResultReact<object>> GetSoDuDauKyAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+             var sql = $@"
+                    SELECT 
+                        r.*,
+                        d.amount,
+                        d.total
+                    FROM receipts r
+                    LEFT JOIN income_expense_categorys iecat
+                    ON iecat.id = r.income_expense_category_id
+                    AND iecat.deleted_at IS NULL
+                    LEFT JOIN (
+                        SELECT 
+                            receipt_id,
+                            SUM(amount) AS amount,
+                            SUM(amount * (1 + vat / 100.0)) AS total
+                        FROM receipt_details
+                        WHERE deleted_at IS NULL
+                        GROUP BY receipt_id
+                    ) d ON d.receipt_id = r.id
+                    WHERE 
+                        r.income_expense_category_id = 33
                         AND r.deleted_at IS NULL";
             if (ReceiptDto.StorageId > 0)
             {

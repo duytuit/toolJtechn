@@ -310,16 +310,16 @@ namespace Vudaco.Debits.Controllers
                    //return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", first);
                         // Tính tổng và count
                     int soLuong = group.Items.Where(x=> x.type == 1 && x.file_info_id == first.file_info_id).Count();
-                    decimal price = data.Where(x => new int[] { 0,1, 4, 5 }.Contains((int)x.type) && x.file_info_id == first.file_info_id).Sum(x => x.price);
+                    decimal price = data.Where(x => new int[] { 0,1, 4, 5 ,8}.Contains((int)x.type) && x.file_info_id == first.file_info_id).Sum(x => x.price + x.price_com);
                     decimal price_dv = data
-                            .Where(x => new int[] { 0,1, 4, 5 }.Contains((int)x.type) && x.file_info_id == first.file_info_id)
+                            .Where(x => new int[] { 0,1, 4, 5 ,8}.Contains((int)x.type) && x.file_info_id == first.file_info_id)
                                             .Sum(x =>
                                             {
-                                                decimal price = (decimal)x.price;
+                                                decimal total_price = (decimal)x.price + (decimal)x.price_com;
                                                 decimal vat = (decimal)x.vat;
-                                                return price + (price * vat / 100m); // giá + VAT
+                                                return total_price+ (total_price * vat / 100m); // giá + VAT
                                             });
-                    decimal price_thue = data.Where(x => x.file_info_id == first.file_info_id).Sum(x =>(decimal)x.price * (decimal)x.vat / 100);
+                    decimal price_thue = data.Where(x => x.file_info_id == first.file_info_id).Sum(x =>((decimal)x.price + (decimal)x.price_com) * (decimal)x.vat / 100);
                     decimal price_ch = data.Where(x => new int[] { 2, 3, 6 }.Contains((int)x.type) && x.file_info_id == first.file_info_id)
                                                     .Sum(x =>
                                                     {
@@ -327,7 +327,13 @@ namespace Vudaco.Debits.Controllers
                                                         decimal vat = (decimal)x.vat;
                                                         return price + (price * vat / 100m); // giá + VAT
                                                     });
-                    decimal thanhtien = data.Where(x => x.file_info_id == first.file_info_id).Sum(x => (decimal)x.price + ((decimal)x.price * (decimal)x.vat / 100));
+                    decimal thanhtien = data.Where(x => x.file_info_id == first.file_info_id).Sum(x =>
+                    {
+                        decimal total_price = (decimal)x.price + (decimal)x.price_com;
+                        decimal vat = (decimal)x.vat;
+                        return total_price+ (total_price * vat / 100m); // giá + VAT
+                    }
+                    );
                    // return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", first);
                     ws.Cell(row, 1).Value = i + 1; // STT
                     ws.Cell(row, 2).Value = first.accounting_date.ToString("dd/MM/yyyy");
@@ -668,15 +674,17 @@ namespace Vudaco.Debits.Controllers
                     foreach (var svc in serviceList)
                     {
                         // Tính giá
+                        decimal price_dv = (decimal)svc.price + (decimal)svc.price_com;
                         decimal price = (decimal)svc.price;
 
+                        decimal vatAmount_dv = price_dv * (decimal)svc.vat / 100m;
                         decimal vatAmount = price * (decimal)svc.vat / 100m;
 
-                        decimal price_dv = new int[] { 0,1, 4, 5}.Contains((int)svc.type)
-                            ? (price + vatAmount)
+                        decimal total_price_dv = new int[] { 0,1, 4, 5,8}.Contains((int)svc.type)
+                            ? (price_dv + vatAmount_dv)
                             : 0;
 
-                        decimal price_thue = vatAmount;
+                        decimal price_thue_dv = vatAmount_dv;
 
                         decimal price_ch = new int[] { 2, 3, 6 }.Contains((int)svc.type)
                             ? (price + vatAmount)
@@ -686,13 +694,13 @@ namespace Vudaco.Debits.Controllers
                         ws.Cell(row, 11).Value = svc.note ?? "";
                         ws.Cell(row, 12).Value = svc.name ?? "";
 
-                        ws.Cell(row, 13).Value = (svc.type == 0 || svc.type == 1 || svc.type == 4 || svc.type == 5)? price:0;
+                        ws.Cell(row, 13).Value = (svc.type == 0 || svc.type == 1 || svc.type == 4 || svc.type == 5|| svc.type == 8)? price_dv:0;
                         ws.Cell(row, 13).Style.NumberFormat.Format = "#,##0";
 
-                        ws.Cell(row, 14).Value = price_thue;
+                        ws.Cell(row, 14).Value = price_thue_dv;
                         ws.Cell(row, 14).Style.NumberFormat.Format = "#,##0";
 
-                        ws.Cell(row, 15).Value = price_dv;
+                        ws.Cell(row, 15).Value = total_price_dv;
                         ws.Cell(row, 15).Style.NumberFormat.Format = "#,##0";
 
                         ws.Cell(row, 16).Value = price_ch;
@@ -2313,6 +2321,8 @@ namespace Vudaco.Debits.Controllers
                 {
                     int debit_id = item.GetProperty("id").GetInt32();
                     int vat = item.GetProperty("vat").GetInt32();
+                    int purchase_com = item.GetProperty("purchase_com").GetInt32();
+                    int price_com = item.GetProperty("price_com").GetInt32();
                     var debit = await _context.Debits.FirstOrDefaultAsync(x => x.Id == debit_id);
                     if (debit == null) continue;
                     var confirm_file = await _context.ConfirmFiles.FirstOrDefaultAsync(x => x.DebitId == debit.Id); // duyệt file giá
@@ -2321,6 +2331,8 @@ namespace Vudaco.Debits.Controllers
                     {
                         debit.AccountingDate = ConfirmDebitNoFileDto.AccountingDate;
                         debit.Vat = vat;
+                        debit.PurchaseCom = purchase_com;
+                        debit.PriceCom = price_com;
                         debit.Status = ContractFileRepository.statusDebit;
                         debit.UpdatedBy = userId;
                         debit.UpdatedAt = now;
@@ -2373,19 +2385,17 @@ namespace Vudaco.Debits.Controllers
                         await tran.RollbackAsync();
                         return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu xác nhận chi phí. Hãy duyệt chi phí hải quan" +debit.Id, null);
                     }
-                    debit.Status = ContractFileRepository.statusDebit; 
-                    debit.UpdatedBy = userId;
-                    debit.UpdatedAt = now;
                     if (confirm_file.Status == 1 || confirm_file.Status == 2)
                     {
+                        debit.Status = ContractFileRepository.statusDebit; 
+                        debit.UpdatedBy = userId;
+                        debit.UpdatedAt = now;
                         confirm_file.Status = ContractFileRepository.statusDebit;
                         confirm_file.StatusConfirm = ConfirmFileDto.StatusConfirm;
                         confirm_file.UpdatedBy = userId;
                         confirm_file.UpdatedAt = now;
                     }
-
                 }
-               
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
                 return ApiResponseResult<object>(true, "Cập nhật thành công", null);
@@ -2832,6 +2842,8 @@ namespace Vudaco.Debits.Controllers
             }
             var now = DateTime.Now;
             entity.Vat = 0;
+            entity.PurchaseCom = 0;
+            entity.PriceCom = 0;
             entity.Status = ContractFileRepository.statusDichVu;
             entity.UpdatedBy = userId;
             entity.UpdatedAt = now;

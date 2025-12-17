@@ -72,6 +72,10 @@ namespace Vudaco.Debits.Models
         [Column("purchase_vat")]
         public int PurchaseVat { get; set; }
 
+        [Column("purchase_com")]
+        public int PurchaseCom { get; set; }
+        [Column("price_com")]
+        public int PriceCom { get; set; }
         [Column("driver_fee")]
         public int? DriverFee { get; set; }
 

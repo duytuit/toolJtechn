@@ -30,6 +30,8 @@ namespace Vudaco.Debits.Dtos
         public int PurchasePrice { get; set; }      // Cước mua
         public int Price { get; set; }
         public int Vat { get; set; }
+        public int PurchaseCom { get; set; }
+        public int PriceCom { get; set; }
         public int? DriverFee { get; set; }         // lái xe thu cước
         public int? MealFee { get; set; }           // tiền ăn
         public int? TicketFee { get; set; }         // tiền vé

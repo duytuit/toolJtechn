@@ -326,6 +326,25 @@ namespace Vudaco.ContractFiles.Repositories
                 .ToListAsync();
             return file;
         }
+        public async Task<FileInfo> ShowWithDebitConfirmAsync(int id)
+        {
+            var file = await _context.FileInfos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (file == null) return null;
+
+            file.Debits = await _context.Debits
+                .AsNoTracking()
+                .Where(d => d.FileInfoId == id && d.Status > 0)
+                .OrderBy(d=>d.Type)
+                .ToListAsync();
+            file.FileInfoDetails = await _context.FileInfoDetails
+                .AsNoTracking()
+                .Where(d => d.FileId == id)
+                .ToListAsync();
+            return file;
+        }
         public async Task<FileInfo> ShowWithDebitHasNCCAsync(int id)
         {
             var file = await _context.FileInfos
@@ -434,6 +453,7 @@ namespace Vudaco.ContractFiles.Repositories
                         d_total.purchase_vat AS debit_purchase_vat,
                         CAST(d_total.total_purchase_price AS INT) AS debit_total_purchase_price,
                         CAST(d_total.price AS INT) AS debit_price,
+                        CAST(d_total.total_vat AS INT) AS debit_total_vat,
                         d_total.vat AS debit_vat,
                         CAST(d_total.total_price AS INT) AS debit_total_price,
                         cf.note AS cf_note,
@@ -473,6 +493,7 @@ namespace Vudaco.ContractFiles.Repositories
                             SUM(d.purchase_price) AS purchase_price,
                             SUM(d.purchase_price * (d.purchase_vat / 100.0)) + SUM(d.purchase_price) AS total_purchase_price,
                             SUM(d.price) AS price,
+                            SUM(d.price * (d.vat / 100.0)) AS total_vat,
                             SUM(d.price * (d.vat / 100.0)) + SUM(d.price) AS total_price
                         FROM debits d
                         WHERE d.status in (1,2) 

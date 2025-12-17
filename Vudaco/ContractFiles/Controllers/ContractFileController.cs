@@ -414,6 +414,20 @@ namespace Vudaco.ContractFiles.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", entity);
         }
+        [HttpGet("ShowWithDebitConfirmAsync")]
+        public async Task<IActionResult> ShowWithDebitConfirmAsync([FromQuery] int id)
+        {
+            if (id <= 0)
+            {
+                return ApiResponseResult<object>(false, "Id không tồn tại", null);
+            }
+            var entity = await _repoContractFile.ShowWithDebitConfirmAsync(id);
+            if (entity == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", entity);
+        }
         [HttpGet("ShowWithDebitHasNCC")]
         public async Task<IActionResult> ShowWithDebitHasNCC([FromQuery] int id)
         {

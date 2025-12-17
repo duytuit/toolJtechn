@@ -236,9 +236,9 @@ namespace Vudaco.Debits.Controllers
                 cell_benmua.Clear();
                 cell_benmua.GetRichText().AddText("Đơn vị mua hàng: ")
                     .SetBold();
-                cell_benmua.GetRichText().AddText(info_kh.Name.ToString());
-                ws.Cell("A10").Value = "Địa chỉ: "+info_kh.Address.ToString();
-                ws.Cell("A11").Value = "Mã số thuế: "+info_kh.TaxCode.ToString();
+                cell_benmua.GetRichText().AddText(info_kh?.Name ?? "");
+                ws.Cell("A10").Value = "Địa chỉ: "+info_kh?.Address?? "";
+                ws.Cell("A11").Value = "Mã số thuế: "+info_kh?.TaxCode?? "";
 
 
                 // ==== HEADER BẢNG ====
@@ -561,9 +561,9 @@ namespace Vudaco.Debits.Controllers
                 cell_benmua.Clear();
                 cell_benmua.GetRichText().AddText("Đơn vị mua hàng: ")
                     .SetBold();
-                cell_benmua.GetRichText().AddText(info_kh.Name.ToString());
-                ws.Cell("A9").Value = "Địa chỉ: "+info_kh.Address.ToString();
-                ws.Cell("A10").Value = "Mã số thuế: "+info_kh.TaxCode.ToString();
+                cell_benmua.GetRichText().AddText(info_kh?.Name ?? "");
+                ws.Cell("A9").Value = "Địa chỉ: "+info_kh?.Address ?? "";
+                ws.Cell("A10").Value = "Mã số thuế: "+info_kh?.TaxCode ?? "";
 
                 ws.Range("A12:L12").Merge();
                 ws.Range("A12:L12").Merge().Value = "Dư nợ đầu kỳ (0)";

@@ -1373,7 +1373,7 @@ namespace Vudaco.Debits.Repositories
                 WHERE 
                         r.status IS NULL
                         AND iecat.type = 1
-                        AND r.income_expense_category_id in (12,19)
+                        AND iecat.parent_id in (12)
                         AND r.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {

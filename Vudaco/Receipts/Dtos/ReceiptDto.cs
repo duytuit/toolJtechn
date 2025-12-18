@@ -9,6 +9,7 @@ namespace Vudaco.Receipts.Dtos
     {
         public int Id { get; set; }
         public string CodeReceipt { get; set; }
+        public string PrefixCode { get; set; }
         public int StorageId { get; set; }
         public int? PartnerDetailId { get; set; }
         public int? FileInfoId { get; set; }

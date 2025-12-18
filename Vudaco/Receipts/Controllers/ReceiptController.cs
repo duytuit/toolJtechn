@@ -442,6 +442,10 @@ namespace Vudaco.Receipts.Controllers
         [Route("create/chinoibo")]
         public async Task<IActionResult> CreateChiNoiBo([FromBody] ReceiptDto ReceiptDto)
         {
+            if (string.IsNullOrWhiteSpace(ReceiptDto.PrefixCode))
+                return ApiResponseResult<object>(false, "Mã phiếu bắt buộc", null);
+            if (ReceiptDto.TypeReceipt <= 0)
+                return ApiResponseResult<object>(false, "Kiểu phiếu bắt buộc", null);
             if (ReceiptDto.Object == null || ReceiptDto.ObjectId == 0)
                 return ApiResponseResult<object>(false, "Doi tuong bắt buộc", null);
             if (ReceiptDto.FormOfPayment == 1 && (ReceiptDto.FundId == null || ReceiptDto.FundId == 0))
@@ -459,7 +463,7 @@ namespace Vudaco.Receipts.Controllers
             var conn = _context.Database.GetDbConnection();
             try
             {
-                var code_receipt = await SqlServerHelpers.GenerateCodeEfAsync(conn, tran.GetDbTransaction(), "receipts", "code_receipt", ReceiptDto.StorageId, "PC"+ReceiptDto.AccountingDate.ToString("yyMM"), 4);
+                var code_receipt = await SqlServerHelpers.GenerateCodeEfAsync(conn, tran.GetDbTransaction(), "receipts", "code_receipt", ReceiptDto.StorageId, ReceiptDto.PrefixCode+ReceiptDto.AccountingDate.ToString("yyMM"), 4);
                 var now = DateTime.Now;
                 entity = new Receipt
                 {
@@ -473,7 +477,7 @@ namespace Vudaco.Receipts.Controllers
                     IncomeExpenseCategoryId = ReceiptDto.IncomeExpenseCategoryId,
                     Note = ReceiptDto.Note,
                     FormOfPayment = ReceiptDto.FormOfPayment,
-                    TypeReceipt = ReceiptRepositories.ChiNoiBo,
+                    TypeReceipt = ReceiptDto.TypeReceipt,
                     BankId = ReceiptDto.FormOfPayment == 2 ? ReceiptDto.BankId : 0,
                     Data = ReceiptDto.Data,
                     CreatedBy = userId,

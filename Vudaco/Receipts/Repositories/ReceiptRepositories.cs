@@ -27,9 +27,9 @@ namespace Vudaco.Receipts.Repositories
         public const int ChuyenTienNoiBo = 10;
         public const int DoiTruCongNo = 11;
         public const int HoanTraTamThuGiaoNhan = 12;
-        public const int ChiNoiBo = 8; // chi khách hàng
+        public const int ChiKhac = 8; // chi khác
         public const int ChiNCC = 7;
-        public const int ChiNV = 9;
+        public const int ThuKhac = 9; // thu khác
         public const int ChiMuaHangNCC = 4; // chưa dùng
         public const int ThuBanHangKH = 5; // chưa dùng
         public const int ThuBanHangNV = 6; // chưa dùng

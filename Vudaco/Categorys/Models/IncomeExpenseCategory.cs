@@ -27,9 +27,9 @@ namespace Vudaco.Categorys.Models
 
         [MaxLength(50)]
         [Column("type")]
-        public int Type { get; set; }
+        public int? Type { get; set; }
         [Column("enable")]
-        public int Enable { get; set; }
+        public int? Enable { get; set; }
         [Column("status")]
         public int Status { get; set; }
 

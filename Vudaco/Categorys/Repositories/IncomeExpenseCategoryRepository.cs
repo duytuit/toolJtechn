@@ -51,9 +51,9 @@ namespace Vudaco.Categorys.Repositories
             var orderByList = new List<string> {  "updated_at desc" , "id"};
             if (IncomeExpenseCategoryDto.StorageId > 0)
                 whereEquals["storage_id"] = IncomeExpenseCategoryDto.StorageId;
-            if (IncomeExpenseCategoryDto.Type >= 0)
+            if (IncomeExpenseCategoryDto.Type.HasValue)
                 whereEquals["type"] = IncomeExpenseCategoryDto.Type;
-            if (IncomeExpenseCategoryDto.Enable >= 0)
+            if (IncomeExpenseCategoryDto.Enable.HasValue)
                 whereEquals["enable"] = IncomeExpenseCategoryDto.Enable;
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),

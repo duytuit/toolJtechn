@@ -2922,18 +2922,17 @@ namespace Vudaco.Debits.Controllers
             var now = DateTime.Now;
             foreach (var item in entities)
             {
-                if (item.Type == 0)
-                {
-                    item.Price = 0;
-                }
+                // if (item.Type == 0)
+                // {
+                //     item.Price = 0;
+                // }
                 if (item.Type == 4)
                 {
-                    item.Price = 0;
                     item.DeletedAt = now;
                     item.DeletedBy = userId;
                 }
                 item.Status = 0;
-                item.Vat = 0;
+                // item.Vat = 0;
                 item.UpdatedAt = now;
                 item.UpdatedBy = userId;
             }

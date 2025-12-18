@@ -59,6 +59,17 @@ namespace Vudaco.Debits.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
+        [HttpGet("GetObjectBaoCaoDoanhThuAsync")]
+        public async Task<IActionResult> GetObjectBaoCaoDoanhThuAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectBaoCaoDoanhThuAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
         [HttpGet("hasDebitNoFileNCC")]
         public async Task<IActionResult> GetHasDebitNoFileNCC(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
         {
@@ -510,14 +521,15 @@ namespace Vudaco.Debits.Controllers
                     .ToList();
 
                 // Merge vào chung loại anonymous type
-                if (groupedDataNoFile.Any())
+                foreach (var item in groupedDataNoFile)
                 {
                     groupedData.Add(new
                     {
-                        file_info_id = (long?)null,         // cùng long?
-                        Items = groupedDataNoFile
+                        file_info_id = (long?)null,
+                        Items = new List<dynamic> { item }
                     });
                 }
+               
                 groupedData = groupedData
                 .OrderBy(g => g.Items.Min(x => (DateTime)x.accounting_date))
                 .ToList();
@@ -650,7 +662,7 @@ namespace Vudaco.Debits.Controllers
                   
                    // return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", first);
                     ws.Cell(row, 1).Value = i + 1; // STT
-                    ws.Cell(row, 2).Value = _fileInfo != null ? (_fileInfo.FileNumber??"") : first.dispatch_code;
+                    ws.Cell(row, 2).Value = _fileInfo != null ? (_fileInfo.FileNumber??first.dispatch_code) : first.dispatch_code;
                     ws.Cell(row, 3).Value = first.cus_bill ?? "";
                     ws.Cell(row, 4).Value = first.accounting_date.ToString("dd/MM/yyyy");;
                     ws.Cell(row, 5).Value =  _fileInfo != null ? _fileInfo.Declaration ??"" : "";
@@ -661,53 +673,94 @@ namespace Vudaco.Debits.Controllers
                     ws.Cell(row, 10).Value =  first.vehicle_number ??"";
                     row++;
                     // Lấy danh sách bản ghi của group theo file_info_id
-                    var serviceList = data
+                    if (first.file_info_id > 0)
+                    {
+                         var serviceList = data
                         .Where(x => x.file_info_id == first.file_info_id)
                         .OrderBy(x=>x.type)
                         .ToList();
 
-                    // Nếu không có bản ghi → bỏ qua
-                    if (!serviceList.Any())
-                        continue;
+                        // Nếu không có bản ghi → bỏ qua
+                        if (!serviceList.Any())
+                            continue;
 
-                    // DUYỆT TỪNG BẢN GHI TRONG DATA (đúng theo mẫu bạn yêu cầu)
-                    foreach (var svc in serviceList)
-                    {
-                        // Tính giá
-                        decimal price_dv = (decimal)svc.price + (decimal)svc.price_com;
-                        decimal price = (decimal)svc.price;
+                        // DUYỆT TỪNG BẢN GHI TRONG DATA (đúng theo mẫu bạn yêu cầu)
+                        foreach (var svc in serviceList)
+                        {
+                            // Tính giá
+                            decimal price_dv = (decimal)svc.price + (decimal)svc.price_com;
+                            decimal price = (decimal)svc.price;
 
-                        decimal vatAmount_dv = price_dv * (decimal)svc.vat / 100m;
-                        decimal vatAmount = price * (decimal)svc.vat / 100m;
+                            decimal vatAmount_dv = price_dv * (decimal)svc.vat / 100m;
+                            decimal vatAmount = price * (decimal)svc.vat / 100m;
 
-                        decimal total_price_dv = new int[] { 0,1, 4, 5,8}.Contains((int)svc.type)
-                            ? (price_dv + vatAmount_dv)
-                            : 0;
+                            decimal total_price_dv = new int[] { 0,1, 4, 5,8}.Contains((int)svc.type)
+                                ? (price_dv + vatAmount_dv)
+                                : 0;
 
-                        decimal price_thue_dv = vatAmount_dv;
+                            decimal price_thue_dv = vatAmount_dv;
 
-                        decimal price_ch = new int[] { 2, 3, 6 }.Contains((int)svc.type)
-                            ? (price + vatAmount)
-                            : 0;
+                            decimal price_ch = new int[] { 2, 3, 6 }.Contains((int)svc.type)
+                                ? (price + vatAmount)
+                                : 0;
 
-                        // --- GHI DÒNG CHI TIẾT ---
-                        ws.Cell(row, 11).Value = svc.note ?? "";
-                        ws.Cell(row, 12).Value = svc.name ?? "";
+                            // --- GHI DÒNG CHI TIẾT ---
+                            ws.Cell(row, 11).Value = svc.note ?? "";
+                            ws.Cell(row, 12).Value = svc.name ?? "";
 
-                        ws.Cell(row, 13).Value = (svc.type == 0 || svc.type == 1 || svc.type == 4 || svc.type == 5|| svc.type == 8)? price_dv:0;
-                        ws.Cell(row, 13).Style.NumberFormat.Format = "#,##0";
+                            ws.Cell(row, 13).Value = (svc.type == 0 || svc.type == 1 || svc.type == 4 || svc.type == 5|| svc.type == 8)? price_dv:0;
+                            ws.Cell(row, 13).Style.NumberFormat.Format = "#,##0";
 
-                        ws.Cell(row, 14).Value = price_thue_dv;
-                        ws.Cell(row, 14).Style.NumberFormat.Format = "#,##0";
+                            ws.Cell(row, 14).Value = price_thue_dv;
+                            ws.Cell(row, 14).Style.NumberFormat.Format = "#,##0";
 
-                        ws.Cell(row, 15).Value = total_price_dv;
-                        ws.Cell(row, 15).Style.NumberFormat.Format = "#,##0";
+                            ws.Cell(row, 15).Value = total_price_dv;
+                            ws.Cell(row, 15).Style.NumberFormat.Format = "#,##0";
 
-                        ws.Cell(row, 16).Value = price_ch;
-                        ws.Cell(row, 16).Style.NumberFormat.Format = "#,##0";
+                            ws.Cell(row, 16).Value = price_ch;
+                            ws.Cell(row, 16).Style.NumberFormat.Format = "#,##0";
 
-                        row++;
+                            row++;
+                        }
                     }
+                    else
+                    {
+                         // Tính giá
+                            decimal price_dv = (decimal)first.price + (decimal)first.price_com;
+                            decimal price = (decimal)first.price;
+
+                            decimal vatAmount_dv = price_dv * (decimal)first.vat / 100m;
+                            decimal vatAmount = price * (decimal)first.vat / 100m;
+
+                            decimal total_price_dv = new int[] { 0,1, 4, 5,8}.Contains((int)first.type)
+                                ? (price_dv + vatAmount_dv)
+                                : 0;
+
+                            decimal price_thue_dv = vatAmount_dv;
+
+                            decimal price_ch = new int[] { 2, 3, 6 }.Contains((int)first.type)
+                                ? (price + vatAmount)
+                                : 0;
+
+                            // --- GHI DÒNG CHI TIẾT ---
+                            ws.Cell(row, 11).Value = first.note ?? "";
+                            ws.Cell(row, 12).Value = first.name ?? "";
+
+                            ws.Cell(row, 13).Value = (first.type == 0 || first.type == 1 || first.type == 4 || first.type == 5|| first.type == 8)? price_dv:0;
+                            ws.Cell(row, 13).Style.NumberFormat.Format = "#,##0";
+
+                            ws.Cell(row, 14).Value = price_thue_dv;
+                            ws.Cell(row, 14).Style.NumberFormat.Format = "#,##0";
+
+                            ws.Cell(row, 15).Value = total_price_dv;
+                            ws.Cell(row, 15).Style.NumberFormat.Format = "#,##0";
+
+                            ws.Cell(row, 16).Value = price_ch;
+                            ws.Cell(row, 16).Style.NumberFormat.Format = "#,##0";
+
+                            row++;
+                    }
+                   
                                                 
                 }
           

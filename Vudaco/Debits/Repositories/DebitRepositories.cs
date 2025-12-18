@@ -1274,5 +1274,157 @@ namespace Vudaco.Debits.Repositories
             };
             return _results;
         }
+
+        public async Task<PaginatedResultReact<object>> GetObjectBaoCaoDoanhThuAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var _results = new PaginatedResultReact<object>();
+            var sql = $@"
+                -- doanh thu các lô hàng có lập file ,trừ mua hàng từ nhà cung cấp,trừ bán hàng cho khách hàng
+                SELECT SUM(d.price) AS total_price FROM debits d
+                LEFT JOIN file_infos f ON f.id = d.file_info_id
+                WHERE d.type NOT IN (7,8) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            var dt_hasfile_results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["dt_hasfile_results"] = dt_hasfile_results;
+
+            sql = $@"
+               -- doanh thu các lô hàng không lập file, trừ mua hàng từ nhà cung cấp
+               SELECT SUM(d.price+d.driver_fee+d.price_com) AS total_price FROM debits d WHERE d.type NOT IN (7) AND (d.file_info_id IS NULL OR d.file_info_id = 0) AND d.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            var dt_nofile_results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["dt_nofile_results"] = dt_nofile_results;
+
+            sql = $@"
+               -- chi phí các lô hàng có lặp file
+                SELECT SUM(d.purchase_price) AS total_purchase_price FROM debits d
+                LEFT JOIN file_infos f ON f.id = d.file_info_id
+                WHERE d.type NOT IN (7,8) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            var cp_hasfile_results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["cp_hasfile_results"] = cp_hasfile_results;
+
+             sql = $@"
+              -- chi phí các lô hàng không lặp file, trừ mua hàng từ nhà cung cấp
+              SELECT SUM(d.purchase_price+d.purchase_com) AS total_purchase_price FROM debits d WHERE d.type NOT IN (7,8) AND (d.file_info_id IS NULL OR d.file_info_id = 0) AND d.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            var cp_nofile_results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["cp_nofile_results"] = cp_nofile_results;
+
+             sql = $@"
+             -- lấy phiếu chi có income_expense_categorys kiểu là chi phí kinh doanh
+            SELECT 
+                    sum(d.amount) AS amount
+                FROM receipts r
+                LEFT JOIN income_expense_categorys iecat
+                ON iecat.id = r.income_expense_category_id
+                LEFT JOIN (
+                        SELECT 
+                                receipt_id,
+                                SUM(amount) AS amount,
+                                SUM(amount * (1 + vat / 100.0)) AS total
+                        FROM receipt_details
+                        WHERE deleted_at IS NULL
+                        GROUP BY receipt_id
+                ) d ON d.receipt_id = r.id
+                WHERE 
+                        r.status IS NULL
+                        AND iecat.type = 1
+                        AND r.income_expense_category_id = 12
+                        AND r.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND r.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND r.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND r.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            var cp_kinhdoanh = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["cp_kinhdoanh"] = cp_kinhdoanh;
+             sql = $@"
+                SELECT 
+                        sum(d.amount) AS amount
+                FROM receipts r
+                LEFT JOIN income_expense_categorys iecat
+                ON iecat.id = r.income_expense_category_id
+                LEFT JOIN (
+                        SELECT 
+                                receipt_id,
+                                SUM(amount) AS amount,
+                                SUM(amount * (1 + vat / 100.0)) AS total
+                        FROM receipt_details
+                        WHERE deleted_at IS NULL
+                        GROUP BY receipt_id
+                ) d ON d.receipt_id = r.id
+                WHERE 
+                        r.status IS NULL
+                        AND iecat.type = 0
+                        AND r.income_expense_category_id = 36
+                        AND r.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND r.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND r.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND r.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            var doanhthu_khac = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["doanhthu_khac"] = doanhthu_khac;
+
+            return _results;
+        }
     }
 }

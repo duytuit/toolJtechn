@@ -1280,9 +1280,9 @@ namespace Vudaco.Debits.Repositories
             var _results = new PaginatedResultReact<object>();
             var sql = $@"
                 -- doanh thu các lô hàng có lập file ,trừ mua hàng từ nhà cung cấp,trừ bán hàng cho khách hàng
-                SELECT SUM(d.price) AS total_price FROM debits d
+                SELECT COALESCE(SUM(price), 0) AS total_price FROM debits d
                 LEFT JOIN file_infos f ON f.id = d.file_info_id
-                WHERE d.type NOT IN (7,8) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL";
+                WHERE d.type IN (0,1,2,3,4,5,6) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND d.storage_id = {DebitDto.StorageId}";
@@ -1300,7 +1300,7 @@ namespace Vudaco.Debits.Repositories
 
             sql = $@"
                -- doanh thu các lô hàng không lập file, trừ mua hàng từ nhà cung cấp
-               SELECT SUM(d.price+d.driver_fee+d.price_com) AS total_price FROM debits d WHERE d.type NOT IN (7) AND (d.file_info_id IS NULL OR d.file_info_id = 0) AND d.deleted_at IS NULL";
+               SELECT COALESCE(SUM(price), 0)+COALESCE(SUM(price_com), 0)+COALESCE(SUM(driver_fee),0) AS total_price FROM debits WHERE type IN (0,1,2,3,4,5,6) AND (file_info_id IS NULL OR file_info_id = 0) AND deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND d.storage_id = {DebitDto.StorageId}";
@@ -1318,9 +1318,9 @@ namespace Vudaco.Debits.Repositories
 
             sql = $@"
                -- chi phí các lô hàng có lặp file
-                SELECT SUM(d.purchase_price) AS total_purchase_price FROM debits d
+                SELECT COALESCE(SUM(purchase_price), 0) AS total_purchase_price FROM debits d
                 LEFT JOIN file_infos f ON f.id = d.file_info_id
-                WHERE d.type NOT IN (7,8) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL";
+                WHERE d.type IN (0,1,2,3,4,10,11) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND d.storage_id = {DebitDto.StorageId}";
@@ -1338,7 +1338,7 @@ namespace Vudaco.Debits.Repositories
 
              sql = $@"
               -- chi phí các lô hàng không lặp file, trừ mua hàng từ nhà cung cấp
-              SELECT SUM(d.purchase_price+d.purchase_com) AS total_purchase_price FROM debits d WHERE d.type NOT IN (7,8) AND (d.file_info_id IS NULL OR d.file_info_id = 0) AND d.deleted_at IS NULL";
+              SELECT  COALESCE(SUM(purchase_price), 0)+ COALESCE(SUM(purchase_com), 0) AS total_purchase_price FROM debits d WHERE d.type IN (0,1,2,3,4,10,11) AND (d.file_info_id IS NULL OR d.file_info_id = 0) AND d.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND d.storage_id = {DebitDto.StorageId}";

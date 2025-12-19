@@ -514,6 +514,7 @@ namespace Vudaco.Debits.Repositories
                 sql += $@" AND d.customer_detail_id = {DebitDto.CustomerDetailId}";
             }
             sql += $@" AND d.accounting_date < '{DebitDto.FromDate.Value:yyyy-MM-dd}'";
+           // _ = Task.Run(() => Helper.SendTelegramMessageAsync(sql));
             return await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
         }
           public async Task<List<object>> GetObjectDebitDuNoDKNCCAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)

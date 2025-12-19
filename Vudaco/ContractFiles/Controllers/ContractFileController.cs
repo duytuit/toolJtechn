@@ -393,7 +393,7 @@ namespace Vudaco.ContractFiles.Controllers
             {
                 return ApiResponseResult<object>(false, "Id không tồn tại", null);
             }
-            var entity = await _repoContractFile.ShowAsync(id);
+            var entity = await _repoContractFile.ShowWithDebitAsync(id);
             if (entity == null)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);

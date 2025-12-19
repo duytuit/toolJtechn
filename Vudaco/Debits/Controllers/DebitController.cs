@@ -2889,10 +2889,11 @@ namespace Vudaco.Debits.Controllers
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
             }
             var confirm_file = await _context.ConfirmFiles.FirstOrDefaultAsync(x => x.DebitId == entity.Id);
-            if (entity == null)
+            if (confirm_file == null)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu debit confirm", null);
             }
+           
             var now = DateTime.Now;
             entity.Vat = 0;
             entity.PurchaseCom = 0;

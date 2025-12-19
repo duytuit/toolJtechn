@@ -149,7 +149,7 @@ namespace Vudaco.Shares.SqlServerHelper
 
                     parent[relation.Name] = relation.IsCollection
                         ? (relatedItems?.Select(x => (ExpandoObject)x).ToList() ?? new List<ExpandoObject>())
-                        : (ExpandoObject)(relatedItems?.FirstOrDefault() ?? new ExpandoObject());
+                        : (ExpandoObject)(relatedItems?.FirstOrDefault() ?? null);
                 }
 
                 // Recursive sub-relations

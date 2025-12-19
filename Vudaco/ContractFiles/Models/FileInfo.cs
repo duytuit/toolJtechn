@@ -40,7 +40,7 @@ namespace Vudaco.ContractFiles.Models
         [Column("quantity")]
         public string Quantity { get; set; }
 
-        [MaxLength(50)]
+        [MaxLength(150)]
         [Column("container_code")]
         public string ContainerCode { get; set; }
 

@@ -240,6 +240,16 @@ namespace Vudaco.ContractFiles.Repositories
                                 {
                                     new AdoRelation
                                     {
+                                        Name = "debits",
+                                        Table = "debits",
+                                        Columns = new[] { "id","file_info_id","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},
+                                        ParentKey = "id",
+                                        ForeignKey = "file_info_id",
+                                        KeyName = "file_info_id",
+                                        IsCollection = false
+                                    },
+                                    new AdoRelation
+                                    {
                                         Name = "file_info_details",
                                         Table = "file_info_details",
                                         Columns = new[] { "id","file_id","employee_id","price","storage_id","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},

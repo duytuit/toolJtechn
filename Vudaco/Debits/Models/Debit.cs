@@ -53,6 +53,9 @@ namespace Vudaco.Debits.Models
         [Column("name")]
         public string Name { get; set; }
         [Required]
+        [Column("service_date", TypeName = "date")]
+        public DateTime ServiceDate { get; set; }
+        [Required]
         [Column("accounting_date", TypeName = "date")]
         public DateTime AccountingDate { get; set; }
         [Column("purchase_accounting_date", TypeName = "date")]

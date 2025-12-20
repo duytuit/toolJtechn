@@ -2508,10 +2508,10 @@ namespace Vudaco.Debits.Controllers
                 {
                     var debit = await _context.Debits.FirstOrDefaultAsync(x => x.Id == item.Id);
                     if (debit == null) continue;
-                    if (item.Type == 0 && item.Price == 0)
+                    if (item.Price == 0)
                     {
                         await tran.RollbackAsync();
-                        return ApiResponseResult<object>(false, "Chưa nhập giá bán cho phí hải quan.", null);
+                        return ApiResponseResult<object>(false, "Chưa nhập giá bán. Hãy kiểm tra lại", null);
                     }
                     var confirm_file = await _context.ConfirmFiles.FirstOrDefaultAsync(x => x.FileInfoId == item.FileInfoId && x.PartnerDetailId == item.CustomerDetailId && x.DebitId == debit.Id); // duyệt file giá
                     if (confirm_file == null)
@@ -2521,6 +2521,8 @@ namespace Vudaco.Debits.Controllers
                     }
                     if (confirm_file.Status == 1 || confirm_file.Status == 2)
                     {
+                        debit.Price = item.Price; 
+                        debit.Vat = item.Vat; 
                         debit.Status = ContractFileRepository.statusDebit; 
                         debit.UpdatedBy = userId;
                         debit.UpdatedAt = now;

@@ -2519,11 +2519,11 @@ namespace Vudaco.Debits.Controllers
                 {
                     var debit = await _context.Debits.FirstOrDefaultAsync(x => x.Id == item.Id);
                     if (debit == null) continue;
-                    if (item.Price == 0)
-                    {
-                        await tran.RollbackAsync();
-                        return ApiResponseResult<object>(false, "Chưa nhập giá bán. Hãy kiểm tra lại", null);
-                    }
+                    //if (item.Price == 0)
+                    //{
+                    //    await tran.RollbackAsync();
+                    //    return ApiResponseResult<object>(false, "Chưa nhập giá bán. Hãy kiểm tra lại", null);
+                    //}
                     var confirm_file = await _context.ConfirmFiles.FirstOrDefaultAsync(x => x.FileInfoId == item.FileInfoId && x.PartnerDetailId == item.CustomerDetailId && x.DebitId == debit.Id); // duyệt file giá
                     if (confirm_file == null)
                     {

@@ -1288,10 +1288,50 @@ namespace Vudaco.Debits.Repositories
         {
             var _results = new PaginatedResultReact<object>();
             var sql = $@"
+                -- doanh thu chi hộ
+                SELECT COALESCE(SUM(price), 0) AS total_price FROM debits d
+                LEFT JOIN file_infos f ON f.id = d.file_info_id
+                WHERE d.type IN (2) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL AND d.status in (1,2)";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            var dt_ch_hasfile_results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["dt_ch_hasfile_results"] = dt_ch_hasfile_results;
+
+            sql = $@"
+               -- chi phí chi ho
+                SELECT COALESCE(SUM(purchase_price), 0) AS total_purchase_price FROM debits d
+                LEFT JOIN file_infos f ON f.id = d.file_info_id
+                WHERE d.type IN (2) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL AND d.status IN (1,2)";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            var cp_ch_hasfile_results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["cp_ch_hasfile_results"] = cp_ch_hasfile_results;
+
+            sql = $@"
                 -- doanh thu các lô hàng có lập file ,trừ mua hàng từ nhà cung cấp,trừ bán hàng cho khách hàng
                 SELECT COALESCE(SUM(price), 0) AS total_price FROM debits d
                 LEFT JOIN file_infos f ON f.id = d.file_info_id
-                WHERE d.type IN (0,1,2,3,4) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL AND d.status in (1,2)";
+                WHERE d.type IN (0,1,3,4) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL AND d.status in (1,2)";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND d.storage_id = {DebitDto.StorageId}";
@@ -1329,7 +1369,7 @@ namespace Vudaco.Debits.Repositories
                -- chi phí các lô hàng có lặp file
                 SELECT COALESCE(SUM(purchase_price), 0) AS total_purchase_price FROM debits d
                 LEFT JOIN file_infos f ON f.id = d.file_info_id
-                WHERE d.type IN (0,1,2,3,4) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL AND d.status IN (1,2)";
+                WHERE d.type IN (0,1,3,4) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL AND d.status IN (1,2)";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND d.storage_id = {DebitDto.StorageId}";

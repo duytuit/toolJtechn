@@ -499,8 +499,18 @@ namespace Vudaco.Debits.Controllers
                 if (result == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
 
                 var result_duno_dauky = await _repoDebit.GetObjectDebitDuNoDKKHAsync(DebitDto, page, pageSize, cancellationToken);
-                dynamic duno_dauky = result_duno_dauky.FirstOrDefault();
-                int duno = duno_dauky.total_debit - duno_dauky.total_receipt;
+
+                int duno = 0;
+
+                if (result_duno_dauky != null && result_duno_dauky.Any())
+                {
+                    dynamic duno_dauky = result_duno_dauky.First();
+
+                    int totalDebit = duno_dauky?.total_debit ?? 0;
+                    int totalReceipt = duno_dauky?.total_receipt ?? 0;
+
+                    duno = totalDebit - totalReceipt;
+                }
                 // Chuẩn hóa dữ liệu về dynamic để đọc property
                 var data = result.Data.Select(x => (dynamic)x);
 
@@ -582,10 +592,9 @@ namespace Vudaco.Debits.Controllers
                 ws.Range("A12:L12").Merge().Style.Font.SetBold().Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
                 ws.Range("A12:L12").Merge().Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
                 ws.Range("A12:L12").Merge().Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-               
                 ws.Range("M12:O12").Merge();
-                //ws.Range("M12:O12").Merge().Value = duno == 0 ? 0 : duno;
-               // ws.Range("M12:O12").Merge().Style.NumberFormat.Format = "#,##0";
+                ws.Range("M12:O12").Merge().Value = duno == 0 ? 0 : duno;
+                ws.Range("M12:O12").Merge().Style.NumberFormat.Format = "#,##0";
                 ws.Range("M12:O12").Merge().Style.Font.SetBold().Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
                 ws.Range("M12:O12").Merge().Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
                 ws.Range("M12:O12").Merge().Style.Border.InsideBorder = XLBorderStyleValues.Thin;

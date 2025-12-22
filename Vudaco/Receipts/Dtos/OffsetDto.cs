@@ -13,9 +13,12 @@ namespace Vudaco.Receipts.Dtos
         public int? BReceiptId { get; set; }
         public int StorageId { get; set; }
         public DateTime AccountingDate { get; set; }
+        public string customerName { get; set; }
+        public string DebitThu { get; set; }
+        public string DebitChi { get; set; }
         public int Price { get; set; }
         public string Note { get; set; }
-        public int Type { get; set; }
+        public int? Type { get; set; } = null;
         public int? CreatedBy { get; set; }
         public int? UpdatedBy { get; set; }
         public int? DeletedBy { get; set; }

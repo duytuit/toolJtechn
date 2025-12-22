@@ -584,8 +584,8 @@ namespace Vudaco.Debits.Controllers
                 ws.Range("A12:L12").Merge().Style.Border.InsideBorder = XLBorderStyleValues.Thin;
                
                 ws.Range("M12:O12").Merge();
-                ws.Range("M12:O12").Merge().Value = duno;
-                ws.Range("M12:O12").Merge().Style.NumberFormat.Format = "#,##0";
+                //ws.Range("M12:O12").Merge().Value = duno == 0 ? 0 : duno;
+               // ws.Range("M12:O12").Merge().Style.NumberFormat.Format = "#,##0";
                 ws.Range("M12:O12").Merge().Style.Font.SetBold().Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
                 ws.Range("M12:O12").Merge().Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
                 ws.Range("M12:O12").Merge().Style.Border.InsideBorder = XLBorderStyleValues.Thin;
@@ -645,7 +645,7 @@ namespace Vudaco.Debits.Controllers
                 int startRow = 15;
                 int currentRow = startRow;
                 int row = startRow;
-               // return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", groupedData);
+                //return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", groupedData);
                 for (int i = 0; i < groupedData.Count; i++)
                 {
                     var group = groupedData[i];
@@ -655,22 +655,22 @@ namespace Vudaco.Debits.Controllers
                    　//return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", first);
                         // Tính tổng và count
                     ContractFiles.Models.FileInfo _fileInfo = new ContractFiles.Models.FileInfo();
-                    if ( first.file_info_id > 0)
+                    if (first.file_info_id > 0)
                     {
                         _fileInfo = list_file.FirstOrDefault(x => x.Id == (long)first.file_info_id);
                     }
                   
                    // return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", first);
                     ws.Cell(row, 1).Value = i + 1; // STT
-                    ws.Cell(row, 2).Value = _fileInfo != null ? (_fileInfo.FileNumber??first.dispatch_code) : first.dispatch_code;
+                    ws.Cell(row, 2).Value = _fileInfo != null ? (_fileInfo.FileNumber??first.dispatch_code) : first.dispatch_code ?? "";
                     ws.Cell(row, 3).Value = first.cus_bill ?? "";
-                    ws.Cell(row, 4).Value = first.accounting_date.ToString("dd/MM/yyyy");;
+                    ws.Cell(row, 4).Value = first.accounting_date.ToString("dd/MM/yyyy");
                     ws.Cell(row, 5).Value =  _fileInfo != null ? _fileInfo.Declaration ??"" : "";
                     ws.Cell(row, 6).Value =  _fileInfo != null ? _fileInfo.Bill ?? "" : "";
                     ws.Cell(row, 7).Value =  _fileInfo != null ? _fileInfo.ContainerCode ?? "" : "";
                     ws.Cell(row, 8).Value =  _fileInfo != null ? _fileInfo.Quantity ?? "" : "";
                     ws.Cell(row, 9).Value =  first.customer_vehicle_type ??"";
-                    ws.Cell(row, 10).Value =  first.vehicle_number ??"";
+                   
                     row++;
                     // Lấy danh sách bản ghi của group theo file_info_id
                     if (first.file_info_id > 0)
@@ -705,6 +705,7 @@ namespace Vudaco.Debits.Controllers
                                 : 0;
 
                             // --- GHI DÒNG CHI TIẾT ---
+                            ws.Cell(row, 10).Value = svc.vehicle_number ??"";
                             ws.Cell(row, 11).Value = svc.note ?? "";
                             ws.Cell(row, 12).Value = svc.name ?? "";
 
@@ -743,6 +744,7 @@ namespace Vudaco.Debits.Controllers
                                 : 0;
 
                             // --- GHI DÒNG CHI TIẾT ---
+                            ws.Cell(row, 10).Value = first.vehicle_number ?? "";
                             ws.Cell(row, 11).Value = first.note ?? "";
                             ws.Cell(row, 12).Value = first.name ?? "";
 

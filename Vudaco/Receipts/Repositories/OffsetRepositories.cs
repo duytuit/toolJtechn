@@ -20,7 +20,7 @@ namespace Vudaco.Receipts.Repositories
         private readonly RedisService _redis;
         //================Offset=============================
         public const int ChuyenTienNoiBo = 0;
-        public const int BuTruCongNo = 1;
+        public const int DoiTruCongNo = 1;
         public OffsetRepositories(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;
@@ -46,8 +46,9 @@ namespace Vudaco.Receipts.Repositories
             var orderByList = new List<string> { "updated_at desc", "id" };
             if (OffsetDto.StorageId > 0)
                 whereEquals["storage_id"] = OffsetDto.StorageId;
-            if (OffsetDto.Type > 0)
+            if (OffsetDto.Type.HasValue)
                 whereEquals["type"] = OffsetDto.Type;
+
             if (OffsetDto.FromDate.HasValue && OffsetDto.ToDate.HasValue)
                 whereDateRange.Add(("accounting_date", OffsetDto.FromDate.Value, OffsetDto.ToDate.Value.AddDays(1)));
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(

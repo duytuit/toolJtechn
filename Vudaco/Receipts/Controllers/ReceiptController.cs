@@ -598,6 +598,153 @@ namespace Vudaco.Receipts.Controllers
             }
         }
         [HttpPost]
+        [Route("create/doitrucongno")]
+        public async Task<IActionResult> CreateDoiTruCongNo([FromBody] OffsetDto OffsetDto)
+        {
+            // Kiểm tra chi tiết phiếu thu
+            if (string.IsNullOrEmpty(OffsetDto.DebitThu))
+            {
+                return ApiResponseResult<object>(false, "Không có chi tiết thu", null);
+            }
+            List<JsonElement> list_thu = null;
+            try
+            {
+                list_thu = JsonSerializer.Deserialize<List<JsonElement>>(OffsetDto.DebitThu);
+            }
+            catch
+            {
+                return ApiResponseResult<object>(false, "Dữ liệu chi tiết thu không hợp lệ", null);
+            }
+
+            if (list_thu == null || list_thu.Count == 0)
+            {
+                return ApiResponseResult<object>(false, "Không có chi tiết thu", null);
+            }
+              List<JsonElement> list_chi = null;
+            // Kiểm tra chi tiết phiếu chi
+            if (string.IsNullOrEmpty(OffsetDto.DebitChi))
+            {
+                return ApiResponseResult<object>(false, "Không có chi tiết chi", null);
+            }
+            try
+            {
+                list_chi = JsonSerializer.Deserialize<List<JsonElement>>(OffsetDto.DebitChi);
+            }
+            catch
+            {
+                return ApiResponseResult<object>(false, "Dữ liệu chi tiết chi không hợp lệ", null);
+            }
+
+            if (list_chi == null || list_chi.Count == 0)
+            {
+                return ApiResponseResult<object>(false, "Không có chi tiết chi", null);
+            }
+
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                 var now = DateTime.Now;
+                 var doitru = new Offset
+                 {
+                     AccountingDate =OffsetDto.AccountingDate,
+                     StorageId =OffsetDto.StorageId,
+                     Type = OffsetRepositories.DoiTruCongNo,
+                     Price = OffsetDto.Price,
+                     Note = "Bù trừ công nợ phải thu, phải trả "+OffsetDto.customerName,
+                     CreatedBy = userId,
+                     CreatedAt = now,
+                     UpdatedAt = now,
+                     UpdatedBy = userId,
+                 };
+                 _context.Offsets.Add(doitru);
+                await _context.SaveChangesAsync();
+                var code_receipt = await SqlServerHelpers.GenerateCodeEfAsync(conn, tran.GetDbTransaction(), "receipts", "code_receipt", OffsetDto.StorageId, "PCDT"+OffsetDto.AccountingDate.ToString("yyMM"), 4);
+             
+                var entity = new Receipt
+                {
+                    AccountingDate = OffsetDto.AccountingDate,
+                    StorageId = OffsetDto.StorageId,
+                    CodeReceipt = code_receipt,
+                    IncomeExpenseCategoryId = IncomeExpenseCategoryRepository.ChiDoiTru,
+                    FormOfPayment = 1,
+                    TypeReceipt = ReceiptRepositories.DoiTruCongNo,
+                    OffsetId = doitru.Id,
+                    CreatedBy = userId,
+                    CreatedAt = now,
+                    UpdatedAt = now,
+                    UpdatedBy = userId,
+                };
+                _context.Receipts.Add(entity);
+                await _context.SaveChangesAsync();
+                foreach (var item in list_chi)
+                {
+                    int debit_id = item.GetProperty("id").GetInt32();
+                    int amount = item.GetProperty("conlai_tong").GetInt32();
+                    var entity_detail = new ReceiptDetail
+                    {
+                        ReceiptId = entity.Id,
+                        StorageId = OffsetDto.StorageId,
+                        AccountingDate = OffsetDto.AccountingDate,
+                        DebitId = debit_id,
+                        Amount = amount,
+                        CreatedBy = userId,
+                        CreatedAt = now,
+                        UpdatedAt = now
+                    };
+                    _context.ReceiptDetails.Add(entity_detail);
+                }
+                await _context.SaveChangesAsync();
+                var code_receipt_thu = await SqlServerHelpers.GenerateCodeEfAsync(conn, tran.GetDbTransaction(), "receipts", "code_receipt", OffsetDto.StorageId, "PTDT"+OffsetDto.AccountingDate.ToString("yyMM"), 4);
+                var entity_thu = new Receipt
+                {
+                    AccountingDate = OffsetDto.AccountingDate,
+                    StorageId = OffsetDto.StorageId,
+                    CodeReceipt = code_receipt_thu,
+                    IncomeExpenseCategoryId = IncomeExpenseCategoryRepository.ThuDoiTru,
+                    FormOfPayment = 1,
+                    TypeReceipt = ReceiptRepositories.DoiTruCongNo,
+                    OffsetId = doitru.Id,
+                    CreatedBy = userId,
+                    CreatedAt = now,
+                    UpdatedAt = now,
+                    UpdatedBy = userId,
+                };
+
+                _context.Receipts.Add(entity_thu);
+                await _context.SaveChangesAsync();
+                foreach (var item in list_thu)
+                {
+                    int debit_id = item.GetProperty("id").GetInt32();
+                    int amount = item.GetProperty("conlai_tong").GetInt32();
+                    var entity_detail_thu = new ReceiptDetail
+                    {
+                        ReceiptId = entity_thu.Id,
+                        StorageId = OffsetDto.StorageId,
+                        AccountingDate = OffsetDto.AccountingDate,
+                        DebitId = debit_id,
+                        Amount = amount,
+                        CreatedBy = userId,
+                        CreatedAt = now,
+                        UpdatedAt = now
+                    };
+                    _context.ReceiptDetails.Add(entity_detail_thu);
+                }
+                await _context.SaveChangesAsync();
+                doitru.AReceiptId = entity.Id;
+                doitru.BReceiptId = entity_thu.Id;
+                _context.Offsets.Update(doitru);
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+                return ApiResponseResult(true, "Thêm thành công", entity);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
+            }
+        }
+        [HttpPost]
         [Route("create/chuyentiennoibo")]
         public async Task<IActionResult> CreateChuyenTienNoiBo([FromBody] ReceiptDto ReceiptDto)
         {

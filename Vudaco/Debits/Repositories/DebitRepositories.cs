@@ -423,18 +423,20 @@ namespace Vudaco.Debits.Repositories
                                     MAX(rdt.vat) AS vat,
                                     SUM(rdt.amount * (rdt.vat / 100.0)) + SUM(rdt.amount) AS total
                             FROM receipts r
+                            LEFT JOIN income_expense_categorys iecat
+                            ON iecat.id = r.income_expense_category_id
                             LEFT JOIN receipt_details rdt 
                                     ON rdt.receipt_id = r.id
                             WHERE 
                                     d.id = rdt.debit_id 
-                                    AND r.type_receipt = 0
+                                    AND iecat.type = 0
                                     AND r.deleted_at IS NULL
                                     AND rdt.deleted_at IS NULL
                     ) AS rdt_total
                     WHERE
                     p.status = 1
                     AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                    AND (d.service_id NOT IN (19) OR d.service_id IS NULL)
+                    AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
                     AND p.deleted_at IS NULL
                     AND f.deleted_at IS NULL
                     AND d.deleted_at IS NULL";
@@ -501,7 +503,7 @@ namespace Vudaco.Debits.Repositories
                     WHERE
                         p.status = 1
                         AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                        AND (d.service_id NOT IN (19) OR d.service_id IS NULL)
+                        AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
                         AND p.deleted_at IS NULL
                         AND f.deleted_at IS NULL
                         AND d.deleted_at IS NULL";
@@ -899,11 +901,13 @@ namespace Vudaco.Debits.Repositories
                                     MAX(rdt.vat) AS vat,
                                     SUM(rdt.amount * (rdt.vat / 100.0)) + SUM(rdt.amount) AS total
                             FROM receipts r
+                            LEFT JOIN income_expense_categorys iecat
+                            ON iecat.id = r.income_expense_category_id
                             LEFT JOIN receipt_details rdt 
                                     ON rdt.receipt_id = r.id
                             WHERE 
                                     d.id = rdt.debit_id 
-                                    AND r.type_receipt = 7
+                                    AND iecat.type = 1
                                     AND r.deleted_at IS NULL
                                     AND rdt.deleted_at IS NULL
                     ) AS rdt_total
@@ -1082,18 +1086,20 @@ namespace Vudaco.Debits.Repositories
                                     MAX(rdt.vat) AS vat,
                                     SUM(rdt.amount * (rdt.vat / 100.0)) + SUM(rdt.amount) AS total
                             FROM receipts r
+                            LEFT JOIN income_expense_categorys iecat
+                            ON iecat.id = r.income_expense_category_id
                             LEFT JOIN receipt_details rdt 
                                     ON rdt.receipt_id = r.id
                             WHERE 
                                     d.id = rdt.debit_id 
-                                    AND r.type_receipt = 0
+                                    AND iecat.type = 0
                                     AND r.deleted_at IS NULL
                                     AND rdt.deleted_at IS NULL
                     ) AS rdt_total
                     WHERE
                         p.status = 1
                         AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                        AND (d.service_id NOT IN (19) OR d.service_id IS NULL)
+                        AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
                         AND p.deleted_at IS NULL
                         AND d.deleted_at IS NULL
                         AND (d.price + (d.price * d.vat) / 100.0 - ISNULL(rdt_total.total, 0)) > 0";
@@ -1143,18 +1149,20 @@ namespace Vudaco.Debits.Repositories
                                 MAX(rdt.vat) AS vat,
                                 SUM(rdt.amount * (rdt.vat / 100.0)) + SUM(rdt.amount) AS total
                             FROM receipts r
+                            LEFT JOIN income_expense_categorys iecat
+                            ON iecat.id = r.income_expense_category_id
                             LEFT JOIN receipt_details rdt 
                                 ON rdt.receipt_id = r.id
                             WHERE 
                                 d.id = rdt.debit_id 
-                                AND r.type_receipt = 7
+                                AND iecat.type = 1
                                 AND r.deleted_at IS NULL
                                 AND rdt.deleted_at IS NULL
                     ) AS rdt_total
                     WHERE
                         p.status = 2
                         AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                        AND (d.service_id NOT IN (19) OR d.service_id IS NULL)
+                        AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
                         AND p.deleted_at IS NULL
                         AND d.deleted_at IS NULL
                         AND (d.purchase_price + (d.purchase_price * d.purchase_vat) / 100.0 - ISNULL(rdt_total.total, 0)) > 0";

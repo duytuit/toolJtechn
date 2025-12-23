@@ -1475,5 +1475,141 @@ namespace Vudaco.Debits.Repositories
 
             return _results;
         }
+
+        public async Task<PaginatedResultReact<object>> GetObjectDebitTongHopKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var _results = new PaginatedResultReact<object>();
+            var sql = $@"
+                      SELECT
+                        d.customer_detail_id,
+                        d.type,
+
+                        /* ===== DEBIT ===== */
+                        CAST(SUM(ISNULL(d.price, 0)) AS INT) AS debit_price,
+                        CAST(SUM(
+                            ISNULL(d.price, 0) + ISNULL(d.price * (d.vat / 100.0), 0)
+                        ) AS INT) AS debit_total,
+
+                        /* ===== RECEIPT ===== */
+                        CAST(SUM(ISNULL(rdt.amount, 0)) AS INT) AS receipt_amount,
+                        CAST(SUM(ISNULL(rdt.amount * (rdt.vat / 100.0), 0)) AS INT) AS receipt_vat,
+                        CAST(SUM(
+                            ISNULL(rdt.amount, 0) + ISNULL(rdt.amount * (rdt.vat / 100.0), 0)
+                        ) AS INT) AS receipt_total
+
+                    FROM debits d
+
+                    /* ===== RECEIPT (LEFT JOIN để giữ chưa thu) ===== */
+                    LEFT JOIN receipt_details rdt 
+                        ON rdt.debit_id = d.id
+                        AND rdt.deleted_at IS NULL
+
+                    LEFT JOIN receipts r 
+                        ON r.id = rdt.receipt_id
+                        AND r.deleted_at IS NULL";
+                    if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+                    {
+                        // Cộng thêm 1 ngày cho ToDate
+                        var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                        // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                        sql += $@" AND r.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                        AND r.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                    }
+                   sql += $@" LEFT JOIN income_expense_categorys iecat
+                        ON iecat.id = r.income_expense_category_id
+                        AND iecat.type = 0
+
+                    /* ===== MASTER DATA ===== */
+                    LEFT JOIN file_infos f 
+                        ON f.id = d.file_info_id
+
+                    LEFT JOIN partner_details p 
+                        ON p.id = d.customer_detail_id
+
+                    WHERE
+                        p.status = 1
+                        AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
+                        AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
+                        AND p.deleted_at IS NULL
+                        AND (f.deleted_at IS NULL OR d.file_info_id IS NULL)
+                        AND d.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.CustomerDetailId > 0)
+            {
+                sql += $@" AND d.customer_detail_id = {DebitDto.CustomerDetailId}";
+            }
+          
+            sql += "GROUP BY d.customer_detail_id, d.type";
+            var congnotonghop_kh = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["congnotonghop_kh"] = congnotonghop_kh;
+            sql = $@"
+                      SELECT
+                        d.customer_detail_id,
+                        d.type,
+
+                        /* ===== DEBIT ===== */
+                        CAST(SUM(ISNULL(d.price, 0)) AS INT) AS debit_price,
+                        CAST(SUM(
+                            ISNULL(d.price, 0) + ISNULL(d.price * (d.vat / 100.0), 0)
+                        ) AS INT) AS debit_total,
+
+                        /* ===== RECEIPT ===== */
+                        CAST(SUM(ISNULL(rdt.amount, 0)) AS INT) AS receipt_amount,
+                        CAST(SUM(ISNULL(rdt.amount * (rdt.vat / 100.0), 0)) AS INT) AS receipt_vat,
+                        CAST(SUM(
+                            ISNULL(rdt.amount, 0) + ISNULL(rdt.amount * (rdt.vat / 100.0), 0)
+                        ) AS INT) AS receipt_total
+
+                    FROM debits d
+
+                    /* ===== RECEIPT (LEFT JOIN để giữ chưa thu) ===== */
+                    LEFT JOIN receipt_details rdt 
+                        ON rdt.debit_id = d.id
+                        AND rdt.deleted_at IS NULL
+
+                    LEFT JOIN receipts r 
+                        ON r.id = rdt.receipt_id
+                        AND r.deleted_at IS NULL";
+            if (DebitDto.FromDate.HasValue)
+            {
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND r.accounting_date < '{DebitDto.FromDate.Value:yyyy-MM-dd}'";
+            }
+            sql += $@" LEFT JOIN income_expense_categorys iecat
+                        ON iecat.id = r.income_expense_category_id
+                        AND iecat.type = 0
+
+                    /* ===== MASTER DATA ===== */
+                    LEFT JOIN file_infos f 
+                        ON f.id = d.file_info_id
+
+                    LEFT JOIN partner_details p 
+                        ON p.id = d.customer_detail_id
+
+                    WHERE
+                        p.status = 1
+                        AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
+                        AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
+                        AND p.deleted_at IS NULL
+                        AND (f.deleted_at IS NULL OR d.file_info_id IS NULL)
+                        AND d.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.CustomerDetailId > 0)
+            {
+                sql += $@" AND d.customer_detail_id = {DebitDto.CustomerDetailId}";
+            }
+
+            sql += "GROUP BY d.customer_detail_id, d.type";
+            var congnotonghop_dk_kh = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["congnotonghop_dk_kh"] = congnotonghop_dk_kh;
+            return _results;
+        }
+
     }
 }

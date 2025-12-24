@@ -90,10 +90,10 @@ namespace JtechnApi.Controllers
             return ApiResponseResult<object>(true, "Lấy dữ liệu ok", new { config = Helper.ConfigRequiredByType(1), department = dept, emp_dept = emp_dept, emp = emp });
         }
         [HttpGet("config/jtechn/workGroup")]
-        public async Task<IActionResult> GetWorkGroup([FromQuery] int type = 1, string emps = null)
+        public async Task<IActionResult> GetWorkGroup([FromQuery] int type = 2, string emps = null)
         {
             var emp = await _emp.GetAll();
-            return ApiResponseResult<object>(true, "Lấy dữ liệu ok", new { config = Helper.ConfigRequiredByType(2), emp = emp });
+            return ApiResponseResult<object>(true, "Lấy dữ liệu ok", new { config = Helper.ConfigRequiredByType(type), emp = emp });
         }
         // POST api/upload/single
         [HttpPost("upload/single")]

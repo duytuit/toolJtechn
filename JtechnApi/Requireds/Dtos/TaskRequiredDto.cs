@@ -16,6 +16,7 @@ namespace JtechnApi.Requireds.Models
         [Required]
         public string Emp_depts { get; set; }
         public int UserId { get; set; }
+        public int DepartmentId { get; set; }
         public string Attach { get; set; }
         [Required]
         public string Task_types { get; set; }

@@ -198,6 +198,60 @@ namespace JtechnApi.Shares
                                     },
                     };
                     break;
+                case 3:
+                    result = new
+                    {
+                        from_dept = 0,
+                        to_dept = new List<int> { 5, 7, 4, 3, 2, 6 },
+                        confirm_by_type = "",
+                        confirm_from_dept = 0,
+                        confirm_to_dept = 2,
+                        confirm_by_from_dept = new List<int> { 3 },
+                        confirm_by_to_dept = new List<int> { 4, 5 },
+                        emp_dept = new[]
+                                    {
+                                        new {
+                                            id_dept = 5,
+                                            code_emp = new List<int> { 240929, 240923 },
+                                            group="Khánh"
+                                        },
+                                        new {
+                                            id_dept = 7,
+                                            code_emp = new List<int> { 240930, 240931 },
+                                            group="Cường"
+                                        },
+                                        new {
+                                            id_dept = 4,
+                                            code_emp = new List<int> { 240929, 240923 },
+                                            group="Hải"
+                                        },
+                                        new {
+                                            id_dept = 3,
+                                            code_emp = new List<int> { 240930, 240931 },
+                                            group="Quỳnh"
+                                        }
+                                    },
+                        work_group = new[]
+                                    {
+                                        new {
+                                            id=128,
+                                            group="Huệ"
+                                        },
+                                        new {
+                                             id=149,
+                                            group="Bích Liên"
+                                        },
+                                        new {
+                                             id=184,
+                                            group="Uyên"
+                                        },
+                                        new {
+                                             id=341,
+                                            group="Yến"
+                                        }
+                                    },
+                    };
+                    break;
                 default:
                     break;
             }

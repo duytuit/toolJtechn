@@ -14,6 +14,7 @@ namespace JtechnApi.Requireds.Models
         public string Code { get; set; }
         public string Code_nv { get; set; }
         public string Department { get; set; }
+        public int? DepartmentId { get; set; } = null;
         public string Content { get; set; }
         public int? From_type { get; set; }
         public int? Size { get; set; }

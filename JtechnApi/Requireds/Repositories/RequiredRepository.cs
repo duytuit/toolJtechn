@@ -165,6 +165,8 @@ namespace JtechnApi.Requireds.Repositories
 
             if (dto.From_type.HasValue)
                 whereEquals["from_type"] = dto.From_type.Value;
+            if (dto.DepartmentId.HasValue)
+                whereEquals["required_department_id"] = dto.DepartmentId.Value;
 
             if (dto.Created_client.HasValue)
                 whereEquals["created_client"] = dto.Created_client.Value;

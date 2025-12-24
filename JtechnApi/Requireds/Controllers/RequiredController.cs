@@ -356,7 +356,7 @@ namespace JtechnApi.Controllers
                 Attach = TaskRequiredDto.Attach,
                 Title = TaskRequiredDto.Code.Trim(),
                 From_type = RequiredRepository.from_type_task,
-                Required_department_id = 0,
+                Required_department_id = TaskRequiredDto.DepartmentId,
                 Receiving_department_ids = jsonArray,
                 Content_form = JsonSerializer.Serialize(content_form),
                 Type = 0,
@@ -392,7 +392,7 @@ namespace JtechnApi.Controllers
                             var sig = new SignatureSubmission
                             {
                                 Required_id = result.Result.Id,
-                                Department_id = 0,
+                                Department_id = TaskRequiredDto.DepartmentId,
                                 Approve_id = JsonSerializer.Serialize(new List<int> { intId }),
                                 Signature_id = intId,
                                 Status = 0,
@@ -475,7 +475,6 @@ namespace JtechnApi.Controllers
             _required.Attach = TaskRequiredDto.Attach;
             _required.Title = TaskRequiredDto.Code.Trim();
             _required.Code = TaskRequiredDto.Code.Trim();
-            _required.Required_department_id = 0;
             _required.Updated_by = TaskRequiredDto.UserId;
        
               /* 1️⃣  Lấy execution‑strategy */
@@ -505,7 +504,6 @@ namespace JtechnApi.Controllers
                             var signatureSubmission = new SignatureSubmission
                             {
                                 Required_id = result.Result.Id,
-                                Department_id = 0,
                                 Content = "",
                                 Positions = 0,
                                 Approve_id = JsonSerializer.Serialize(new List<int> { intId }),

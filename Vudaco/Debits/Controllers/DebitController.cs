@@ -131,11 +131,134 @@ namespace Vudaco.Debits.Controllers
         {
             // test
             var result = await _repoDebit.GetObjectDebitTongHopKHAsync(DebitDto, page, pageSize, cancellationToken);
+
+            var data = ((IEnumerable<dynamic>)result.Extra["congnotonghop_kh"]).Select(x => new
+                            {
+                                x.customer_detail_id,
+                                x.debit_price,
+                                x.debit_total,
+                                x.receipt_amount,
+                                x.receipt_total,
+                                x.receipt_vat,
+                                type = (int)x.type 
+                            }).ToList();
+            var data_dv = data.Where(x => new[] { 0, 1, 3, 4, 5, 8 }.Contains(x.type))
+                            .GroupBy(x => x.customer_detail_id)
+                            .Select(g => new
+                            {
+                                customer_detail_id = g.Key,
+                                debit_price = g.Sum(x => x.debit_price),
+                                debit_total = g.Sum(x => x.debit_total),
+                                receipt_amount = g.Sum(x => x.receipt_amount),
+                                receipt_total = g.Sum(x => x.receipt_total)
+                            }).ToList();
+         
+            var data_ch = data.Where(x => new[] { 2, 6 }.Contains(x.type))
+                            .GroupBy(x => x.customer_detail_id)
+                            .Select(g => new
+                            {
+                                customer_detail_id = g.Key,
+                                debit_price = g.Sum(x => x.debit_price),
+                                debit_total = g.Sum(x => x.debit_total),
+                                receipt_amount = g.Sum(x => x.receipt_amount),
+                                receipt_total = g.Sum(x => x.receipt_total)
+                            }).ToList();
+             var data_dk = ((IEnumerable<dynamic>)result.Extra["congnotonghop_dk_kh"]).Select(x => new
+                            {
+                                x.customer_detail_id,
+                                x.debit_price,
+                                x.debit_total,
+                                x.receipt_amount,
+                                x.receipt_total,
+                                x.receipt_vat,
+                                type = (int)x.type 
+                            }).ToList();
+            var data_dv_dk = data_dk.Where(x => new[] { 0, 1, 3, 4, 5, 8 }.Contains(x.type))
+                            .GroupBy(x => x.customer_detail_id)
+                            .Select(g => new
+                            {
+                                customer_detail_id = g.Key,
+                                debit_price = g.Sum(x => x.debit_price),
+                                debit_total = g.Sum(x => x.debit_total),
+                                receipt_amount = g.Sum(x => x.receipt_amount),
+                                receipt_total = g.Sum(x => x.receipt_total)
+                            }).ToList();
+            var data_ch_dk = data_dk.Where(x => new[] { 2, 6 }.Contains(x.type))
+                            .GroupBy(x => x.customer_detail_id)
+                            .Select(g => new
+                            {
+                                customer_detail_id = g.Key,
+                                debit_price = g.Sum(x => x.debit_price),
+                                debit_total = g.Sum(x => x.debit_total),
+                                receipt_amount = g.Sum(x => x.receipt_amount),
+                                receipt_total = g.Sum(x => x.receipt_total)
+                            }).ToList();
+              // Kiểm tra receipt liên quan
+         
+           var customers = await _context.PartnerDetails
+                .Where(d => d.Status == 1)
+                .Join(
+                    _context.Partners,
+                    pd => pd.PartnerId,
+                    p => p.Id,
+                    (pd, p) => new
+                    {
+                        p.Id,
+                        p.Abbreviation,
+                        p.Name
+                    }
+                )
+                .ToListAsync();
+            List<CongNoTongHopDto> cnth = new List<CongNoTongHopDto>();
+            var dvDict     = data_dv.ToDictionary(x => x.customer_detail_id);
+            var chDict     = data_ch.ToDictionary(x => x.customer_detail_id);
+            var dvDkDict   = data_dv_dk.ToDictionary(x => x.customer_detail_id);
+            var chDkDict   = data_ch_dk.ToDictionary(x => x.customer_detail_id);
+
+           foreach (var item in customers)
+            {
+                dvDict.TryGetValue(item.Id, out var dv);
+                chDict.TryGetValue(item.Id, out var ch);
+                dvDkDict.TryGetValue(item.Id, out var dvdk);
+                chDkDict.TryGetValue(item.Id, out var chdk);
+
+                var DVDK   = dvdk?.debit_total    ?? 0;
+                var CHDK   = chdk?.debit_total    ?? 0;
+                var TTDVDK = dvdk?.receipt_total  ?? 0;
+                var TTCHDK = chdk?.receipt_total  ?? 0;
+
+                var DVTK   = dv?.debit_total      ?? 0;
+                var CHTK   = ch?.debit_total      ?? 0;
+                var TTDVTK = dv?.receipt_total    ?? 0;
+                var TTCHTK = ch?.receipt_total    ?? 0;
+
+                cnth.Add(new CongNoTongHopDto
+                {
+                    Id = item.Id,
+                    Abbreviation = item.Abbreviation,
+                    Name = item.Name,
+
+                    DVDK = DVDK,
+                    CHDK = CHDK,
+                    TTDVDK = TTDVDK,
+                    TTCHDK = TTCHDK,
+
+                    DVTK = DVTK,
+                    CHTK = CHTK,
+                    TTDVTK = TTDVTK,
+                    TTCHTK = TTCHTK,
+
+                    DVCK = (DVDK - TTDVDK) + (DVTK - TTDVTK),
+                    CHCK = (CHDK - TTCHDK) + (CHTK - TTCHTK),
+                    CK = (DVDK - TTDVDK) + (DVTK - TTDVTK) + (CHDK - TTCHDK) + (CHTK - TTCHTK)
+                });
+            }
+            cnth = cnth.OrderBy(x =>(x.DVDK + x.CHDK + x.DVTK + x.CHTK + x.TTDVDK + x.TTCHDK + x.TTDVTK + x.TTCHTK) == 0).ToList();
             if (result == null)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
             }
-            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", cnth);
         }
         [HttpGet("congnochitietkh")]
         public async Task<IActionResult> GetCongNoChiTietKH(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)

@@ -1521,7 +1521,8 @@ namespace Vudaco.Debits.Repositories
 
                     /* ===== MASTER DATA ===== */
                     LEFT JOIN file_infos f 
-                        ON f.id = d.file_info_id
+                          ON f.id = d.file_info_id 
+                          AND f.deleted_at IS NULL
 
                     LEFT JOIN partner_details p 
                         ON p.id = d.customer_detail_id
@@ -1531,7 +1532,6 @@ namespace Vudaco.Debits.Repositories
                         AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
                         AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
                         AND p.deleted_at IS NULL
-                        AND (f.deleted_at IS NULL OR d.file_info_id IS NULL)
                         AND d.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
@@ -1542,7 +1542,8 @@ namespace Vudaco.Debits.Repositories
                 sql += $@" AND d.customer_detail_id = {DebitDto.CustomerDetailId}";
             }
           
-            sql += "GROUP BY d.customer_detail_id, d.type";
+            sql += " GROUP BY d.customer_detail_id, d.type";
+          
             var congnotonghop_kh = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["congnotonghop_kh"] = congnotonghop_kh;
             sql = $@"
@@ -1584,7 +1585,8 @@ namespace Vudaco.Debits.Repositories
 
                     /* ===== MASTER DATA ===== */
                     LEFT JOIN file_infos f 
-                        ON f.id = d.file_info_id
+                        ON f.id = d.file_info_id 
+                        AND f.deleted_at IS NULL
 
                     LEFT JOIN partner_details p 
                         ON p.id = d.customer_detail_id
@@ -1594,7 +1596,6 @@ namespace Vudaco.Debits.Repositories
                         AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
                         AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
                         AND p.deleted_at IS NULL
-                        AND (f.deleted_at IS NULL OR d.file_info_id IS NULL)
                         AND d.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
@@ -1605,7 +1606,8 @@ namespace Vudaco.Debits.Repositories
                 sql += $@" AND d.customer_detail_id = {DebitDto.CustomerDetailId}";
             }
 
-            sql += "GROUP BY d.customer_detail_id, d.type";
+            sql += " GROUP BY d.customer_detail_id, d.type";
+          
             var congnotonghop_dk_kh = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["congnotonghop_dk_kh"] = congnotonghop_dk_kh;
             return _results;

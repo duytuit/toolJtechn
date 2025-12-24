@@ -152,7 +152,7 @@ namespace Vudaco.Debits.Controllers
                                 receipt_amount = g.Sum(x => x.receipt_amount),
                                 receipt_total = g.Sum(x => x.receipt_total)
                             }).ToList();
-         
+           
             var data_ch = data.Where(x => new[] { 2, 6 }.Contains(x.type))
                             .GroupBy(x => x.customer_detail_id)
                             .Select(g => new
@@ -203,35 +203,38 @@ namespace Vudaco.Debits.Controllers
                     p => p.Id,
                     (pd, p) => new
                     {
-                        p.Id,
+                        pd.Id,
                         p.Abbreviation,
                         p.Name
                     }
                 )
                 .ToListAsync();
             List<CongNoTongHopDto> cnth = new List<CongNoTongHopDto>();
-            var dvDict     = data_dv.ToDictionary(x => x.customer_detail_id);
-            var chDict     = data_ch.ToDictionary(x => x.customer_detail_id);
-            var dvDkDict   = data_dv_dk.ToDictionary(x => x.customer_detail_id);
-            var chDkDict   = data_ch_dk.ToDictionary(x => x.customer_detail_id);
 
            foreach (var item in customers)
             {
-                dvDict.TryGetValue(item.Id, out var dv);
-                chDict.TryGetValue(item.Id, out var ch);
-                dvDkDict.TryGetValue(item.Id, out var dvdk);
-                chDkDict.TryGetValue(item.Id, out var chdk);
+                var _data_dv = data_dv.FirstOrDefault(x=>x.customer_detail_id == item.Id);
+                var _data_ch = data_ch.FirstOrDefault(x=>x.customer_detail_id == item.Id);
+                var _data_dv_dk = data_dv_dk.FirstOrDefault(x=>x.customer_detail_id == item.Id);
+                var _data_ch_dk = data_ch_dk.FirstOrDefault(x=>x.customer_detail_id == item.Id);
 
-                var DVDK   = dvdk?.debit_total    ?? 0;
-                var CHDK   = chdk?.debit_total    ?? 0;
-                var TTDVDK = dvdk?.receipt_total  ?? 0;
-                var TTCHDK = chdk?.receipt_total  ?? 0;
+                var DVDK = _data_dv_dk?.debit_total ?? 0;
+                var CHDK = _data_ch_dk?.debit_total ?? 0;
+                var TTDVDK = _data_dv_dk?.receipt_total ?? 0;
+                var TTCHDK = _data_ch_dk?.receipt_total ?? 0;
 
-                var DVTK   = dv?.debit_total      ?? 0;
-                var CHTK   = ch?.debit_total      ?? 0;
-                var TTDVTK = dv?.receipt_total    ?? 0;
-                var TTCHTK = ch?.receipt_total    ?? 0;
-
+                var DVTK = _data_dv?.debit_total ?? 0;
+                var CHTK = _data_ch?.debit_total ?? 0;
+                var TTDVTK = _data_dv?.receipt_total ?? 0;
+                var TTCHTK = _data_ch?.receipt_total ?? 0;
+               // nếu tất cả đều = 0 → bỏ
+                if (
+                    DVDK == 0 && CHDK == 0 &&
+                    TTDVDK == 0 && TTCHDK == 0 &&
+                    DVTK == 0 && CHTK == 0 &&
+                    TTDVTK == 0 && TTCHTK == 0
+                )
+                    continue;
                 cnth.Add(new CongNoTongHopDto
                 {
                     Id = item.Id,
@@ -253,7 +256,6 @@ namespace Vudaco.Debits.Controllers
                     CK = (DVDK - TTDVDK) + (DVTK - TTDVTK) + (CHDK - TTCHDK) + (CHTK - TTCHTK)
                 });
             }
-            cnth = cnth.OrderBy(x =>(x.DVDK + x.CHDK + x.DVTK + x.CHTK + x.TTDVDK + x.TTCHDK + x.TTDVTK + x.TTCHTK) == 0).ToList();
             if (result == null)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);

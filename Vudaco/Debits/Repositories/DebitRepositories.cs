@@ -1541,7 +1541,15 @@ namespace Vudaco.Debits.Repositories
             {
                 sql += $@" AND d.customer_detail_id = {DebitDto.CustomerDetailId}";
             }
-          
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+
             sql += " GROUP BY d.customer_detail_id, d.type";
           
             var congnotonghop_kh = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
@@ -1605,9 +1613,12 @@ namespace Vudaco.Debits.Repositories
             {
                 sql += $@" AND d.customer_detail_id = {DebitDto.CustomerDetailId}";
             }
-
+            if (DebitDto.FromDate.HasValue)
+            {
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date < '{DebitDto.FromDate.Value:yyyy-MM-dd}'";
+            }
             sql += " GROUP BY d.customer_detail_id, d.type";
-          
             var congnotonghop_dk_kh = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["congnotonghop_dk_kh"] = congnotonghop_dk_kh;
             return _results;

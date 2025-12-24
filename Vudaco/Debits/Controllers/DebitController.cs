@@ -135,11 +135,8 @@ namespace Vudaco.Debits.Controllers
             var data = ((IEnumerable<dynamic>)result.Extra["congnotonghop_kh"]).Select(x => new
                             {
                                 x.customer_detail_id,
-                                x.debit_price,
                                 x.debit_total,
-                                x.receipt_amount,
                                 x.receipt_total,
-                                x.receipt_vat,
                                 type = (int)x.type 
                             }).ToList();
             var data_dv = data.Where(x => new[] { 0, 1, 3, 4, 5, 8 }.Contains(x.type))
@@ -147,9 +144,7 @@ namespace Vudaco.Debits.Controllers
                             .Select(g => new
                             {
                                 customer_detail_id = g.Key,
-                                debit_price = g.Sum(x => x.debit_price),
                                 debit_total = g.Sum(x => x.debit_total),
-                                receipt_amount = g.Sum(x => x.receipt_amount),
                                 receipt_total = g.Sum(x => x.receipt_total)
                             }).ToList();
            
@@ -158,19 +153,14 @@ namespace Vudaco.Debits.Controllers
                             .Select(g => new
                             {
                                 customer_detail_id = g.Key,
-                                debit_price = g.Sum(x => x.debit_price),
                                 debit_total = g.Sum(x => x.debit_total),
-                                receipt_amount = g.Sum(x => x.receipt_amount),
                                 receipt_total = g.Sum(x => x.receipt_total)
                             }).ToList();
              var data_dk = ((IEnumerable<dynamic>)result.Extra["congnotonghop_dk_kh"]).Select(x => new
                             {
                                 x.customer_detail_id,
-                                x.debit_price,
                                 x.debit_total,
-                                x.receipt_amount,
                                 x.receipt_total,
-                                x.receipt_vat,
                                 type = (int)x.type 
                             }).ToList();
             var data_dv_dk = data_dk.Where(x => new[] { 0, 1, 3, 4, 5, 8 }.Contains(x.type))
@@ -178,9 +168,7 @@ namespace Vudaco.Debits.Controllers
                             .Select(g => new
                             {
                                 customer_detail_id = g.Key,
-                                debit_price = g.Sum(x => x.debit_price),
                                 debit_total = g.Sum(x => x.debit_total),
-                                receipt_amount = g.Sum(x => x.receipt_amount),
                                 receipt_total = g.Sum(x => x.receipt_total)
                             }).ToList();
             var data_ch_dk = data_dk.Where(x => new[] { 2, 6 }.Contains(x.type))
@@ -188,9 +176,7 @@ namespace Vudaco.Debits.Controllers
                             .Select(g => new
                             {
                                 customer_detail_id = g.Key,
-                                debit_price = g.Sum(x => x.debit_price),
                                 debit_total = g.Sum(x => x.debit_total),
-                                receipt_amount = g.Sum(x => x.receipt_amount),
                                 receipt_total = g.Sum(x => x.receipt_total)
                             }).ToList();
               // Kiểm tra receipt liên quan

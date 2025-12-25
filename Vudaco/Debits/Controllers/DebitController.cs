@@ -139,7 +139,7 @@ namespace Vudaco.Debits.Controllers
                                 x.receipt_total,
                                 type = (int)x.type 
                             }).ToList();
-            var data_dv = data.Where(x => new[] { 0, 1, 3, 4, 5, 8 }.Contains(x.type))
+            var data_dv = data.Where(x => new[] { 0, 1, 4, 5, 8 }.Contains(x.type))
                             .GroupBy(x => x.customer_detail_id)
                             .Select(g => new
                             {
@@ -148,7 +148,7 @@ namespace Vudaco.Debits.Controllers
                                 receipt_total = g.Sum(x => x.receipt_total)
                             }).ToList();
            
-            var data_ch = data.Where(x => new[] { 2, 6 }.Contains(x.type))
+            var data_ch = data.Where(x => new[] { 2, 3, 6 }.Contains(x.type))
                             .GroupBy(x => x.customer_detail_id)
                             .Select(g => new
                             {
@@ -163,7 +163,7 @@ namespace Vudaco.Debits.Controllers
                                 x.receipt_total,
                                 type = (int)x.type 
                             }).ToList();
-            var data_dv_dk = data_dk.Where(x => new[] { 0, 1, 3, 4, 5, 8 }.Contains(x.type))
+            var data_dv_dk = data_dk.Where(x => new[] { 0, 1, 4, 5, 8 }.Contains(x.type))
                             .GroupBy(x => x.customer_detail_id)
                             .Select(g => new
                             {
@@ -171,7 +171,7 @@ namespace Vudaco.Debits.Controllers
                                 debit_total = g.Sum(x => x.debit_total),
                                 receipt_total = g.Sum(x => x.receipt_total)
                             }).ToList();
-            var data_ch_dk = data_dk.Where(x => new[] { 2, 6 }.Contains(x.type))
+            var data_ch_dk = data_dk.Where(x => new[] { 2, 3, 6 }.Contains(x.type))
                             .GroupBy(x => x.customer_detail_id)
                             .Select(g => new
                             {

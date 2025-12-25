@@ -435,6 +435,7 @@ namespace Vudaco.Debits.Repositories
                     ) AS rdt_total
                     WHERE
                     p.status = 1
+                    AND d.type in (0,1,2,3,4,5,6,8)
                     AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
                     AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
                     AND p.deleted_at IS NULL
@@ -481,13 +482,13 @@ namespace Vudaco.Debits.Repositories
                     FROM receipts r
                     INNER JOIN receipt_details rdt 
                         ON rdt.receipt_id = r.id
-                        AND rdt.deleted_at IS NULL
                     INNER JOIN income_expense_categorys iecat
                         ON iecat.id = r.income_expense_category_id
-                        AND iecat.type = 0
-                        AND iecat.deleted_at IS NULL
                     WHERE
                         r.deleted_at IS NULL
+                        AND iecat.type = 0
+                        AND iecat.deleted_at IS NULL
+                        AND rdt.deleted_at IS NULL
                     GROUP BY rdt.debit_id
                 )
 
@@ -503,13 +504,14 @@ namespace Vudaco.Debits.Repositories
                     ON rt.debit_id = d.id
                 LEFT JOIN file_infos f
                     ON f.id = d.file_info_id
-                    AND f.deleted_at IS NULL
                 INNER JOIN partner_details p 
                     ON p.id = d.customer_detail_id
-                    AND p.status = 1
-                    AND p.deleted_at IS NULL
                 WHERE
                     d.deleted_at IS NULL
+                    AND p.status = 1
+                    AND p.deleted_at IS NULL
+                    AND f.deleted_at IS NULL
+                    AND d.type in (0,1,2,3,4,5,6,8)
                     AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
                     AND (d.service_id NOT IN (19, 33) OR d.service_id IS NULL)";
             if (DebitDto.StorageId > 0)
@@ -535,8 +537,11 @@ namespace Vudaco.Debits.Repositories
                         FROM receipts r
                         INNER JOIN receipt_details rdt 
                             ON rdt.receipt_id = r.id
+                        INNER JOIN income_expense_categorys iecat
+                        ON iecat.id = r.income_expense_category_id
                         WHERE
-                            r.type_receipt = 7
+                            iecat.type = 0
+                            AND iecat.deleted_at IS NULL
                             AND r.deleted_at IS NULL
                             AND rdt.deleted_at IS NULL
                         GROUP BY rdt.debit_id
@@ -553,7 +558,7 @@ namespace Vudaco.Debits.Repositories
                     INNER JOIN partner_details p 
                         ON p.id = d.supplier_detail_id
                     LEFT JOIN file_infos f
-                    ON f.id = d.file_info_id
+                        ON f.id = d.file_info_id
                     LEFT JOIN ReceiptTotal rt 
                         ON rt.debit_id = d.id
                     WHERE
@@ -1103,6 +1108,7 @@ namespace Vudaco.Debits.Repositories
                     ) AS rdt_total
                     WHERE
                         p.status = 1
+                        AND d.type in (0,1,2,3,4,5,6,8)
                         AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
                         AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
                         AND p.deleted_at IS NULL
@@ -1495,12 +1501,12 @@ namespace Vudaco.Debits.Repositories
                 FROM receipts r
 		            LEFT JOIN income_expense_categorys iecat
                 ON iecat.id = r.income_expense_category_id
-                AND iecat.type = 0
                 INNER JOIN receipt_details rdt 
                     ON rdt.receipt_id = r.id
-                    AND rdt.deleted_at IS NULL
                 WHERE
 				    iecat.deleted_at IS NULL
+                    AND rdt.deleted_at IS NULL
+                    AND iecat.type = 0
                     AND r.deleted_at IS NULL";
                 if (DebitDto.StorageId > 0)
                 {
@@ -1519,29 +1525,23 @@ namespace Vudaco.Debits.Repositories
                 sql += $@"SELECT
                             d.customer_detail_id,
                             d.type,
-
                             CAST(SUM(
                                 (d.price + ISNULL(d.price_com, 0))
                                 * (1 + d.vat / 100.0)
                             ) AS INT) AS debit_total,
 
                             CAST(SUM(ISNULL(rt.receipt_total, 0)) AS INT) AS receipt_total
-
                         FROM debits d
-
                         LEFT JOIN file_infos f
                             ON f.id = d.file_info_id
-                            AND f.deleted_at IS NULL
-
                         INNER JOIN partner_details p 
                             ON p.id = d.customer_detail_id
-                            AND p.deleted_at IS NULL
-
                         LEFT JOIN ReceiptTotal rt 
                             ON rt.debit_id = d.id
-
                         WHERE
                             p.status = 1
+                            AND f.deleted_at IS NULL
+                            AND p.deleted_at IS NULL
                             AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
                             AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
                             AND d.deleted_at IS NULL";
@@ -1562,7 +1562,6 @@ namespace Vudaco.Debits.Repositories
                 sql += $@" AND d.customer_detail_id = {DebitDto.CustomerDetailId}";
             }
             sql += " GROUP BY d.customer_detail_id, d.type";
-          
             var congnotonghop_kh = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["congnotonghop_kh"] = congnotonghop_kh;
             sql = $@"
@@ -1576,12 +1575,13 @@ namespace Vudaco.Debits.Repositories
                 FROM receipts r
 		            LEFT JOIN income_expense_categorys iecat
                 ON iecat.id = r.income_expense_category_id
-                AND iecat.type = 0
                 INNER JOIN receipt_details rdt 
                     ON rdt.receipt_id = r.id
-                    AND rdt.deleted_at IS NULL
                 WHERE
 				    iecat.deleted_at IS NULL
+                    AND iecat.type = 0
+                    AND rdt.deleted_at IS NULL
+                    AND iecat.deleted_at IS NULL
                     AND r.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
@@ -1597,29 +1597,23 @@ namespace Vudaco.Debits.Repositories
             sql += $@"SELECT
                             d.customer_detail_id,
                             d.type,
-
                             CAST(SUM(
                                 (d.price + ISNULL(d.price_com, 0))
                                 * (1 + d.vat / 100.0)
                             ) AS INT) AS debit_total,
 
                             CAST(SUM(ISNULL(rt.receipt_total, 0)) AS INT) AS receipt_total
-
                         FROM debits d
-
                         LEFT JOIN file_infos f
                             ON f.id = d.file_info_id
-                            AND f.deleted_at IS NULL
-
                         INNER JOIN partner_details p 
                             ON p.id = d.customer_detail_id
-                            AND p.deleted_at IS NULL
-
                         LEFT JOIN ReceiptTotal rt 
                             ON rt.debit_id = d.id
-
                         WHERE
                             p.status = 1
+                            AND p.deleted_at IS NULL
+                            AND f.deleted_at IS NULL
                             AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
                             AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
                             AND d.deleted_at IS NULL";

@@ -1088,6 +1088,8 @@ namespace Vudaco.Debits.Repositories
                         -- Công nợ còn lại
                         (d.price + (d.price * d.vat) / 100.0 - ISNULL(rdt_total.total, 0)) AS remain_debit
                     FROM debits d
+                    LEFT JOIN file_infos f
+                    ON f.id = d.file_info_id
                     LEFT JOIN partner_details p 
                         ON p.id = d.customer_detail_id
                     OUTER APPLY (
@@ -1113,6 +1115,7 @@ namespace Vudaco.Debits.Repositories
                         AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
                         AND p.deleted_at IS NULL
                         AND d.deleted_at IS NULL
+                        AND f.deleted_at IS NULL
                         AND (d.price + (d.price * d.vat) / 100.0 - ISNULL(rdt_total.total, 0)) > 0";
             if (DebitDto.StorageId > 0)
             {
@@ -1152,6 +1155,8 @@ namespace Vudaco.Debits.Repositories
                         CAST(ISNULL(rdt_total.total, 0) AS INT) AS receipt_total,
                         (d.purchase_price + (d.purchase_price * d.purchase_vat) / 100.0 - ISNULL(rdt_total.total, 0)) AS remain_debit
                     FROM debits d
+                    LEFT JOIN file_infos f
+                    ON f.id = d.file_info_id
                     LEFT JOIN partner_details p 
                         ON p.id = d.supplier_detail_id
                     OUTER APPLY (
@@ -1176,6 +1181,7 @@ namespace Vudaco.Debits.Repositories
                         AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
                         AND p.deleted_at IS NULL
                         AND d.deleted_at IS NULL
+                        AND f.deleted_at IS NULL
                         AND (d.purchase_price + (d.purchase_price * d.purchase_vat) / 100.0 - ISNULL(rdt_total.total, 0)) > 0";
             if (DebitDto.StorageId > 0)
             {

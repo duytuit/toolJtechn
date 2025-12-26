@@ -1642,5 +1642,155 @@ namespace Vudaco.Debits.Repositories
             return _results;
         }
 
+        public async Task<PaginatedResultReact<object>> GetObjectDebitTongHopNCCAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var _results = new PaginatedResultReact<object>();
+            var sql = $@"
+            WITH ReceiptTotal AS (
+                SELECT
+                    rdt.debit_id,
+                    SUM(
+                        ISNULL(rdt.amount, 0)
+                        + ISNULL(rdt.amount * (rdt.vat / 100.0), 0)
+                    ) AS receipt_total
+                FROM receipts r
+		            LEFT JOIN income_expense_categorys iecat
+                ON iecat.id = r.income_expense_category_id
+                INNER JOIN receipt_details rdt 
+                    ON rdt.receipt_id = r.id
+                WHERE
+				    iecat.deleted_at IS NULL
+                    AND rdt.deleted_at IS NULL
+                    AND iecat.type = 1
+                    AND r.deleted_at IS NULL";
+                if (DebitDto.StorageId > 0)
+                {
+                    sql += $@" AND r.storage_id = {DebitDto.StorageId}";
+                }
+                if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+                {
+                    // Cộng thêm 1 ngày cho ToDate
+                    var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                    // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                    sql += $@" AND r.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                    AND r.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                }
+                sql += $@" GROUP BY rdt.debit_id)";
+
+                sql += $@"SELECT
+                            d.supplier_detail_id,
+                            d.type,
+                            CAST(SUM(
+                                (d.purchase_price + ISNULL(d.purchase_com, 0))
+                                * (1 + d.purchase_vat / 100.0)
+                            ) AS INT) AS debit_total,
+
+                            CAST(SUM(ISNULL(rt.receipt_total, 0)) AS INT) AS receipt_total
+                        FROM debits d
+                        LEFT JOIN file_infos f
+                            ON f.id = d.file_info_id
+                        INNER JOIN partner_details p 
+                            ON p.id = d.supplier_detail_id
+                        LEFT JOIN ReceiptTotal rt 
+                            ON rt.debit_id = d.id
+                        WHERE
+                            p.status = 2
+                            AND f.deleted_at IS NULL
+                            AND p.deleted_at IS NULL
+                            AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
+                            AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
+                            AND d.deleted_at IS NULL";
+            
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            if (DebitDto.SupplierDetailId > 0)
+            {
+                sql += $@" AND d.supplier_detail_id = {DebitDto.SupplierDetailId}";
+            }
+            sql += " GROUP BY d.supplier_detail_id, d.type";
+            //  _ = Task.Run(() => Helper.SendTelegramMessageAsync(sql));
+            var congnotonghop_ncc = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["congnotonghop_ncc"] = congnotonghop_ncc;
+            sql = $@"
+                 WITH ReceiptTotal AS (
+                SELECT
+                    rdt.debit_id,
+                    SUM(
+                        ISNULL(rdt.amount, 0)
+                        + ISNULL(rdt.amount * (rdt.vat / 100.0), 0)
+                    ) AS receipt_total
+                FROM receipts r
+		            LEFT JOIN income_expense_categorys iecat
+                ON iecat.id = r.income_expense_category_id
+                INNER JOIN receipt_details rdt 
+                    ON rdt.receipt_id = r.id
+                WHERE
+				    iecat.deleted_at IS NULL
+                    AND iecat.type = 1
+                    AND rdt.deleted_at IS NULL
+                    AND iecat.deleted_at IS NULL
+                    AND r.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND r.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue)
+            {
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND r.accounting_date < '{DebitDto.FromDate.Value:yyyy-MM-dd}'";
+            }
+            sql += $@" GROUP BY rdt.debit_id)";
+
+            sql += $@"SELECT
+                            d.supplier_detail_id,
+                            d.type,
+                            CAST(SUM(
+                                (d.purchase_price + ISNULL(d.purchase_com, 0))
+                                * (1 + d.purchase_vat / 100.0)
+                            ) AS INT) AS debit_total,
+
+                            CAST(SUM(ISNULL(rt.receipt_total, 0)) AS INT) AS receipt_total
+                        FROM debits d
+                        LEFT JOIN file_infos f
+                            ON f.id = d.file_info_id
+                        INNER JOIN partner_details p 
+                            ON p.id = d.supplier_detail_id
+                        LEFT JOIN ReceiptTotal rt 
+                            ON rt.debit_id = d.id
+                        WHERE
+                            p.status = 2
+                            AND p.deleted_at IS NULL
+                            AND f.deleted_at IS NULL
+                            AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
+                            AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
+                            AND d.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue)
+            {
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date < '{DebitDto.FromDate.Value:yyyy-MM-dd}'";
+            }
+            if (DebitDto.SupplierDetailId > 0)
+            {
+                sql += $@" AND d.supplier_detail_id = {DebitDto.SupplierDetailId}";
+            }
+            sql += " GROUP BY d.supplier_detail_id, d.type";
+            var congnotonghop_dk_ncc = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["congnotonghop_dk_ncc"] = congnotonghop_dk_ncc;
+            return _results;
+        }
     }
 }

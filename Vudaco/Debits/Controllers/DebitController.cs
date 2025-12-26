@@ -248,6 +248,128 @@ namespace Vudaco.Debits.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", cnth);
         }
+        [HttpGet("congnotonghopncc")]
+        public async Task<IActionResult> GetObjectDebitTongHopNCCAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectDebitTongHopNCCAsync(DebitDto, page, pageSize, cancellationToken);
+
+            var data = ((IEnumerable<dynamic>)result.Extra["congnotonghop_ncc"]).Select(x => new
+                            {
+                                x.supplier_detail_id,
+                                x.debit_total,
+                                x.receipt_total,
+                                type = (int)x.type 
+                            }).ToList();
+            var data_dv = data.Where(x => new[] { 0, 1, 4, 7, 10 ,12 }.Contains(x.type))
+                            .GroupBy(x => x.supplier_detail_id)
+                            .Select(g => new
+                            {
+                                supplier_detail_id = g.Key,
+                                debit_total = g.Sum(x => x.debit_total),
+                                receipt_total = g.Sum(x => x.receipt_total)
+                            }).ToList();
+           
+            var data_ch = data.Where(x => new[] { 2, 3, 11 }.Contains(x.type))
+                            .GroupBy(x => x.supplier_detail_id)
+                            .Select(g => new
+                            {
+                                supplier_detail_id = g.Key,
+                                debit_total = g.Sum(x => x.debit_total),
+                                receipt_total = g.Sum(x => x.receipt_total)
+                            }).ToList();
+             var data_dk = ((IEnumerable<dynamic>)result.Extra["congnotonghop_dk_ncc"]).Select(x => new
+                            {
+                                x.supplier_detail_id,
+                                x.debit_total,
+                                x.receipt_total,
+                                type = (int)x.type 
+                            }).ToList();
+            var data_dv_dk = data_dk.Where(x => new[] { 0, 1, 4, 7, 10 ,12 }.Contains(x.type))
+                            .GroupBy(x => x.supplier_detail_id)
+                            .Select(g => new
+                            {
+                                supplier_detail_id = g.Key,
+                                debit_total = g.Sum(x => x.debit_total),
+                                receipt_total = g.Sum(x => x.receipt_total)
+                            }).ToList();
+            var data_ch_dk = data_dk.Where(x => new[] { 2, 3, 11 }.Contains(x.type))
+                            .GroupBy(x => x.supplier_detail_id)
+                            .Select(g => new
+                            {
+                                supplier_detail_id = g.Key,
+                                debit_total = g.Sum(x => x.debit_total),
+                                receipt_total = g.Sum(x => x.receipt_total)
+                            }).ToList();
+              // Kiểm tra receipt liên quan
+         
+           var customers = await _context.PartnerDetails
+                .Where(d => d.Status == 2)
+                .Join(
+                    _context.Partners,
+                    pd => pd.PartnerId,
+                    p => p.Id,
+                    (pd, p) => new
+                    {
+                        pd.Id,
+                        p.Abbreviation,
+                        p.Name
+                    }
+                )
+                .ToListAsync();
+            List<CongNoTongHopDto> cnth = new List<CongNoTongHopDto>();
+
+           foreach (var item in customers)
+            {
+                var _data_dv = data_dv.FirstOrDefault(x=>x.supplier_detail_id == item.Id);
+                var _data_ch = data_ch.FirstOrDefault(x=>x.supplier_detail_id == item.Id);
+                var _data_dv_dk = data_dv_dk.FirstOrDefault(x=>x.supplier_detail_id == item.Id);
+                var _data_ch_dk = data_ch_dk.FirstOrDefault(x=>x.supplier_detail_id == item.Id);
+
+                var DVDK = _data_dv_dk?.debit_total ?? 0;
+                var CHDK = _data_ch_dk?.debit_total ?? 0;
+                var TTDVDK = _data_dv_dk?.receipt_total ?? 0;
+                var TTCHDK = _data_ch_dk?.receipt_total ?? 0;
+
+                var DVTK = _data_dv?.debit_total ?? 0;
+                var CHTK = _data_ch?.debit_total ?? 0;
+                var TTDVTK = _data_dv?.receipt_total ?? 0;
+                var TTCHTK = _data_ch?.receipt_total ?? 0;
+               // nếu tất cả đều = 0 → bỏ
+                if (
+                    DVDK == 0 && CHDK == 0 &&
+                    TTDVDK == 0 && TTCHDK == 0 &&
+                    DVTK == 0 && CHTK == 0 &&
+                    TTDVTK == 0 && TTCHTK == 0
+                )
+                    continue;
+                cnth.Add(new CongNoTongHopDto
+                {
+                    Id = item.Id,
+                    Abbreviation = item.Abbreviation,
+                    Name = item.Name,
+
+                    DVDK = DVDK,
+                    CHDK = CHDK,
+                    TTDVDK = TTDVDK,
+                    TTCHDK = TTCHDK,
+
+                    DVTK = DVTK,
+                    CHTK = CHTK,
+                    TTDVTK = TTDVTK,
+                    TTCHTK = TTCHTK,
+
+                    DVCK = (DVDK - TTDVDK) + (DVTK - TTDVTK),
+                    CHCK = (CHDK - TTCHDK) + (CHTK - TTCHTK),
+                    CK = (DVDK - TTDVDK) + (DVTK - TTDVTK) + (CHDK - TTCHDK) + (CHTK - TTCHTK)
+                });
+            }
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", cnth);
+        }
         [HttpGet("congnochitietkh")]
         public async Task<IActionResult> GetCongNoChiTietKH(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
         {

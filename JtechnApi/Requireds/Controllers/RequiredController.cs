@@ -405,7 +405,7 @@ namespace JtechnApi.Controllers
                         {
                             id = 0,
                             job_id = result.Result.Id,
-                            job_name = result.Result.Code + "lúc:" + result.Result.Created_at,
+                            job_name = result.Result.Code + "lúc : " + result.Result.Created_at,
                             app = "task",
                             code = __emp.Code,
                             link = $"http://192.168.207.6:8088/admin/internalCommunication",
@@ -424,7 +424,7 @@ namespace JtechnApi.Controllers
                             MessageText = JsonSerializer.Serialize(new
                             {
                                 job_id = result.Result.Id,
-                                job_name = result.Result.Code + "lúc:"+ result.Result.Created_at,
+                                job_name = result.Result.Code + "lúc : "+ result.Result.Created_at,
                                 app = "task",
                                 code = __emp.Code,
                                 link = $"http://192.168.207.6:8088/admin/internalCommunication",
@@ -522,7 +522,7 @@ namespace JtechnApi.Controllers
                             MessageText = JsonSerializer.Serialize(new
                             {
                                 job_id = result.Result.Id,
-                                job_name = result.Result.Code + "lúc:" + result.Result.Created_at,
+                                job_name = result.Result.Code + "lúc : " + result.Result.Created_at,
                                 app = "task",
                                 code = __emp.Code,
                                 link = $"http://192.168.207.6:8088/admin/internalCommunication",

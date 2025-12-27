@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,22 +47,28 @@ namespace TestNotify
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            var obj = new
-            {
-                Event = 15,
-                Chanel = "dencanhbao_cd_dap",
-                MessageText = JsonConvert.SerializeObject(new
-                {
-                    job_id = 1223,
-                    app = "task",
-                    job_name = "34ACVEG6",
-                    code = "240404",
-                    link = "http://192.168.207.6:8088/admin",
-                    status = 0
-                })
-            };
-            string jsonData = JsonConvert.SerializeObject(obj);
-            await _client.SendMessageAsync(jsonData, _cts.Token);
+            var client = new HttpClient();
+
+            var request = new HttpRequestMessage(
+                HttpMethod.Post,
+                "http://192.168.207.6:8088/storeDataUmesenVer2"
+            );
+
+            //request.Headers.Add(
+            //    "Cookie",
+            //    "jtec_hn_session=Iu0KAvgUUujYJjlAQdnTUxckO3EJJPFyxrLX0VKa"
+            //);
+
+            var collection = new List<KeyValuePair<string, string>>();
+            collection.Add(new KeyValuePair<string, string>("content", "@2025-12-26 13:44:08|...|...|...|...|...|...|...|...|0|0"));
+            collection.Add(new KeyValuePair<string, string>("arrayImage", "b"));
+
+            request.Content = new FormUrlEncodedContent(collection);
+
+            var response = await client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            Console.WriteLine(await response.Content.ReadAsStringAsync());
         }
 
         private async void button2_Click(object sender, EventArgs e)

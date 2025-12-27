@@ -434,9 +434,8 @@ namespace Vudaco.Debits.Controllers
 
                 // Dữ liệu không có file
                 var groupedDataNoFile = data
-                    .Where(x => x.type == 1 && x.file_info_id == null)
+                    .Where(x => x.file_info_id == null)
                     .ToList();
-
                 // Merge vào chung loại anonymous type
                 if (groupedDataNoFile.Any())
                 {
@@ -555,96 +554,145 @@ namespace Vudaco.Debits.Controllers
                 int startRow = 15;
                 int currentRow = startRow;
                 int row = startRow;
-               // return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", groupedData);
                 for (int i = 0; i < groupedData.Count; i++)
                 {
                     var group = groupedData[i];
 
                     // Lấy bản ghi đầu tiên trong group (để lấy thông tin chung)
                     var first = group.Items.First();
-                   //return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", first);
-                        // Tính tổng và count
-                    int soLuong = group.Items.Where(x=> x.type == 1 && x.file_info_id == first.file_info_id).Count();
-                    decimal price = data.Where(x => new int[] { 0,1, 4, 5 ,8}.Contains((int)x.type) && x.file_info_id == first.file_info_id).Sum(x => x.price + x.price_com);
-                    decimal price_dv = data
-                            .Where(x => new int[] { 0,1, 4, 5 ,8}.Contains((int)x.type) && x.file_info_id == first.file_info_id)
-                                            .Sum(x =>
-                                            {
-                                                decimal total_price = (decimal)x.price + (decimal)x.price_com;
-                                                decimal vat = (decimal)x.vat;
-                                                return total_price+ (total_price * vat / 100m); // giá + VAT
-                                            });
-                    decimal price_thue = data.Where(x => x.file_info_id == first.file_info_id).Sum(x =>((decimal)x.price + (decimal)x.price_com) * (decimal)x.vat / 100);
-                    decimal price_ch = data.Where(x => new int[] { 2, 3, 6 }.Contains((int)x.type) && x.file_info_id == first.file_info_id)
-                                                    .Sum(x =>
-                                                    {
-                                                        decimal price = (decimal)x.price;
-                                                        decimal vat = (decimal)x.vat;
-                                                        return price + (price * vat / 100m); // giá + VAT
-                                                    });
-                    decimal thanhtien = data.Where(x => x.file_info_id == first.file_info_id).Sum(x =>
-                    {
-                        decimal total_price = (decimal)x.price + (decimal)x.price_com;
-                        decimal vat = (decimal)x.vat;
-                        return total_price+ (total_price * vat / 100m); // giá + VAT
-                    }
-                    );
-                   // return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", first);
-                    ws.Cell(row, 1).Value = i + 1; // STT
-                    ws.Cell(row, 2).Value = first.accounting_date.ToString("dd/MM/yyyy");
-                    ws.Cell(row, 3).Value = first.customer_vehicle_type ?? "";
-                    ws.Cell(row, 4).Value = first.vehicle_number ?? "";
-                    ws.Cell(row, 5).Value = first.name;
-                    ws.Cell(row, 6).Value = "Chuyến";
-                    ws.Cell(row, 7).Value = soLuong; // count
 
-                    ws.Cell(row, 8).Value = price;
-                    ws.Cell(row, 8).Style.NumberFormat.Format = "#,##0";
-
-                    ws.Cell(row, 9).Value = first.vat; // thuế suất, nếu cố định thì gán %
-                    ws.Cell(row, 10).Value = price_thue;
-                    ws.Cell(row, 10).Style.NumberFormat.Format = "#,##0";
-
-                    ws.Cell(row, 11).Value = price_dv;
-                    ws.Cell(row, 11).Style.NumberFormat.Format = "#,##0";
-
-                    ws.Cell(row, 12).Value = price_ch;
-                    ws.Cell(row, 12).Style.NumberFormat.Format = "#,##0";
-
-                    ws.Cell(row, 13).Value = thanhtien;
-                    ws.Cell(row, 13).Style.NumberFormat.Format = "#,##0";
-                    ContractFiles.Models.FileInfo _fileInfo = new ContractFiles.Models.FileInfo();
                     if ( first.file_info_id > 0)
                     {
+                         ContractFiles.Models.FileInfo _fileInfo = new ContractFiles.Models.FileInfo();
                         _fileInfo = list_file.FirstOrDefault(x => x.Id == (long)first.file_info_id);
+
+                        int soLuong = group.Items.Where(x=> x.type == 1 && x.file_info_id == first.file_info_id).Count();
+                        decimal price = data.Where(x => new int[] { 0,1, 4, 5 ,8}.Contains((int)x.type) && x.file_info_id == first.file_info_id).Sum(x => x.price + x.price_com);
+                        decimal price_dv = data
+                                .Where(x => new int[] { 0,1, 4, 5 ,8}.Contains((int)x.type) && x.file_info_id == first.file_info_id)
+                                                .Sum(x =>
+                                                {
+                                                    decimal total_price = (decimal)x.price + (decimal)x.price_com;
+                                                    decimal vat = (decimal)x.vat;
+                                                    return total_price+ (total_price * vat / 100m); // giá + VAT
+                                                });
+                        decimal price_thue = data.Where(x => x.file_info_id == first.file_info_id).Sum(x =>((decimal)x.price + (decimal)x.price_com) * (decimal)x.vat / 100);
+                        decimal price_ch = data.Where(x => new int[] { 2, 3, 6 }.Contains((int)x.type) && x.file_info_id == first.file_info_id)
+                                                        .Sum(x =>
+                                                        {
+                                                            decimal price = (decimal)x.price;
+                                                            decimal vat = (decimal)x.vat;
+                                                            return price + (price * vat / 100m); // giá + VAT
+                                                        });
+                        decimal thanhtien = data.Where(x => x.file_info_id == first.file_info_id).Sum(x =>
+                        {
+                            decimal total_price = (decimal)x.price + (decimal)x.price_com;
+                            decimal vat = (decimal)x.vat;
+                            return total_price+ (total_price * vat / 100m); // giá + VAT
+                        }
+                        );
+                    // return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", first);
+                        ws.Cell(row, 1).Value = i + 1; // STT
+                        ws.Cell(row, 2).Value = first.accounting_date.ToString("dd/MM/yyyy");
+                        ws.Cell(row, 3).Value = first.customer_vehicle_type ?? "";
+                        ws.Cell(row, 4).Value = first.vehicle_number ?? "";
+                        ws.Cell(row, 5).Value = first.name;
+                        ws.Cell(row, 6).Value = "Chuyến";
+                        ws.Cell(row, 7).Value = soLuong; // count
+
+                        ws.Cell(row, 8).Value = price;
+                        ws.Cell(row, 8).Style.NumberFormat.Format = "#,##0";
+
+                        ws.Cell(row, 9).Value = first.vat; // thuế suất, nếu cố định thì gán %
+                        ws.Cell(row, 10).Value = price_thue;
+                        ws.Cell(row, 10).Style.NumberFormat.Format = "#,##0";
+
+                        ws.Cell(row, 11).Value = price_dv;
+                        ws.Cell(row, 11).Style.NumberFormat.Format = "#,##0";
+
+                        ws.Cell(row, 12).Value = price_ch;
+                        ws.Cell(row, 12).Style.NumberFormat.Format = "#,##0";
+
+                        ws.Cell(row, 13).Value = thanhtien;
+                        ws.Cell(row, 13).Style.NumberFormat.Format = "#,##0";
+                        ws.Cell(row, 14).Value = _fileInfo != null ? (_fileInfo.FileNumber??"") : "";
+                        ws.Cell(row, 15).Value = _fileInfo != null ? (_fileInfo.Bill ?? _fileInfo.Declaration ?? "") : "";
+                        ws.Cell(row, 16).Value = first.cus_bill ?? "";
+                        // Nối TenDichVu + ThanhTien
+                        var dichVuStr = string.Join("; ",
+                            data.Where(x => new int[] { 2, 3, 6 }.Contains((int)x.type) && x.file_info_id == first.file_info_id)
+                                .Select(x =>
+                                {
+                                    decimal price = (decimal)x.price;
+                                    decimal vat = (decimal)x.vat;
+
+                                    decimal total = price + (price * vat / 100m); // giá + VAT
+
+                                    return $"{x.name}: {total:N0}";
+                                })
+                        );
+                        ws.Cell(row, 17).Value = dichVuStr;
+                        // Nối GhiChu
+                        var ghiChuStr = string.Join("; ",
+                                data.Where(x => !string.IsNullOrEmpty((string)x.note) && x.file_info_id == first.file_info_id)
+                                .Select(x => (string)x.note)
+                        );
+                        ws.Cell(row, 18).Value = ghiChuStr;
+                        row++;
                     }
-                    ws.Cell(row, 14).Value = _fileInfo != null ? (_fileInfo.FileNumber??"") : "";
-                    ws.Cell(row, 15).Value = _fileInfo != null ? (_fileInfo.Bill ?? _fileInfo.Declaration ?? "") : "";
-                     ws.Cell(row, 16).Value = first.cus_bill ?? "";
-                    // Nối TenDichVu + ThanhTien
-                   var dichVuStr = string.Join("; ",
-                        data.Where(x => new int[] { 2, 3, 6 }.Contains((int)x.type) && x.file_info_id == first.file_info_id)
-                            .Select(x =>
-                            {
-                                decimal price = (decimal)x.price;
-                                decimal vat = (decimal)x.vat;
+                    else
+                    {
+                        foreach (var item in group.Items)
+                        {
+                              // Tính giá
+                            decimal price_dv = (decimal)item.price + (decimal)item.price_com;
+                            decimal price = (decimal)item.price;
 
-                                decimal total = price + (price * vat / 100m); // giá + VAT
+                            decimal vatAmount_dv = price_dv * (decimal)item.vat / 100m;
+                            decimal vatAmount = price * (decimal)item.vat / 100m;
 
-                                return $"{x.name}: {total:N0}";
-                            })
-                    );
-                    ws.Cell(row, 17).Value = dichVuStr;
-                    // Nối GhiChu
-                    var ghiChuStr = string.Join("; ",
-                             data.Where(x => !string.IsNullOrEmpty((string)x.note) && x.file_info_id == first.file_info_id)
-                            .Select(x => (string)x.note)
-                    );
-                    ws.Cell(row, 18).Value = ghiChuStr;
-                    row++;
+                            decimal total_price_dv = new int[] { 0,1, 4, 5,8}.Contains((int)item.type)
+                                ? (price_dv + vatAmount_dv)
+                                : 0;
+
+                            decimal price_thue_dv = vatAmount_dv;
+
+                            decimal price_ch = new int[] { 2, 3, 6 }.Contains((int)item.type)
+                                ? (price + vatAmount)
+                                : 0;
+
+                            ws.Cell(row, 1).Value = i + 1; // STT
+                            ws.Cell(row, 2).Value = item.accounting_date.ToString("dd/MM/yyyy");
+                            ws.Cell(row, 3).Value = item.customer_vehicle_type ?? "";
+                            ws.Cell(row, 4).Value = item.vehicle_number ?? "";
+                            ws.Cell(row, 5).Value = item.name;
+                            ws.Cell(row, 6).Value = "Chuyến";
+                            ws.Cell(row, 7).Value = 1; // count
+
+                            ws.Cell(row, 8).Value = (item.type == 0 || item.type == 1 || item.type == 4 || item.type == 5|| item.type == 8)? price_dv:0;
+                            ws.Cell(row, 8).Style.NumberFormat.Format = "#,##0";
+
+                            ws.Cell(row, 9).Value = item.vat; // thuế suất, nếu cố định thì gán %
+                            ws.Cell(row, 10).Value = (item.type == 0 || item.type == 1 || item.type == 4 || item.type == 5|| item.type == 8)? vatAmount_dv:0;
+                            ws.Cell(row, 10).Style.NumberFormat.Format = "#,##0";
+
+                            ws.Cell(row, 11).Value = total_price_dv;
+                            ws.Cell(row, 11).Style.NumberFormat.Format = "#,##0";
+
+                            ws.Cell(row, 12).Value = price_ch;
+                            ws.Cell(row, 12).Style.NumberFormat.Format = "#,##0";
+
+                            ws.Cell(row, 13).Value = price_dv + vatAmount_dv;
+                            ws.Cell(row, 13).Style.NumberFormat.Format = "#,##0";
+                            ws.Cell(row, 14).Value = "";
+                            ws.Cell(row, 15).Value = "";
+                            ws.Cell(row, 16).Value = item.cus_bill ?? "";
+                            row++;
+                        }
+                    }
+                   //return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", first);
+                        // Tính tổng và count
                 }
-          
-
                 int dataStartRow = 15;
                 int dataEndRow = ws.LastRowUsed().RowNumber();
                 int totalRow = dataEndRow + 1;
@@ -771,7 +819,7 @@ namespace Vudaco.Debits.Controllers
 
                 // Dữ liệu không có file
                 var groupedDataNoFile = data
-                    .Where(x => x.type == 1 && x.file_info_id == null)
+                    .Where(x => x.file_info_id == null)
                     .ToList();
 
                 // Merge vào chung loại anonymous type

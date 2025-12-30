@@ -229,8 +229,7 @@ namespace Vudaco.Receipts.Repositories
                     ) d ON d.receipt_id = r.id
                     LEFT JOIN income_expense_categorys iecat
                         ON iecat.id = r.income_expense_category_id
-                        AND iecat.deleted_at IS NULL
-                    WHERE r.type_receipt NOT IN (12) AND r.deleted_at IS NULL";
+                    WHERE r.type_receipt NOT IN (12) AND r.deleted_at IS NULL  AND iecat.deleted_at IS NULL";
             if (ReceiptDto.StorageId > 0)
             {
                 sql += $@" AND r.storage_id = {ReceiptDto.StorageId}";
@@ -287,9 +286,9 @@ namespace Vudaco.Receipts.Repositories
                     ) d ON d.receipt_id = r.id
                     LEFT JOIN income_expense_categorys iecat
                         ON iecat.id = r.income_expense_category_id
-                        AND iecat.deleted_at IS NULL
                     WHERE r.type_receipt NOT IN (12)
-                      AND r.deleted_at IS NULL";
+                      AND r.deleted_at IS NULL
+                      AND iecat.deleted_at IS NULL";
             if (ReceiptDto.StorageId > 0)
             {
                 sql += $@" AND r.storage_id = {ReceiptDto.StorageId}";
@@ -360,10 +359,24 @@ namespace Vudaco.Receipts.Repositories
                     SELECT 
                         r.*,
                         d.amount,
-                        d.total
+                        d.total,
+                        db.min_status
                     FROM receipts r
+                    LEFT JOIN file_infos f
+                        ON f.id = r.file_info_id
+                    -- ✅ Lấy MIN(status) từ debits
+                    LEFT JOIN (
+                        SELECT
+                            file_info_id,
+                            MIN(status) AS min_status
+                        FROM debits
+                        WHERE deleted_at IS NULL
+                        AND type in (0,2) 
+                        GROUP BY file_info_id
+                    ) db
+                        ON db.file_info_id = r.file_info_id
                     LEFT JOIN income_expense_categorys iecat
-                    ON iecat.id = r.income_expense_category_id
+                        ON iecat.id = r.income_expense_category_id
                     LEFT JOIN (
                         SELECT 
                             receipt_id,
@@ -372,11 +385,13 @@ namespace Vudaco.Receipts.Repositories
                         FROM receipt_details
                         WHERE deleted_at IS NULL
                         GROUP BY receipt_id
-                    ) d ON d.receipt_id = r.id
+                    ) d 
+                        ON d.receipt_id = r.id
                     WHERE 
                         r.status IS NULL
                         AND iecat.type = 1
-                        AND r.deleted_at IS NULL";
+                        AND r.deleted_at IS NULL
+                        AND f.deleted_at IS NULL";
             if (ReceiptDto.StorageId > 0)
             {
                 sql += $@" AND r.storage_id = {ReceiptDto.StorageId}";
@@ -409,7 +424,6 @@ namespace Vudaco.Receipts.Repositories
                     FROM receipts r
                     LEFT JOIN income_expense_categorys iecat
                     ON iecat.id = r.income_expense_category_id
-                    AND iecat.deleted_at IS NULL
                     LEFT JOIN (
                         SELECT 
                             receipt_id,
@@ -421,6 +435,7 @@ namespace Vudaco.Receipts.Repositories
                     ) d ON d.receipt_id = r.id
                     WHERE 
                         r.income_expense_category_id = 33
+                        AND iecat.deleted_at IS NULL
                         AND r.deleted_at IS NULL";
             if (ReceiptDto.StorageId > 0)
             {

@@ -57,8 +57,8 @@ namespace NotifycationApp
             shakeTimer.Start();
             connectSocket();
             //richTextBox1.AppendText("Mở website tại: http://192.168.207.6:8088/admin \n");
-          
             CreateNotifyIcon();
+            FileLogger.CleanupOldLogs();
         }
         private async void connectSocket()
         {
@@ -185,9 +185,16 @@ namespace NotifycationApp
                 }
 
             }));
-           // _client.OnConnected += () => Invoke((Action)(() => labelStatus.Text = "🟢 Connected"));
-           // _client.OnDisconnected += () => Invoke((Action)(() => labelStatus.Text = "🔴 Disconnected"));
+            // _client.OnConnected += () => Invoke((Action)(() => labelStatus.Text = "🟢 Connected"));
+            // _client.OnDisconnected += () => Invoke((Action)(() => labelStatus.Text = "🔴 Disconnected"));
+            _client.OnLog += (log) =>
+            {
+                FileLogger.Log(log);
+                Invoke((Action)(() =>
+                {
 
+                }));
+            };
             await _client.StartAsync(_cts.Token);
             var obj = new
             {
@@ -353,14 +360,14 @@ namespace NotifycationApp
                 MessageBox.Show("Lỗi LoadDataAsync: " + ex.Message);
             }
         }
-        private async void button1_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
             Environment.SetEnvironmentVariable("MY_APP_CODENV", txtCodeNV.Text, EnvironmentVariableTarget.User);
-            await LoadDataAsync();
+            _ = LoadDataAsync();
         }
-        private async void timer1_Tick(object sender, EventArgs e)
+        private void timer1_Tick(object sender, EventArgs e)
         {
-            await LoadDataAsync();
+            //await LoadDataAsync();
         }
         private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
@@ -545,10 +552,10 @@ namespace NotifycationApp
             catch { return false; }
         }
 
-        private async void Form1_Load(object sender, EventArgs e)
+        private void Form1_Load(object sender, EventArgs e)
         {
             checkUpdate();
-            await LoadDataAsync();
+            _ = LoadDataAsync();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)

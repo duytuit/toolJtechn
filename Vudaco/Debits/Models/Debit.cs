@@ -104,6 +104,9 @@ namespace Vudaco.Debits.Models
         [Required]
         [Column("purchase_status")]
         public int PurchaseStatus { get; set; }
+        [Required]
+        [Column("service_status")]
+        public int ServiceStatus { get; set; }
 
         [Column("data")]
         public string Data { get; set; }

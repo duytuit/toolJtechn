@@ -191,7 +191,7 @@ namespace Vudaco.Debits.Repositories
             return Task.FromResult(Debit);
         }
 
-        public async Task<PaginatedResultReact<object>> GetObjectDebitCuocTamThuAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
+        public async Task<PaginatedResultReact<object>> GetObjectDebitPhiTamThuAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
         {
            var sql = $@"
                     SELECT 
@@ -204,16 +204,16 @@ namespace Vudaco.Debits.Repositories
                     FROM debits d
                     LEFT JOIN file_infos f 
                         ON d.file_info_id = f.id
-                        AND d.customer_detail_id = f.customer_detail_id
                     LEFT JOIN partner_details p 
                         ON p.id = d.customer_detail_id
                     LEFT JOIN confirm_file_infos cf 
                          ON d.id = cf.debit_id
                     WHERE 
                         p.status = 1
+                        AND d.service_id = 33
                         AND d.deleted_at IS NULL
                         AND p.deleted_at IS NULL
-                        AND f.deleted_at IS NULL
+                        AND (f.deleted_at IS NULL OR d.file_info_id IS NULL)
                         AND cf.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
@@ -243,13 +243,7 @@ namespace Vudaco.Debits.Repositories
                 Data = results,
             };
             return _results;
-        }
-
-        public Task<PaginatedResultReact<object>> GetObjectDebitTamThuAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
+        }      
         public async Task<PaginatedResultReact<object>> GetObjectDebitDauKyKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
         {
              var sql = $@"
@@ -435,8 +429,9 @@ namespace Vudaco.Debits.Repositories
                     ) AS rdt_total
                     WHERE
                     p.status = 1
+                    AND d.type in (0,1,2,3,4,5,6,8)
                     AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                    AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
+                    AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
                     AND p.deleted_at IS NULL
                     AND f.deleted_at IS NULL
                     AND d.deleted_at IS NULL";
@@ -481,13 +476,13 @@ namespace Vudaco.Debits.Repositories
                     FROM receipts r
                     INNER JOIN receipt_details rdt 
                         ON rdt.receipt_id = r.id
-                        AND rdt.deleted_at IS NULL
                     INNER JOIN income_expense_categorys iecat
                         ON iecat.id = r.income_expense_category_id
-                        AND iecat.type = 0
-                        AND iecat.deleted_at IS NULL
                     WHERE
                         r.deleted_at IS NULL
+                        AND iecat.type = 0
+                        AND iecat.deleted_at IS NULL
+                        AND rdt.deleted_at IS NULL
                     GROUP BY rdt.debit_id
                 )
 
@@ -503,13 +498,14 @@ namespace Vudaco.Debits.Repositories
                     ON rt.debit_id = d.id
                 LEFT JOIN file_infos f
                     ON f.id = d.file_info_id
-                    AND f.deleted_at IS NULL
                 INNER JOIN partner_details p 
                     ON p.id = d.customer_detail_id
-                    AND p.status = 1
-                    AND p.deleted_at IS NULL
                 WHERE
                     d.deleted_at IS NULL
+                    AND p.status = 1
+                    AND p.deleted_at IS NULL
+                    AND f.deleted_at IS NULL
+                    AND d.type in (0,1,2,3,4,5,6,8)
                     AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
                     AND (d.service_id NOT IN (19, 33) OR d.service_id IS NULL)";
             if (DebitDto.StorageId > 0)
@@ -535,8 +531,11 @@ namespace Vudaco.Debits.Repositories
                         FROM receipts r
                         INNER JOIN receipt_details rdt 
                             ON rdt.receipt_id = r.id
+                        INNER JOIN income_expense_categorys iecat
+                        ON iecat.id = r.income_expense_category_id
                         WHERE
-                            r.type_receipt = 7
+                            iecat.type = 0
+                            AND iecat.deleted_at IS NULL
                             AND r.deleted_at IS NULL
                             AND rdt.deleted_at IS NULL
                         GROUP BY rdt.debit_id
@@ -553,14 +552,14 @@ namespace Vudaco.Debits.Repositories
                     INNER JOIN partner_details p 
                         ON p.id = d.supplier_detail_id
                     LEFT JOIN file_infos f
-                    ON f.id = d.file_info_id
+                        ON f.id = d.file_info_id
                     LEFT JOIN ReceiptTotal rt 
                         ON rt.debit_id = d.id
                     WHERE
                         p.status = 2
                         AND d.supplier_detail_id IS NOT NULL
                         AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                        AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
+                        AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
                         AND p.deleted_at IS NULL
                         AND f.deleted_at IS NULL
                         AND d.deleted_at IS NULL";
@@ -1083,6 +1082,8 @@ namespace Vudaco.Debits.Repositories
                         -- Công nợ còn lại
                         (d.price + (d.price * d.vat) / 100.0 - ISNULL(rdt_total.total, 0)) AS remain_debit
                     FROM debits d
+                    LEFT JOIN file_infos f
+                    ON f.id = d.file_info_id
                     LEFT JOIN partner_details p 
                         ON p.id = d.customer_detail_id
                     OUTER APPLY (
@@ -1103,10 +1104,12 @@ namespace Vudaco.Debits.Repositories
                     ) AS rdt_total
                     WHERE
                         p.status = 1
+                        AND d.type in (0,1,2,3,4,5,6,8)
                         AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                        AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
+                        AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
                         AND p.deleted_at IS NULL
                         AND d.deleted_at IS NULL
+                        AND f.deleted_at IS NULL
                         AND (d.price + (d.price * d.vat) / 100.0 - ISNULL(rdt_total.total, 0)) > 0";
             if (DebitDto.StorageId > 0)
             {
@@ -1146,6 +1149,8 @@ namespace Vudaco.Debits.Repositories
                         CAST(ISNULL(rdt_total.total, 0) AS INT) AS receipt_total,
                         (d.purchase_price + (d.purchase_price * d.purchase_vat) / 100.0 - ISNULL(rdt_total.total, 0)) AS remain_debit
                     FROM debits d
+                    LEFT JOIN file_infos f
+                    ON f.id = d.file_info_id
                     LEFT JOIN partner_details p 
                         ON p.id = d.supplier_detail_id
                     OUTER APPLY (
@@ -1167,9 +1172,10 @@ namespace Vudaco.Debits.Repositories
                     WHERE
                         p.status = 2
                         AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                        AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
+                        AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
                         AND p.deleted_at IS NULL
                         AND d.deleted_at IS NULL
+                        AND f.deleted_at IS NULL
                         AND (d.purchase_price + (d.purchase_price * d.purchase_vat) / 100.0 - ISNULL(rdt_total.total, 0)) > 0";
             if (DebitDto.StorageId > 0)
             {
@@ -1215,7 +1221,7 @@ namespace Vudaco.Debits.Repositories
                     AND d.type NOT IN (10,11)
                     AND d.supplier_detail_id IS NOT NULL
                     AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                    AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
+                    AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
                     AND p.deleted_at IS NULL
                     AND f.deleted_at IS NULL
                     AND d.deleted_at IS NULL";
@@ -1260,7 +1266,7 @@ namespace Vudaco.Debits.Repositories
                     AND d.type NOT IN (10,11)
                     AND d.supplier_detail_id IS NOT NULL
                     AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                    AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
+                    AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
                     AND p.deleted_at IS NULL
                     AND f.deleted_at IS NULL
                     AND d.deleted_at IS NULL";
@@ -1495,12 +1501,12 @@ namespace Vudaco.Debits.Repositories
                 FROM receipts r
 		            LEFT JOIN income_expense_categorys iecat
                 ON iecat.id = r.income_expense_category_id
-                AND iecat.type = 0
                 INNER JOIN receipt_details rdt 
                     ON rdt.receipt_id = r.id
-                    AND rdt.deleted_at IS NULL
                 WHERE
 				    iecat.deleted_at IS NULL
+                    AND rdt.deleted_at IS NULL
+                    AND iecat.type = 0
                     AND r.deleted_at IS NULL";
                 if (DebitDto.StorageId > 0)
                 {
@@ -1519,31 +1525,25 @@ namespace Vudaco.Debits.Repositories
                 sql += $@"SELECT
                             d.customer_detail_id,
                             d.type,
-
                             CAST(SUM(
                                 (d.price + ISNULL(d.price_com, 0))
                                 * (1 + d.vat / 100.0)
                             ) AS INT) AS debit_total,
 
                             CAST(SUM(ISNULL(rt.receipt_total, 0)) AS INT) AS receipt_total
-
                         FROM debits d
-
                         LEFT JOIN file_infos f
                             ON f.id = d.file_info_id
-                            AND f.deleted_at IS NULL
-
                         INNER JOIN partner_details p 
                             ON p.id = d.customer_detail_id
-                            AND p.deleted_at IS NULL
-
                         LEFT JOIN ReceiptTotal rt 
                             ON rt.debit_id = d.id
-
                         WHERE
                             p.status = 1
+                            AND f.deleted_at IS NULL
+                            AND p.deleted_at IS NULL
                             AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                            AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
+                            AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
                             AND d.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
@@ -1562,7 +1562,6 @@ namespace Vudaco.Debits.Repositories
                 sql += $@" AND d.customer_detail_id = {DebitDto.CustomerDetailId}";
             }
             sql += " GROUP BY d.customer_detail_id, d.type";
-          
             var congnotonghop_kh = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["congnotonghop_kh"] = congnotonghop_kh;
             sql = $@"
@@ -1576,12 +1575,13 @@ namespace Vudaco.Debits.Repositories
                 FROM receipts r
 		            LEFT JOIN income_expense_categorys iecat
                 ON iecat.id = r.income_expense_category_id
-                AND iecat.type = 0
                 INNER JOIN receipt_details rdt 
                     ON rdt.receipt_id = r.id
-                    AND rdt.deleted_at IS NULL
                 WHERE
 				    iecat.deleted_at IS NULL
+                    AND iecat.type = 0
+                    AND rdt.deleted_at IS NULL
+                    AND iecat.deleted_at IS NULL
                     AND r.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
@@ -1597,31 +1597,25 @@ namespace Vudaco.Debits.Repositories
             sql += $@"SELECT
                             d.customer_detail_id,
                             d.type,
-
                             CAST(SUM(
                                 (d.price + ISNULL(d.price_com, 0))
                                 * (1 + d.vat / 100.0)
                             ) AS INT) AS debit_total,
 
                             CAST(SUM(ISNULL(rt.receipt_total, 0)) AS INT) AS receipt_total
-
                         FROM debits d
-
                         LEFT JOIN file_infos f
                             ON f.id = d.file_info_id
-                            AND f.deleted_at IS NULL
-
                         INNER JOIN partner_details p 
                             ON p.id = d.customer_detail_id
-                            AND p.deleted_at IS NULL
-
                         LEFT JOIN ReceiptTotal rt 
                             ON rt.debit_id = d.id
-
                         WHERE
                             p.status = 1
+                            AND p.deleted_at IS NULL
+                            AND f.deleted_at IS NULL
                             AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                            AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
+                            AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
                             AND d.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
@@ -1642,5 +1636,209 @@ namespace Vudaco.Debits.Repositories
             return _results;
         }
 
+        public async Task<PaginatedResultReact<object>> GetObjectDebitTongHopNCCAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var _results = new PaginatedResultReact<object>();
+            var sql = $@"
+            WITH ReceiptTotal AS (
+                SELECT
+                    rdt.debit_id,
+                    SUM(
+                        ISNULL(rdt.amount, 0)
+                        + ISNULL(rdt.amount * (rdt.vat / 100.0), 0)
+                    ) AS receipt_total
+                FROM receipts r
+		            LEFT JOIN income_expense_categorys iecat
+                ON iecat.id = r.income_expense_category_id
+                INNER JOIN receipt_details rdt 
+                    ON rdt.receipt_id = r.id
+                WHERE
+				    iecat.deleted_at IS NULL
+                    AND rdt.deleted_at IS NULL
+                    AND iecat.type = 1
+                    AND r.deleted_at IS NULL";
+                if (DebitDto.StorageId > 0)
+                {
+                    sql += $@" AND r.storage_id = {DebitDto.StorageId}";
+                }
+                if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+                {
+                    // Cộng thêm 1 ngày cho ToDate
+                    var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                    // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                    sql += $@" AND r.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                    AND r.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                }
+                sql += $@" GROUP BY rdt.debit_id)";
+
+                sql += $@"SELECT
+                            d.supplier_detail_id,
+                            d.type,
+                            CAST(SUM(
+                                (d.purchase_price + ISNULL(d.purchase_com, 0))
+                                * (1 + d.purchase_vat / 100.0)
+                            ) AS INT) AS debit_total,
+
+                            CAST(SUM(ISNULL(rt.receipt_total, 0)) AS INT) AS receipt_total
+                        FROM debits d
+                        LEFT JOIN file_infos f
+                            ON f.id = d.file_info_id
+                        INNER JOIN partner_details p 
+                            ON p.id = d.supplier_detail_id
+                        LEFT JOIN ReceiptTotal rt 
+                            ON rt.debit_id = d.id
+                        WHERE
+                            p.status = 2
+                            AND f.deleted_at IS NULL
+                            AND p.deleted_at IS NULL
+                            AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
+                            AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
+                            AND d.deleted_at IS NULL";
+            
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            if (DebitDto.SupplierDetailId > 0)
+            {
+                sql += $@" AND d.supplier_detail_id = {DebitDto.SupplierDetailId}";
+            }
+            sql += " GROUP BY d.supplier_detail_id, d.type";
+            //  _ = Task.Run(() => Helper.SendTelegramMessageAsync(sql));
+            var congnotonghop_ncc = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["congnotonghop_ncc"] = congnotonghop_ncc;
+            sql = $@"
+                 WITH ReceiptTotal AS (
+                SELECT
+                    rdt.debit_id,
+                    SUM(
+                        ISNULL(rdt.amount, 0)
+                        + ISNULL(rdt.amount * (rdt.vat / 100.0), 0)
+                    ) AS receipt_total
+                FROM receipts r
+		            LEFT JOIN income_expense_categorys iecat
+                ON iecat.id = r.income_expense_category_id
+                INNER JOIN receipt_details rdt 
+                    ON rdt.receipt_id = r.id
+                WHERE
+				    iecat.deleted_at IS NULL
+                    AND iecat.type = 1
+                    AND rdt.deleted_at IS NULL
+                    AND iecat.deleted_at IS NULL
+                    AND r.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND r.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue)
+            {
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND r.accounting_date < '{DebitDto.FromDate.Value:yyyy-MM-dd}'";
+            }
+            sql += $@" GROUP BY rdt.debit_id)";
+
+            sql += $@"SELECT
+                            d.supplier_detail_id,
+                            d.type,
+                            CAST(SUM(
+                                (d.purchase_price + ISNULL(d.purchase_com, 0))
+                                * (1 + d.purchase_vat / 100.0)
+                            ) AS INT) AS debit_total,
+
+                            CAST(SUM(ISNULL(rt.receipt_total, 0)) AS INT) AS receipt_total
+                        FROM debits d
+                        LEFT JOIN file_infos f
+                            ON f.id = d.file_info_id
+                        INNER JOIN partner_details p 
+                            ON p.id = d.supplier_detail_id
+                        LEFT JOIN ReceiptTotal rt 
+                            ON rt.debit_id = d.id
+                        WHERE
+                            p.status = 2
+                            AND p.deleted_at IS NULL
+                            AND f.deleted_at IS NULL
+                            AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
+                            AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
+                            AND d.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue)
+            {
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date < '{DebitDto.FromDate.Value:yyyy-MM-dd}'";
+            }
+            if (DebitDto.SupplierDetailId > 0)
+            {
+                sql += $@" AND d.supplier_detail_id = {DebitDto.SupplierDetailId}";
+            }
+            sql += " GROUP BY d.supplier_detail_id, d.type";
+            var congnotonghop_dk_ncc = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["congnotonghop_dk_ncc"] = congnotonghop_dk_ncc;
+            return _results;
+        }
+
+        public async Task<PaginatedResultReact<object>> GetObjectDebitPhiCuocAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+             var sql = $@"
+                    SELECT 
+                        d.*,
+                        cf.note AS cf_note,
+                        cf.status AS cf_status,
+                        cf.status_confirm AS cf_status_confirm,
+                        cf.updated_at AS cf_updated_at,
+                        cf.updated_by AS cf_updated_by
+                    FROM debits d
+                    LEFT JOIN file_infos f 
+                        ON d.file_info_id = f.id
+                    LEFT JOIN partner_details p 
+                        ON p.id = d.customer_detail_id
+                    LEFT JOIN confirm_file_infos cf 
+                         ON d.id = cf.debit_id
+                    WHERE 
+                        p.status = 1
+                        AND d.service_id = 19
+                        AND d.deleted_at IS NULL
+                        AND p.deleted_at IS NULL
+                        AND (f.deleted_at IS NULL OR d.file_info_id IS NULL)
+                        AND cf.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.ServiceId > 0)
+            {
+                sql += $@" AND d.service_id = {DebitDto.ServiceId}";
+            }
+            if (DebitDto.CustomerDetailId > 0)
+            {
+                sql += $@" AND d.customer_detail_id = {DebitDto.CustomerDetailId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+
+            sql += " ORDER BY d.updated_at DESC";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
     }
 }

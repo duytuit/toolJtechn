@@ -33,6 +33,10 @@ namespace Vudaco.Debits.Repositories
         public const int PhiDichVuDK_NCC = 10;
         public const int PhiChihoDK_NCC = 11;
         public const int PhiKhacNCC = 12;
+        //=============================================
+        public const int ServiceStatusDaHoanCuoc = 5;
+        public const int ServiceStatusDaHoanTien = 4;
+        public const int ServiceStatusDaHoanTra = 3;
         public DebitRepositories(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;
@@ -431,7 +435,7 @@ namespace Vudaco.Debits.Repositories
                     p.status = 1
                     AND d.type in (0,1,2,3,4,5,6,8)
                     AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                    AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
+                    AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status > 2) OR d.service_id IS NULL )
                     AND p.deleted_at IS NULL
                     AND f.deleted_at IS NULL
                     AND d.deleted_at IS NULL";
@@ -559,7 +563,7 @@ namespace Vudaco.Debits.Repositories
                         p.status = 2
                         AND d.supplier_detail_id IS NOT NULL
                         AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                        AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
+                        AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status > 2) OR d.service_id IS NULL )
                         AND p.deleted_at IS NULL
                         AND f.deleted_at IS NULL
                         AND d.deleted_at IS NULL";
@@ -1106,7 +1110,7 @@ namespace Vudaco.Debits.Repositories
                         p.status = 1
                         AND d.type in (0,1,2,3,4,5,6,8)
                         AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                        AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
+                        AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status > 2) OR d.service_id IS NULL )
                         AND p.deleted_at IS NULL
                         AND d.deleted_at IS NULL
                         AND f.deleted_at IS NULL
@@ -1172,7 +1176,7 @@ namespace Vudaco.Debits.Repositories
                     WHERE
                         p.status = 2
                         AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                        AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
+                        AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status > 2) OR d.service_id IS NULL )
                         AND p.deleted_at IS NULL
                         AND d.deleted_at IS NULL
                         AND f.deleted_at IS NULL
@@ -1221,7 +1225,7 @@ namespace Vudaco.Debits.Repositories
                     AND d.type NOT IN (10,11)
                     AND d.supplier_detail_id IS NOT NULL
                     AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                    AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
+                    AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status > 2) OR d.service_id IS NULL )
                     AND p.deleted_at IS NULL
                     AND f.deleted_at IS NULL
                     AND d.deleted_at IS NULL";
@@ -1266,7 +1270,7 @@ namespace Vudaco.Debits.Repositories
                     AND d.type NOT IN (10,11)
                     AND d.supplier_detail_id IS NOT NULL
                     AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                    AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
+                    AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status > 2) OR d.service_id IS NULL )
                     AND p.deleted_at IS NULL
                     AND f.deleted_at IS NULL
                     AND d.deleted_at IS NULL";
@@ -1543,7 +1547,7 @@ namespace Vudaco.Debits.Repositories
                             AND f.deleted_at IS NULL
                             AND p.deleted_at IS NULL
                             AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                            AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
+                            AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status > 2) OR d.service_id IS NULL )
                             AND d.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
@@ -1615,7 +1619,7 @@ namespace Vudaco.Debits.Repositories
                             AND p.deleted_at IS NULL
                             AND f.deleted_at IS NULL
                             AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                            AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
+                            AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status > 2) OR d.service_id IS NULL )
                             AND d.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
@@ -1692,7 +1696,7 @@ namespace Vudaco.Debits.Repositories
                             AND f.deleted_at IS NULL
                             AND p.deleted_at IS NULL
                             AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                            AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
+                            AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status > 2) OR d.service_id IS NULL )
                             AND d.deleted_at IS NULL";
             
             if (DebitDto.StorageId > 0)
@@ -1766,7 +1770,7 @@ namespace Vudaco.Debits.Repositories
                             AND p.deleted_at IS NULL
                             AND f.deleted_at IS NULL
                             AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                            AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status >= 2) OR d.service_id IS NULL )
+                            AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (19,33) AND d.service_status > 2) OR d.service_id IS NULL )
                             AND d.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {

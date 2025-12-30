@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Vudaco.Categorys.Repositories;
 using Vudaco.Controllers;
+using Vudaco.Debits.Repositories;
 using Vudaco.Receipts.Dtos;
 using Vudaco.Receipts.Models;
 using Vudaco.Receipts.Repositories;
@@ -215,6 +216,52 @@ namespace Vudaco.Receipts.Controllers
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
                 return ApiResponseResult(true, "Thêm thành công", entity);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
+            }
+        }
+        [HttpPost]
+        [Route("create/hoantratamthu")]
+        public async Task<IActionResult> CreateHoanTraTamThu([FromBody] ReceiptDto ReceiptDto)
+        {
+            // Kiểm tra chi tiết phiếu thu
+            if (string.IsNullOrEmpty(ReceiptDto.Debits))
+            {
+                return ApiResponseResult<object>(false, "Không có chi tiết phiếu thu", null);
+            }
+            List<JsonElement> list = null;
+            try
+            {
+                list = JsonSerializer.Deserialize<List<JsonElement>>(ReceiptDto.Debits);
+            }
+            catch
+            {
+                return ApiResponseResult<object>(false, "Dữ liệu chi tiết phiếu thu không hợp lệ", null);
+            }
+
+            if (list == null || list.Count == 0)
+            {
+                return ApiResponseResult<object>(false, "Không có chi tiết phiếu thu", null);
+            }
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                var now = DateTime.Now;
+                foreach (var item in list)
+                {
+                    int debit_id = item.GetProperty("id").GetInt32();
+                    var debit = _context.Debits.FirstOrDefault(x => x.Id == debit_id);
+                    if (debit == null) continue;
+                    debit.ServiceStatus = DebitRepositories.ServiceStatusDaHoanTra;
+                    _context.Debits.Update(debit);
+                }
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+                return ApiResponseResult<object>(true, "Thêm thành công", null);
             }
             catch (DbUpdateException ex)
             {

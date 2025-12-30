@@ -23,6 +23,7 @@ namespace Vudaco.Debits.Dtos
         public string Name { get; set; } = null!;
         public int PurchaseVat { get; set; }
         public int PurchaseStatus { get; set; }
+        public int ServiceStatus { get; set; }
         public string PurchaseNote { get; set; }
         public string PurchaseBill { get; set; }
         public DateTime? PurchaseAccountingDate { get; set; }

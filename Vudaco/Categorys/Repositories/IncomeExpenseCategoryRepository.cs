@@ -23,8 +23,10 @@ namespace Vudaco.Categorys.Repositories
         public const int ThuDK = 33;
         public const int ChiChuyenTienNoiBo = 26; // chi
         public const int ThuChuyenTienNoiBo = 27; // thu
+        public const int ThuGiaoNhan = 28; // thu giao nhận
         public const int ChiDoiTru = 32; // chi
         public const int ThuDoiTru = 31; // thu
+        public const int ThuLaiXe = 29; // thu
         public IncomeExpenseCategoryRepository(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;

@@ -12,7 +12,6 @@ namespace Vudaco.Debits.Models
         [Column("id")]
         public int Id { get; set; }
 
-        [Required]
         [Column("bill_id")]
         public int BillId { get; set; }
 

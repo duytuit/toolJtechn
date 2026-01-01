@@ -45,11 +45,11 @@ namespace Vudaco.Departments.Controllers
         public async Task<IActionResult> Create([FromBody] DepartmentDto DepartmentDto)
         {
             // Check trùng Name
-            var entity = await _context.Departments.FirstOrDefaultAsync(p => p.Name == DepartmentDto.Name);
+            var entity = await _context.Departments.FirstOrDefaultAsync(p =>p.StorageId == DepartmentDto.StorageId && p.Name == DepartmentDto.Name);
             if (entity != null)
                 return ApiResponseResult<object>(false, "Tên dữ liệu đã tồn tại", null);
             // Check trùng Code
-            entity = await _context.Departments.FirstOrDefaultAsync(p => p.Code == DepartmentDto.Code);
+            entity = await _context.Departments.FirstOrDefaultAsync(p => p.StorageId == DepartmentDto.StorageId && p.Code == DepartmentDto.Code);
             if (entity != null)
                 return ApiResponseResult<object>(false, "code dữ liệu đã tồn tại", null);
                 

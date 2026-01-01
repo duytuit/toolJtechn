@@ -38,6 +38,21 @@ namespace Vudaco.Storages.Repositories
             return Task.FromResult(Storage);
         }
 
+        public async Task<PaginatedResultReact<object>> GetByUserIdAsync(StorageDto StorageDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var sql = $@"SELECT s.* FROM employees e LEFT JOIN data_storages s on s.id = e.storage_id WHERE e.deleted_at IS NULL AND s.deleted_at IS NULL";
+            if (StorageDto.UserId > 0)
+            {
+                sql += $@" AND e.user_id = {StorageDto.UserId}";
+            }
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
+
         public async Task<PaginatedResultReact<object>> GetObjectTaskAsync(StorageDto StorageDto, int page, int pageSize, CancellationToken cancellationToken)
         {
             var whereEquals = new Dictionary<string, object>();

@@ -14,6 +14,7 @@ namespace Vudaco.Storages.Repositories
     public interface IStorageRepository : IBaseRepository<Storage>
     {
         Task<PaginatedResultReact<object>> GetObjectTaskAsync(StorageDto StorageDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<PaginatedResultReact<object>> GetByUserIdAsync(StorageDto StorageDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<Storage> ShowAsync(int id);
         Task<Storage> CreateAsync(Storage Storage);
         Task<Storage> UpdateAsync(Storage Storage);

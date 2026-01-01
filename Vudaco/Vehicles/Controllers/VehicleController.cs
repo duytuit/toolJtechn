@@ -47,7 +47,7 @@ namespace Vudaco.Vehicles.Controllers
         public async Task<IActionResult> Create([FromBody] VehicleDto VehicleDto)
         {
             // Check trùng Name
-            var entity = await _context.Vehicles.FirstOrDefaultAsync(p => p.NumberCode == VehicleDto.NumberCode);
+            var entity = await _context.Vehicles.FirstOrDefaultAsync(p =>p.StorageId == VehicleDto.StorageId && p.NumberCode == VehicleDto.NumberCode);
             if (entity != null)
                 return ApiResponseResult<object>(false, "Tên dữ liệu đã tồn tại", null);
                 

@@ -62,58 +62,69 @@ namespace Vudaco.Employees.Controllers
             {
                 return ApiResponseResult<object>(false, "Vui lòng chọn kho làm việc", null);
             }
-            if (await _context.Users.AnyAsync(u => u.Username == dto.Phone))
-                return ApiResponseResult<object>(false, "Số điện thoại đã được dùng làm username", null);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == dto.Phone);
 
-            if (await _context.Employees.AnyAsync(e => e.Phone == dto.Phone))
-                return ApiResponseResult<object>(false, "Số điện thoại đã tồn tại", null);
+            var employee = await _context.Employees.FirstOrDefaultAsync(u => u.StorageId == dto.StorageId && u.Phone == dto.Phone);
+
+            if (employee != null) return ApiResponseResult<object>(false, "Số điện thoại nguoi dung đã tồn tại", null);   
 
             using var tran = await _context.Database.BeginTransactionAsync();
             try
             {
                 // ====== CREATE USER ======
-                var user = new User
+                if (user == null)
                 {
-                    Username  = dto.Phone,
-                    Password  = !string.IsNullOrWhiteSpace(dto.Password) ? BCrypt.Net.BCrypt.HashPassword(dto.Password) : BCrypt.Net.BCrypt.HashPassword(dto.Phone),
-                    Email     = dto.Email,
-                    FirstName = dto.FirstName,
-                    LastName  = dto.LastName,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now,
-                    UpdatedBy = userId
-                };
+                    user = new User
+                    {
+                        Username = dto.Phone,
+                        Password = !string.IsNullOrWhiteSpace(dto.Password) ? BCrypt.Net.BCrypt.HashPassword(dto.Password) : BCrypt.Net.BCrypt.HashPassword(dto.Phone),
+                        Email = dto.Email,
+                        FirstName = dto.FirstName,
+                        LastName = dto.LastName,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now,
+                        UpdatedBy = userId
+                    };
 
-                _context.Users.Add(user);
-                await _context.SaveChangesAsync(); // cần để lấy user.Id
+                    _context.Users.Add(user);
+                    await _context.SaveChangesAsync(); // cần để lấy user.Id
+                }
 
                 // ====== CREATE EMPLOYEE ======
-                var employee = new Employee
+                if (employee == null)
                 {
-                    Code = SqlServerHelpers.GenerateSoChungTu(_configuration.GetConnectionString("DefaultConnection"), "employees", "code",dto.StorageId, "NV", 4),
-                    FirstName = dto.FirstName,
-                    LastName = dto.LastName,
-                    StorageId = dto.StorageId,
-                    CreatedBy = userId,
-                    BeginDateCompany = DateTime.Now,
-                    Phone = dto.Phone,
-                    Email = dto.Email,
-                    UserId = user.Id,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now,
-                    UpdatedBy = userId
-                };
-                _context.Employees.Add(employee);
-                await _context.SaveChangesAsync();
-                if (dto.EmployeeDepartment.DepartmentId > 0)
-                {
-                    var employeeDepartment = new EmployeeDepartment
+                    employee = new Employee
                     {
-                        EmployeeId = employee.Id,
-                        DepartmentId = dto.EmployeeDepartment.DepartmentId,
-                        StorageId = employee.StorageId,
+                        Code = SqlServerHelpers.GenerateSoChungTu(_configuration.GetConnectionString("DefaultConnection"), "employees", "code", dto.StorageId, "NV", 4),
+                        FirstName = dto.FirstName,
+                        LastName = dto.LastName,
+                        StorageId = dto.StorageId,
+                        CreatedBy = userId,
+                        BeginDateCompany = DateTime.Now,
+                        Phone = dto.Phone,
+                        Email = dto.Email,
+                        UserId = user.Id,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now,
+                        UpdatedBy = userId
                     };
-                    _context.EmployeeDepartments.Add(employeeDepartment);
+                    _context.Employees.Add(employee);
+                    await _context.SaveChangesAsync();
+                }
+              
+                if (dto.EmployeeDepartment?.DepartmentId > 0)
+                {
+                    var employeeDepartment = await _context.EmployeeDepartments.FirstOrDefaultAsync(u => u.StorageId == dto.StorageId && u.EmployeeId == employee.Id && u.DepartmentId == dto.EmployeeDepartment.DepartmentId);
+                    if (employeeDepartment == null)
+                    {
+                        employeeDepartment = new EmployeeDepartment
+                        {
+                            EmployeeId = employee.Id,
+                            DepartmentId = dto.EmployeeDepartment.DepartmentId,
+                            StorageId = employee.StorageId,
+                        };
+                        _context.EmployeeDepartments.Add(employeeDepartment);
+                    }
                 }
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();

@@ -12,6 +12,7 @@ namespace Vudaco.Storages.Dtos
         public string Name { get; set; }
         public string Note { get; set; }
         public string Address { get; set; }
+        public int? UserId { get; set; }
         public int? CreatedBy { get; set; }
         public int? UpdatedBy { get; set; }
         public int? DeletedBy { get; set; }

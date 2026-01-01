@@ -38,6 +38,6 @@ namespace Vudaco.Employees.Dtos
         public string BankName { get; set; }
         public int? UserId { get; set; }
         public string StorageIds { get; set; }
-        public EmployeeDepartment EmployeeDepartment { get; set; }
+        public EmployeeDepartment? EmployeeDepartment { get; set; } = null;
     }
 }

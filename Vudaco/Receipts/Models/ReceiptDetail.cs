@@ -22,6 +22,8 @@ namespace Vudaco.Receipts.Models
 
         [Column("debit_id")]
         public int? DebitId { get; set; }
+        [Column("debit_driver_id")]
+        public int? DebitDriverId { get; set; }
 
         [Required]
         [Column("accounting_date")]

@@ -44,8 +44,8 @@ namespace Vudaco.Categorys.Repositories
             var whereLikes = new Dictionary<string, string>();
             var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
             var orderByList = new List<string> {  "updated_at desc" , "id"};
-            if (ServiceCategoryDto.StorageId > 0)
-                whereEquals["storage_id"] = ServiceCategoryDto.StorageId;
+            // if (ServiceCategoryDto.StorageId > 0)
+            //     whereEquals["storage_id"] = ServiceCategoryDto.StorageId;
                 whereEquals["type"] = ServiceCategoryDto.Type;
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
@@ -85,7 +85,7 @@ namespace Vudaco.Categorys.Repositories
 
         public Task<ServiceCategory> UpdateAsync(ServiceCategory ServiceCategory)
         {
-              _context.ServiceCategorys.Update(ServiceCategory);
+            _context.ServiceCategorys.Update(ServiceCategory);
             _context.SaveChanges();
             return Task.FromResult(ServiceCategory);
         }

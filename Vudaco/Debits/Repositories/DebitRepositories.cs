@@ -555,7 +555,7 @@ namespace Vudaco.Debits.Repositories
                         p.status = 2
                         AND d.supplier_detail_id IS NOT NULL
                         AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                        AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (33) AND d.service_status > 2) OR d.service_id IS NULL )
+                        AND ( d.service_id NOT IN (19,33) OR d.service_id IS NULL )
                         AND p.deleted_at IS NULL
                         AND f.deleted_at IS NULL
                         AND d.deleted_at IS NULL";
@@ -914,7 +914,7 @@ namespace Vudaco.Debits.Repositories
                     WHERE
                     p.status = 2
                     AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                    AND (d.service_id NOT IN (19 ,33 ) OR d.service_id IS NULL)
+                    AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (33) AND d.service_status > 2) OR d.service_id IS NULL )
                     AND p.deleted_at IS NULL
                     AND f.deleted_at IS NULL
                     AND d.deleted_at IS NULL";

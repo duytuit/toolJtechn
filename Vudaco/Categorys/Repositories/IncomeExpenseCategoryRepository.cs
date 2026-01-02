@@ -53,8 +53,8 @@ namespace Vudaco.Categorys.Repositories
             var whereLikes = new Dictionary<string, string>();
             var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
             var orderByList = new List<string> {  "updated_at desc" , "id"};
-            if (IncomeExpenseCategoryDto.StorageId > 0)
-                whereEquals["storage_id"] = IncomeExpenseCategoryDto.StorageId;
+            // if (IncomeExpenseCategoryDto.StorageId > 0)
+            //     whereEquals["storage_id"] = IncomeExpenseCategoryDto.StorageId;
             if (IncomeExpenseCategoryDto.Type.HasValue)
                 whereEquals["type"] = IncomeExpenseCategoryDto.Type;
             if (IncomeExpenseCategoryDto.Enable.HasValue)

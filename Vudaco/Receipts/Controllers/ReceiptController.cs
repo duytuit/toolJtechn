@@ -485,13 +485,13 @@ namespace Vudaco.Receipts.Controllers
                     int debit_id = item.GetProperty("id").GetInt32();
                     int conlai_dv = item.GetProperty("conlai_dv").GetInt32();
                     int conlai_ch = item.GetProperty("conlai_ch").GetInt32();
-                    int price = item.GetProperty("price").GetInt32();
+                    int driver_fee = item.GetProperty("driver_fee").GetInt32();
                     int receipt_total = item.GetProperty("receipt_total").GetInt32();
-                    if (price - receipt_total <= 0)
+                    if (driver_fee - receipt_total <= 0)
                     {
                         continue;
                     }
-                    int new_price = (conlai_dv+conlai_ch) >0 ?(conlai_dv+conlai_ch) :price;
+                    int new_price = (conlai_dv+conlai_ch) >0 ?(conlai_dv+conlai_ch) :driver_fee;
                     // ✔️ Dùng GetDateTime() vì dữ liệu là ISO-8601
                     var accountingDate = item.GetProperty("accounting_date").GetDateTime();
                    

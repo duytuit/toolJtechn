@@ -30,7 +30,7 @@ namespace Vudaco.Receipts.Repositories
         public const int ChiKhac = 8; // chi khác
         public const int ChiNCC = 7;
         public const int ThuKhac = 9; // thu khác
-        public const int ChiMuaHangNCC = 4; // chưa dùng
+        public const int ChiMuaHangNCC = 4; // đã dùng
         public const int ThuBanHangKH = 5; // chưa dùng
         public const int ThuBanHangNV = 6; // chưa dùng
         //=============================================
@@ -229,7 +229,7 @@ namespace Vudaco.Receipts.Repositories
                     ) d ON d.receipt_id = r.id
                     LEFT JOIN income_expense_categorys iecat
                         ON iecat.id = r.income_expense_category_id
-                    WHERE r.type_receipt NOT IN (12) AND r.deleted_at IS NULL  AND iecat.deleted_at IS NULL";
+                    WHERE r.type_receipt NOT IN (12) AND r.deleted_at IS NULL AND iecat.deleted_at IS NULL AND (r.status IS NULL OR r.status = 1)";
             if (ReceiptDto.StorageId > 0)
             {
                 sql += $@" AND r.storage_id = {ReceiptDto.StorageId}";
@@ -288,7 +288,7 @@ namespace Vudaco.Receipts.Repositories
                         ON iecat.id = r.income_expense_category_id
                     WHERE r.type_receipt NOT IN (12)
                       AND r.deleted_at IS NULL
-                      AND iecat.deleted_at IS NULL";
+                      AND iecat.deleted_at IS NULL AND (r.status IS NULL OR r.status = 1)";
             if (ReceiptDto.StorageId > 0)
             {
                 sql += $@" AND r.storage_id = {ReceiptDto.StorageId}";
@@ -328,7 +328,7 @@ namespace Vudaco.Receipts.Repositories
                         GROUP BY receipt_id
                     ) d ON d.receipt_id = r.id
                     WHERE 
-                        r.status IS NULL
+                        (r.status IS NULL OR r.status = 1)
                         AND iecat.type = 0
                         AND r.deleted_at IS NULL";
             if (ReceiptDto.StorageId > 0)
@@ -388,7 +388,7 @@ namespace Vudaco.Receipts.Repositories
                     ) d 
                         ON d.receipt_id = r.id
                     WHERE 
-                        r.status IS NULL
+                        (r.status IS NULL OR r.status = 1)
                         AND iecat.type = 1
                         AND r.deleted_at IS NULL
                         AND f.deleted_at IS NULL";
@@ -435,6 +435,7 @@ namespace Vudaco.Receipts.Repositories
                     ) d ON d.receipt_id = r.id
                     WHERE 
                         r.income_expense_category_id = 33
+                        AND (r.status IS NULL OR r.status = 1)
                         AND iecat.deleted_at IS NULL
                         AND r.deleted_at IS NULL";
             if (ReceiptDto.StorageId > 0)

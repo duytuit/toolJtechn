@@ -39,6 +39,7 @@ namespace Vudaco.Debits.Repositories
         Task<PaginatedResultReact<object>> GetObjectMuaHangNCCAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectBaoCaoDoanhThuAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<Debit> ShowAsync(int id);
+        Task<Debit> ShowWithPurchaseNCCAsync(int id);
         Task<Debit> ShowWithFileInfoAsync(int id);
         Task<List<Debit>> ShowByFileIdAsync(int id);
         Task<Debit> CreateAsync(Debit Debit);

@@ -172,6 +172,20 @@ namespace Vudaco.Debits.Repositories
         {
              return _context.Debits.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         }
+        public async Task<Debit> ShowWithPurchaseNCCAsync(int id)
+        {
+            var debit = await _context.Debits.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (debit == null) return null;
+            var receipt = await _context.Receipts.FirstOrDefaultAsync(x => x.PurchaseDebitId == debit.Id);
+            if (receipt != null)
+            {
+                var receiptDetails = await _context.ReceiptDetails.Where(x => x.ReceiptId == receipt.Id).ToListAsync();
+                receipt.ReceiptDetails = receiptDetails;
+                debit.Receipt = receipt;
+            }
+            return debit;
+        }
         public async Task<Debit> ShowWithFileInfoAsync(int id)
         {
             var debit = await _context.Debits
@@ -420,6 +434,7 @@ namespace Vudaco.Debits.Repositories
                             WHERE 
                                     d.id = rdt.debit_id 
                                     AND iecat.type = 0
+                                    AND (r.status IS NULL OR r.status = 1)
                                     AND r.deleted_at IS NULL
                                     AND rdt.deleted_at IS NULL
                     ) AS rdt_total
@@ -476,6 +491,7 @@ namespace Vudaco.Debits.Repositories
                         ON iecat.id = r.income_expense_category_id
                     WHERE
                         r.deleted_at IS NULL
+                        AND (r.status IS NULL OR r.status = 1)
                         AND iecat.type = 0
                         AND iecat.deleted_at IS NULL
                         AND rdt.deleted_at IS NULL
@@ -531,6 +547,7 @@ namespace Vudaco.Debits.Repositories
                         ON iecat.id = r.income_expense_category_id
                         WHERE
                             iecat.type = 0
+                            AND (r.status IS NULL OR r.status = 1)
                             AND iecat.deleted_at IS NULL
                             AND r.deleted_at IS NULL
                             AND rdt.deleted_at IS NULL
@@ -907,6 +924,7 @@ namespace Vudaco.Debits.Repositories
                                     ON rdt.receipt_id = r.id
                             WHERE 
                                     d.id = rdt.debit_id 
+                                    AND (r.status IS NULL OR r.status = 1)
                                     AND iecat.type = 1
                                     AND r.deleted_at IS NULL
                                     AND rdt.deleted_at IS NULL
@@ -971,6 +989,7 @@ namespace Vudaco.Debits.Repositories
                                     ON rdt.receipt_id = r.id
                             WHERE 
                                     d.id = rdt.debit_id 
+                                    AND (r.status IS NULL OR r.status = 1)
                                     AND r.type_receipt = 0
                                     AND r.deleted_at IS NULL
                                     AND rdt.deleted_at IS NULL
@@ -1032,6 +1051,7 @@ namespace Vudaco.Debits.Repositories
                                     ON rdt.receipt_id = r.id
                             WHERE 
                                     d.id = rdt.debit_driver_id 
+                                    AND (r.status IS NULL OR r.status = 1)
                                     AND r.deleted_at IS NULL
                                     AND rdt.deleted_at IS NULL
                     ) AS rdt_total
@@ -1094,6 +1114,7 @@ namespace Vudaco.Debits.Repositories
                                     ON rdt.receipt_id = r.id
                             WHERE 
                                     d.id = rdt.debit_id 
+                                    AND (r.status IS NULL OR r.status = 1)
                                     AND iecat.type = 0
                                     AND r.deleted_at IS NULL
                                     AND rdt.deleted_at IS NULL
@@ -1161,6 +1182,7 @@ namespace Vudaco.Debits.Repositories
                                 ON rdt.receipt_id = r.id
                             WHERE 
                                 d.id = rdt.debit_id 
+                                AND (r.status IS NULL OR r.status = 1)
                                 AND iecat.type = 1
                                 AND r.deleted_at IS NULL
                                 AND rdt.deleted_at IS NULL
@@ -1427,7 +1449,7 @@ namespace Vudaco.Debits.Repositories
                         GROUP BY receipt_id
                 ) d ON d.receipt_id = r.id
                 WHERE 
-                        r.status IS NULL
+                        (r.status IS NULL OR r.status = 1)
                         AND iecat.type = 1
                         AND iecat.parent_id in (12)
                         AND r.deleted_at IS NULL";
@@ -1461,7 +1483,7 @@ namespace Vudaco.Debits.Repositories
                         GROUP BY receipt_id
                 ) d ON d.receipt_id = r.id
                 WHERE 
-                        r.status IS NULL
+                        (r.status IS NULL OR r.status = 1)
                         AND iecat.type = 0
                         AND r.income_expense_category_id = 36
                         AND r.deleted_at IS NULL";
@@ -1501,6 +1523,7 @@ namespace Vudaco.Debits.Repositories
                     ON rdt.receipt_id = r.id
                 WHERE
 				    iecat.deleted_at IS NULL
+                    AND (r.status IS NULL OR r.status = 1)
                     AND rdt.deleted_at IS NULL
                     AND iecat.type = 0
                     AND r.deleted_at IS NULL";
@@ -1575,6 +1598,7 @@ namespace Vudaco.Debits.Repositories
                     ON rdt.receipt_id = r.id
                 WHERE
 				    iecat.deleted_at IS NULL
+                    AND (r.status IS NULL OR r.status = 1)
                     AND iecat.type = 0
                     AND rdt.deleted_at IS NULL
                     AND iecat.deleted_at IS NULL
@@ -1650,6 +1674,7 @@ namespace Vudaco.Debits.Repositories
                     ON rdt.receipt_id = r.id
                 WHERE
 				    iecat.deleted_at IS NULL
+                    AND (r.status IS NULL OR r.status = 1)
                     AND rdt.deleted_at IS NULL
                     AND iecat.type = 1
                     AND r.deleted_at IS NULL";
@@ -1726,6 +1751,7 @@ namespace Vudaco.Debits.Repositories
                     ON rdt.receipt_id = r.id
                 WHERE
 				    iecat.deleted_at IS NULL
+                    AND (r.status IS NULL OR r.status = 1)
                     AND iecat.type = 1
                     AND rdt.deleted_at IS NULL
                     AND iecat.deleted_at IS NULL

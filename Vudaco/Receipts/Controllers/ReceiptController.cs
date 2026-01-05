@@ -1959,7 +1959,7 @@ namespace Vudaco.Receipts.Controllers
                 await tran.CommitAsync();
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
                 await tran.RollbackAsync();
                 return false;

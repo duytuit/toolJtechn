@@ -22,6 +22,8 @@ namespace Vudaco.Receipts.Models
 
         [Column("debit_id")]
         public int? DebitId { get; set; }
+        [Column("vehicle_id")]
+        public int? VehicleId { get; set; }
         [Column("debit_driver_id")]
         public int? DebitDriverId { get; set; }
 
@@ -40,7 +42,10 @@ namespace Vudaco.Receipts.Models
         public string Note { get; set; }
         [Column("data", TypeName = "nvarchar(max)")]
         public string Data { get; set; }
+        public string Bill { get; set; }
 
+        [Column("allocation")]
+        public int Allocation { get; set; }
         [Column("created_by")]
         public int? CreatedBy { get; set; }
 

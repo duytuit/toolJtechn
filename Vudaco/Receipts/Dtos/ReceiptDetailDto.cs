@@ -17,6 +17,9 @@ namespace Vudaco.Receipts.Dtos
         public int Vat { get; set; }
         public string Note { get; set; }
         public string Data { get; set; }
+        public int? VehicleId { get; set; }
+        public string Bill { get; set; }
+        public int Allocation { get; set; }
         public int? CreatedBy { get; set; }
         public int? UpdatedBy { get; set; }
         public int? DeletedBy { get; set; }

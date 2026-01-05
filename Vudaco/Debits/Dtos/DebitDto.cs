@@ -61,10 +61,22 @@ namespace Vudaco.Debits.Dtos
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
         public string Route { get; set; }
-
+        public int? IncomeExpenseCategoryId { get; set; }
+        public int? EmployeeId { get; set; }
+        public List<MuaHangNCCDto> MuaHangNCC { get; set; }
         public List<serviceDto> productChiho { get; set; }
         public List<serviceDto> productHaiquan { get; set; }
         public List<serviceDto> productNangha { get; set; }
+    }
+    public class MuaHangNCCDto
+    {
+        public string Note { get; set; }
+        public int Amount { get; set; }
+        public int Vat { get; set; }
+        public int ThanhTien { get; set; }
+        public string Bill { get; set; }
+        public int? VehicleId { get; set; }
+        public int Allocation { get; set; }
     }
 }
 
@@ -82,3 +94,4 @@ public class serviceDto
     public string Note { get; set; }
     public string NoteConfirm { get; set; }
 }
+

@@ -1925,7 +1925,10 @@ namespace Vudaco.Debits.Controllers
         [Route("create/muahang")]
         public async Task<IActionResult> CreateMuaHang([FromBody] DebitDto DebitDto)
         {
-
+            if (DebitDto.SupplierDetailId == null || DebitDto.SupplierDetailId == 0)
+                return ApiResponseResult<object>(false, "Nhà cung cấp bắt buộc", null);
+            if ((DebitDto.IncomeExpenseCategoryId ?? 0) == 0)
+                return ApiResponseResult<object>(false, "ly do chi bắt buộc", null);
             using var tran = await _context.Database.BeginTransactionAsync();
             var conn = _context.Database.GetDbConnection();
             try
@@ -1964,10 +1967,8 @@ namespace Vudaco.Debits.Controllers
                     Name = DebitDto.Note,
                     AccountingDate = DebitDto.AccountingDate,
                     ServiceDate = DebitDto.AccountingDate,
-                    PurchasePrice = DebitDto.PurchasePrice,
-                    PurchaseVat = DebitDto.PurchaseVat,
+                    PurchasePrice = DebitDto.MuaHangNCC.Sum(x => x.ThanhTien),
                     Status = ContractFileRepository.statusDebit,
-                    Data = DebitDto.Data,
                     Note = DebitDto.Note,
                     CreatedBy = userId,
                     CreatedAt = now,
@@ -1987,6 +1988,48 @@ namespace Vudaco.Debits.Controllers
                     CreatedAt = now,
                 };
                 _context.ConfirmFiles.Add(entity);
+                var PrefixCode = "PCMH"+DebitDto.AccountingDate.ToString("yyMM");
+                var code_receipt = await SqlServerHelpers.GenerateCodeEfAsync(conn, tran.GetDbTransaction(), "receipts", "code_receipt", DebitDto.StorageId, PrefixCode , 4);
+                var entity_receipt = new Receipt
+                {
+                    AccountingDate = DebitDto.AccountingDate,
+                    StorageId = DebitDto.StorageId,
+                    CodeReceipt = code_receipt,
+                    Note = DebitDto.Note,
+                    FormOfPayment = 1,
+                    PurchaseDebitId = debit.Id,
+                    Object = ReceiptRepositories.DoiTuongNCC,
+                    ObjectId = DebitDto.SupplierDetailId,
+                    EmployeeId = DebitDto.EmployeeId,
+                    TypeReceipt = ReceiptRepositories.ChiMuaHangNCC,
+                    IncomeExpenseCategoryId = DebitDto.IncomeExpenseCategoryId,
+                    Status = 0,
+                    CreatedBy = userId,
+                    CreatedAt = now,
+                    UpdatedAt = now,
+                    UpdatedBy = userId,
+                };
+                _context.Receipts.Add(entity_receipt);
+                await _context.SaveChangesAsync();
+                foreach (var item in DebitDto.MuaHangNCC)
+                {
+                     var entity_detail = new ReceiptDetail
+                    {
+                        ReceiptId = entity_receipt.Id,
+                        StorageId = DebitDto.StorageId,
+                        AccountingDate = DebitDto.AccountingDate,
+                        Bill = item.Bill,
+                        Allocation = item.Allocation,
+                        VehicleId = item.VehicleId,
+                        Amount = item.Amount,
+                        Vat = item.Vat,
+                        Note = item.Note,
+                        CreatedBy = userId,
+                        CreatedAt = now,
+                        UpdatedAt = now
+                    };
+                    _context.ReceiptDetails.Add(entity_detail);
+                }
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
                 return ApiResponseResult<object>(true, "Thêm thành công", null);
@@ -2939,6 +2982,8 @@ namespace Vudaco.Debits.Controllers
         [Route("update/muahang")]
         public async Task<IActionResult> UpdateMuaHang([FromBody] DebitDto DebitDto)
         {
+            if ((DebitDto.IncomeExpenseCategoryId ?? 0) == 0)
+                return ApiResponseResult<object>(false, "ly do chi bắt buộc", null);
             if (DebitDto.Id <= 0)
             {
                 return ApiResponseResult<object>(false, "Id không tồn tại", null);
@@ -2978,14 +3023,61 @@ namespace Vudaco.Debits.Controllers
                 entity.Name = DebitDto.Note;
                 entity.AccountingDate = DebitDto.AccountingDate;
                 entity.ServiceDate = DebitDto.AccountingDate;
-                entity.PurchasePrice = DebitDto.Price;
-                entity.Price = DebitDto.Price;
-                entity.Vat = DebitDto.Vat;
+                entity.PurchasePrice = DebitDto.MuaHangNCC.Sum(x => x.ThanhTien);
                 entity.Data = DebitDto.Data;
                 entity.UpdatedAt = now;
                 entity.UpdatedBy = userId;
                 _context.Debits.Update(entity);
                 await _context.SaveChangesAsync();  // phải có
+                bool checkDelete = await deleteReceiptByDebitId(DebitDto.Id);
+                if (!checkDelete)
+                {
+                    await tran.RollbackAsync();
+                    return ApiResponseResult<object>(false, "Lỗi khi xóa phiếu thu liên quan", null);
+                }
+                var PrefixCode = "PCMH"+DebitDto.AccountingDate.ToString("yyMM");
+                var code_receipt = await SqlServerHelpers.GenerateCodeEfAsync(conn, tran.GetDbTransaction(), "receipts", "code_receipt", DebitDto.StorageId, PrefixCode , 4);
+                var entity_receipt = new Receipt
+                {
+                    AccountingDate = DebitDto.AccountingDate,
+                    StorageId = DebitDto.StorageId,
+                    CodeReceipt = code_receipt,
+                    Note = DebitDto.Note,
+                    FormOfPayment = 1,
+                    PurchaseDebitId = DebitDto.Id,
+                    Object = ReceiptRepositories.DoiTuongNCC,
+                    ObjectId = DebitDto.SupplierDetailId,
+                    EmployeeId = DebitDto.EmployeeId,
+                    TypeReceipt = ReceiptRepositories.ChiMuaHangNCC,
+                    IncomeExpenseCategoryId = DebitDto.IncomeExpenseCategoryId,
+                    Status = 0,
+                    CreatedBy = userId,
+                    CreatedAt = now,
+                    UpdatedAt = now,
+                    UpdatedBy = userId,
+                };
+                _context.Receipts.Add(entity_receipt);
+                await _context.SaveChangesAsync();
+                foreach (var item in DebitDto.MuaHangNCC)
+                {
+                     var entity_detail = new ReceiptDetail
+                    {
+                        ReceiptId = entity_receipt.Id,
+                        StorageId = DebitDto.StorageId,
+                        AccountingDate = DebitDto.AccountingDate,
+                        Bill = item.Bill,
+                        Allocation = item.Allocation,
+                        VehicleId = item.VehicleId,
+                        Amount = item.Amount,
+                        Vat = item.Vat,
+                        Note = item.Note,
+                        CreatedBy = userId,
+                        CreatedAt = now,
+                        UpdatedAt = now
+                    };
+                    _context.ReceiptDetails.Add(entity_detail);
+                }
+                await _context.SaveChangesAsync();
                 await tran.CommitAsync();
                 return ApiResponseResult<object>(true, "Cập nhật thành công", null);
             }
@@ -3038,7 +3130,6 @@ namespace Vudaco.Debits.Controllers
                 entity.Name = DebitDto.Note;
                 entity.AccountingDate = DebitDto.AccountingDate;
                 entity.ServiceDate = DebitDto.AccountingDate;
-                entity.PurchasePrice = DebitDto.Price;
                 entity.Price = DebitDto.Price;
                 entity.Vat = DebitDto.Vat;
                 entity.Data = DebitDto.Data;
@@ -3814,6 +3905,7 @@ namespace Vudaco.Debits.Controllers
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
             }
+            var now  = DateTime.Now;
              // Kiểm tra receipt liên quan
             var receiptCodes = await _context.ReceiptDetails
                 .Where(d => d.DebitId == DebitDto.Id)
@@ -3830,8 +3922,9 @@ namespace Vudaco.Debits.Controllers
             {
                 return ApiResponseResult<object>(false, "Không thể xoá vì chi phí đã được thu tiền: "+ string.Join(", ", receiptCodes), null);
             }
+            await deleteReceiptByDebitId(DebitDto.Id);
             entity.DeletedBy = userId;
-            entity.DeletedAt = DateTime.Now;
+            entity.DeletedAt = now;
             await _repoDebit.DeleteSoftAsync(entity);
             return ApiResponseResult<object>(true, "Xóa thành công", null);
         }
@@ -3973,6 +4066,20 @@ namespace Vudaco.Debits.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", entity);
         }
+        [HttpGet("ShowWithPurchaseNCCAsync")]
+        public async Task<IActionResult> ShowWithPurchaseNCCAsync([FromQuery] int id)
+        {
+            if (id <= 0)
+            {
+                return ApiResponseResult<object>(false, "Id không tồn tại", null);
+            }
+            var entity = await _repoDebit.ShowWithPurchaseNCCAsync(id);
+            if (entity == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", entity);
+        }
         [HttpGet("ShowWithFileInfoAsync")]
         public async Task<IActionResult> ShowWithFileInfoAsync([FromQuery] int id)
         {
@@ -4000,6 +4107,32 @@ namespace Vudaco.Debits.Controllers
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", entity);
+        }
+        public async Task<bool> deleteReceiptByDebitId(int debitId)
+        { 
+            try
+            {
+                var now = DateTime.Now;
+                var receipt_purchase = await _context.Receipts.FirstOrDefaultAsync(d => d.PurchaseDebitId == debitId);
+                if (receipt_purchase != null)
+                {
+                    var receipt_purchase_detail = await _context.ReceiptDetails.Where(d => d.ReceiptId == receipt_purchase.Id).ToListAsync();
+                    foreach (var item in receipt_purchase_detail)
+                    {
+                    item.DeletedAt = now;
+                    item.DeletedBy = userId;
+                    _context.ReceiptDetails.Update(item);
+                    }
+                    receipt_purchase.DeletedAt = now;
+                    receipt_purchase.DeletedBy = userId;
+                }
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }

@@ -1449,7 +1449,7 @@ namespace Vudaco.Debits.Repositories
                         GROUP BY receipt_id
                 ) d ON d.receipt_id = r.id
                 WHERE 
-                        (r.status IS NULL OR r.status = 1)
+                        (r.status IS NULL OR r.status = 0)
                         AND iecat.type = 1
                         AND iecat.parent_id in (12)
                         AND r.deleted_at IS NULL";

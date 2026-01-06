@@ -617,7 +617,7 @@ namespace Vudaco.Debits.Controllers
 
                         ws.Cell(row, 13).Value = thanhtien;
                         ws.Cell(row, 13).Style.NumberFormat.Format = "#,##0";
-                        ws.Cell(row, 14).Value = _fileInfo != null ? (_fileInfo.FileNumber??"") : "";
+                        ws.Cell(row, 14).Value = _fileInfo != null ? (_fileInfo.FileNumber??"") : first.dispatch_code ?? "";
                         ws.Cell(row, 15).Value = _fileInfo != null ? (_fileInfo.Bill ?? _fileInfo.Declaration ?? "") : "";
                         ws.Cell(row, 16).Value = first.cus_bill ?? "";
                         // Nối TenDichVu + ThanhTien
@@ -686,7 +686,7 @@ namespace Vudaco.Debits.Controllers
 
                             ws.Cell(row, 13).Value = price_dv + vatAmount_dv;
                             ws.Cell(row, 13).Style.NumberFormat.Format = "#,##0";
-                            ws.Cell(row, 14).Value = "";
+                            ws.Cell(row, 14).Value = item.dispatch_code ?? "";
                             ws.Cell(row, 15).Value = "";
                             ws.Cell(row, 16).Value = item.cus_bill ?? "";
                             row++;

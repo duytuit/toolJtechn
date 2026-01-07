@@ -197,6 +197,7 @@ namespace Vudaco.ContractFiles.Repositories
                         CAST(d_total.total AS INT) AS debit_total,
                         CAST(d_total.purchase_price AS INT) AS debit_purchase_price,
                         d_total.service_id,
+                        d_total.supplier_detail_id,
                         d_total.type as debit_type,
                         d_total.id as debit_id,
                         d_total.name as debit_name,
@@ -218,6 +219,7 @@ namespace Vudaco.ContractFiles.Repositories
                     -- ✅ Debit phải tồn tại (INNER JOIN)
                     INNER JOIN (
                         SELECT 
+                            supplier_detail_id,
                             file_info_id,
                             customer_detail_id,
                             employee_staff_id,
@@ -244,6 +246,7 @@ namespace Vudaco.ContractFiles.Repositories
                             id,
                             name,
                             updated_at,
+                            supplier_detail_id,
                             updated_by
                     ) AS d_total
                         ON d_total.file_info_id = f.id
@@ -367,6 +370,7 @@ namespace Vudaco.ContractFiles.Repositories
                         CAST(d_total.vat AS INT) AS debit_vat,
                         CAST(d_total.total AS INT) AS debit_total,
                         d_total.service_id,
+                        d_total.supplier_detail_id,
                         d_total.type as debit_type,
                         d_total.id as debit_id,
                         d_total.name as debit_name,
@@ -409,6 +413,7 @@ namespace Vudaco.ContractFiles.Repositories
                     INNER JOIN (
                         SELECT 
                             file_info_id,
+                            supplier_detail_id,
                             customer_detail_id,
                             employee_staff_id,
                             service_id,
@@ -427,6 +432,7 @@ namespace Vudaco.ContractFiles.Repositories
                             AND deleted_at IS NULL
                         GROUP BY 
                             file_info_id,
+                            supplier_detail_id,
                             customer_detail_id,
                             employee_staff_id,
                             service_id,

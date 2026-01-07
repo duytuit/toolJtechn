@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using Microsoft.ML.OnnxRuntime;
-using Microsoft.ML.OnnxRuntime.Tensors;
 using OpenCvSharp;
+using Tesseract;
 
 namespace pdfOCR
 {
@@ -16,25 +16,19 @@ namespace pdfOCR
     {
         Bitmap _image;
         List<TextBoxResult> _boxes = new List<TextBoxResult>();
-        PaddleOcr _ocr;
+        private string tessDataPath = @"./tessdata";
 
         public Form2()
         {
             InitializeComponent();
 
-            // Paths relative
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            string detModel = Path.Combine(baseDir, "Model", "ch_PP-OCRv3_det_infer.onnx");
-            string recModel = Path.Combine(baseDir, "Model", "en_PP-OCRv3_rec_infer.onnx");
-            string keyFile = Path.Combine(baseDir, "Model", "ppocr_keys_v1.txt");
-
-            if (!File.Exists(detModel) || !File.Exists(recModel) || !File.Exists(keyFile))
+            // Check if tessdata exists
+            string tessDataDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tessdata");
+            if (!Directory.Exists(tessDataDir) || !File.Exists(Path.Combine(tessDataDir, "eng.traineddata")))
             {
-                MessageBox.Show("Models or keys file not found in 'Model' folder!");
+                MessageBox.Show("Tessdata folder or eng.traineddata not found!");
                 return;
             }
-
-            _ocr = new PaddleOcr(detModel, recModel, keyFile);
         }
 
         // =========================
@@ -57,7 +51,7 @@ namespace pdfOCR
         }
 
         // =========================
-        // Detect + Recognize
+        // Detect + Recognize toàn bộ chữ viết
         // =========================
         private void btnDetect_Click(object sender, EventArgs e)
         {
@@ -66,14 +60,102 @@ namespace pdfOCR
             lblStatus.Text = "Detecting...";
             Application.DoEvents();
 
+            _boxes.Clear();
+
+            // First, detect all text with Tesseract
+            using (var engine = new TesseractEngine(tessDataPath, "eng", EngineMode.Default))
+            {
+                engine.DefaultPageSegMode = PageSegMode.Auto;
+                engine.SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .,-()");
+
+                Bitmap processedImage = PreprocessImage(_image);
+
+                using (var page = engine.Process(processedImage))
+                {
+                    using (var iter = page.GetIterator())
+                    {
+                        iter.Begin();
+                        do
+                        {
+                            string text = iter.GetText(PageIteratorLevel.Word);
+                            if (!string.IsNullOrEmpty(text.Trim()))
+                            {
+                                if (iter.TryGetBoundingBox(PageIteratorLevel.Word, out Tesseract.Rect rect))
+                                {
+                                    var box = new TextBoxResult
+                                    {
+                                        Box = new RectangleF(rect.X1, rect.Y1, rect.Width, rect.Height),
+                                        TightBox = new RectangleF(rect.X1, rect.Y1, rect.Width, rect.Height),
+                                        Text = text.Trim(),
+                                        Score = iter.GetConfidence(PageIteratorLevel.Word) / 100f
+                                    };
+                                    _boxes.Add(box);
+                                }
+                            }
+                        } while (iter.Next(PageIteratorLevel.Word));
+                    }
+                }
+            }
+
+            // Then, detect blue text regions and recognize with Tesseract
             using (Mat mat = BitmapToMat(_image))
             {
-                // 1️⃣ Detect & recognize
-                _boxes = _ocr.DetectAndRecognize(mat);
+                Mat processedMat = PreprocessForColorDetection(mat);
+
+                // Detect regions with blue color (wide range for bold and light)
+                Mat hsv = new Mat();
+                Cv2.CvtColor(processedMat, hsv, ColorConversionCodes.BGR2HSV);
+
+                Scalar lowerBlue = new Scalar(70, 20, 20); // Wider range for light blue
+                Scalar upperBlue = new Scalar(150, 255, 255); // Wider range for bold blue
+                Mat mask = new Mat();
+                Cv2.InRange(hsv, lowerBlue, upperBlue, mask);
+
+                Mat kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new OpenCvSharp.Size(3, 3));
+                Cv2.MorphologyEx(mask, mask, MorphTypes.Close, kernel);
+                Cv2.Dilate(mask, mask, kernel);
+
+                // Find contours
+                OpenCvSharp.Point[][] contours;
+                Cv2.FindContours(mask, out contours, out _, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+
+                using (var engine = new TesseractEngine(tessDataPath, "eng", EngineMode.Default))
+                {
+                    engine.DefaultPageSegMode = PageSegMode.SingleBlock;
+                    engine.SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .,-()");
+
+                    foreach (var contour in contours)
+                    {
+                        OpenCvSharp.Rect rect = Cv2.BoundingRect(contour);
+                        if (rect.Width < 10 || rect.Height < 10) continue;
+
+                        // Crop ROI
+                        Mat roi = new Mat(processedMat, rect);
+                        Bitmap roiBitmap = MatToBitmap(roi);
+
+                        using (var page = engine.Process(roiBitmap))
+                        {
+                            string text = page.GetText().Trim();
+                            if (!string.IsNullOrEmpty(text))
+                            {
+                                var box = new TextBoxResult
+                                {
+                                    Box = new RectangleF(rect.X, rect.Y, rect.Width, rect.Height),
+                                    TightBox = new RectangleF(rect.X, rect.Y, rect.Width, rect.Height),
+                                    Text = text,
+                                    Score = page.GetMeanConfidence() / 100f
+                                };
+                                // Add if not already present (simple check by text)
+                                if (!_boxes.Any(b => b.Text == text))
+                                    _boxes.Add(box);
+                            }
+                        }
+                    }
+                }
             }
 
             // 2️⃣ Hiển thị box trên ảnh
-            pictureBox1.Image = DrawBoxes(_image, _boxes);
+            pictureBox1.Image = DrawBoxes(_image, _boxes, "");
 
             // 3️⃣ Đổ text vào ListBox1
             listBox1.Items.Clear();
@@ -93,13 +175,41 @@ namespace pdfOCR
         // =========================
         private void btnSearch_Click(object sender, EventArgs e)
         {
-            if (_image == null || _boxes.Count == 0) return;
+            if (_image == null || _boxes == null || _boxes.Count == 0)
+                return;
 
             string keyword = txtSearch.Text.Trim();
-            if (keyword.Length == 0) return;
+            if (string.IsNullOrEmpty(keyword))
+                return;
 
-            pictureBox1.Image = DrawBoxes(_image, _boxes, keyword);
-            lblStatus.Text = $"Highlight keyword '{keyword}'";
+            // 1️⃣ Lọc box match
+            var matched = new List<TextBoxResult>();
+
+            foreach (var box in _boxes)
+            {
+                string txt = (box.Text ?? "").Trim();
+                string kw = keyword.Trim();
+                bool isMatch = txt.IndexOf(kw, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                               kw.IndexOf(txt, StringComparison.OrdinalIgnoreCase) >= 0; // linh hoạt hơn
+                if (isMatch)
+                    matched.Add(box);
+            }
+
+            // 2️⃣ Highlight ảnh - chỉ vẽ những box matched và highlight chúng
+            pictureBox1.Image = DrawBoxes(_image, matched, keyword);
+
+            // 3️⃣ Hiển thị ListBox
+            listBox1.DataSource = null;
+            listBox1.DisplayMember = "Text";
+            listBox1.DataSource = matched;
+
+            lblStatus.Text = $"Found {matched.Count} results for '{keyword}'";
+
+            if (matched.Count == 0)
+            {
+                string allTexts = string.Join("\n", _boxes.Select(b => b.Text ?? ""));
+                MessageBox.Show($"No matches found for '{keyword}'.\n\nAll detected texts:\n{allTexts}", "Search Result");
+            }
         }
         Bitmap LoadImage(string path)
         {
@@ -119,16 +229,50 @@ namespace pdfOCR
         }
 
         // =========================
+        // Preprocess image for better OCR
+        // =========================
+        private Bitmap PreprocessImage(Bitmap original)
+        {
+            Bitmap grayscale = new Bitmap(original.Width, original.Height, PixelFormat.Format24bppRgb);
+            using (Graphics g = Graphics.FromImage(grayscale))
+            {
+                ColorMatrix colorMatrix = new ColorMatrix(
+                    new float[][]
+                    {
+                        new float[] {0.299f, 0.299f, 0.299f, 0, 0},
+                        new float[] {0.587f, 0.587f, 0.587f, 0, 0},
+                        new float[] {0.114f, 0.114f, 0.114f, 0, 0},
+                        new float[] {0, 0, 0, 1, 0},
+                        new float[] {0, 0, 0, 0, 1}
+                    });
+                ImageAttributes attributes = new ImageAttributes();
+                attributes.SetColorMatrix(colorMatrix);
+                g.DrawImage(original, new Rectangle(0, 0, original.Width, original.Height),
+                    0, 0, original.Width, original.Height, GraphicsUnit.Pixel, attributes);
+            }
+            return grayscale;
+        }
+
+        // =========================
+        // Preprocess for color detection
+        // =========================
+        private Mat PreprocessForColorDetection(Mat img)
+        {
+            Mat processed = new Mat();
+            Cv2.GaussianBlur(img, processed, new OpenCvSharp.Size(3, 3), 0);
+            return processed;
+        }
+
+        // =========================
         // Draw boxes + highlight keyword
         // =========================
         public Bitmap DrawBoxes(Bitmap src, List<TextBoxResult> boxes, string keyword = "")
         {
-            if (src == null) return null;
             Bitmap bmp = new Bitmap(src);
 
             using (Graphics g = Graphics.FromImage(bmp))
             {
-                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                g.SmoothingMode = SmoothingMode.AntiAlias;
 
                 using (Brush bYellow = new SolidBrush(Color.FromArgb(80, Color.Yellow)))
                 using (Brush bGreen = new SolidBrush(Color.FromArgb(80, Color.Lime)))
@@ -138,69 +282,21 @@ namespace pdfOCR
                 {
                     foreach (var box in boxes)
                     {
-                        string txt = box.Text ?? "";
+                        RectangleF r = box.TightBox.Width > 0 ? box.TightBox : box.Box;
 
-                        // Nếu có polygon, highlight polygon sát chữ
-                        if (box.Polygon != null && box.Polygon.Length > 0)
-                        {
-                            PointF[] pts = box.Polygon;
+                        bool highlight = !string.IsNullOrEmpty(keyword) &&
+                                         box.Text.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0;
 
-                            // Highlight keyword toàn bộ box polygon nếu text chứa keyword
-                            bool highlightKeyword = !string.IsNullOrEmpty(keyword) &&
-                                                    txt.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0;
+                        // g.FillRectangle(highlight ? bGreen : bYellow, r);
+                        g.DrawRectangle(highlight ? pBlue : pRed, r.X, r.Y, r.Width, r.Height);
 
-                            g.FillPolygon(highlightKeyword ? bGreen : bYellow, pts);
-                            g.DrawPolygon(highlightKeyword ? pBlue : pRed, pts);
-
-                            // Vẽ text trên polygon (lấy min X, min Y)
-                            float px = pts.Min(p => p.X);
-                            float py = pts.Min(p => p.Y) - 15;
-                            if (py < 0) py = 0;
-                            g.DrawString(txt, font, Brushes.Black, px, py);
-                        }
-                        else if (!string.IsNullOrEmpty(txt))
-                        {
-                            // Chia box theo số ký tự
-                            int n = txt.Length;
-                            if (n <= 0) continue;
-
-                            float charWidth = box.Box.Width / n;
-
-                            for (int i = 0; i < n; i++)
-                            {
-                                RectangleF charRect = new RectangleF(
-                                    box.Box.X + i * charWidth,
-                                    box.Box.Y,
-                                    charWidth,
-                                    box.Box.Height
-                                );
-
-                                bool charMatch = !string.IsNullOrEmpty(keyword) &&
-                  keyword.ToUpper().IndexOf(char.ToUpper(txt[i])) >= 0;
-
-                                // Fill màu
-                                g.FillRectangle(charMatch ? bGreen : bYellow, charRect);
-                                g.DrawRectangle(charMatch ? pBlue : pRed, charRect.X, charRect.Y, charRect.Width, charRect.Height);
-
-                                // Vẽ ký tự
-                                g.DrawString(txt[i].ToString(), font, Brushes.Black, charRect.X, charRect.Y - 15);
-                            }
-                        }
-                        else
-                        {
-                            // Box trống → chỉ vẽ rectangle
-                            g.DrawRectangle(pRed, box.Box.X, box.Box.Y, box.Box.Width, box.Box.Height);
-                        }
+                        g.DrawString(box.Text, font, Brushes.Black, r.X + 1, r.Y + 1);
                     }
                 }
             }
 
             return bmp;
         }
-
-        // =========================
-        // Safe load image
-        // =========================
 
 
         // =========================
@@ -210,7 +306,7 @@ namespace pdfOCR
         {
             using (MemoryStream ms = new MemoryStream())
             {
-                bitmap.Save(ms, ImageFormat.Bmp);
+                bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
                 byte[] bytes = ms.ToArray();
                 Mat mat = Mat.FromImageData(bytes, ImreadModes.Color);
                 return mat;
@@ -253,137 +349,15 @@ namespace pdfOCR
     // =========================
     public class TextBoxResult
     {
-        public RectangleF Box { get; set; }        // Hình chữ nhật bao chữ
-        public PointF[] Polygon { get; set; }      // Polygon contour chính xác
-        public string Text { get; set; }           // Kết quả OCR
-        public float Score { get; set; }           // Confidence (tạm 0.9)
-    }
+        public RectangleF Box { get; set; }
+        public RectangleF TightBox { get; set; }
+        public PointF[] Polygon { get; set; }
+        public string Text { get; set; }
+        public float Score { get; set; }
 
-    // =========================
-    // PaddleOCR wrapper
-    // =========================
-    public class PaddleOcr
-    {
-        private InferenceSession _detSession;
-        private InferenceSession _recSession;
-        private string[] _keys;
-
-        public PaddleOcr(string detModel, string recModel, string keyFile)
+        public override string ToString()
         {
-            _detSession = new InferenceSession(detModel);
-            _recSession = new InferenceSession(recModel);
-            _keys = File.ReadAllLines(keyFile); // đảm bảo chứa tất cả ký tự muốn nhận
-        }
-
-        public List<TextBoxResult> DetectAndRecognize(Mat img)
-        {
-            List<TextBoxResult> results = new List<TextBoxResult>();
-
-            // =========================
-            // 1️⃣ Convert to grayscale + adaptive threshold
-            // =========================
-            Mat gray = new Mat();
-            Cv2.CvtColor(img, gray, ColorConversionCodes.BGR2GRAY);
-
-            Mat bin = new Mat();
-            Cv2.AdaptiveThreshold(
-                gray, bin,
-                maxValue: 255,
-                adaptiveMethod: AdaptiveThresholdTypes.MeanC,
-                thresholdType: ThresholdTypes.BinaryInv,
-                blockSize: 15,
-                c: 5
-            );
-
-            // =========================
-            // 2️⃣ Find contours
-            // =========================
-            OpenCvSharp.Point[][] contours;
-            Cv2.FindContours(bin, out contours, out _, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
-
-            float scaleX = 1f; // vì adaptive threshold dùng trực tiếp ảnh gốc
-            float scaleY = 1f;
-
-            foreach (var contour in contours)
-            {
-                // Polygon approximation
-                var approx = Cv2.ApproxPolyDP(contour, epsilon: 1.0, closed: true);
-                var rect = Cv2.BoundingRect(approx);
-
-                // Bỏ các box quá nhỏ
-                if (rect.Width < 5 || rect.Height < 5) continue;
-
-                // =========================
-                // 3️⃣ Crop ROI với padding nhỏ
-                // =========================
-                int pad = 2;
-                int x = Math.Max(rect.X - pad, 0);
-                int y = Math.Max(rect.Y - pad, 0);
-                int w = Math.Min(rect.Width + 2 * pad, img.Width - x);
-                int h = Math.Min(rect.Height + 2 * pad, img.Height - y);
-                var roiRect = new OpenCvSharp.Rect(x, y, w, h);
-                Mat roi = new Mat(img, roiRect);
-
-                // =========================
-                // 4️⃣ Resize CRNN input H=32
-                // =========================
-                Mat crnnImg = new Mat();
-                Cv2.Resize(roi, crnnImg, new OpenCvSharp.Size(320, 32));
-                crnnImg.ConvertTo(crnnImg, MatType.CV_32FC3, 1.0 / 255);
-
-                float[] crnnCHW = new float[1 * 3 * 32 * 320];
-                unsafe
-                {
-                    int idx = 0;
-                    for (int c = 0; c < 3; c++)
-                        for (int y2 = 0; y2 < 32; y2++)
-                            for (int x2 = 0; x2 < 320; x2++)
-                                crnnCHW[idx++] = crnnImg.At<Vec3f>(y2, x2)[c];
-                }
-
-                var recTensor = new DenseTensor<float>(crnnCHW, new int[] { 1, 3, 32, 320 });
-                var recInputs = new List<NamedOnnxValue> { NamedOnnxValue.CreateFromTensor("x", recTensor) };
-                var recOutputs = _recSession.Run(recInputs);
-
-                // =========================
-                // 5️⃣ Decode CRNN
-                // =========================
-                var output = recOutputs.First().AsEnumerable<float>().ToArray();
-                int timeSteps = output.Length / _keys.Length;
-                string text = "";
-                int lastIdx = -1;
-                for (int t = 0; t < timeSteps; t++)
-                {
-                    float maxVal = float.MinValue;
-                    int maxIdx = 0;
-                    for (int k = 0; k < _keys.Length; k++)
-                    {
-                        float v = output[t * _keys.Length + k];
-                        if (v > maxVal)
-                        {
-                            maxVal = v;
-                            maxIdx = k;
-                        }
-                    }
-
-                    if (maxIdx != 0 && maxIdx != lastIdx)
-                        text += _keys[maxIdx];
-
-                    lastIdx = maxIdx;
-                }
-
-                // =========================
-                // 6️⃣ Add result với polygon
-                // =========================
-                results.Add(new TextBoxResult
-                {
-                    Box = new RectangleF(rect.X * scaleX, rect.Y * scaleY, rect.Width * scaleX, rect.Height * scaleY),
-                    Text = text,
-                    Score = 0.9f
-                });
-            }
-
-            return results;
+            return $"{Text}  ({Score:0.00})";
         }
     }
 }

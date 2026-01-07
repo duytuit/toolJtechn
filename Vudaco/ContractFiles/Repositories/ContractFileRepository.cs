@@ -446,12 +446,13 @@ namespace Vudaco.ContractFiles.Repositories
                         d_total.sup_bill AS debit_sup_bill,
                         d_total.sup_bill_date AS debit_sup_bill_date,
                         d_total.vehicle_number AS debit_vehicle_number,
-                        d_total.data AS debit_data,
                         d_total.file_info_id AS debit_file_info_id,
                         d_total.customer_detail_id AS debit_customer_detail_id,
                         d_total.employee_staff_id AS debit_employee_staff_id,
                         d_total.service_id AS debit_service_id,
                         d_total.service_detail AS debit_service_detail,
+                        d_total.supplier_detail_id,
+                        d_total.data AS debit_data,
                         d_total.type AS debit_type,
                         d_total.id AS debit_id,
                         d_total.name AS debit_name,
@@ -479,9 +480,10 @@ namespace Vudaco.ContractFiles.Repositories
                         ON p.id = f.customer_detail_id
                     INNER JOIN (
                         SELECT 
-                            d.data,
                             d.file_info_id,
+                            d.data,
                             d.customer_detail_id,
+                            d.supplier_detail_id,
                             d.employee_staff_id,
                             d.service_id,
                             d.service_detail,
@@ -510,8 +512,9 @@ namespace Vudaco.ContractFiles.Repositories
                         AND d.deleted_at IS NULL
                         GROUP BY 
                             d.file_info_id,
-                            d.customer_detail_id,
                             d.data,
+                            d.supplier_detail_id,
+                            d.customer_detail_id,
                             d.employee_staff_id,
                             d.service_id,
                             d.service_detail,

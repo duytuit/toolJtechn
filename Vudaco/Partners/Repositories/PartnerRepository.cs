@@ -177,9 +177,12 @@ namespace Vudaco.Partners.Repositories
             return _results;
         }
 
-        public Task<Partner> ShowAsync(int id)
+        public async Task<Partner> ShowAsync(int id)
         {
-            return _context.Partners.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            var entity = await _context.Partners.FirstOrDefaultAsync(x => x.Id == id);
+            if (entity == null) return null;
+            entity.PartnerDetails = await _context.PartnerDetails.Where(d => d.PartnerId == entity.Id).ToListAsync();
+            return entity;
         }
 
         public Task<Partner> UpdateAsync(Partner Partner)

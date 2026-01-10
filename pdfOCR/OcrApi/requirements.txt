@@ -1,0 +1,7 @@
+paddlepaddle>=2.6
+paddleocr>=2.8
+opencv-python
+flask
+numpy
+pillow
+pdf2image

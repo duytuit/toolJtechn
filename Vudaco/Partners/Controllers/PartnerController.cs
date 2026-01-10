@@ -143,6 +143,7 @@ namespace Vudaco.Partners.Controllers
                     Status = 0,
                     Code = SqlServerHelpers.GenerateSoChungTu( _configuration.GetConnectionString("DefaultConnection"),"partner_details","code",dto.StorageId,"KH", 4),
                     StorageId = dto.StorageId,
+                    CustomerCreditLimit = dto.CustomerCreditLimit,
                     CreatedBy = userId,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
@@ -154,6 +155,7 @@ namespace Vudaco.Partners.Controllers
                     Status = 0,
                     Code = SqlServerHelpers.GenerateSoChungTu( _configuration.GetConnectionString("DefaultConnection"),"partner_details","code",dto.StorageId,"NCC", 4),
                     StorageId = dto.StorageId,
+                    SupplierCreditLimit = dto.SupplierCreditLimit,
                     CreatedBy = userId,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
@@ -250,6 +252,25 @@ namespace Vudaco.Partners.Controllers
                 user.LastName = dto.Abbreviation;
                 user.UpdatedAt = DateTime.Now;
                 user.UpdatedBy = userId;
+
+                if (dto.CustomerId > 0)
+                {
+                    var cus = await _context.PartnerDetails.AsTracking().FirstOrDefaultAsync(x=>x.Id == dto.CustomerId);
+                    if (cus != null)
+                    {
+                        cus.CustomerCreditLimit = dto.CustomerCreditLimit;
+                    }
+
+                }
+                if (dto.SupplierId > 0)
+                {
+                    var sup = await _context.PartnerDetails.AsTracking().FirstOrDefaultAsync(x=>x.Id == dto.SupplierId);
+                    if (sup != null)
+                    {
+                        sup.SupplierCreditLimit = dto.SupplierCreditLimit;
+                    }
+
+                }
 
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();

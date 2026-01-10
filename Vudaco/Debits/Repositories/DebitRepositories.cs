@@ -414,7 +414,8 @@ namespace Vudaco.Debits.Repositories
                     d.*,
                     CAST(ISNULL(rdt_total.amount, 0) AS INT) AS receipt_amount,
                     CAST(ISNULL(rdt_total.vat, 0) AS INT) AS receipt_vat,
-                    CAST(ISNULL(rdt_total.total, 0) AS INT) AS receipt_total
+                    CAST(ISNULL(rdt_total.total, 0) AS INT) AS receipt_total,
+                    p.customer_credit_limit
                     FROM debits d
                     LEFT JOIN file_infos f
                     ON f.id = d.file_info_id
@@ -1109,6 +1110,7 @@ namespace Vudaco.Debits.Repositories
              var sql = $@"
                     SELECT 
                         d.*,
+                        p.customer_credit_limit,
                         CAST(ISNULL(rdt_total.amount, 0) AS INT) AS receipt_amount,
                         CAST(ISNULL(rdt_total.vat, 0) AS INT) AS receipt_vat,
                         CAST(ISNULL(rdt_total.total, 0) AS INT) AS receipt_total,
@@ -1178,6 +1180,7 @@ namespace Vudaco.Debits.Repositories
             var sql = $@"
                     SELECT 
                         d.*,
+                        p.supplier_credit_limit,
                         CAST(ISNULL(rdt_total.amount, 0) AS INT) AS receipt_amount,
                         CAST(ISNULL(rdt_total.vat, 0) AS INT) AS receipt_vat,
                         CAST(ISNULL(rdt_total.total, 0) AS INT) AS receipt_total,

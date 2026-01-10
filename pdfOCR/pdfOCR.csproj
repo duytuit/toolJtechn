@@ -149,5 +149,8 @@
     </PackageReference>
     <PackageReference Include="Tesseract" Version="5.2.0" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="OcrApi\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -79,5 +80,7 @@ namespace Vudaco.Partners.Models
 
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
+        [NotMapped]
+        public List<PartnerDetail> PartnerDetails { get; set; }
     }
 }

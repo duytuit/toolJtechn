@@ -1711,31 +1711,9 @@ namespace Vudaco.Debits.Controllers
             {
                 var now = DateTime.Now;
                 int CycleName = int.Parse(DebitMuaBanDto.AccountingDate.ToString("MMyyyy"));
-                var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitMuaBanDto.CustomerDetailId);
-                if (bill_Partner == null)
-                {
-                    var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitMuaBanDto.StorageId, "HD"+DebitMuaBanDto.AccountingDate.ToString("yyMM"),4);
-                    bill_Partner = new Bill
-                    {
-                        BillCode = BillCodePartner,
-                        StorageId = DebitMuaBanDto.StorageId,
-                        CustomerDetailId =  DebitMuaBanDto.CustomerDetailId,
-                        Name = CycleName.ToString(),
-                        AccountingDate = DebitMuaBanDto.AccountingDate,
-                        CycleName = CycleName,
-                        CreatedBy = userId,
-                        CreatedAt = now,
-                        UpdatedAt = now,
-                        UpdatedBy = userId
-                    };
-                    _context.Bills.Add(bill_Partner);
-                    await _context.SaveChangesAsync();  // phải có
-                }
                 var DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn,tran.GetDbTransaction(), "debits", "dispatch_code", DebitMuaBanDto.StorageId, "BHKH"+DebitMuaBanDto.AccountingDate.ToString("yyMM"),4);
-
                 var debit = new Debit
                 {
-                    BillId = bill_Partner.Id,
                     CustomerDetailId = DebitMuaBanDto.CustomerDetailId,
                     StorageId = DebitMuaBanDto.StorageId,
                     Type = DebitRepositories.BanHangKH,
@@ -1837,31 +1815,9 @@ namespace Vudaco.Debits.Controllers
             {
                 var now = DateTime.Now;
                 int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
-                var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitDto.CustomerDetailId);
-                if (bill_Partner == null)
-                {
-                    var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HD"+DebitDto.AccountingDate.ToString("yyMM"),4);
-                    bill_Partner = new Bill
-                    {
-                        BillCode = BillCodePartner,
-                        StorageId = DebitDto.StorageId,
-                        CustomerDetailId =  DebitDto.CustomerDetailId,
-                        Name = CycleName.ToString(),
-                        AccountingDate = DebitDto.AccountingDate,
-                        CycleName = CycleName,
-                        CreatedBy = userId,
-                        CreatedAt = now,
-                        UpdatedAt = now,
-                        UpdatedBy = userId
-                    };
-                    _context.Bills.Add(bill_Partner);
-                    await _context.SaveChangesAsync();  // phải có
-                }
                 var DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn,tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "KS"+DebitDto.AccountingDate.ToString("yyMM"),4);
-
                 var debit = new Debit
                 {
-                    BillId = bill_Partner.Id,
                     VehicleId = DebitDto.VehicleId,
                     VehicleNumber = DebitDto.VehicleNumber,
                     CustomerDetailId = DebitDto.CustomerDetailId,
@@ -1935,31 +1891,10 @@ namespace Vudaco.Debits.Controllers
             {
                 var now = DateTime.Now;
                 int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
-                var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.SupplierDetailId == DebitDto.SupplierDetailId);
-                if (bill_Partner == null)
-                {
-                    var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HD" + DebitDto.AccountingDate.ToString("yyMM"), 4);
-                    bill_Partner = new Bill
-                    {
-                        BillCode = BillCodePartner,
-                        StorageId = DebitDto.StorageId,
-                        SupplierDetailId = DebitDto.SupplierDetailId,
-                        Name = CycleName.ToString(),
-                        AccountingDate = DebitDto.AccountingDate,
-                        CycleName = CycleName,
-                        CreatedBy = userId,
-                        CreatedAt = now,
-                        UpdatedAt = now,
-                        UpdatedBy = userId
-                    };
-                    _context.Bills.Add(bill_Partner);
-                    await _context.SaveChangesAsync();  // phải có
-                }
                 var DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "MH" + DebitDto.AccountingDate.ToString("yyMM"), 4);
 
                 var debit = new Debit
                 {
-                    BillId = bill_Partner.Id,
                     SupplierDetailId = DebitDto.SupplierDetailId,
                     StorageId = DebitDto.StorageId,
                     Type = DebitRepositories.MuaHangNCC,
@@ -2052,31 +1987,9 @@ namespace Vudaco.Debits.Controllers
             {
                 var now = DateTime.Now;
                 int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
-                var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitDto.CustomerDetailId);
-                if (bill_Partner == null)
-                {
-                    var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HD" + DebitDto.AccountingDate.ToString("yyMM"), 4);
-                    bill_Partner = new Bill
-                    {
-                        BillCode = BillCodePartner,
-                        StorageId = DebitDto.StorageId,
-                        CustomerDetailId = DebitDto.CustomerDetailId,
-                        Name = CycleName.ToString(),
-                        AccountingDate = DebitDto.AccountingDate,
-                        CycleName = CycleName,
-                        CreatedBy = userId,
-                        CreatedAt = now,
-                        UpdatedAt = now,
-                        UpdatedBy = userId
-                    };
-                    _context.Bills.Add(bill_Partner);
-                    await _context.SaveChangesAsync();  // phải có
-                }
                 var DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "BH" + DebitDto.AccountingDate.ToString("yyMM"), 4);
-
                 var debit = new Debit
                 {
-                    BillId = bill_Partner.Id,
                     CustomerDetailId = DebitDto.CustomerDetailId,
                     StorageId = DebitDto.StorageId,
                     Type = DebitRepositories.BanHangKH,
@@ -2129,31 +2042,10 @@ namespace Vudaco.Debits.Controllers
             {
                 var now = DateTime.Now;
                 int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
-                var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitDto.CustomerDetailId);
-                if (bill_Partner == null)
-                {
-                    var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HD"+DebitDto.AccountingDate.ToString("yyMM"),4);
-                    bill_Partner = new Bill
-                    {
-                        BillCode = BillCodePartner,
-                        StorageId = DebitDto.StorageId,
-                        CustomerDetailId =  DebitDto.CustomerDetailId,
-                        Name = CycleName.ToString(),
-                        AccountingDate = DebitDto.AccountingDate,
-                        CycleName = CycleName,
-                        CreatedBy = userId,
-                        CreatedAt = now,
-                        UpdatedAt = now,
-                        UpdatedBy = userId
-                    };
-                    _context.Bills.Add(bill_Partner);
-                    await _context.SaveChangesAsync();  // phải có
-                }
                 var DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn,tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "DKKH"+DebitDto.AccountingDate.ToString("yyMM"),4);
 
                 var debit = new Debit
                 {
-                    BillId = bill_Partner.Id,
                     CustomerDetailId = DebitDto.CustomerDetailId,
                     StorageId = DebitDto.StorageId,
                     Type = DebitDto.Type,
@@ -2206,31 +2098,9 @@ namespace Vudaco.Debits.Controllers
             {
                 var now = DateTime.Now;
                 int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
-                var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.SupplierDetailId == DebitDto.SupplierDetailId);
-                if (bill_Partner == null)
-                {
-                    var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HD"+DebitDto.AccountingDate.ToString("yyMM"),4);
-                    bill_Partner = new Bill
-                    {
-                        BillCode = BillCodePartner,
-                        StorageId = DebitDto.StorageId,
-                        SupplierDetailId =  DebitDto.SupplierDetailId,
-                        Name = CycleName.ToString(),
-                        AccountingDate = DebitDto.AccountingDate,
-                        CycleName = CycleName,
-                        CreatedBy = userId,
-                        CreatedAt = now,
-                        UpdatedAt = now,
-                        UpdatedBy = userId
-                    };
-                    _context.Bills.Add(bill_Partner);
-                    await _context.SaveChangesAsync();  // phải có
-                }
                 var DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn,tran.GetDbTransaction(), "debits", "dispatch_code", DebitDto.StorageId, "DKNCC"+DebitDto.AccountingDate.ToString("yyMM"),4);
-
                 var debit = new Debit
                 {
-                    BillId = bill_Partner.Id,
                     SupplierDetailId = DebitDto.SupplierDetailId,
                     StorageId = DebitDto.StorageId,
                     Type = DebitDto.Type,
@@ -2286,31 +2156,10 @@ namespace Vudaco.Debits.Controllers
                 var now = DateTime.Now;
                 if (DebitDto.CustomerDetailId > 0)
                 {
-                    var bill_Partner = await _context.Bills.AsNoTracking().FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitDto.CustomerDetailId);
-                    if (bill_Partner == null)
-                    {
-                        bill_Partner = new Bill
-                        {
-                            BillCode = BillCode,
-                            StorageId = DebitDto.StorageId,
-                            Name = CycleName.ToString(),
-                            AccountingDate = DebitDto.AccountingDate,
-                            CustomerDetailId = DebitDto.CustomerDetailId,
-                            CycleName = CycleName,
-                            CreatedBy = userId,
-                            CreatedAt = now,
-                            UpdatedAt = now,
-                            UpdatedBy = userId
-                        };
-                        _context.Bills.Add(bill_Partner);
-                        await _context.SaveChangesAsync();
-
-                    }
                     foreach (var item in DebitDto.productChiho)
                     {
                         var debit = new Debit
                         {
-                            BillId = bill_Partner.Id,
                             CustomerDetailId = DebitDto.CustomerDetailId,
                             ServiceId = item.ServiceId,
                             Bill = item.Bill,
@@ -2327,7 +2176,7 @@ namespace Vudaco.Debits.Controllers
                             PurchasePrice = item.PurchasePrice,
                             Price = item.PurchasePrice,
                             Data = DebitDto.Data,
-                            Note = DebitDto.Note,
+                            Note = item.Note,
                             ServiceDetail =  JsonSerializer.Serialize(new[] { item }),
                             PurchaseStatus = DebitDto.PurchaseStatus,
                             PurchaseVat = DebitDto.PurchaseVat,
@@ -2356,7 +2205,6 @@ namespace Vudaco.Debits.Controllers
                     {
                         var debit = new Debit
                         {
-                            BillId = bill_Partner.Id,
                             CustomerDetailId = DebitDto.CustomerDetailId,
                             EmployeeStaffId = DebitDto.EmployeeStaffId,
                             FileInfoId = DebitDto.FileInfoId,
@@ -2368,7 +2216,7 @@ namespace Vudaco.Debits.Controllers
                             ServiceDate = DebitDto.AccountingDate,
                             PurchasePrice = DebitDto.productHaiquan.Sum(x => x.PurchasePrice),
                             Data = DebitDto.Data,
-                            Note = DebitDto.Note,
+                            Note = string.Join(";", DebitDto.productHaiquan.Where(x => !string.IsNullOrWhiteSpace(x?.Note)) .Select(x => x.Note) ),
                             ServiceDetail = JsonSerializer.Serialize(DebitDto.productHaiquan),
                             PurchaseStatus = DebitDto.PurchaseStatus,
                             PurchaseVat = DebitDto.PurchaseVat,
@@ -2417,31 +2265,10 @@ namespace Vudaco.Debits.Controllers
                 var now = DateTime.Now;
                 if (DebitDto.CustomerDetailId > 0)
                 {
-                    var bill_Partner = await _context.Bills.AsNoTracking().FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitDto.CustomerDetailId);
-                    if (bill_Partner == null)
-                    {
-                        bill_Partner = new Bill
-                        {
-                            BillCode = BillCode,
-                            StorageId = DebitDto.StorageId,
-                            Name = CycleName.ToString(),
-                            AccountingDate = DebitDto.AccountingDate,
-                            CustomerDetailId = DebitDto.CustomerDetailId,
-                            CycleName = CycleName,
-                            CreatedBy = userId,
-                            CreatedAt = now,
-                            UpdatedAt = now,
-                            UpdatedBy = userId
-                        };
-                        _context.Bills.Add(bill_Partner);
-                         await _context.SaveChangesAsync();
-                     
-                    }
                     foreach (var item in DebitDto.productNangha) 
                     {
                         var debit = new Debit
                         {
-                            BillId = bill_Partner.Id,
                             CustomerDetailId = DebitDto.CustomerDetailId,
                             ServiceId = item.ServiceId,
                             Bill = item.Bill,
@@ -2458,7 +2285,7 @@ namespace Vudaco.Debits.Controllers
                             PurchasePrice = item.PurchasePrice,
                             Price = item.PurchasePrice,
                             Data = DebitDto.Data,
-                            Note = DebitDto.Note,
+                            Note = item.Note,
                             PurchaseStatus = DebitDto.PurchaseStatus,
                             PurchaseVat = DebitDto.PurchaseVat,
                             CreatedBy = userId,
@@ -2534,33 +2361,12 @@ namespace Vudaco.Debits.Controllers
                     var _kh_detail = await _context.PartnerDetails.Where(x => x.PartnerId == _kh.Id && x.Status == 1).FirstOrDefaultAsync();
                     if (_kh_detail == null) continue;
                     int CycleName = int.Parse(ngay.ToString("MMyyyy"));
-                    var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == _kh_detail.Id);
-                    if (bill_Partner == null)
-                    {
-                        var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", ImportDauKyDto.StorageId, "HD" + ngay.ToString("yyMM"), 4);
-                        bill_Partner = new Bill
-                        {
-                            BillCode = BillCodePartner,
-                            StorageId = ImportDauKyDto.StorageId,
-                            CustomerDetailId = _kh_detail.Id,
-                            Name = CycleName.ToString(),
-                            AccountingDate = ngay,
-                            CycleName = CycleName,
-                            CreatedBy = userId,
-                            CreatedAt = now,
-                            UpdatedAt = now,
-                            UpdatedBy = userId
-                        };
-                        _context.Bills.Add(bill_Partner);
-                        await _context.SaveChangesAsync();  // phải có
-                    }
                     var DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", ImportDauKyDto.StorageId, "DKKH" + ngay.ToString("yyMM"), 4);
 
                     if (tien_dv > 0)
                     {
                         var debit = new Debit
                         {
-                            BillId = bill_Partner.Id,
                             CustomerDetailId = _kh_detail.Id,
                             StorageId = ImportDauKyDto.StorageId,
                             Type = 5,
@@ -2594,7 +2400,6 @@ namespace Vudaco.Debits.Controllers
                     {
                         var debit = new Debit
                         {
-                            BillId = bill_Partner.Id,
                             CustomerDetailId = _kh_detail.Id,
                             StorageId = ImportDauKyDto.StorageId,
                             Type = 6,
@@ -2676,33 +2481,13 @@ namespace Vudaco.Debits.Controllers
                     var _ncc_detail = await _context.PartnerDetails.Where(x => x.PartnerId == _ncc.Id && x.Status == 2).FirstOrDefaultAsync();
                     if (_ncc_detail == null) continue;
                     int CycleName = int.Parse(ngay.ToString("MMyyyy"));
-                    var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.SupplierDetailId == _ncc_detail.Id);
-                    if (bill_Partner == null)
-                    {
-                        var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", ImportDauKyDto.StorageId, "HD" + ngay.ToString("yyMM"), 4);
-                        bill_Partner = new Bill
-                        {
-                            BillCode = BillCodePartner,
-                            StorageId = ImportDauKyDto.StorageId,
-                            SupplierDetailId = _ncc_detail.Id,
-                            Name = CycleName.ToString(),
-                            AccountingDate = ngay,
-                            CycleName = CycleName,
-                            CreatedBy = userId,
-                            CreatedAt = now,
-                            UpdatedAt = now,
-                            UpdatedBy = userId
-                        };
-                        _context.Bills.Add(bill_Partner);
-                        await _context.SaveChangesAsync();  // phải có
-                    }
+                 
                     var DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", ImportDauKyDto.StorageId, "DKNCC" + ngay.ToString("yyMM"), 4);
 
                     if (tien_dv > 0)
                     {
                         var debit = new Debit
                         {
-                            BillId = bill_Partner.Id,
                             SupplierDetailId = _ncc_detail.Id,
                             StorageId = ImportDauKyDto.StorageId,
                             Type = 10,
@@ -2736,7 +2521,6 @@ namespace Vudaco.Debits.Controllers
                     {
                         var debit = new Debit
                         {
-                            BillId = bill_Partner.Id,
                             SupplierDetailId = _ncc_detail.Id,
                             StorageId = ImportDauKyDto.StorageId,
                             Type = 11,
@@ -2795,28 +2579,6 @@ namespace Vudaco.Debits.Controllers
             {
                 var now = DateTime.Now;
                 int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
-                var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitDto.CustomerDetailId);
-                if (bill_Partner == null)
-                {
-                    var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HD"+DebitDto.AccountingDate.ToString("yyMM"),4);
-                    bill_Partner = new Bill
-                    {
-                        BillCode = BillCodePartner,
-                        StorageId = DebitDto.StorageId,
-                        CustomerDetailId =  DebitDto.CustomerDetailId,
-                        Name = CycleName.ToString(),
-                        AccountingDate = DebitDto.AccountingDate,
-                        CycleName = CycleName,
-                        CreatedBy = userId,
-                        CreatedAt = now,
-                        UpdatedAt = now,
-                        UpdatedBy = userId
-                    };
-                    _context.Bills.Add(bill_Partner);
-                    await _context.SaveChangesAsync();  // phải có
-                }
-
-                debit.BillId = bill_Partner.Id;
                 debit.VehicleId = DebitDto.VehicleId;
                 debit.VehicleNumber = DebitDto.VehicleNumber;
                 debit.CustomerDetailId = DebitDto.CustomerDetailId;
@@ -2877,27 +2639,7 @@ namespace Vudaco.Debits.Controllers
             {
                 var now = DateTime.Now;
                 int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
-                var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitDto.CustomerDetailId);
-                if (bill_Partner == null)
-                {
-                    var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HD" + DebitDto.AccountingDate.ToString("yyMM"), 4);
-                    bill_Partner = new Bill
-                    {
-                        BillCode = BillCodePartner,
-                        StorageId = DebitDto.StorageId,
-                        CustomerDetailId = DebitDto.CustomerDetailId,
-                        Name = CycleName.ToString(),
-                        AccountingDate = DebitDto.AccountingDate,
-                        CycleName = CycleName,
-                        CreatedBy = userId,
-                        CreatedAt = now,
-                        UpdatedAt = now,
-                        UpdatedBy = userId
-                    };
-                    _context.Bills.Add(bill_Partner);
-                    await _context.SaveChangesAsync();  // phải có
-                }
-                entity.BillId = bill_Partner.Id;
+               
                 entity.Name = DebitDto.Name;
                 entity.Type = DebitDto.Type;
                 entity.AccountingDate = DebitDto.AccountingDate;
@@ -2937,27 +2679,6 @@ namespace Vudaco.Debits.Controllers
             {
                 var now = DateTime.Now;
                 int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
-                var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.SupplierDetailId == DebitDto.SupplierDetailId);
-                if (bill_Partner == null)
-                {
-                    var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HD" + DebitDto.AccountingDate.ToString("yyMM"), 4);
-                    bill_Partner = new Bill
-                    {
-                        BillCode = BillCodePartner,
-                        StorageId = DebitDto.StorageId,
-                        SupplierDetailId = DebitDto.SupplierDetailId,
-                        Name = CycleName.ToString(),
-                        AccountingDate = DebitDto.AccountingDate,
-                        CycleName = CycleName,
-                        CreatedBy = userId,
-                        CreatedAt = now,
-                        UpdatedAt = now,
-                        UpdatedBy = userId
-                    };
-                    _context.Bills.Add(bill_Partner);
-                    await _context.SaveChangesAsync();  // phải có
-                }
-                entity.BillId = bill_Partner.Id;
                 entity.Name = DebitDto.Name;
                 entity.Type = DebitDto.Type;
                 entity.AccountingDate = DebitDto.AccountingDate;
@@ -2999,27 +2720,6 @@ namespace Vudaco.Debits.Controllers
             {
                 var now = DateTime.Now;
                 int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
-                var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.SupplierDetailId == DebitDto.SupplierDetailId);
-                if (bill_Partner == null)
-                {
-                    var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HD" + DebitDto.AccountingDate.ToString("yyMM"), 4);
-                    bill_Partner = new Bill
-                    {
-                        BillCode = BillCodePartner,
-                        StorageId = DebitDto.StorageId,
-                        SupplierDetailId = DebitDto.SupplierDetailId,
-                        Name = CycleName.ToString(),
-                        AccountingDate = DebitDto.AccountingDate,
-                        CycleName = CycleName,
-                        CreatedBy = userId,
-                        CreatedAt = now,
-                        UpdatedAt = now,
-                        UpdatedBy = userId
-                    };
-                    _context.Bills.Add(bill_Partner);
-                    await _context.SaveChangesAsync();  // phải có
-                }
-                entity.BillId = bill_Partner.Id;
                 entity.Name = DebitDto.Note;
                 entity.AccountingDate = DebitDto.AccountingDate;
                 entity.ServiceDate = DebitDto.AccountingDate;
@@ -3106,27 +2806,6 @@ namespace Vudaco.Debits.Controllers
             {
                 var now = DateTime.Now;
                 int CycleName = int.Parse(DebitDto.AccountingDate.ToString("MMyyyy"));
-                var bill_Partner = await _context.Bills.FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == DebitDto.CustomerDetailId);
-                if (bill_Partner == null)
-                {
-                    var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", DebitDto.StorageId, "HD" + DebitDto.AccountingDate.ToString("yyMM"), 4);
-                    bill_Partner = new Bill
-                    {
-                        BillCode = BillCodePartner,
-                        StorageId = DebitDto.StorageId,
-                        CustomerDetailId = DebitDto.CustomerDetailId,
-                        Name = CycleName.ToString(),
-                        AccountingDate = DebitDto.AccountingDate,
-                        CycleName = CycleName,
-                        CreatedBy = userId,
-                        CreatedAt = now,
-                        UpdatedAt = now,
-                        UpdatedBy = userId
-                    };
-                    _context.Bills.Add(bill_Partner);
-                    await _context.SaveChangesAsync();  // phải có
-                }
-                entity.BillId = bill_Partner.Id;
                 entity.Name = DebitDto.Note;
                 entity.AccountingDate = DebitDto.AccountingDate;
                 entity.ServiceDate = DebitDto.AccountingDate;
@@ -3347,32 +3026,10 @@ namespace Vudaco.Debits.Controllers
                 }
                 int CycleName = int.Parse(ConfirmFileDto.AccountingDate.ToString("MMyyyy"));
 
-                var bill_Partner = await _context.Bills.AsNoTracking().FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == ConfirmFileDto.PartnerDetailId);
-                if (bill_Partner == null)
-                {
-                    var BillCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", ConfirmFileDto.StorageId, "HD"+ConfirmFileDto.AccountingDate.ToString("yyMM"), 4);
-                    bill_Partner = new Bill
-                    {
-                        BillCode = BillCode,
-                        StorageId = ConfirmFileDto.StorageId,
-                        Name = CycleName.ToString(),
-                        AccountingDate = ConfirmFileDto.AccountingDate,
-                        CustomerDetailId = ConfirmFileDto.PartnerDetailId,
-                        CycleName = CycleName,
-                        CreatedBy = userId,
-                        CreatedAt = now,
-                        UpdatedAt = now,
-                        UpdatedBy = userId
-                    };
-                    _context.Bills.Add(bill_Partner);
-                    await _context.SaveChangesAsync();
-                    
-                }
                 foreach (var item in ConfirmFileDto.Chiphikhac)
                 {
                     var debit = new Debit
                     {
-                        BillId = bill_Partner.Id,
                         CustomerDetailId = ConfirmFileDto.PartnerDetailId,
                         SupplierDetailId = item.SupplierDetailId,
                         FileInfoId = ConfirmFileDto.FileInfoId,
@@ -3653,33 +3310,10 @@ namespace Vudaco.Debits.Controllers
 
                 }
                 int CycleName = int.Parse(ConfirmFileDto.AccountingDate.ToString("MMyyyy"));
-
-                var bill_Partner = await _context.Bills.AsNoTracking().FirstOrDefaultAsync(x => x.CycleName == CycleName && x.CustomerDetailId == ConfirmFileDto.PartnerDetailId);
-                if (bill_Partner == null)
-                {
-                    var BillCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", ConfirmFileDto.StorageId, "HD"+ConfirmFileDto.AccountingDate.ToString("yyMM"), 4);
-                    bill_Partner = new Bill
-                    {
-                        BillCode = BillCode,
-                        StorageId = ConfirmFileDto.StorageId,
-                        Name = CycleName.ToString(),
-                        AccountingDate = ConfirmFileDto.AccountingDate,
-                        CustomerDetailId = ConfirmFileDto.PartnerDetailId,
-                        CycleName = CycleName,
-                        CreatedBy = userId,
-                        CreatedAt = now,
-                        UpdatedAt = now,
-                        UpdatedBy = userId
-                    };
-                    _context.Bills.Add(bill_Partner);
-                    await _context.SaveChangesAsync();
-                    
-                }
                 foreach (var item in ConfirmFileDto.Chiphikhac)
                 {
                      var debit = new Debit
                         {
-                            BillId = bill_Partner.Id,
                             CustomerDetailId = ConfirmFileDto.PartnerDetailId,
                             SupplierDetailId = item.SupplierDetailId,
                             FileInfoId = ConfirmFileDto.FileInfoId,
@@ -3750,33 +3384,10 @@ namespace Vudaco.Debits.Controllers
                     debit.UpdatedAt = now;
                 }
                 int CycleName = int.Parse(ConfirmFileDto.AccountingDate.ToString("MMyyyy"));
-
-                var bill_Partner = await _context.Bills.AsNoTracking().FirstOrDefaultAsync(x => x.CycleName == CycleName && x.SupplierDetailId == ConfirmFileDto.PartnerDetailId);
-                if (bill_Partner == null)
-                {
-                    var BillCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", ConfirmFileDto.StorageId, "HD"+ConfirmFileDto.AccountingDate.ToString("yyMM"), 4);
-                    bill_Partner = new Bill
-                    {
-                        BillCode = BillCode,
-                        StorageId = ConfirmFileDto.StorageId,
-                        Name = CycleName.ToString(),
-                        AccountingDate = ConfirmFileDto.AccountingDate,
-                        SupplierDetailId = ConfirmFileDto.PartnerDetailId,
-                        CycleName = CycleName,
-                        CreatedBy = userId,
-                        CreatedAt = now,
-                        UpdatedAt = now,
-                        UpdatedBy = userId
-                    };
-                    _context.Bills.Add(bill_Partner);
-                    await _context.SaveChangesAsync();
-                    
-                }
                 foreach (var item in ConfirmFileDto.Chiphikhac)
                 {
                      var debit = new Debit
                         {
-                            BillId = bill_Partner.Id,
                             SupplierDetailId = ConfirmFileDto.PartnerDetailId,
                             FileInfoId = ConfirmFileDto.FileInfoId,
                             DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "debits", "dispatch_code", ConfirmFileDto.StorageId, "PKNCC" + ConfirmFileDto.AccountingDate.ToString("yyMM"), 4),

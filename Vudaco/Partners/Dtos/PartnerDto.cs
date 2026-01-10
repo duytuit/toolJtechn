@@ -24,6 +24,10 @@ namespace Vudaco.Partners.Dtos
         public int Status { get; set; }
         public int StorageId { get; set; }
         public string Abbreviation { get; set; }
+        public int CustomerCreditLimit { get; set; }
+        public int SupplierCreditLimit { get; set; }
+        public int CustomerId { get; set; }
+        public int SupplierId { get; set; }
         public int? CreatedBy { get; set; }
         public int? UpdatedBy { get; set; }
         public int? DeletedBy { get; set; }

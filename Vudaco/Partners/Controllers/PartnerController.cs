@@ -144,6 +144,7 @@ namespace Vudaco.Partners.Controllers
                     Code = SqlServerHelpers.GenerateSoChungTu( _configuration.GetConnectionString("DefaultConnection"),"partner_details","code",dto.StorageId,"KH", 4),
                     StorageId = dto.StorageId,
                     CustomerCreditLimit = dto.CustomerCreditLimit,
+                    CustomerCreditLimitMonth = dto.CustomerCreditLimitMonth,
                     CreatedBy = userId,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
@@ -156,6 +157,7 @@ namespace Vudaco.Partners.Controllers
                     Code = SqlServerHelpers.GenerateSoChungTu( _configuration.GetConnectionString("DefaultConnection"),"partner_details","code",dto.StorageId,"NCC", 4),
                     StorageId = dto.StorageId,
                     SupplierCreditLimit = dto.SupplierCreditLimit,
+                    SupplierCreditLimitMonth = dto.SupplierCreditLimitMonth,
                     CreatedBy = userId,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
@@ -259,6 +261,7 @@ namespace Vudaco.Partners.Controllers
                     if (cus != null)
                     {
                         cus.CustomerCreditLimit = dto.CustomerCreditLimit;
+                        cus.CustomerCreditLimitMonth = dto.CustomerCreditLimitMonth;
                     }
 
                 }
@@ -268,6 +271,7 @@ namespace Vudaco.Partners.Controllers
                     if (sup != null)
                     {
                         sup.SupplierCreditLimit = dto.SupplierCreditLimit;
+                        sup.SupplierCreditLimitMonth = dto.SupplierCreditLimitMonth;
                     }
 
                 }

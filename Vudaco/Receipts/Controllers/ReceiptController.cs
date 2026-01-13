@@ -98,6 +98,16 @@ namespace Vudaco.Receipts.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
+        [HttpGet("GetBaoCaoLuuChuyenTienTeAsync")]
+        public async Task<IActionResult> GetBaoCaoLuuChuyenTienTeAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] ReceiptDto ReceiptDto = null)
+        {
+            var result = await _repoReceipt.GetBaoCaoLuuChuyenTienTeAsync(ReceiptDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
         [HttpGet("XacNhanChiPhiGiaoNhan")]
         public async Task<IActionResult> GetXacNhanChiPhiGiaoNhan(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] ReceiptDto ReceiptDto = null)
         {
@@ -1863,6 +1873,11 @@ namespace Vudaco.Receipts.Controllers
                     detail.DeletedBy = userId;
                 }
 
+                var file_info = await _context.FileInfos.FirstOrDefaultAsync(x => x.ReceiptId == receipt.Id);
+                if (file_info != null)
+                {
+                    file_info.ReceiptId = null;
+                }
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
 

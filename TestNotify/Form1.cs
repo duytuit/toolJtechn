@@ -30,9 +30,9 @@ namespace TestNotify
 
             //_client.OnLog += (msg) => Invoke((Action)(() => richTextBox1.AppendText(msg + "\n")));
             _client.OnMessageReceived += (msg) => Invoke((Action)(() => {
-               
+                label1.Text = msg.ToString();
             }));
-            // _client.OnConnected += () => Invoke((Action)(() => labelStatus.Text = "🟢 Connected"));
+           // _client.OnConnected += () => Invoke((Action)(() => ));
             // _client.OnDisconnected += () => Invoke((Action)(() => labelStatus.Text = "🔴 Disconnected"));
 
             await _client.StartAsync(_cts.Token);

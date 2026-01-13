@@ -15,6 +15,7 @@ namespace Vudaco.Receipts.Repositories
         Task<PaginatedResultReact<object>> GetObjectTaskAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetXacNhanChiPhiGiaoNhanAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetPhieuThuAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<PaginatedResultReact<object>> GetBaoCaoLuuChuyenTienTeAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetPhieuChiAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetSoQuyAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetSoDuDauKyAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken);

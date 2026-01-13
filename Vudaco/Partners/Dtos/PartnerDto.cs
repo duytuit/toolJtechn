@@ -26,6 +26,8 @@ namespace Vudaco.Partners.Dtos
         public string Abbreviation { get; set; }
         public int CustomerCreditLimit { get; set; }
         public int SupplierCreditLimit { get; set; }
+        public int SupplierCreditLimitMonth { get; set; }
+        public int CustomerCreditLimitMonth { get; set; }
         public int CustomerId { get; set; }
         public int SupplierId { get; set; }
         public int? CreatedBy { get; set; }

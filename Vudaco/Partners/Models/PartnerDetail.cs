@@ -22,6 +22,10 @@ namespace Vudaco.Partners.Models
         [Required]
         [Column("supplier_credit_limit")]
         public int SupplierCreditLimit { get; set; }
+        [Column("supplier_credit_limit_month")]
+        public int SupplierCreditLimitMonth { get; set; }
+        [Column("customer_credit_limit_month")]
+        public int CustomerCreditLimitMonth { get; set; }
         [MaxLength(50)]
         [Column("code")]
         public string Code { get; set; } 

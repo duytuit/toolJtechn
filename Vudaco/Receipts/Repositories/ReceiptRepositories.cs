@@ -459,5 +459,84 @@ namespace Vudaco.Receipts.Repositories
             };
             return _results;
         }
+
+        public async Task<PaginatedResultReact<object>> GetBaoCaoLuuChuyenTienTeAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var _results = new PaginatedResultReact<object>();
+            var sql = $@"
+                    SELECT 
+                        iecat.id,
+                        iecat.name,
+                        SUM(ISNULL(d.amount, 0)) AS total_amount,
+                        SUM(ISNULL(d.total, 0))  AS total_with_vat
+                    FROM receipts r
+                    LEFT JOIN income_expense_categorys iecat
+                        ON iecat.id = r.income_expense_category_id
+                    LEFT JOIN (
+                        SELECT 
+                            receipt_id,
+                            SUM(amount) AS amount,
+                            SUM(amount * (1 + vat / 100.0)) AS total
+                        FROM receipt_details
+                        WHERE deleted_at IS NULL
+                        GROUP BY receipt_id
+                    ) d ON d.receipt_id = r.id
+                    WHERE (r.status IS NULL OR r.status = 1)
+                        AND r.deleted_at IS NULL
+                        AND iecat.id IN (1,3,24,25,14,15,10,11,13,21,37,16,17,18,20,19,35,36)
+                        AND iecat.deleted_at IS NULL";
+            if (ReceiptDto.StorageId > 0)
+            {
+                sql += $@" AND r.storage_id = {ReceiptDto.StorageId}";
+            }
+           
+            if (ReceiptDto.FromDate.HasValue && ReceiptDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = ReceiptDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND r.accounting_date >= '{ReceiptDto.FromDate.Value:yyyy-MM-dd}' 
+                AND r.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            sql += $@" GROUP BY iecat.id,iecat.name";
+            var bao_cao_tk_results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+             _results.Extra["bao_cao_tk_results"] = bao_cao_tk_results;
+             sql = $@"
+                    SELECT 
+                        iecat.id,
+                        iecat.name,
+                        SUM(ISNULL(d.amount, 0)) AS total_amount,
+                        SUM(ISNULL(d.total, 0))  AS total_with_vat
+                    FROM receipts r
+                    LEFT JOIN income_expense_categorys iecat
+                        ON iecat.id = r.income_expense_category_id
+                    LEFT JOIN (
+                        SELECT 
+                            receipt_id,
+                            SUM(amount) AS amount,
+                            SUM(amount * (1 + vat / 100.0)) AS total
+                        FROM receipt_details
+                        WHERE deleted_at IS NULL
+                        GROUP BY receipt_id
+                    ) d ON d.receipt_id = r.id
+                    WHERE (r.status IS NULL OR r.status = 1)
+                        AND r.deleted_at IS NULL
+                        AND iecat.id IN (1,3,24,25,14,15,10,11,13,21,37,16,17,18,20,19,35,36)
+                        AND iecat.deleted_at IS NULL";
+            if (ReceiptDto.StorageId > 0)
+            {
+                sql += $@" AND r.storage_id = {ReceiptDto.StorageId}";
+            }
+           
+            if (ReceiptDto.FromDate.HasValue)
+            {
+                sql += $@" AND r.accounting_date < '{ReceiptDto.FromDate.Value:yyyy-MM-dd}'";
+            }
+            sql += $@" GROUP BY iecat.id,iecat.name";
+            var bao_cao_dk_results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+             _results.Extra["bao_cao_dk_results"] = bao_cao_dk_results;
+
+            return _results;
+        }
     }
 }

@@ -30,6 +30,8 @@ namespace Vudaco.Bills.Models
         [Required]
         [Column("accounting_date")]
         public DateTime AccountingDate { get; set; }
+        [Column("expiry_date")]
+        public DateTime? expiryDate { get; set; }
 
         [MaxLength(255)]
         [Column("name")]
@@ -37,7 +39,7 @@ namespace Vudaco.Bills.Models
 
         [Required]
         [Column("cycle_name")]
-        public int CycleName { get; set; }
+        public string CycleName { get; set; }
 
         [Column("status")]
         public int? Status { get; set; }

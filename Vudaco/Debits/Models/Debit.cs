@@ -14,7 +14,9 @@ namespace Vudaco.Debits.Models
         public int Id { get; set; }
 
         [Column("bill_id")]
-        public int BillId { get; set; }
+        public int? BillId { get; set; }
+        [Column("supplier_bill_id")]
+        public int? SupplierBillId { get; set; }
 
         [Column("vehicle_id")]
         public int? VehicleId { get; set; }

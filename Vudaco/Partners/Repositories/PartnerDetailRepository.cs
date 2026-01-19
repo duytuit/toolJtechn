@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Vudaco.Employees.Models;
@@ -87,6 +88,33 @@ namespace Vudaco.Partners.Repositories
             _context.PartnerDetails.Update(PartnerDetail);
             _context.SaveChanges();
             return Task.FromResult(PartnerDetail);
+        }
+        public async Task<PartnerDetail> GetPartnerInfoByIdWithCacheAsync(
+            int id,
+            CancellationToken cancellationToken = default)
+        {
+            string cacheKey = $"GetPartnerInfoById_{id}";
+
+            // 1️⃣ GET CACHE
+            var cacheValue = await _redis.GetAsync(cacheKey, cancellationToken);
+            if (!string.IsNullOrEmpty(cacheValue))
+            {
+                return JsonSerializer.Deserialize<PartnerDetail>(cacheValue);
+            }
+            // 2️⃣ GET DB
+            var entity = await _context.PartnerDetails.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            if (entity == null)
+                return null;
+            entity.Partner = await _context.Partners.FirstOrDefaultAsync(d => d.Id == entity.PartnerId);
+            // 3️⃣ SET CACHE
+            var json = JsonSerializer.Serialize(entity);
+            await _redis.SetAsync(
+                cacheKey,
+                json,
+                TimeSpan.FromDays(1),
+                cancellationToken
+            );
+            return entity;
         }
     }
 }

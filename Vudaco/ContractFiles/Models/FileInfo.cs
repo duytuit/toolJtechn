@@ -88,9 +88,9 @@ namespace Vudaco.ContractFiles.Models
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
         [NotMapped]
-        public List<FileInfoDetail> FileInfoDetails { get; set; }
+        public List<FileInfoDetail> FileInfoDetails { get; set; } = null;
         [NotMapped]
-        public List<Debit> Debits { get; set; }
+        public List<Debit> Debits { get; set; } = null;
 
     }
 }

@@ -47,5 +47,7 @@ namespace Vudaco.Partners.Models
         public DateTime? CreatedAt { get; set; }
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
+        [NotMapped]
+        public Partner Partner { get; set; }
     }
 }

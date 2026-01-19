@@ -124,7 +124,7 @@ namespace Vudaco.ContractFiles.Repositories
                 AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
             }
 
-            sql += " ORDER BY d.updated_at DESC";
+            sql += " ORDER BY d.service_date DESC";
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
             {

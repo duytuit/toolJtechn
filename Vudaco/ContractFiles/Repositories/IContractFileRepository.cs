@@ -20,6 +20,7 @@ namespace Vudaco.ContractFiles.Repositories
         Task<FileInfo> ShowAsync(int id);
         Task<FileInfo> ShowWithDebitAsync(int id);
         Task<FileInfo> ShowWithDebitConfirmAsync(int id);
+        Task<FileInfo> GetFileInfoByIdWithCacheAsync(int id, CancellationToken cancellationToken);
         Task<FileInfo> ShowWithDebitHasNCCAsync(int id);
         Task<FileInfo> CreateAsync(FileInfo FileInfo);
         Task<FileInfo> UpdateAsync(FileInfo FileInfo);

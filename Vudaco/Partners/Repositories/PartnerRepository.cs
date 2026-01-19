@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Vudaco.Partners.Dtos;
@@ -177,6 +178,50 @@ namespace Vudaco.Partners.Repositories
             return _results;
         }
 
+        public async Task<PaginatedResultReact<object>> GetPartnerWithDebitNoBill(PartnerDetailDto PartnerDetailDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+             var sql = $@"
+                    SELECT 
+                        p.id AS customer_detail_id,
+                        dt.abbreviation,
+                        dt.name,
+                        p.customer_credit_limit_month,
+                        MIN(d.accounting_date) AS oldest_accounting_date
+                    FROM partner_details p
+                    LEFT JOIN debits d
+                        ON d.customer_detail_id = p.id
+                    AND d.deleted_at IS NULL
+                    AND d.bill_id IS NULL
+                    AND d.type IN (0,1,2,3,4,5,6,8)
+                    AND (
+                            d.status = 2 
+                            OR (d.status = 0 AND d.file_info_id IS NULL)
+                        )
+                    AND (
+                            d.service_id NOT IN (19,33)
+                            OR (d.service_id = 33 AND d.service_status > 2)
+                            OR d.service_id IS NULL
+                        )";
+                    if (PartnerDetailDto.StorageId > 0)
+                    {
+                        sql += $@" AND d.storage_id = {PartnerDetailDto.StorageId}";
+                    }
+                    sql += $@" LEFT JOIN file_infos f
+                        ON f.id = d.file_info_id
+                    AND f.deleted_at IS NULL
+                    LEFT JOIN partners dt
+                        ON dt.id = p.partner_id
+                    WHERE p.status = 1
+                    AND p.deleted_at IS NULL";
+              sql += $@" GROUP BY p.id, dt.abbreviation, p.customer_credit_limit_month, dt.name ORDER BY CASE WHEN MIN(d.accounting_date) IS NULL THEN 1 ELSE 0 END, MIN(d.accounting_date) DESC";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
+
         public async Task<Partner> ShowAsync(int id)
         {
             var entity = await _context.Partners.FirstOrDefaultAsync(x => x.Id == id);
@@ -191,5 +236,6 @@ namespace Vudaco.Partners.Repositories
             _context.SaveChanges();
             return Task.FromResult(Partner);
         }
+       
     }
 }

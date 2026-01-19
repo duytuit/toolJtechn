@@ -8,14 +8,16 @@ namespace Vudaco.Bills.Dtos
     public class BillDto
     {
         public int Id { get; set; }
+        public int[] Ids { get; set; }
         public string BillCode { get; set; }
         public int? FileInfoId { get; set; }
         public int StorageId { get; set; }
         public int? CustomerDetailId { get; set; }
         public int? SupplierDetailId { get; set; }
+        public DateTime? expiryDate { get; set; }
         public DateTime AccountingDate { get; set; }
         public string Name { get; set; }
-        public int CycleName { get; set; }
+        public string CycleName { get; set; }
         public int? Status { get; set; }
         public int? ApprovedByUser { get; set; }
         public DateTime? ApprovalTime { get; set; }

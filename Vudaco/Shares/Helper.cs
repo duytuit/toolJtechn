@@ -2,16 +2,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore.Query.Internal;
+using Vudaco.ContractFiles.Models;
 using Vudaco.Shares.Connects;
 
 namespace Vudaco.Shares
@@ -252,6 +255,59 @@ namespace Vudaco.Shares
             };
 
             return JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+        }
+        public static DataTable ToDataTable(IEnumerable<dynamic> items)
+        {
+            var dataTable = new DataTable("Data");
+
+            if (items == null) return dataTable;
+
+            var list = items.ToList();
+            if (!list.Any()) return dataTable;
+
+            // 🔹 ExpandoObject / Dictionary
+            if (list[0] is IDictionary<string, object>)
+            {
+                var dict = (IDictionary<string, object>)list[0];
+
+                foreach (var key in dict.Keys)
+                    dataTable.Columns.Add(key);
+
+                foreach (IDictionary<string, object> item in list)
+                {
+                    var row = dataTable.NewRow();
+                    foreach (var key in dict.Keys)
+                        row[key] = item[key] ?? DBNull.Value;
+
+                    dataTable.Rows.Add(row);
+                }
+
+                return dataTable;
+            }
+
+            // 🔹 dynamic object (Dapper, anonymous)
+            var props = list[0].GetType()
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (var prop in props)
+            {
+                var type = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+                dataTable.Columns.Add(prop.Name, type);
+            }
+
+            foreach (var item in list)
+            {
+                var values = new object[props.Length];
+
+                for (int i = 0; i < props.Length; i++)
+                {
+                    values[i] = props[i].GetValue(item) ?? DBNull.Value;
+                }
+
+                dataTable.Rows.Add(values);
+            }
+
+            return dataTable;
         }
         public static string NumberToVietnameseWords(double number)
         {

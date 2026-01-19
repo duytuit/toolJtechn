@@ -406,7 +406,82 @@ namespace Vudaco.Debits.Repositories
             };
             return _results;
         }
-
+        public async Task<PaginatedResultReact<object>> GetObjectXuatHoaDonKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+             var sql = $@"
+                    SELECT 
+                    d.*,
+                    CAST(ISNULL(rdt_total.amount, 0) AS INT) AS receipt_amount,
+                    CAST(ISNULL(rdt_total.vat, 0) AS INT) AS receipt_vat,
+                    CAST(ISNULL(rdt_total.total, 0) AS INT) AS receipt_total,
+                    p.customer_credit_limit
+                    FROM debits d
+                    LEFT JOIN file_infos f
+                    ON f.id = d.file_info_id
+                    LEFT JOIN partner_details p 
+                    ON p.id = d.customer_detail_id
+                    -- ✅ Tổng receipts
+                    OUTER APPLY (
+                            SELECT 
+                                    SUM(rdt.amount) AS amount,
+                                    MAX(rdt.vat) AS vat,
+                                    SUM(rdt.amount * (rdt.vat / 100.0)) + SUM(rdt.amount) AS total
+                            FROM receipts r
+                            LEFT JOIN income_expense_categorys iecat
+                            ON iecat.id = r.income_expense_category_id
+                            LEFT JOIN receipt_details rdt 
+                                    ON rdt.receipt_id = r.id
+                            WHERE 
+                                    d.id = rdt.debit_id 
+                                    AND iecat.type = 0
+                                    AND (r.status IS NULL OR r.status = 1)
+                                    AND r.deleted_at IS NULL
+                                    AND rdt.deleted_at IS NULL
+                    ) AS rdt_total
+                    WHERE
+                    p.status = 1
+                    AND d.type in (0,1,2,3,4,5,6,8)
+                    AND (d.status > 0 OR (d.status = 0 AND d.file_info_id IS NULL))
+                    AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (33) AND d.service_status > 2) OR d.service_id IS NULL )
+                    AND p.deleted_at IS NULL
+                    AND f.deleted_at IS NULL
+                    AND d.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.ServiceId > 0)
+            {
+                sql += $@" AND d.service_id = {DebitDto.ServiceId}";
+            }
+            if (DebitDto.CustomerDetailId > 0)
+            {
+                sql += $@" AND d.customer_detail_id = {DebitDto.CustomerDetailId}";
+            }
+            if (DebitDto.FileInfoIds != null)
+            {
+                sql += $" AND d.file_info_id IN ({DebitDto.FileInfoIds})";
+            }
+            else
+            {
+                if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+                {
+                    // Cộng thêm 1 ngày cho ToDate
+                    var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                    // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                    sql += $@" AND d.service_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                            AND d.service_date < '{toDateNext:yyyy-MM-dd}'";
+                }
+            }
+            
+            sql += " ORDER BY d.file_info_id,d.customer_detail_id,d.type,d.service_date";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
         public async Task<PaginatedResultReact<object>> GetObjectDebitChiTietKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
         {
              var sql = $@"
@@ -586,6 +661,7 @@ namespace Vudaco.Debits.Repositories
                 sql += $@" AND d.supplier_detail_id = {DebitDto.SupplierDetailId}";
             }
             sql += $@" AND d.accounting_date < '{DebitDto.FromDate.Value:yyyy-MM-dd}'";
+            
             return await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
         }
         public async Task<PaginatedResultReact<object>> GetObjectNoDebitNoFileNCCAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
@@ -632,6 +708,7 @@ namespace Vudaco.Debits.Repositories
             }
 
             sql += " ORDER BY d.updated_at DESC";
+            _ = Task.Run(() => Helper.SendTelegramMessageAsync(sql));
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
             {
@@ -1875,6 +1952,95 @@ namespace Vudaco.Debits.Repositories
             }
 
             sql += " ORDER BY d.updated_at DESC";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
+
+        public async Task<PaginatedResultReact<object>> GetObjectDebitChiTietNoBillKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var sql = $@"
+                    SELECT 
+                    d.*
+                    FROM debits d
+                    LEFT JOIN file_infos f
+                    ON f.id = d.file_info_id
+                    LEFT JOIN partner_details p 
+                    ON p.id = d.customer_detail_id
+                    WHERE
+                    p.status = 1
+                    AND NOT EXISTS (
+                            SELECT 1
+                            FROM bills b
+                            WHERE d.bill_id = b.id AND b.deleted_at IS NULL
+                    )
+                    AND d.type in (0,1,2,3,4,5,6,8)
+                    AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
+                    AND (d.service_id NOT IN (19,33) OR (d.service_id IN (33) AND d.service_status > 2) OR d.service_id IS NULL )
+                    AND p.deleted_at IS NULL
+                    AND f.deleted_at IS NULL
+                    AND d.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.CustomerDetailId > 0)
+            {
+                sql += $@" AND d.customer_detail_id = {DebitDto.CustomerDetailId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            sql += " ORDER BY d.file_info_id,d.customer_detail_id,d.type,d.accounting_date";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
+        public async Task<PaginatedResultReact<object>> GetObjectDebitChiTietHasBillKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var sql = $@"
+                    SELECT 
+                    d.*
+                    FROM debits d
+                    LEFT JOIN file_infos f
+                    ON f.id = d.file_info_id
+                    LEFT JOIN partner_details p 
+                    ON p.id = d.customer_detail_id
+                    WHERE
+                    p.status = 1
+                    AND EXISTS (
+                            SELECT 1
+                            FROM bills b
+                            WHERE d.bill_id = b.id AND b.deleted_at IS NULL
+                    )
+                    AND d.type in (0,1,2,3,4,5,6,8)
+                    AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
+                    AND (d.service_id NOT IN (19,33) OR (d.service_id IN (33) AND d.service_status > 2) OR d.service_id IS NULL )
+                    AND p.deleted_at IS NULL
+                    AND f.deleted_at IS NULL
+                    AND d.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.CustomerDetailId > 0)
+            {
+                sql += $@" AND d.customer_detail_id = {DebitDto.CustomerDetailId}";
+            }
+            if (DebitDto.BillId > 0)
+            {
+                sql += $@" AND d.bill_id = {DebitDto.BillId}";
+            }
+            sql += " ORDER BY d.file_info_id,d.customer_detail_id,d.type,d.accounting_date";
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
             {

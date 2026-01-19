@@ -68,6 +68,16 @@ namespace Vudaco.Partners.Controllers
                 }
                 return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
+        [HttpGet("GetPartnerWithDebitNoBill")]
+        public async Task<IActionResult> GetPartnerWithDebitNoBill(CancellationToken cancellationToken,[FromQuery] int page = 1, int pageSize = 50, [FromQuery] PartnerDetailDto PartnerDetailDto = null )
+        {
+            var result = await _repoPartner.GetPartnerWithDebitNoBill(PartnerDetailDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
         [HttpPost("create")]
         public async Task<IActionResult> Create([FromBody] PartnerDto dto)
         {

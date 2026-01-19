@@ -8,7 +8,8 @@ namespace Vudaco.Debits.Dtos
     public class DebitDto
     {
         public int Id { get; set; }
-        public int BillId { get; set; }
+        public int? BillId { get; set; }
+        public int? SupplierBillId { get; set; }
         public int? VehicleId { get; set; }
         public int? EmployeeStaffId { get; set; }
         public int? EmployeeDriverId { get; set; }
@@ -24,6 +25,7 @@ namespace Vudaco.Debits.Dtos
         public int PurchaseVat { get; set; }
         public int PurchaseStatus { get; set; }
         public int ServiceStatus { get; set; }
+        public int Invoice { get; set; }
         public string PurchaseNote { get; set; }
         public string PurchaseBill { get; set; }
         public DateTime? PurchaseAccountingDate { get; set; }
@@ -61,6 +63,7 @@ namespace Vudaco.Debits.Dtos
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
         public string Route { get; set; }
+        public string FileInfoIds { get; set; }
         public int? IncomeExpenseCategoryId { get; set; }
         public int? EmployeeId { get; set; }
         public List<MuaHangNCCDto> MuaHangNCC { get; set; }

@@ -16,6 +16,7 @@ namespace Vudaco.Partners.Repositories
         Task<PaginatedResultReact<object>> GetObjectTaskAsync(PartnerDto PartnerDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetPartnerDetail(PartnerDetailDto PartnerDetailDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetPartnerKHAndNCCDetail(PartnerDetailDto PartnerDetailDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<PaginatedResultReact<object>> GetPartnerWithDebitNoBill(PartnerDetailDto PartnerDetailDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<Partner> ShowAsync(int id);
         Task<Partner> CreateAsync(Partner Partner);
         Task<Partner> UpdateAsync(Partner Partner);

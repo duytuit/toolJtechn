@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Vudaco.ContractFiles.Dtos;
@@ -566,6 +567,32 @@ namespace Vudaco.ContractFiles.Repositories
                 Data = results,
             };
             return _results;
+        }
+        public async Task<FileInfo> GetFileInfoByIdWithCacheAsync(
+            int id,
+            CancellationToken cancellationToken = default)
+        {
+            string cacheKey = $"getFileInfoById_{id}";
+
+            // 1️⃣ GET CACHE
+            var cacheValue = await _redis.GetAsync(cacheKey, cancellationToken);
+            if (!string.IsNullOrEmpty(cacheValue))
+            {
+                return JsonSerializer.Deserialize<FileInfo>(cacheValue);
+            }
+            // 2️⃣ GET DB
+            var file = await _context.FileInfos.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            if (file == null)
+                return null;
+            // 3️⃣ SET CACHE
+            var json = JsonSerializer.Serialize(file);
+            await _redis.SetAsync(
+                cacheKey,
+                json,
+                TimeSpan.FromDays(1),
+                cancellationToken
+            );
+            return file;
         }
     }
 }

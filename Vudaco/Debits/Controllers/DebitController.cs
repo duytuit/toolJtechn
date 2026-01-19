@@ -26,6 +26,8 @@ using ClosedXML.Excel;
 using Vudaco.Shares;
 using System.Diagnostics;
 using System.Runtime.Serialization;
+using System.Dynamic;
+using System.Data;
 
 namespace Vudaco.Debits.Controllers
 {
@@ -35,19 +37,21 @@ namespace Vudaco.Debits.Controllers
     {
         private readonly IDebitRepositories _repoDebit;
         private readonly IContractFileDetailRepository _repoContractFileDetail;
+        private readonly IContractFileRepository _repoContractFile;
         private readonly ILogger<DebitController> _logger;
         private readonly VudacoDBContext _context;
 
         private readonly IConfiguration _configuration;
         public int userId => (int)HttpContext.Items["UserId"];
 
-        public DebitController(ILogger<DebitController> logger,  IContractFileDetailRepository repoContractFileDetail,IConfiguration configuration, IDebitRepositories repoDebit, VudacoDBContext context)
+        public DebitController(ILogger<DebitController> logger,  IContractFileDetailRepository repoContractFileDetail,IContractFileRepository repoContractFile,IConfiguration configuration, IDebitRepositories repoDebit, VudacoDBContext context)
         {
             _logger = logger;
             _repoDebit = repoDebit;
             _context = context;
             _configuration = configuration;
             _repoContractFileDetail = repoContractFileDetail;
+            _repoContractFile = repoContractFile;
         }
         [HttpGet("noDebitNoFileNCC")]
         public async Task<IActionResult> GetNoDebitNoFileNCC(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
@@ -371,6 +375,27 @@ namespace Vudaco.Debits.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", cnth);
         }
+        [HttpGet("GetObjectDebitChiTietNoBillKHAsync")]
+        public async Task<IActionResult> GetObjectDebitChiTietNoBillKHAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectDebitChiTietNoBillKHAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet("GetObjectDebitChiTietHasBillKHAsync")]
+        public async Task<IActionResult> GetObjectDebitChiTietHasBillKHAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            var result = await _repoDebit.GetObjectDebitChiTietHasBillKHAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
         [HttpGet("congnochitietkh")]
         public async Task<IActionResult> GetCongNoChiTietKH(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
         {
@@ -403,6 +428,215 @@ namespace Vudaco.Debits.Controllers
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet("excel/dieuxe")]
+        public async Task<IActionResult> ExportDieuXe(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] FileInfoDetailDto FileInfoDetailDto = null)
+         {
+              try
+                {
+                    var result = await _repoContractFileDetail
+                        .GetObjectFileHasDispatchAsync(FileInfoDetailDto, page, pageSize, cancellationToken);
+                    var data = result.Data.Select(x => (dynamic)x);
+                    if (data == null || !data.Any())
+                        return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+                    var list_kh = await _context.PartnerDetails
+                    .Where(x => x.StorageId == FileInfoDetailDto.StorageId)
+                    .Join(
+                        _context.Partners,
+                        pd => pd.PartnerId,
+                        p => p.Id,
+                        (pd, p) => new
+                        {
+                            p.Abbreviation,
+                            p.Name,
+                            pd.Id
+                        }
+                    ).ToListAsync();
+                    var list_employee = await _context.Employees.Where(x => x.StorageId == FileInfoDetailDto.StorageId).ToListAsync();
+          
+                    // 🔹 List<object> → DataTable
+                    var dataTable = Helper.ToDataTable(data);
+                    DataTable table = new DataTable();
+                    var columnDisplayMap = new Dictionary<string, string>
+                    {
+                        ["supplier_detail_id"] = "Nhà cung cấp",
+                        ["file_info_id"] = "Hồ sơ",
+                        ["employee_staff_id"] = "Nhân viên xử lý",
+                        ["employee_driver_id"] = "Tài xế",
+                        ["storage_id"] = "Kho",
+                        ["service_id"] = "Dịch vụ",
+                        ["service_detail"] = "Chi tiết dịch vụ",
+                        ["type"] = "Loại",
+                        ["dispatch_code"] = "Mã điều xe",
+                        ["name"] = "Tên",
+                        ["accounting_date"] = "Ngày hạch toán",
+                        ["service_date"] = "Ngày dịch vụ",
+                        ["service_status"] = "Trạng thái dịch vụ",
+                        ["purchase_accounting_date"] = "Ngày hạch toán mua",
+                        ["purchase_price"] = "Giá mua",
+                        ["purchase_vat"] = "VAT mua",
+                        ["price"] = "Giá bán",
+                        ["vat"] = "VAT bán",
+                        ["purchase_com"] = "Hoa hồng mua",
+                        ["price_com"] = "Hoa hồng bán",
+                        ["driver_fee"] = "Phí tài xế",
+                        ["meal_fee"] = "Phí ăn uống",
+                        ["ticket_fee"] = "Phí vé",
+                        ["overnight_fee"] = "Phí qua đêm",
+                        ["penalty_fee"] = "Phí phạt",
+                        ["goods_fee"] = "Phí hàng hóa",
+                        ["purchase_status"] = "Trạng thái mua",
+                        ["status"] = "Trạng thái",
+                        ["data"] = "Dữ liệu",
+                        ["purchase_bill"] = "Hóa đơn mua",
+                        ["bill"] = "Hóa đơn",
+                        ["link_bill"] = "Link hóa đơn",
+                        ["code_bill"] = "Mã hóa đơn",
+                        ["note"] = "Ghi chú",
+                        ["purchase_note"] = "Ghi chú mua",
+                        ["customer_vehicle_type"] = "Loại xe khách",
+                        ["supplier_vehicle_type"] = "Loại xe NCC",
+                        ["vehicle_number"] = "Biển số xe",
+                        ["approved_by_user"] = "Người duyệt",
+                        ["approval_time"] = "Thời gian duyệt",
+                        ["cus_bill"] = "Hóa đơn KH",
+                        ["cus_bill_date"] = "Ngày hóa đơn KH",
+                        ["sup_bill"] = "Hóa đơn NCC",
+                        ["sup_bill_date"] = "Ngày hóa đơn NCC",
+                        ["created_by"] = "Người tạo",
+                        ["updated_by"] = "Người cập nhật",
+                        ["deleted_by"] = "Người xóa",
+                        ["deleted_at"] = "Ngày xóa",
+                        ["created_at"] = "Ngày tạo",
+                        ["updated_at"] = "Ngày cập nhật",
+                        ["cf_note"] = "Ghi chú xác nhận",
+                        ["cf_status"] = "Trạng thái xác nhận",
+                        ["cf_status_confirm"] = "Trạng thái duyệt",
+                        ["cf_updated_at"] = "Ngày xác nhận",
+                        ["cf_updated_by"] = "Người xác nhận",
+
+                        // 🔹 CỘT MAP THÊM
+                        ["customer"] = "Khách hàng",
+                        ["employee_driver"] = "Tên tài xế",
+                        ["fileNumber"] = "Số hồ sơ"
+                    };
+                var ignoreColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "data"
+                };
+
+                foreach (DataColumn col in dataTable.Columns)
+                {
+                    if (ignoreColumns.Contains(col.ColumnName))
+                        continue;
+
+                    table.Columns.Add(col.ColumnName, col.DataType);
+                }
+                table.Columns.Add("customer", typeof(string));
+                    table.Columns.Add("employee_driver", typeof(string));
+                    table.Columns.Add("fileNumber", typeof(string));
+                    // table: bảng mới sau khi map (đã tạo sẵn cột)
+                    // 🔹 Lookup cho nhanh 
+                    var khDict = list_kh.ToDictionary( x => x.Id, x => $"{x.Abbreviation}" ); 
+                    var employeeDict = list_employee.ToDictionary( x => x.Id, x => $"{x.LastName} {x.FirstName}" );// đổi field nếu khác );
+                foreach (DataRow item in dataTable.Rows)
+                {
+                    var row = table.NewRow();
+
+                    // ✅ copy cột gốc, BỎ cột data
+                    foreach (DataColumn col in dataTable.Columns)
+                    {
+                        if (col.ColumnName.Equals("data", StringComparison.OrdinalIgnoreCase))
+                            continue;
+
+                        row[col.ColumnName] = item[col.ColumnName];
+                    }
+
+                    // 🔹 MAP CUSTOMER
+                    if (item.Table.Columns.Contains("customer_detail_id") &&
+                        item["customer_detail_id"] != DBNull.Value &&
+                        khDict.TryGetValue(Convert.ToInt32(item["customer_detail_id"]), out var customer))
+                    {
+                        row["customer"] = customer;
+                    }
+                    else
+                    {
+                        row["customer"] = "";
+                    }
+
+                    // 🔹 MAP EMPLOYEE
+                    if (item.Table.Columns.Contains("employee_driver_id") &&
+                        item["employee_driver_id"] != DBNull.Value &&
+                        employeeDict.TryGetValue(Convert.ToInt32(item["employee_driver_id"]), out var employee))
+                    {
+                        row["employee_driver"] = employee;
+                    }
+                    else
+                    {
+                        row["employee_driver"] = "";
+                    }
+
+                    // 🔹 MAP FILE INFO (ASYNC)
+                    if (item.Table.Columns.Contains("file_info_id") &&
+                        item["file_info_id"] != DBNull.Value)
+                    {
+                        int fileInfoId = Convert.ToInt32(item["file_info_id"]);
+
+                        var fileInfo = await _repoContractFile
+                            .GetFileInfoByIdWithCacheAsync(fileInfoId, cancellationToken);
+
+                        row["fileNumber"] = fileInfo?.FileNumber ?? "";
+                    }
+                    else
+                    {
+                        row["fileNumber"] = "";
+                    }
+
+                    table.Rows.Add(row);
+                }
+                using var workbook = new XLWorkbook();
+                    var worksheet = workbook.Worksheets.Add("Điều Xe");
+
+                    // 🔹 Đổ DataTable vào Excel
+                    worksheet.Cell(1, 1).InsertTable(table, true);
+                    var headerRow = worksheet.FirstRow();
+                    foreach (DataColumn col in table.Columns)
+                    {
+                        if (columnDisplayMap.TryGetValue(col.ColumnName, out var displayName))
+                        {
+                            headerRow.Cell(col.Ordinal + 1).Value = displayName;
+                        }
+                    }
+
+                // 🔹 Format header
+                worksheet.FirstRow()
+                    .Style.Font.SetBold()
+                    .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+                worksheet.Columns().AdjustToContents();
+                using var stream = new MemoryStream();
+                    workbook.SaveAs(stream);
+                    stream.Position = 0;
+
+                    return File(
+                        stream.ToArray(),
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        $"DieuXe_{DateTime.Now:yyyyMMddHHmmss}.xlsx"
+                    );
+                }
+                catch (Exception ex)
+                {
+                    var st = new StackTrace(ex, true);
+                    var frame = st.GetFrames()?.FirstOrDefault(f => f.GetFileLineNumber() > 0);
+
+                    var errorMessage = frame != null
+                        ? $"Error at {frame.GetFileName()}:{frame.GetFileLineNumber()} in {frame.GetMethod()?.Name} - {ex.Message}"
+                        : ex.Message;
+
+                    _logger.LogError(ex, errorMessage);
+                    return ApiResponseResult<object>(false, errorMessage, null);
+                }
+
         }
         [HttpGet("excel/congnokh")]
         public async Task<IActionResult> ExportCongNoKH(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)

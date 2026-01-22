@@ -64,6 +64,7 @@ namespace Vudaco.Debits.Dtos
         public DateTime? ToDate { get; set; }
         public string Route { get; set; }
         public string FileInfoIds { get; set; }
+        public int ExportHasBill { get; set; }
         public int? IncomeExpenseCategoryId { get; set; }
         public int? EmployeeId { get; set; }
         public List<MuaHangNCCDto> MuaHangNCC { get; set; }

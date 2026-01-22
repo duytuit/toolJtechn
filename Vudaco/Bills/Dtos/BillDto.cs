@@ -8,7 +8,7 @@ namespace Vudaco.Bills.Dtos
     public class BillDto
     {
         public int Id { get; set; }
-        public int[] Ids { get; set; }
+        public int[] DebitIds { get; set; }
         public string BillCode { get; set; }
         public int? FileInfoId { get; set; }
         public int StorageId { get; set; }

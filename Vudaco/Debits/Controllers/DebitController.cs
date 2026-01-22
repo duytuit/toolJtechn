@@ -131,6 +131,17 @@ namespace Vudaco.Debits.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
+        [HttpGet("GetObjectTheoDoiNhacNoKHAsync")]
+        public async Task<IActionResult> GetObjectTheoDoiNhacNoKHAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectTheoDoiNhacNoKHAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
         [HttpGet("congnotonghopkh")]
         public async Task<IActionResult> GetCongNoTongHopKH(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
         {
@@ -3340,7 +3351,45 @@ namespace Vudaco.Debits.Controllers
                 return ApiResponseResult<object>(false, "Lỗi khi cập nhật: " + ex.InnerException?.Message, null);
             }
         }
-          [HttpPost("updateVATDebitNoFile")]
+        [HttpPost("UpdateBill")]
+        public async Task<IActionResult> UpdateBill([FromBody] DebitDto DebitDto)
+        {
+            if (DebitDto == null || DebitDto.Id <= 0)
+            {
+                return ApiResponseResult<object>(false, "Id không tồn tại", null);
+            }
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                var entity = await _context.Debits.FirstOrDefaultAsync(x => x.Id == DebitDto.Id);
+
+                if (entity == null)
+                {
+                    return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+                }
+                var now = DateTime.Now;
+                var count_bill = await _context.Debits.Where(x => x.BillId == entity.BillId).CountAsync();
+                if (count_bill == 1)
+                {
+                   var _bill = await _context.Bills.FirstOrDefaultAsync(x=>x.Id == entity.BillId);
+                    _bill.DeletedAt = now;
+                    _bill.DeletedBy = userId;
+                     _context.Bills.Update(_bill);
+                }
+                entity.BillId = null;
+                _context.Debits.Update(entity);
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+                return ApiResponseResult<object>(true, "Cập nhật thành công", null);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi cập nhật: " + ex.InnerException?.Message, null);
+            }
+        }
+        [HttpPost("updateVATDebitNoFile")]
         public async Task<IActionResult> UpdateVATDebitNoFile([FromBody] DebitDto DebitDto)
         {
             using var tran = await _context.Database.BeginTransactionAsync();

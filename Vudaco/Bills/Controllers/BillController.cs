@@ -40,50 +40,135 @@ namespace Vudaco.Bills.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
-        [HttpPost]
-        [Route("create")]
-        public async Task<IActionResult> Create([FromBody] BillDto BillDto)
+        [HttpPost("create")]
+        public async Task<IActionResult> Create([FromBody] BillDto billDto)
         {
 
-            using var tran = await _context.Database.BeginTransactionAsync();
+            await using var tran = await _context.Database.BeginTransactionAsync();
             var conn = _context.Database.GetDbConnection();
+
             try
             {
                 var now = DateTime.Now;
-                string CycleName = BillDto.AccountingDate.ToString("MMyyyy");
-                var BillCodePartner = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn, tran.GetDbTransaction(), "bills", "bill_code", BillDto.StorageId, "HDKH" + BillDto.AccountingDate.ToString("yyMM"), 4);
-                var  bill_Partner = new Bill
+                Bill bill;
+
+                // ===== 1. UPDATE BILL =====
+                if (billDto.Id > 0)
+                {
+                    bill = await _context.Bills.FirstOrDefaultAsync(x => x.Id == billDto.Id);
+
+                    if (bill == null)
                     {
-                        BillCode = BillCodePartner,
-                        StorageId = BillDto.StorageId,
-                        CustomerDetailId = BillDto.CustomerDetailId,
-                        Name = CycleName.ToString(),
-                        AccountingDate = BillDto.AccountingDate,
-                        expiryDate = BillDto.expiryDate,
-                        CycleName = CycleName,
-                        CreatedBy = userId,
+                        return ApiResponseResult<object>(false, "Không tìm thấy kỳ công nợ", null);
+                    }
+
+                    bill.AccountingDate = billDto.AccountingDate;
+                    bill.expiryDate = billDto.expiryDate;
+                    bill.Name = billDto.Name;
+                    bill.UpdatedAt = now;
+                    bill.UpdatedBy = userId;
+
+                    _context.Bills.Update(bill);
+                }
+                // ===== 2. CREATE BILL =====
+                else
+                {
+                    var billCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(
+                        conn,
+                        tran.GetDbTransaction(),
+                        "bills",
+                        "bill_code",
+                        billDto.StorageId,
+                        "HDKH" + billDto.AccountingDate.ToString("yyMM"),
+                        4
+                    );
+
+                    bill = new Bill
+                    {
+                        BillCode = billCode,
+                        StorageId = billDto.StorageId,
+                        CustomerDetailId = billDto.CustomerDetailId,
+                        Name = billDto.Name,
+                        AccountingDate = billDto.AccountingDate,
+                        expiryDate = billDto.expiryDate,
+                        CycleName = billDto.CycleName,
                         CreatedAt = now,
+                        CreatedBy = userId,
                         UpdatedAt = now,
                         UpdatedBy = userId
                     };
-                _context.Bills.Add(bill_Partner);
-                await _context.SaveChangesAsync();  // phải có
-                var entities = await _context.Debits
-                    .Where(x => BillDto.Ids.Contains(x.Id))
+
+                    _context.Bills.Add(bill);
+                }
+
+                await _context.SaveChangesAsync(); // BẮT BUỘC để có bill.Id
+
+                // ===== 3. GÁN DEBIT VÀO BILL =====
+                var debits = await _context.Debits
+                    .Where(x => billDto.DebitIds.Contains(x.Id))
                     .ToListAsync();
 
-                foreach (var item in entities)
+                foreach (var item in debits)
                 {
-                    item.BillId = bill_Partner.Id;
+                    item.BillId = bill.Id;
                 }
+
+                _context.Debits.UpdateRange(debits);
+
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
+
                 return ApiResponseResult<object>(true, "Thêm thành công", null);
             }
-            catch (DbUpdateException ex)
+            catch (Exception ex)
             {
                 await tran.RollbackAsync();
-                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.Message, null);
+            }
+        }
+        [HttpPost("delete")]
+        public async Task<IActionResult> Delete([FromBody] BillDto billDto)
+        {
+            if (billDto == null || billDto.Id <= 0)
+            {
+                return ApiResponseResult<object>(false, "Id không tồn tại", null);
+            }
+
+            await using var tran = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var entity = await _context.Bills.FirstOrDefaultAsync(x => x.Id == billDto.Id);
+
+                if (entity == null)
+                {
+                    return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+                }
+
+                var now = DateTime.Now;
+                entity.DeletedAt = now;
+                entity.DeletedBy = userId;
+
+                var debits = await _context.Debits
+                    .Where(x => x.BillId == billDto.Id)
+                    .ToListAsync();
+
+                foreach (var item in debits)
+                {
+                    item.BillId = null;
+                }
+
+                _context.Bills.Update(entity);
+                _context.Debits.UpdateRange(debits);
+
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+
+                return ApiResponseResult<object>(true, "Xóa thành công", null);
+            }
+            catch (Exception ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, $"Lỗi khi xóa: {ex.Message}", null);
             }
         }
     }

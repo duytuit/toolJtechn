@@ -352,7 +352,7 @@ namespace Vudaco.ContractFiles.Controllers
                             ws.Cell(row, 13).Value = "VND";
                             ws.Cell(row, 17).Value = 8;
                             ws.Cell(row, 18).Value = vatDv;
-                            ws.Cell(row, 19).Value = "CƯỚC VẬN CHUYỂN " + (item.name ?? "");
+                            ws.Cell(row, 19).Value = DebitDto.ExportHasBill == 1? "CƯỚC VẬN CHUYỂN " + (item.name ?? "") +" BILL: "+(fileInfo?.Bill ?? ""): "CƯỚC VẬN CHUYỂN " + (item.name ?? "");
                             ws.Cell(row, 21).Value = "chuyến";
                             ws.Cell(row, 22).Value = 1;
                             ws.Cell(row, 23).Value = giaDv;
@@ -384,10 +384,7 @@ namespace Vudaco.ContractFiles.Controllers
                                 ws.Cell(row, 13).Value = "VND";
                                 ws.Cell(row, 17).Value = 8;
                                 ws.Cell(row, 18).Value = vat;
-                                ws.Cell(row, 19).Value =
-                                    item.type == 1
-                                        ? "CƯỚC VẬN CHUYỂN " + (item.name ?? "")
-                                        : "Phí dịch vụ giao nhận";
+                                ws.Cell(row, 19).Value = item.type == 1 ? "CƯỚC VẬN CHUYỂN " + (item.name ?? ""): "Phí dịch vụ giao nhận";
                                 ws.Cell(row, 21).Value = "chuyến";
                                 ws.Cell(row, 22).Value = 1;
                                 ws.Cell(row, 23).Value = price;

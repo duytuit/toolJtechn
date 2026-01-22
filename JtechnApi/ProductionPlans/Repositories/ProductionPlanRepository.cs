@@ -57,6 +57,11 @@ namespace JtechnApi.ProductionPlans.Repositories
             {
                 whereCustom.Add(("JSON_EXTRACT(description, '$.hangxuatchualam_cam') < ?", new object[] { 0 }));
                 whereCustom.Add(("JSON_EXTRACT(description, '$.hangxuatchualam_cam') < ?", new object[] { "" }));
+            } 
+            if (!string.IsNullOrWhiteSpace(dto.Filter_17))
+            {
+                whereCustom.Add(("JSON_EXTRACT(description, '$.hangxuatchualam_lrap') < ?", new object[] { 0 }));
+                whereCustom.Add(("JSON_EXTRACT(description, '$.hangxuatchualam_lrap') < ?", new object[] { "" }));
             }
 
             if (!string.IsNullOrWhiteSpace(dto.GiaCong))

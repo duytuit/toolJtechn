@@ -193,7 +193,7 @@ namespace Vudaco.ContractFiles.Controllers
                         MinServiceDate = (DateTime)x.accounting_date
                     })
                     .ToList();
-
+                //return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", groupedDataNoFile);
                 // 🔹 Merge (OK vì cùng anonymous shape)
                 groupedData.AddRange(groupedDataNoFile);
 

@@ -199,6 +199,10 @@ namespace Vudaco.ContractFiles.Repositories
             {
                 sql += $@" AND f.id = {FileInfoDto.Id}";
             }
+            if (FileInfoDto.CustomerDetailId > 0)
+            {
+                sql += $@" AND f.customer_detail_id = {FileInfoDto.CustomerDetailId}";
+            }
             if (FileInfoDto.FromDate.HasValue && FileInfoDto.ToDate.HasValue)
             {
                 // Cộng thêm 1 ngày cho ToDate
@@ -547,6 +551,10 @@ namespace Vudaco.ContractFiles.Repositories
             if (FileInfo.StorageId > 0)
             {
                 sql += $@" AND f.storage_id = {FileInfo.StorageId}";
+            }
+            if (FileInfo.CustomerDetailId > 0)
+            {
+                sql += $@" AND f.customer_detail_id = {FileInfo.CustomerDetailId}";
             }
             if (FileInfo.Id > 0)
             {

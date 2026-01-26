@@ -446,6 +446,7 @@ namespace Vudaco.Debits.Repositories
                     AND p.deleted_at IS NULL
                     AND f.deleted_at IS NULL
                     AND d.deleted_at IS NULL";
+
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND d.storage_id = {DebitDto.StorageId}";
@@ -469,12 +470,11 @@ namespace Vudaco.Debits.Repositories
                     // Cộng thêm 1 ngày cho ToDate
                     var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
                     // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
-                    sql += $@" AND d.service_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
-                            AND d.service_date < '{toDateNext:yyyy-MM-dd}'";
+                    sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                            AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
                 }
             }
-            
-            sql += " ORDER BY d.file_info_id,d.customer_detail_id,d.type,d.service_date";
+            sql += " ORDER BY d.file_info_id,d.customer_detail_id,d.type,d.accounting_date";
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
             {
@@ -614,13 +614,15 @@ namespace Vudaco.Debits.Repositories
                     WITH ReceiptTotal AS (
                         SELECT
                             rdt.debit_id,
-                            SUM(rdt.amount * (rdt.vat / 100.0)) 
-                            + SUM(rdt.amount) AS total_receipt
+                            SUM(
+                                CAST(rdt.amount AS DECIMAL(18,2)) 
+                                * (1 + rdt.vat / 100.0)
+                            ) AS total_receipt
                         FROM receipts r
                         INNER JOIN receipt_details rdt 
                             ON rdt.receipt_id = r.id
                         INNER JOIN income_expense_categorys iecat
-                        ON iecat.id = r.income_expense_category_id
+                            ON iecat.id = r.income_expense_category_id
                         WHERE
                             iecat.type = 0
                             AND (r.status IS NULL OR r.status = 1)
@@ -634,9 +636,9 @@ namespace Vudaco.Debits.Repositories
                         CAST(SUM(
                             (d.purchase_price + COALESCE(d.purchase_com, 0)) 
                             * (1 + d.purchase_vat / 100.0)
-                        ) AS INT) AS total_debit,
+                        ) AS DECIMAL(18,2)) AS total_debit,
 
-                        CAST(SUM(ISNULL(rt.total_receipt, 0)) AS INT) AS total_receipt
+                        CAST(SUM(ISNULL(rt.total_receipt, 0)) AS DECIMAL(18,2)) AS total_receipt
                     FROM debits d
                     INNER JOIN partner_details p 
                         ON p.id = d.supplier_detail_id
@@ -648,7 +650,7 @@ namespace Vudaco.Debits.Repositories
                         p.status = 2
                         AND d.supplier_detail_id IS NOT NULL
                         AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                        AND ( d.service_id NOT IN (19,33) OR d.service_id IS NULL )
+                        AND (d.service_id NOT IN (19,33) OR d.service_id IS NULL)
                         AND p.deleted_at IS NULL
                         AND f.deleted_at IS NULL
                         AND d.deleted_at IS NULL";
@@ -661,7 +663,6 @@ namespace Vudaco.Debits.Repositories
                 sql += $@" AND d.supplier_detail_id = {DebitDto.SupplierDetailId}";
             }
             sql += $@" AND d.accounting_date < '{DebitDto.FromDate.Value:yyyy-MM-dd}'";
-            
             return await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
         }
         public async Task<PaginatedResultReact<object>> GetObjectNoDebitNoFileNCCAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
@@ -1091,7 +1092,6 @@ namespace Vudaco.Debits.Repositories
                     ) AS rdt_total
                     WHERE
                     p.status = 1
-                    AND d.status = 2
                     AND d.service_id IN (19,33)
                     AND d.service_status >=2
                     AND p.deleted_at IS NULL

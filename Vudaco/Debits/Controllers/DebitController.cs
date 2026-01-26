@@ -1394,19 +1394,20 @@ namespace Vudaco.Debits.Controllers
                 var result = await _repoDebit.GetObjectDebitChiTietNCCAsync(DebitDto, page, pageSize, cancellationToken);
                 if (result == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
 
+                //return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", null);
                 var result_duno_dauky = await _repoDebit.GetObjectDebitDuNoDKNCCAsync(DebitDto, page, pageSize, cancellationToken);
-
-                int duno = 0;
+                decimal duno = 0m;
 
                 if (result_duno_dauky != null && result_duno_dauky.Any())
                 {
                     dynamic duno_dauky = result_duno_dauky.First();
 
-                    int totalDebit = duno_dauky?.total_debit ?? 0;
-                    int totalReceipt = duno_dauky?.total_receipt ?? 0;
+                    decimal totalDebit = duno_dauky?.total_debit ?? 0m;
+                    decimal totalReceipt = duno_dauky?.total_receipt ?? 0m;
 
                     duno = totalDebit - totalReceipt;
                 }
+             
                 // Chuẩn hóa dữ liệu về dynamic để đọc property
                 var data = result.Data.Select(x => (dynamic)x);
 
@@ -1500,7 +1501,7 @@ namespace Vudaco.Debits.Controllers
                 // cell_benban.GetRichText().AddText("Công ty TNHH VUDACO");
                 // ws.Cell("A5").Value = "Địa chỉ: Số 6C/195 Kiều Hạ, Phường Đông Hải, Thành Phố Hải Phòng, Việt Nam";
                 // ws.Cell("A6").Value = "MST: 0201723721";
-
+              
                 var cell_benmua = ws.Cell("A8");
                 cell_benmua.Clear();
                 cell_benmua.GetRichText().AddText("Nhà cung cấp: ")
@@ -1576,6 +1577,7 @@ namespace Vudaco.Debits.Controllers
                 int startRow = 15;
                 int currentRow = startRow;
                 int row = startRow;
+               
                 //return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", groupedData);
                 for (int i = 0; i < groupedData.Count; i++)
                 {
@@ -1703,7 +1705,7 @@ namespace Vudaco.Debits.Controllers
                     }
                                                 
                 }
-          
+              
                 int dataStartRow = 15;
                 int dataEndRow = ws.LastRowUsed().RowNumber();
                 int totalRow = dataEndRow + 1;

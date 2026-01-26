@@ -15,6 +15,7 @@ namespace JtechnApi.Requireds.Models
         public string Content_form { get; set; }
         [Required]
         public string Emp_depts { get; set; }
+        public int? From_type { get; set; }
         public int UserId { get; set; }
         public int DepartmentId { get; set; }
         public string Attach { get; set; }

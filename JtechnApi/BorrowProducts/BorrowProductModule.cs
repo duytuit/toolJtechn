@@ -9,6 +9,7 @@ namespace JtechnApi.BorrowProducts
         public static IServiceCollection AddBorrowProductModule(this IServiceCollection services)
         {
             services.AddScoped<IBorrowProductRepository, BorrowProductRepository>();
+            services.AddScoped<IDataSayRepository, DataSayRepository>();
             return services;
         }
     }

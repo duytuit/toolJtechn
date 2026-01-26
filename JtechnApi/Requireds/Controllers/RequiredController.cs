@@ -355,7 +355,7 @@ namespace JtechnApi.Controllers
                 Content = TaskRequiredDto.Content,
                 Attach = TaskRequiredDto.Attach,
                 Title = TaskRequiredDto.Code.Trim(),
-                From_type = RequiredRepository.from_type_task,
+                From_type = TaskRequiredDto.From_type ?? 8,
                 Required_department_id = TaskRequiredDto.DepartmentId,
                 Receiving_department_ids = jsonArray,
                 Content_form = JsonSerializer.Serialize(content_form),

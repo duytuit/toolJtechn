@@ -29,6 +29,7 @@ namespace JtechnApi.Shares.BaseRepository
         public DbSet<TempRequired> TempRequired { get; set; }
         public DbSet<KTNQ> KTNQ { get; set; }
         public DbSet<BorrowProduct> BorrowProduct { get; set; }
+        public DbSet<DataSay> DataSay { get; set; }
         public DBContext(DbContextOptions<DBContext> options) : base(options)
         {
 
@@ -48,6 +49,7 @@ namespace JtechnApi.Shares.BaseRepository
             modelBuider.Entity<KTNQ>().HasQueryFilter(e => e.Deleted_at == null);
             modelBuider.Entity<EmployeeDepartment>().HasQueryFilter(e => e.Deleted_at == null);
             modelBuider.Entity<BorrowProduct>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<DataSay>().HasQueryFilter(e => e.DeletedAt == null);
         }           
     }
 }

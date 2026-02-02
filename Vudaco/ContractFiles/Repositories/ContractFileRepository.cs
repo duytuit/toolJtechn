@@ -230,7 +230,7 @@ namespace Vudaco.ContractFiles.Repositories
             if (FileInfo.CustomerDetailId > 0)
                 whereEquals["customer_detail_id"] = FileInfo.CustomerDetailId;
             if (FileInfo.FromDate.HasValue && FileInfo.ToDate.HasValue)
-                whereDateRange.Add(("accounting_date", FileInfo.FromDate.Value, FileInfo.ToDate.Value.AddDays(1)));
+                whereDateRange.Add(("accounting_date", FileInfo.FromDate.Value, FileInfo.ToDate.Value));
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "file_infos",
@@ -601,6 +601,47 @@ namespace Vudaco.ContractFiles.Repositories
                 cancellationToken
             );
             return file;
+        }
+
+        public async Task<PaginatedResultReact<object>> GetSelectFileInfoAsync(FileInfoDto FileInfo, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var whereEquals = new Dictionary<string, object>();
+            var whereLikes = new Dictionary<string, string>();
+            var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
+            var orderByList = new List<string>{"id"};
+            if (FileInfo.StorageId > 0)
+                whereEquals["storage_id"] = FileInfo.StorageId;
+            if (FileInfo.CustomerDetailId > 0)
+                whereEquals["customer_detail_id"] = FileInfo.CustomerDetailId;
+            if (FileInfo.FromDate.HasValue && FileInfo.ToDate.HasValue)
+                whereDateRange.Add(("accounting_date", FileInfo.FromDate.Value, FileInfo.ToDate.Value));
+            dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
+                        _configuration.GetConnectionString("DefaultConnection"),
+                        "file_infos",
+                        new[] { "id", "customer_detail_id", "accounting_date", "storage_id", "file_number", "declaration", "bill", "quantity", "container_code", "sales", "type", "feature", "declaration_quantity", "declaration_type", "business", "occurrence", "note", "created_by", "updated_by", "deleted_by", "deleted_at", "created_at", "updated_at", },
+                        offset: (page - 1) * pageSize,
+                        limit: pageSize,    
+                        whereEquals: whereEquals,
+                        whereLikes: whereLikes,
+                        dateRangeList: whereDateRange,
+                        orderByList: orderByList,
+                        redisCache: _redis,
+                        includeCount: true,
+                        cancellationToken: cancellationToken
+                    );
+            int totalItems = results.Count;
+            var objectList = new List<object>();
+            objectList.AddRange(results.Data);
+            var _results = new PaginatedResultReact<object>
+            {
+                PageNum = page,
+                PageSize = pageSize,
+                First = (int)Math.Ceiling((double)totalItems / pageSize),
+                Total = totalItems,
+                Data = objectList,
+            };
+            whereEquals?.Clear(); whereLikes?.Clear(); whereDateRange?.Clear();
+            return _results;
         }
     }
 }

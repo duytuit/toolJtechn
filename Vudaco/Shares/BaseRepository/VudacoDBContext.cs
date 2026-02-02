@@ -5,11 +5,15 @@ using Vudaco.Activitys.Models;
 using Vudaco.Auth.Models;
 using Vudaco.Bills.Models;
 using Vudaco.Categorys.Models;
+using Vudaco.Comments.Models;
 using Vudaco.ContractFiles.Models;
 using Vudaco.Debits.Models;
 using Vudaco.Departments.Models;
 using Vudaco.Employees.Models;
+using Vudaco.FormRequests.Models;
+using Vudaco.Notifys.Models;
 using Vudaco.Partners.Models;
+using Vudaco.PayrollPeriods.Models;
 using Vudaco.Receipts.Models;
 using Vudaco.Storages.Models;
 using Vudaco.Vehicles.Models;
@@ -45,6 +49,11 @@ namespace Vudaco.Shares.BaseRepository
         public DbSet<Debit> Debits { get; set; }
         public DbSet<ConfirmFile> ConfirmFiles { get; set; }
         public DbSet<Offset> Offsets { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Notify> Notifys { get; set; }
+        public DbSet<FormRequest> FormRequests { get; set; }
+        public DbSet<PayrollPeriod> PayrollPeriods { get; set; }
+        public DbSet<PayrollPeriodDetail> PayrollPeriodDetails { get; set; }
         public VudacoDBContext(DbContextOptions<VudacoDBContext> options) : base(options)
         {
 
@@ -76,6 +85,11 @@ namespace Vudaco.Shares.BaseRepository
             modelBuider.Entity<ReceiptDetail>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<ConfirmFile>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<Offset>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<Comment>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<Notify>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<FormRequest>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<PayrollPeriod>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<PayrollPeriodDetail>().HasQueryFilter(e => e.DeletedAt == null);
         }           
     }
 }

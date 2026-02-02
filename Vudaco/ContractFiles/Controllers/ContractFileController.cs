@@ -278,7 +278,7 @@ namespace Vudaco.ContractFiles.Controllers
 
                         // 🔹 tách hải quan & vận chuyển
                         var dvItems = group.Items.Where(x => x.type == 0).ToList(); // hải quan
-                        var vcItems = group.Items.Where(x => x.type == 1).ToList(); // vận chuyển
+                        var vcItems = group.Items.Where(x => new [] { 1, 4 }.Contains((int)x.type)).ToList(); // vận chuyển
 
                         // 👉 nếu không có vận chuyển, nhưng có hải quan → vẫn xuất 1 dòng
                         if (!vcItems.Any() && dvItems.Any())
@@ -287,13 +287,13 @@ namespace Vudaco.ContractFiles.Controllers
 
                             decimal giaDv = (decimal)dv.price + (decimal)dv.price_com;
                             decimal vatDv = giaDv * (decimal)dv.vat / 100m;
-
+                            var taxCode = kh?.Partner?.TaxCode;
                             ws.Cell(row, 1).Value = stt++;
                             ws.Cell(row, 2).Value = dv.service_date.ToString("dd/MM/yyyy");
                             ws.Cell(row, 3).Value = kh?.Partner?.Name ?? "";
                             ws.Cell(row, 4).Value = kh?.Partner?.Abbreviation ?? "";
                             ws.Cell(row, 5).Value = kh?.Partner?.Address ?? "";
-                            ws.Cell(row, 6).Value = kh?.Partner?.TaxCode ?? "";
+                            ws.Cell(row, 6).Value = string.IsNullOrWhiteSpace(taxCode) ? "" : $"MST: {taxCode}";
                             ws.Cell(row, 7).Value = fileInfo?.Sales ?? "";
                             ws.Cell(row, 11).Value = fileInfo?.Bill ?? "";
                             ws.Cell(row, 12).Value = "Chuyển khoản";
@@ -442,6 +442,16 @@ namespace Vudaco.ContractFiles.Controllers
                 Data = result.Cast<object>().ToList()
             };
             return ApiResponseResult(true, "Lấy dữ liệu thành công", _results);
+        }
+        [HttpGet("GetSelectFileInfoAsync")]
+        public async Task<IActionResult> GetSelectFileInfoAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] FileInfoDto FileInfoDto = null)
+        {
+            var result = await _repoContractFile.GetSelectFileInfoAsync(FileInfoDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
         [HttpGet("codeFile")]
         public IActionResult GetCodeFile(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] GetCodeDto GetCodeDto = null)
@@ -603,8 +613,13 @@ namespace Vudaco.ContractFiles.Controllers
                     };
                     _context.FileInfoDetails.Add(entity_FileInfoDetail);
                 }
+                var debits = await _context.Debits.Where(x => x.FileInfoId == entity.Id).ToListAsync();
+                foreach (var item in debits)
+                {
+                     item.AccountingDate = dto.AccountingDate;
+                    _context.Debits.Update(item);
+                }
                 await _context.SaveChangesAsync();
-
                 await tran.CommitAsync();
                 return ApiResponseResult(true, "Cập nhật file thành công", entity);
             }

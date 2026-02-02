@@ -342,6 +342,17 @@ namespace Vudaco.Shares
             return result;
         }
 
+        public static List<object> Permissions()
+        {
+            return new[]
+            {
+                new { id = 1, role = "laixe" },
+                new { id = 2, role = "vanphong" },
+                new { id = 3, role = "giaonhan" },
+                new { id = 6, role = "quanly" },
+                new { id = 7, role = "dieuxe" }
+            }.ToList<object>();
+        }
         public static string ReadThreeDigits(int number, string[] unitNumbers)
         {
             int hundreds = number / 100;

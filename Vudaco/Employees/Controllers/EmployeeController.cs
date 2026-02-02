@@ -27,8 +27,7 @@ namespace Vudaco.Employees.Controllers
         private readonly ILogger<EmployeeController> _logger;
         private readonly VudacoDBContext _context;
         public int userId => (int)HttpContext.Items["UserId"];
-
-          private readonly IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
 
         public EmployeeController(ILogger<EmployeeController> logger, IConfiguration configuration,IEmployeeDepartmentRepository repoEmployeeDepartmentRepository,IEmployeeRepository repoEmployee, VudacoDBContext context)
         {
@@ -48,11 +47,38 @@ namespace Vudaco.Employees.Controllers
         {
             // test
             var result = await _repoEmployee.GetObjectTaskAsync(EmployeeDto, page, pageSize, cancellationToken);
-                if (result == null)
-                {
-                    return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
-                }
-                return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet("InfoEmployee")]
+        public async Task<IActionResult> InfoEmployee(CancellationToken cancellationToken)
+        {
+            var result = await _repoEmployee.InfoEmployeeAsync(userId);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet("drivers")]
+        public async Task<IActionResult> DriversEmployee(CancellationToken cancellationToken,[FromQuery] int page = 1, int pageSize = 50, [FromQuery] EmployeeDto EmployeeDto = null )
+        {
+            var result = await _context.Employees
+                    .Where(x => x.StorageId == EmployeeDto.StorageId)
+                    .Join(
+                        _context.EmployeeDepartments.Where(ed => ed.DepartmentId == 1),
+                        pd => pd.Id,
+                        p => p.EmployeeId,
+                        (pd, p) => pd
+                    ).ToListAsync();
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
         [HttpPost("create")]
         public async Task<IActionResult> Create([FromBody] EmployeeDto dto)

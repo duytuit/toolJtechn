@@ -61,6 +61,25 @@ namespace Vudaco.Auth.Repositories
 
             // 🔹 Sinh access & refresh token
             var employee = await _db.Employees.FirstOrDefaultAsync(e => e.UserId == user.Id);
+            if (employee != null)
+            {
+                var employeeDepartments = await _db.EmployeeDepartments
+                    .Where(ed => ed.EmployeeId == employee.Id)
+                    .ToListAsync();
+                if (employeeDepartments.Any())
+                {
+                    var departmentIds = employeeDepartments.Select(ed => ed.DepartmentId).ToList();
+                    var departments = await _db.Departments
+                        .Where(d => departmentIds.Contains(d.Id))
+                        .ToListAsync();
+                    employee.Departments = departments;
+                    employee.Permissions = Helper.Permissions()
+                        .Where(p => departmentIds.Contains((int)p.GetType().GetProperty("id").GetValue(p)))
+                        .Select(p => (string)p.GetType().GetProperty("role").GetValue(p))
+                        .Distinct()
+                        .ToList();
+                }
+            }
             var accessToken = _tokenService.GenerateAccessToken(user, request.DeviceId, accessTokenExpiryMinutes);
             var refreshToken = _tokenService.GenerateRefreshToken();
 

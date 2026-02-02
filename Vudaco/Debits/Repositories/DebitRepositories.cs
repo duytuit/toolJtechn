@@ -1244,6 +1244,7 @@ namespace Vudaco.Debits.Repositories
                 sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
                 AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
             }
+            sql += " ORDER BY d.accounting_date";
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
             {
@@ -1312,6 +1313,7 @@ namespace Vudaco.Debits.Repositories
                 sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
                 AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
             }
+            sql += " ORDER BY d.accounting_date";
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
             {

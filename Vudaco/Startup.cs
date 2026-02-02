@@ -1,17 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Vudaco.Shares.BaseRepository;
 using Microsoft.EntityFrameworkCore;
 using Vudaco.Shares;
@@ -32,6 +23,10 @@ using Vudaco.Receipts;
 using Vudaco.Vehicles;
 using Vudaco.Shares.Connects;
 using Microsoft.Extensions.Options;
+using Vudaco.Comments;
+using Vudaco.Notifys;
+using Vudaco.FormRequests;
+using Vudaco.PayrollPeriods;
 
 namespace Vudaco
 {
@@ -106,6 +101,10 @@ namespace Vudaco
             services.AddDepartmentModule();
             services.AddReceiptModule();
             services.AddVehicleModule();
+            services.AddCommentModule();
+            services.AddNotifyModule();
+            services.AddFormRequestModule();
+            services.AddPayrollPeriodModule();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

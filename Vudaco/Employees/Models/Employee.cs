@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Vudaco.Departments.Models;
 
 namespace Vudaco.Employees.Models
 {
@@ -108,5 +109,9 @@ namespace Vudaco.Employees.Models
         public int? UserId { get; set; }
         [NotMapped]
         public EmployeeDepartment EmployeeDepartment { get; set; }
+        [NotMapped]
+        public List<Department> Departments { get; set; }
+        [NotMapped]
+        public List<string> Permissions { get; set; }
     }
 }

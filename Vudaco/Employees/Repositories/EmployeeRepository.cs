@@ -91,6 +91,34 @@ namespace Vudaco.Employees.Repositories
             return _results;
         }
 
+        public async Task<Employee> InfoEmployeeAsync(int userId)
+        {
+            var entity = await _context.Employees
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.UserId == userId);
+            if (entity == null) return null;
+            if (entity != null)
+            {
+                var employeeDepartments = await _context.EmployeeDepartments
+                    .Where(ed => ed.EmployeeId == entity.Id)
+                    .ToListAsync();
+                if (employeeDepartments.Any())
+                {
+                    var departmentIds = employeeDepartments.Select(ed => ed.DepartmentId).ToList();
+                    var departments = await _context.Departments
+                        .Where(d => departmentIds.Contains(d.Id))
+                        .ToListAsync();
+                    entity.Departments = departments;
+                    entity.Permissions = Helper.Permissions()
+                        .Where(p => departmentIds.Contains((int)p.GetType().GetProperty("id").GetValue(p)))
+                        .Select(p => (string)p.GetType().GetProperty("role").GetValue(p))
+                        .Distinct()
+                        .ToList();
+                }
+            }
+            return entity;
+        }
+
         public async Task<Employee> ShowAsync(int id)
         {
             var entity = await _context.Employees

@@ -25,6 +25,7 @@ namespace Vudaco.Debits.Dtos
         public int PurchaseVat { get; set; }
         public int PurchaseStatus { get; set; }
         public int ServiceStatus { get; set; }
+        public int DriverStatus { get; set; }
         public int Invoice { get; set; }
         public string PurchaseNote { get; set; }
         public string PurchaseBill { get; set; }

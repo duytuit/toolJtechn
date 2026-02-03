@@ -44,12 +44,20 @@ namespace Vudaco.Notifys.Repositories
             var whereLikes = new Dictionary<string, string>();
             var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
             var orderByList = new List<string> {  "updated_at desc" , "id"};
+             if (notifyDto.StorageId > 0)
+            {
+                whereEquals.Add("storage_id", notifyDto.StorageId);
+            }
+            if (notifyDto.EmployeeId > 0)
+            {
+                whereEquals.Add("employee_id", notifyDto.EmployeeId);
+            }
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "notifys",
-                        new[] { "id","code","name","parent_id","status","storage_id","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},
-                        offset: null,
-                        limit: null,
+                        new[] { "id","storage_id","employee_id","title","description","status","type","image","created_by","created_at","updated_by","updated_at","deleted_by","deleted_at"},
+                        offset: (page - 1) * pageSize,
+                        limit: pageSize,
                         whereEquals: whereEquals,
                         whereLikes: whereLikes,
                         dateRangeList: whereDateRange,

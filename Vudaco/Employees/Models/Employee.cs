@@ -65,6 +65,9 @@ namespace Vudaco.Employees.Models
         [Required]
         [Column("storage_id")]
         public int StorageId { get; set; }
+        [Required]
+        [Column("base_salary")]
+        public int BaseSalary { get; set; }
 
         [Column("created_by")]
         public long? CreatedBy { get; set; }

@@ -24,8 +24,10 @@ namespace Vudaco.FormRequests.Models
 
         [Column("confirm_by")]
         public int? ConfirmBy { get; set; }
-        [Column("total_day_leave")]
-        public decimal TotalDayLeave { get; set; }
+        [Column("total_day_has_paid_leave")]
+        public decimal totalDayHasPaidLeave { get; set; }
+        [Column("total_day_no_paid_leave")]
+        public decimal totalDayNoPaidLeave { get; set; }
 
         [Column("confirm_at")]
         public DateTime? ConfirmAt { get; set; }

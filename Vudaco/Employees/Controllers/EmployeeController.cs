@@ -127,6 +127,7 @@ namespace Vudaco.Employees.Controllers
                         StorageId = dto.StorageId,
                         CreatedBy = userId,
                         BeginDateCompany = DateTime.Now,
+                        BaseSalary = dto.BaseSalary,
                         Phone = dto.Phone,
                         Email = dto.Email,
                         UserId = user.Id,
@@ -207,6 +208,7 @@ namespace Vudaco.Employees.Controllers
                 employee.FirstName = dto.FirstName;
                 employee.LastName  = dto.LastName;
                 employee.StorageId = dto.StorageId;
+                employee.BaseSalary= dto.BaseSalary;
                 employee.Phone     = dto.Phone;
                 employee.Email     = dto.Email;
                 employee.UpdatedAt = DateTime.Now;
@@ -238,6 +240,32 @@ namespace Vudaco.Employees.Controllers
                 await tran.RollbackAsync();
                 return ApiResponseResult<object>(false, "Lỗi: " + ex.Message, null);
             }
+        }
+        [HttpPost("ChangePassword")]
+        public async Task<IActionResult> ChangePassword([FromBody] EmployeeChangePasswordDto dto)
+        {
+            
+            if (dto.Id <= 0)
+            {
+                return ApiResponseResult<object>(false, "Id không tồn tại", null);
+            }
+            var employee = await _context.Employees.FindAsync(dto.Id);
+            if (employee == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            var user = await _context.Users.FindAsync(employee.UserId);
+            if (user == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu user", null);
+            }
+            if (dto.NewPassword != dto.ConfirmPassword)
+            {
+                return ApiResponseResult<object>(false, "Mật khẩu xác nhận không khớp", null);  
+            }
+            user.Password = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+            await _context.SaveChangesAsync();
+            return ApiResponseResult<object>(true, "Đổi mật khẩu thành công", null);    
         }
         [HttpPost("delete")]
         public async Task<IActionResult> Delete([FromBody] EmployeeDto dto)

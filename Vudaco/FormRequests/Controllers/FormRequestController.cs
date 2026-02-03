@@ -55,7 +55,8 @@ namespace Vudaco.FormRequests.Controllers
                 Note = formRequestLeaveDto.Note,
                 Description = JsonSerializer.Serialize(formRequestLeaveDto.LeaveRequestDto),
                 StorageId = formRequestLeaveDto.StorageId,
-                TotalDayLeave = formRequestLeaveDto.LeaveRequestDto.Sum(x => x.DurationLeave),
+                totalDayHasPaidLeave = formRequestLeaveDto.LeaveRequestDto.Where(x => x.IsPaidLeave == 1).Sum(x => x.DurationLeave),
+                totalDayNoPaidLeave = formRequestLeaveDto.LeaveRequestDto.Where(x => x.IsPaidLeave == 0).Sum(x => x.DurationLeave),
                 CreatedBy = userId,
                 CreatedAt = now,
                 UpdatedAt = now,
@@ -98,7 +99,8 @@ namespace Vudaco.FormRequests.Controllers
             formRequest.EmployeeId = formRequestLeaveDto.EmployeeId;
             formRequest.Note = formRequestLeaveDto.Note;
             formRequest.Description = JsonSerializer.Serialize(formRequestLeaveDto.LeaveRequestDto);
-            formRequest.TotalDayLeave = formRequestLeaveDto.LeaveRequestDto.Sum(x => x.DurationLeave);
+            formRequest.totalDayHasPaidLeave = formRequestLeaveDto.LeaveRequestDto.Where(x => x.IsPaidLeave == 1).Sum(x => x.DurationLeave);
+            formRequest.totalDayNoPaidLeave = formRequestLeaveDto.LeaveRequestDto.Where(x => x.IsPaidLeave == 0).Sum(x => x.DurationLeave);
             formRequest.StorageId = formRequestLeaveDto.StorageId;
             formRequest.UpdatedBy = userId;
             formRequest.UpdatedAt = DateTime.Now;

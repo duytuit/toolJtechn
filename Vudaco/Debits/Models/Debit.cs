@@ -109,6 +109,9 @@ namespace Vudaco.Debits.Models
         [Required]
         [Column("service_status")]
         public int ServiceStatus { get; set; }
+        [Required]
+        [Column("driver_status")]
+        public int DriverStatus { get; set; }
 
         [Column("data")]
         public string Data { get; set; }

@@ -31,7 +31,7 @@ namespace Vudaco.Employees.Dtos
         public long? UpdatedBy { get; set; }
         public long? DeletedBy { get; set; }
         public string Avatar { get; set; }
-       
+        public int BaseSalary { get; set; }
         public string Phone { get; set; }
         public string Email { get; set; }
         public string BankNumber { get; set; }

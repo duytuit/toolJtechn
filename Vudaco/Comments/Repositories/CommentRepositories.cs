@@ -44,12 +44,24 @@ namespace Vudaco.Comments.Repositories
             var whereLikes = new Dictionary<string, string>();
             var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
             var orderByList = new List<string> {  "updated_at desc" , "id"};
+            if (CommentDto.StorageId > 0)
+            {
+                whereEquals.Add("storage_id", CommentDto.StorageId);
+            }
+            if (CommentDto.EmployeeId > 0)
+            {
+                whereEquals.Add("employee_id", CommentDto.EmployeeId);
+            }
+            if (CommentDto.PostId > 0)
+            {
+                whereEquals.Add("post_id", CommentDto.PostId);
+            }
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "comments",
-                        new[] { "id","content","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},
-                        offset: null,
-                        limit: null,
+                        new[] { "id","storage_id","post_id","type","message","attach","parent_id","employee_id","created_by","created_at","updated_by","updated_at","deleted_by","deleted_at"},
+                        offset: (page - 1) * pageSize,
+                        limit: pageSize,
                         whereEquals: whereEquals,
                         whereLikes: whereLikes,
                         dateRangeList: whereDateRange,

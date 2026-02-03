@@ -117,9 +117,9 @@ namespace Vudaco
             //    app.UseDeveloperExceptionPage();
             //}
 
-            app.UseHttpsRedirection();
+            app.UseStaticFiles();
 
-            //app.UseStaticFiles();
+            app.UseHttpsRedirection();
 
             app.UseRouting();
 

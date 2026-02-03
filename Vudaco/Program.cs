@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -44,7 +45,11 @@ namespace Vudaco
                 .UseSerilog() // 👉 Thêm dòng này để dùng Serilog
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    var webRoot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                    if (!Directory.Exists(webRoot))
+                        Directory.CreateDirectory(webRoot); 
+
+                    webBuilder.UseWebRoot("wwwroot").UseStartup<Startup>();
                 });
     }
 }

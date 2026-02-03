@@ -736,5 +736,22 @@ FROM {tableNameWithAlias} {joinSql}
                 ? 0m
                 : Convert.ToDecimal(result);
         }
+        public static async Task<int> ExecuteQuerySqlCountAsync(
+            string connectionString,
+            string sql,
+            CancellationToken cancellationToken = default)
+        {
+            await using var conn = new SqlConnection(connectionString);
+            await conn.OpenAsync(cancellationToken);
+
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = sql;
+
+            var result = await cmd.ExecuteScalarAsync(cancellationToken);
+
+            return result == null || result == DBNull.Value
+                ? 0
+                : Convert.ToInt32(result);
+        }
     }
 }

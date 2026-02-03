@@ -1853,6 +1853,17 @@ namespace Vudaco.Debits.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
+        [HttpGet("DispatchByDriver")]
+        public async Task<IActionResult> GetObjectFileHasDispatchByDriverAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoContractFileDetail.GetObjectFileHasDispatchByDriverAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
        
         [HttpGet("muaban")]
         public async Task<IActionResult> GetTaskMuaBan(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
@@ -3741,6 +3752,27 @@ namespace Vudaco.Debits.Controllers
             confirm_file.UpdatedAt = now;
             await _context.SaveChangesAsync();
             return ApiResponseResult<object>(true, "Xóa thành công", null);
+        }
+        [HttpPost("UpdateDriverStatus")]
+        public async Task<IActionResult> UpdateDriverStatus([FromBody] DriverStatusDto DriverStatusDto)
+        {
+            if (DriverStatusDto.Id <= 0)
+            {
+                return ApiResponseResult<object>(false, "Id không tồn tại", null);
+            }
+            var entity = await _context.Debits.FirstOrDefaultAsync(x => x.Id == DriverStatusDto.Id);
+            if (entity == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+           // Optional: tránh update khi không đổi
+            if (entity.DriverStatus == DriverStatusDto.DriverStatus)
+            {
+                return ApiResponseResult<object>(true, "Trạng thái không thay đổi", null);
+            }
+            entity.DriverStatus = DriverStatusDto.DriverStatus;
+            await _context.SaveChangesAsync();     
+            return ApiResponseResult<object>(true, "Cập nhật thành công", null);
         }
         [HttpPost("updateServiceStatus")]
         public async Task<IActionResult> UpdateServiceStatus([FromBody] ServiceStatusDto ServiceStatusDto)

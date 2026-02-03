@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Vudaco.ContractFiles.Dtos;
 using Vudaco.ContractFiles.Models;
+using Vudaco.Debits.Dtos;
 using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
 using Vudaco.Shares.SqlServerHelper;
@@ -523,6 +524,74 @@ namespace Vudaco.ContractFiles.Repositories
         public Task<FileInfoDetail> UpdateAsync(FileInfoDetail FileInfoDetail)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<PaginatedResultReact<object>> GetObjectFileHasDispatchByDriverAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+                if (page <= 0) page = 1;
+                if (pageSize <= 0) pageSize = 10;
+
+                int offset = (page - 1) * pageSize;
+
+                var whereSql = @"
+                    FROM debits d
+                    LEFT JOIN file_infos f 
+                        ON d.file_info_id = f.id
+                        AND d.customer_detail_id = f.customer_detail_id
+                    LEFT JOIN partner_details p 
+                        ON p.id = d.customer_detail_id
+                    LEFT JOIN confirm_file_infos cf 
+                        ON d.id = cf.debit_id
+                    WHERE 
+                        d.type = 1
+                        AND p.status = 1
+                        AND d.deleted_at IS NULL
+                        AND p.deleted_at IS NULL
+                        AND f.deleted_at IS NULL
+                        AND cf.deleted_at IS NULL
+                ";
+
+                if (DebitDto.StorageId > 0)
+                    whereSql += $" AND d.storage_id = {DebitDto.StorageId}";
+
+                if (DebitDto.CustomerDetailId > 0)
+                    whereSql += $" AND d.customer_detail_id = {DebitDto.CustomerDetailId}";
+                if (DebitDto.EmployeeDriverId > 0)
+                    whereSql += $" AND d.employee_driver_id = {DebitDto.EmployeeDriverId}";
+
+                if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+                {
+                    var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                    whereSql += $@"
+                        AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}'
+                        AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'
+                    ";
+                }
+
+                // 🔹 Query lấy data
+                var dataSql = $@"
+                    SELECT 
+                        d.*,
+                        cf.note AS cf_note,
+                        cf.status AS cf_status,
+                        cf.status_confirm AS cf_status_confirm,
+                        cf.updated_at AS cf_updated_at,
+                        cf.updated_by AS cf_updated_by
+                    {whereSql}
+                    ORDER BY d.service_date DESC
+                    OFFSET {offset} ROWS
+                    FETCH NEXT {pageSize} ROWS ONLY
+                ";
+                var data = await SqlServerHelpers.ExecuteQuerySqlAsync(
+                    _configuration.GetConnectionString("DefaultConnection"),
+                    dataSql,
+                    cancellationToken);
+                return new PaginatedResultReact<object>
+                {
+                    PageNum = page,
+                    PageSize = pageSize,
+                    Data = data
+                };
         }
     }
 }

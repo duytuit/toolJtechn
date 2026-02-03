@@ -12,45 +12,108 @@ namespace Vudaco.PayrollPeriods.Models
         public int Id { get; set; }
 
         [Required]
-        [Column("code")]
-        public string Code { get; set; }
-
-        [Required]
-        [MaxLength(191)]
-        [Column("name")]
-        public string Name { get; set; }
-
-        [Required]
-        [Column("parent_id")]
-        public int ParentId { get; set; }
-
-        [Required]
-        [Column("status")]
-        public int Status { get; set; }
-
-        [Required]
         [Column("storage_id")]
         public int StorageId { get; set; }
+
+        [Required]
+        [Column("payroll_period_id")]
+        public int PayrollPeriodId { get; set; }
+
+        [Column("luongcung")]
+        public int LuongCung { get; set; }
+
+        [Column("songaylam")]
+        public int SoNgayLam { get; set; }
+
+        [Column("phepton")]
+        public int PhepTon { get; set; }
+
+        [Column("luongthucnhan")]
+        public int LuongThucNhan { get; set; }
+
+        [Column("lamthemngaythuong")]
+        public int LamThemNgayThuong { get; set; }
+
+        [Column("lamthemngaynghi")]
+        public int LamThemNgayNghi { get; set; }
+
+        [Column("lamthemngayle")]
+        public int LamThemNgayLe { get; set; }
+
+        [Column("tylehuongluong")]
+        public decimal TyLeHuongLuong { get; set; }
+
+        [Column("doanhso")]
+        public int DoanhSo { get; set; }
+
+        [Column("nghiphep")]
+        public int NghiPhep { get; set; }
+
+        [Column("nghikhongluong")]
+        public int NghiKhongLuong { get; set; }
+
+        [Column("chitietdebit", TypeName = "nvarchar(max)")]
+        public string? ChiTietDebit { get; set; }
+
+        [Column("chitietnghiphep", TypeName = "nvarchar(max)")]
+        public string? ChiTietNghiPhep { get; set; }
+
+        [Column("chitietphieuchi", TypeName = "nvarchar(max)")]
+        public string? ChiTietPhieuChi { get; set; }
+
+        [Column("chitietkhoanchi", TypeName = "nvarchar(max)")]
+        public string? ChiTietKhoanChi { get; set; }
+
+        [Column("tongtru")]
+        public int TongTru { get; set; }
+
+        [Column("tongung")]
+        public int TongUng { get; set; }
+
+        [Column("thuong")]
+        public int Thuong { get; set; }
+
+        [Column("ghichu")]
+        [MaxLength(255)]
+        public string? GhiChu { get; set; }
+
+        [Column("diemtrahang")]
+        public int DiemTraHang { get; set; }
+
+        [Column("tienan")]
+        public int TienAn { get; set; }
+
+        [Column("tienve")]
+        public int TienVe { get; set; }
+
+        [Column("dienthoai")]
+        public int DienThoai { get; set; }
+
+        [Column("quadem")]
+        public int QuaDem { get; set; }
+
+        [Column("luat")]
+        public int Luat { get; set; }
+
+        [Column("luonghangve")]
+        public int LuongHangVe { get; set; }
 
         [Column("created_by")]
         public int? CreatedBy { get; set; }
 
+        [Column("created_at")]
+        public DateTime? CreatedAt { get; set; }
+
         [Column("updated_by")]
         public int? UpdatedBy { get; set; }
+
+        [Column("updated_at")]
+        public DateTime? UpdatedAt { get; set; }
 
         [Column("deleted_by")]
         public int? DeletedBy { get; set; }
 
         [Column("deleted_at")]
         public DateTime? DeletedAt { get; set; }
-
-        [Column("created_at")]
-        public DateTime? CreatedAt { get; set; }
-
-        [Column("updated_at")]
-        public DateTime? UpdatedAt { get; set; }
-
-        [Column("permissions", TypeName = "nvarchar(max)")]
-        public string Permissions { get; set; }
     }
 }

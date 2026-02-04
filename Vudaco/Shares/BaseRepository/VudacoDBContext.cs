@@ -15,6 +15,7 @@ using Vudaco.Notifys.Models;
 using Vudaco.Partners.Models;
 using Vudaco.PayrollPeriods.Models;
 using Vudaco.Receipts.Models;
+using Vudaco.SendMails.Models;
 using Vudaco.Storages.Models;
 using Vudaco.Vehicles.Models;
 
@@ -54,6 +55,10 @@ namespace Vudaco.Shares.BaseRepository
         public DbSet<FormRequest> FormRequests { get; set; }
         public DbSet<PayrollPeriod> PayrollPeriods { get; set; }
         public DbSet<PayrollPeriodDetail> PayrollPeriodDetails { get; set; }
+        public DbSet<EmailTemplate> EmailTemplates { get; set; }
+        public DbSet<SmtpSetting> SmtpSettings { get; set; }
+        public DbSet<UserDeviceToken> UserDeviceTokens { get; set; }
+
         public VudacoDBContext(DbContextOptions<VudacoDBContext> options) : base(options)
         {
 
@@ -90,6 +95,9 @@ namespace Vudaco.Shares.BaseRepository
             modelBuider.Entity<FormRequest>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<PayrollPeriod>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<PayrollPeriodDetail>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<EmailTemplate>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<SmtpSetting>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<UserDeviceToken>().HasQueryFilter(e => e.DeletedAt == null);
         }           
     }
 }

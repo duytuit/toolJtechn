@@ -27,6 +27,9 @@ using Vudaco.Comments;
 using Vudaco.Notifys;
 using Vudaco.FormRequests;
 using Vudaco.PayrollPeriods;
+using Vudaco.SendMails;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 namespace Vudaco
 {
@@ -42,6 +45,12 @@ namespace Vudaco
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Init Firebase
+            FirebaseApp.Create(new AppOptions()
+            {
+                Credential = GoogleCredential.FromFile("appvudaco-a5a65d4905b2.json")
+            });
+            services.AddScoped<FcmService>();
             services.Configure<TelegramSettings>(Configuration.GetSection("Telegram"));
             services.AddCors(options =>
             {
@@ -105,6 +114,7 @@ namespace Vudaco
             services.AddNotifyModule();
             services.AddFormRequestModule();
             services.AddPayrollPeriodModule();
+            services.AddSendMailModule();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

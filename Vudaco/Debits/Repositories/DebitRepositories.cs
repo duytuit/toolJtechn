@@ -1152,7 +1152,6 @@ namespace Vudaco.Debits.Repositories
                     ) AS rdt_total
                     WHERE
                     p.status = 1
-                    AND d.status = 2
                     AND d.type = 1 AND driver_fee > 0
                     AND p.deleted_at IS NULL
                     AND f.deleted_at IS NULL
@@ -1164,6 +1163,10 @@ namespace Vudaco.Debits.Repositories
             if (DebitDto.EmployeeStaffId > 0)
             {
                 sql += $@" AND d.employee_staff_id = {DebitDto.EmployeeStaffId}";
+            }
+            if (DebitDto.DriverStatus > 0)
+            {
+                sql += $@" AND d.driver_status = {DebitDto.DriverStatus}";
             }
             if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
             {

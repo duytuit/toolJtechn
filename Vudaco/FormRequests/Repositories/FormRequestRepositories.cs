@@ -55,7 +55,7 @@ namespace Vudaco.FormRequests.Repositories
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "form_requests",
-                        new[] { "id","storage_id","employee_id","description","confirm_by","confirm_at","status","type","note","total_day_leave","created_by","created_at","updated_by","updated_at","deleted_by","deleted_at"},
+                        new[] { "id","storage_id","employee_id","description","confirm_by","confirm_at","status","type","note","total_day_has_paid_leave","total_day_no_paid_leave","created_by","created_at","updated_by","updated_at","deleted_by","deleted_at"},
                         offset: (page - 1) * pageSize,
                         limit: pageSize,
                         whereEquals: whereEquals,

@@ -370,3 +370,8 @@ obj/
 appsettings.json
 appsettings.*.json
 secrets.json
+# Firebase / Google service account
+*.json
+Firebase/*.json
+**/firebase-adminsdk*.json
+**/*service-account*.json

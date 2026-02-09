@@ -1,33 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Vudaco.Auth.Models
 {
-    [Table("roles")]
-    public class Role
+    [Table("user_roles")]
+    public class UserRole
     {
         [Key]
         [Column("id")]
         public int Id { get; set; }
 
         [Required]
-        [Column("name")]
-        public string Name { get; set; }
-        [Required]
-        [Column("storage_id")]
-        public int StorageId { get; set; }
-        [Required]
-        [Column("note")]
-        public string Note { get; set; }
-        [Required]
-        [Column("status")]
-        public bool Status { get; set; }
+        [Column("user_id")]
+        public int UserId { get; set; }
 
-         [Column("created_by")]
+        [Required]
+        [Column("role_id")]
+        public int RoleId { get; set; }
+
+        [Column("created_by")]
         public int? CreatedBy { get; set; }
 
         [Column("updated_by")]
@@ -44,7 +37,5 @@ namespace Vudaco.Auth.Models
 
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
-        [NotMapped]
-        public List<RolePermission> RolePermissions { get; set; } = null;
     }
 }

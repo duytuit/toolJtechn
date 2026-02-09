@@ -15,6 +15,7 @@ namespace Vudaco.Auth
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IPermissionRepository, PermissionRepository>();
             return services;
         }
     }

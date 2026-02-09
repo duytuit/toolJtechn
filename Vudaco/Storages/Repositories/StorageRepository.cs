@@ -85,8 +85,6 @@ namespace Vudaco.Storages.Repositories
                 Total = totalItems,
                 Data = objectList,
             };
-            objectList = null;
-            results = null;
             whereEquals?.Clear(); whereLikes?.Clear(); whereDateRange?.Clear(); orderByList?.Clear();
             return _results;
         }

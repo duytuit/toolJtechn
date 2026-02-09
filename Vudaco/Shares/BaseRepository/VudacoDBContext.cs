@@ -59,6 +59,7 @@ namespace Vudaco.Shares.BaseRepository
         public DbSet<SmtpSetting> SmtpSettings { get; set; }
         public DbSet<UserDeviceToken> UserDeviceTokens { get; set; }
         public DbSet<DriverConfirmStatus> DriverConfirmStatuses { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
 
         public VudacoDBContext(DbContextOptions<VudacoDBContext> options) : base(options)
         {
@@ -99,6 +100,7 @@ namespace Vudaco.Shares.BaseRepository
             modelBuider.Entity<EmailTemplate>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<SmtpSetting>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<UserDeviceToken>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<UserRole>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<DriverConfirmStatus>().HasQueryFilter(e => e.DeletedAt == null);
         }           
     }

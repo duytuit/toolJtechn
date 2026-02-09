@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Vudaco.Auth.Models
 {
@@ -13,8 +10,36 @@ namespace Vudaco.Auth.Models
         [Key]
         [Column("id")]
         public int Id { get; set; }
-        public int PermissionId { get; set; }
 
+        [Required]
+        [Column("permission_id")]
+        public int PermissionId { get; set; }
+        
+        [NotMapped]
+        public string PermissionName { get; set; }
+
+        [Required]
+        [Column("role_id")]
         public int RoleId { get; set; }
+
+        [Required]
+        [Column("all")]
+        public bool All { get; set; }
+
+        [Required]
+        [Column("view")]
+        public bool View { get; set; }
+
+        [Required]
+        [Column("add")]
+        public bool Add { get; set; }
+
+        [Required]
+        [Column("edit")]
+        public bool Edit { get; set; }
+
+        [Required]
+        [Column("delete")]
+        public bool Delete { get; set; }
     }
 }

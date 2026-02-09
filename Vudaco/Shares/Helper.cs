@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -14,7 +13,6 @@ using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore.Query.Internal;
-using Vudaco.ContractFiles.Models;
 using Vudaco.Shares.Connects;
 
 namespace Vudaco.Shares
@@ -223,7 +221,7 @@ namespace Vudaco.Shares
                 ? $"uploads/{folder}/{date_file}{file.FileName}"
                 : $"uploads/{date_file}{file.FileName}";
 
-            return new UploadResult(true, "OK", $"{relativePath}");
+            return new UploadResult(true, "OK", $"{relativePath}", "https://vudaco.online/"+$"{relativePath}");
         }
         public static string GetClientInfo(IHttpContextAccessor accessor, string clientNameFromBody = null)
         {
@@ -391,18 +389,31 @@ namespace Vudaco.Shares
 
             return result.Trim();
         }
+        public static string DriverStatus(int status)
+        {
+            return status switch
+            {
+                0 => "Chưa nhận chuyến",
+                1 => "Đã nhận chuyến",
+                2 => "Đã hoàn thành",
+                3 => "Đổi ca",
+                _ => "Không xác định",
+            };
+        }
     }
         public class UploadResult
         {
             public bool Success { get; set; }
             public string Message { get; set; }
             public string Path { get; set; }
+            public string FullPath { get; set; }
 
-            public UploadResult(bool success, string message=null, string path=null)
+            public UploadResult(bool success, string message=null, string path=null, string fullPath=null)
             {
                 Success = success;
                 Message = message;
                 Path = path;
+                FullPath = fullPath;
             }
         }
 }

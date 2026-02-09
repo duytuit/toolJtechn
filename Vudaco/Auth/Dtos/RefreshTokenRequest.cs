@@ -10,5 +10,6 @@ namespace Vudaco.Auth.Dtos
         public int UserId { get; set; }
         public string DeviceId { get; set; }
         public string RefreshToken { get; set; }
+        public string Type { get; set; }
     }
 }

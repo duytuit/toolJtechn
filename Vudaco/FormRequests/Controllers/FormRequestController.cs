@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
@@ -10,6 +11,8 @@ using Vudaco.Controllers;
 using Vudaco.FormRequests.Dtos;
 using Vudaco.FormRequests.Models;
 using Vudaco.FormRequests.Repositories;
+using Vudaco.Notifys.Dtos;
+using Vudaco.Notifys.Repositories;
 using Vudaco.Shares.BaseRepository;
 
 namespace Vudaco.FormRequests.Controllers
@@ -21,11 +24,13 @@ namespace Vudaco.FormRequests.Controllers
         private readonly IFormRequestRepositories _repoFormRequest;
         private readonly ILogger<FormRequestController> _logger;
         private readonly VudacoDBContext _context;
+        private readonly IFcmQueue _fcmQueue;
         public int userId => (int)HttpContext.Items["UserId"];
 
-        public FormRequestController(ILogger<FormRequestController> logger, IFormRequestRepositories repoFormRequest, VudacoDBContext context)
+        public FormRequestController(ILogger<FormRequestController> logger, IFormRequestRepositories repoFormRequest, VudacoDBContext context, IFcmQueue fcmQueue)
         {
             _logger = logger;
+            _fcmQueue = fcmQueue;
             _repoFormRequest = repoFormRequest;
             _context = context;
         }
@@ -62,6 +67,26 @@ namespace Vudaco.FormRequests.Controllers
                 UpdatedAt = now,
             };
             formRequest = await _repoFormRequest.CreateAsync(formRequest);
+            var getEmp = await _context.Employees.FirstOrDefaultAsync(x => x.Id == formRequest.EmployeeId);
+            var userIds = await _context.Employees
+                .Where(x => x.StorageId == formRequest.StorageId && x.Id != formRequest.EmployeeId && x.UserId.HasValue)
+                .Select(x => x.UserId.Value)
+                .Distinct()
+                .ToListAsync();
+
+            if (userIds.Any())
+            {
+                await _fcmQueue.EnqueueAsync(new FcmJobDto
+                {
+                    UserIds = userIds,
+                    Title = "Yêu cầu nghỉ phép mới",
+                    Body = "Có một yêu cầu nghỉ phép mới của " + (getEmp != null ? getEmp.FirstName + " " + getEmp.LastName : ""),
+                    StorageId = formRequest.StorageId,
+                    PostId = formRequest.Id,
+                    Type = 0,
+                    Screen = "nghiphep"
+                });
+            }
             return ApiResponseResult(true, "Thêm thành công", formRequest);
         }
         [HttpPost("ChangeStatus")]
@@ -82,6 +107,26 @@ namespace Vudaco.FormRequests.Controllers
             formRequest.UpdatedBy = userId;
             formRequest.UpdatedAt = DateTime.Now;
             await _repoFormRequest.UpdateAsync(formRequest);
+            var getEmp = await _context.Employees.FirstOrDefaultAsync(x => x.Id == formRequest.EmployeeId);
+            var userIds = await _context.Employees
+                .Where(x => x.StorageId == formRequest.StorageId && x.UserId.HasValue && x.UserId != formRequest.ConfirmBy)
+                .Select(x => x.UserId.Value)
+                .Distinct()
+                .ToListAsync();
+            if (userIds.Any())
+            {   
+                string statusText = formRequestDto.Status == 1 ? "đã được duyệt" : formRequestDto.Status == 2 ? "bị từ chối" : "đang chờ duyệt";
+                await _fcmQueue.EnqueueAsync(new FcmJobDto
+                {
+                    UserIds = userIds,
+                    Title = "Cập nhật trạng thái yêu cầu nghỉ phép",
+                    Body = $"Yêu cầu nghỉ phép của bạn {getEmp?.FirstName} {getEmp?.LastName} {statusText}",
+                    StorageId = formRequest.StorageId,
+                    PostId = formRequest.Id,
+                    Type = 0,
+                    Screen = "nghiphep"
+                });
+            }
             return ApiResponseResult(true, "Cập nhật trạng thái thành công", formRequest);     
         }
         [HttpPost("UpdateLeaveRequest")]
@@ -126,7 +171,23 @@ namespace Vudaco.FormRequests.Controllers
             }
             entity.DeletedBy = userId;
             entity.DeletedAt = DateTime.Now;
+            var getEmp = await _context.Employees.FirstOrDefaultAsync(x => x.Id == entity.EmployeeId);
+            var userIds = await _context.Employees
+                .Where(x => x.StorageId == entity.StorageId && x.UserId.HasValue && x.UserId != entity.CreatedBy)
+                .Select(x => x.UserId.Value)
+                .Distinct()
+                .ToListAsync();
             await _repoFormRequest.DeleteSoftAsync(entity);
+            await _fcmQueue.EnqueueAsync(new FcmJobDto
+            {
+                UserIds = userIds,
+                Title = "Xóa yêu cầu nghỉ phép",
+                Body = $"Bạn {getEmp?.FirstName} {getEmp?.LastName} đã xóa yêu cầu nghỉ phép",
+                StorageId = entity.StorageId,
+                PostId = entity.Id,
+                Type = 0,
+                Screen = "nghiphep"
+            }); 
             return ApiResponseResult<object>(true, "Xóa thành công", null);
         }
         [HttpGet("show")]

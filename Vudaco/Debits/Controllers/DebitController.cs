@@ -28,6 +28,8 @@ using System.Diagnostics;
 using System.Runtime.Serialization;
 using System.Dynamic;
 using System.Data;
+using Vudaco.Notifys.Repositories;
+using Vudaco.Notifys.Dtos;
 
 namespace Vudaco.Debits.Controllers
 {
@@ -40,16 +42,17 @@ namespace Vudaco.Debits.Controllers
         private readonly IContractFileRepository _repoContractFile;
         private readonly ILogger<DebitController> _logger;
         private readonly VudacoDBContext _context;
-
+        private readonly IFcmQueue _fcmQueue;
         private readonly IConfiguration _configuration;
         public int userId => (int)HttpContext.Items["UserId"];
 
-        public DebitController(ILogger<DebitController> logger,  IContractFileDetailRepository repoContractFileDetail,IContractFileRepository repoContractFile,IConfiguration configuration, IDebitRepositories repoDebit, VudacoDBContext context)
+        public DebitController(ILogger<DebitController> logger,  IContractFileDetailRepository repoContractFileDetail,IContractFileRepository repoContractFile,IConfiguration configuration, IDebitRepositories repoDebit, VudacoDBContext context, IFcmQueue fcmQueue)
         {
             _logger = logger;
             _repoDebit = repoDebit;
             _context = context;
             _configuration = configuration;
+            _fcmQueue = fcmQueue;
             _repoContractFileDetail = repoContractFileDetail;
             _repoContractFile = repoContractFile;
         }
@@ -125,6 +128,17 @@ namespace Vudaco.Debits.Controllers
         {
             // test
             var result = await _repoDebit.GetObjectDebitLaiXeAsync(DebitDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpGet("GetObjectDebitLaiXeTinhLuongAsync")]
+        public async Task<IActionResult> GetObjectDebitLaiXeTinhLuongAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            // test
+            var result = await _repoDebit.GetObjectDebitLaiXeTinhLuongAsync(DebitDto, page, pageSize, cancellationToken);
             if (result == null)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
@@ -2093,6 +2107,7 @@ namespace Vudaco.Debits.Controllers
                     Vat = DebitDto.Vat,
                     DriverFee = DebitDto.DriverFee,
                     MealFee = DebitDto.MealFee,
+                    DeliveryPoint = DebitDto.DeliveryPoint,
                     TicketFee = DebitDto.TicketFee,
                     OvernightFee = DebitDto.OvernightFee,
                     PenaltyFee = DebitDto.PenaltyFee,
@@ -2124,6 +2139,20 @@ namespace Vudaco.Debits.Controllers
                 };
                 _context.ConfirmFiles.Add(entity);
                 await _context.SaveChangesAsync();
+                var getUserDriver = await _context.Employees.FirstOrDefaultAsync(x => x.Id == DebitDto.EmployeeDriverId);
+                if (getUserDriver?.UserId != null)
+                {
+                    await _fcmQueue.EnqueueAsync(new FcmJobDto
+                    {
+                        UserIds = new List<int> { getUserDriver.UserId.Value },
+                        Title = "Bạn nhận được chuyến xe mới",
+                        Body = debit.Name,
+                        StorageId = debit.StorageId,
+                        PostId = debit.Id,
+                        Type = 0,
+                        Screen = "chuyenxe"
+                    });
+                }
                 await tran.CommitAsync();
                 return ApiResponseResult<object>(true, "Thêm thành công", null);
             }
@@ -2857,6 +2886,7 @@ namespace Vudaco.Debits.Controllers
                 debit.OvernightFee = DebitDto.OvernightFee;
                 debit.PenaltyFee = DebitDto.PenaltyFee;
                 debit.GoodsFee = DebitDto.GoodsFee;
+                debit.DeliveryPoint = DebitDto.DeliveryPoint;
                 debit.Data = DebitDto.Data;
                 debit.Note = DebitDto.Note;
                 debit.CustomerVehicleType = DebitDto.CustomerVehicleType;
@@ -3753,27 +3783,71 @@ namespace Vudaco.Debits.Controllers
             await _context.SaveChangesAsync();
             return ApiResponseResult<object>(true, "Xóa thành công", null);
         }
-        [HttpPost("UpdateDriverStatus")]
-        public async Task<IActionResult> UpdateDriverStatus([FromBody] DriverStatusDto DriverStatusDto)
+       [HttpPost("UpdateDriverStatus")]
+        public async Task<IActionResult> UpdateDriverStatus([FromBody] DriverStatusDto dto)
         {
-            if (DriverStatusDto.Id <= 0)
-            {
+            var now = DateTime.Now;
+
+            if (dto.Id <= 0)
                 return ApiResponseResult<object>(false, "Id không tồn tại", null);
-            }
-            var entity = await _context.Debits.FirstOrDefaultAsync(x => x.Id == DriverStatusDto.Id);
+
+            var entity = await _context.Debits.FirstOrDefaultAsync(x => x.Id == dto.Id);
             if (entity == null)
-            {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
-            }
-           // Optional: tránh update khi không đổi
-            if (entity.DriverStatus == DriverStatusDto.DriverStatus)
-            {
+
+            // Không update nếu trạng thái không đổi
+            if (entity.DriverStatus == dto.DriverStatus)
                 return ApiResponseResult<object>(true, "Trạng thái không thay đổi", null);
+
+            // Lấy record confirm
+            var confirm = await _context.DriverConfirmStatuses
+                .FirstOrDefaultAsync(x => x.DebitId == entity.Id);
+
+            // Nếu đã có confirm => chỉ cho đổi trong ngày
+            if (confirm != null)
+            {
+                // So sánh theo UpdatedAt (hợp lý hơn CreatedAt)
+                var lastUpdateDate = (confirm.UpdatedAt ?? confirm.CreatedAt)?.Date;
+
+                if (lastUpdateDate.HasValue && lastUpdateDate.Value != now.Date)
+                    return ApiResponseResult<object>(false, "Đã hết hạn thay đổi trạng thái", null);
+
+                confirm.UpdatedAt = now;
+                confirm.UpdatedBy = userId; // nếu bạn muốn lưu người update thì nên dùng UpdatedBy
             }
-            entity.DriverStatus = DriverStatusDto.DriverStatus;
-            await _context.SaveChangesAsync();     
+            else
+            {
+                // Chưa có confirm => tạo mới
+                var newConfirm = new DriverConfirmStatus
+                {
+                    DebitId = entity.Id,
+                    StorageId = entity.StorageId,
+                    CreatedAt = now,
+                    CreatedBy = userId,
+                    UpdatedAt = now
+                };
+
+                _context.DriverConfirmStatuses.Add(newConfirm);
+            }
+
+            // Update status
+            entity.DriverStatus = dto.DriverStatus;
+
+            await _context.SaveChangesAsync();
+            string DriverStatus = Helper.DriverStatus(dto.DriverStatus);
+            var getUserDriver = await _context.Employees.FirstOrDefaultAsync(x => x.UserId == userId);
+            await _fcmQueue.EnqueueAsync(new FcmJobDto
+            {
+                UserIds = new List<int> { entity.CreatedBy.Value },
+                Title = "Chuyến xe "+ entity.Name,
+                Body = $"{getUserDriver?.FirstName +" "+getUserDriver?.LastName ?? "Tài xế"} đã được cập nhật thành: {DriverStatus}",
+                StorageId = entity.StorageId,
+                PostId = entity.Id,
+                Type = 0,
+            });
             return ApiResponseResult<object>(true, "Cập nhật thành công", null);
         }
+
         [HttpPost("updateServiceStatus")]
         public async Task<IActionResult> UpdateServiceStatus([FromBody] ServiceStatusDto ServiceStatusDto)
         {
@@ -3856,6 +3930,20 @@ namespace Vudaco.Debits.Controllers
             await deleteReceiptByDebitId(DebitDto.Id);
             entity.DeletedBy = userId;
             entity.DeletedAt = now;
+            var getUserDriver = await _context.Employees.FirstOrDefaultAsync(x => x.Id == entity.EmployeeDriverId);
+            if (getUserDriver?.UserId != null)
+            {
+                await _fcmQueue.EnqueueAsync(new FcmJobDto
+                {
+                    UserIds = new List<int> { getUserDriver.UserId.Value },
+                    Title = "Chuyến xe của bạn đã bị hủy",
+                    Body = entity.Name,
+                    StorageId = entity.StorageId,
+                    PostId = entity.Id,
+                    Type = 0,
+                    Screen = "chuyenxe"
+                });
+            }
             await _repoDebit.DeleteSoftAsync(entity);
             return ApiResponseResult<object>(true, "Xóa thành công", null);
         }

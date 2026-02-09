@@ -30,6 +30,8 @@ namespace Vudaco.Auth.Models
         [Required]
         [MaxLength(500)]
         public string RefreshToken { get; set; }
+        [Column("Type")]
+        public string Type { get; set; }
 
         [Column("ExpiryTime")]
         public DateTime ExpiryTime { get; set; }

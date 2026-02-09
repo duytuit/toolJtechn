@@ -17,7 +17,7 @@ namespace Vudaco.Auth.Repositories
         private readonly IConfiguration _config;
         public TokenService(IConfiguration config) => _config = config;
 
-        public string GenerateAccessToken(User user, string deviceId = null, int expire = 5)
+        public string GenerateAccessToken(User user, string deviceId = null, int expire = 5,string type = null)
         {
             var secret = _config["Jwt:Secret"];
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
@@ -31,7 +31,8 @@ namespace Vudaco.Auth.Repositories
 
             if (!string.IsNullOrEmpty(deviceId))
                 claims.Add(new Claim("device_id", deviceId));
-
+            if (!string.IsNullOrEmpty(type))
+                claims.Add(new Claim("type", type));
             var token = new JwtSecurityToken(
                 claims: claims,
                 expires: DateTime.Now.AddMinutes(expire),

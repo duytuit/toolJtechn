@@ -111,7 +111,7 @@ namespace Vudaco.Employees.Models
         [Column("user_id")]
         public int? UserId { get; set; }
         [NotMapped]
-        public EmployeeDepartment EmployeeDepartment { get; set; }
+        public List<EmployeeDepartment> EmployeeDepartments { get; set; }
         [NotMapped]
         public List<Department> Departments { get; set; }
         [NotMapped]

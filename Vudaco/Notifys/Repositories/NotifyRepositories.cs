@@ -55,7 +55,7 @@ namespace Vudaco.Notifys.Repositories
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "notifys",
-                        new[] { "id","storage_id","employee_id","title","description","status","type","image","created_by","created_at","updated_by","updated_at","deleted_by","deleted_at"},
+                        new[] { "id","storage_id","employee_id","post_id","title","screen","description","status","type","image","created_by","created_at","updated_by","updated_at","deleted_by","deleted_at"},
                         offset: (page - 1) * pageSize,
                         limit: pageSize,
                         whereEquals: whereEquals,

@@ -34,7 +34,7 @@ namespace Vudaco.Controllers
             dto.Platform = dto.Platform?.Trim()?.ToLower();
 
             if (dto.Platform != "android" && dto.Platform != "ios")
-                return BadRequest(new { message = "Platform chỉ nhận: android | ios" });
+                 return ApiResponseResult<object>(false, "Platform chỉ nhận: android | ios", null);
 
             // 1) Token đã tồn tại -> update
             var existedByToken = await _context.UserDeviceTokens
@@ -50,7 +50,7 @@ namespace Vudaco.Controllers
 
                 await _context.SaveChangesAsync();
 
-                return Ok(new { message = "Updated token", id = existedByToken.Id });
+                return ApiResponseResult<object>(true, "Updated token", null);
             }
 
             // 2) Nếu có DeviceId thì update token theo deviceId
@@ -67,8 +67,7 @@ namespace Vudaco.Controllers
                     existedByDeviceId.UpdatedAt = DateTime.UtcNow;
 
                     await _context.SaveChangesAsync();
-
-                    return Ok(new { message = "Updated token by deviceId", id = existedByDeviceId.Id });
+                    return ApiResponseResult<object>(true, "Updated token by deviceId", null);
                 }
             }
 
@@ -87,13 +86,13 @@ namespace Vudaco.Controllers
             _context.UserDeviceTokens.Add(entity);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Registered", id = entity.Id });
+            return ApiResponseResult(true, "Registered token", entity);
         }
         [HttpPost("logout")]
         public async Task<IActionResult> Logout([FromBody] LogoutDeviceDto dto)
         {
             if (string.IsNullOrEmpty(dto.DeviceToken) && string.IsNullOrEmpty(dto.DeviceId))
-                return BadRequest(new { message = "Cần DeviceToken hoặc DeviceId" });
+                return ApiResponseResult<object>(false, "Phải truyền DeviceToken hoặc DeviceId", null);
 
             var query = _context.UserDeviceTokens
                 .Where(x => x.UserId == dto.UserId && x.IsActive);
@@ -114,7 +113,7 @@ namespace Vudaco.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Logout success", count = list.Count });
+            return ApiResponseResult<object>(true, "Logged out", null);
         }
     }
 }

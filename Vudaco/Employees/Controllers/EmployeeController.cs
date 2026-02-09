@@ -139,18 +139,21 @@ namespace Vudaco.Employees.Controllers
                     await _context.SaveChangesAsync();
                 }
               
-                if (dto.EmployeeDepartment?.DepartmentId > 0)
+                if (dto.departmentIds != null && dto.departmentIds.Length > 0)
                 {
-                    var employeeDepartment = await _context.EmployeeDepartments.FirstOrDefaultAsync(u => u.StorageId == dto.StorageId && u.EmployeeId == employee.Id && u.DepartmentId == dto.EmployeeDepartment.DepartmentId);
-                    if (employeeDepartment == null)
+                    foreach (var deptId in dto.departmentIds)
                     {
-                        employeeDepartment = new EmployeeDepartment
+                        var employeeDepartment = await _context.EmployeeDepartments.FirstOrDefaultAsync(u => u.StorageId == dto.StorageId && u.EmployeeId == employee.Id && u.DepartmentId == deptId);
+                        if (employeeDepartment == null)
                         {
-                            EmployeeId = employee.Id,
-                            DepartmentId = dto.EmployeeDepartment.DepartmentId,
-                            StorageId = employee.StorageId,
-                        };
-                        _context.EmployeeDepartments.Add(employeeDepartment);
+                            employeeDepartment = new EmployeeDepartment
+                            {
+                                EmployeeId = employee.Id,
+                                DepartmentId = deptId,
+                                StorageId = employee.StorageId,
+                            };
+                            _context.EmployeeDepartments.Add(employeeDepartment);
+                        }
                     }
                 }
                 await _context.SaveChangesAsync();
@@ -214,21 +217,35 @@ namespace Vudaco.Employees.Controllers
                 employee.UpdatedAt = DateTime.Now;
                 employee.UpdatedBy = userId;
 
-                if (dto.EmployeeDepartment.Id>0)
+                if (dto.departmentIds != null && dto.departmentIds.Length > 0)
                 {
-                    var _employeeDepartments = await _context.EmployeeDepartments.AsNoTracking().FirstOrDefaultAsync(d => d.Id == dto.EmployeeDepartment.Id);
-                    _employeeDepartments.DepartmentId = dto.EmployeeDepartment.DepartmentId;
-                     _context.EmployeeDepartments.Update(_employeeDepartments);
-                }
-                else
-                {
-                     var employeeDepartment = new EmployeeDepartment
+                    var check_departments = await _context.EmployeeDepartments
+                        .Where(ed => ed.EmployeeId == employee.Id)
+                        .Where(ed => dto.departmentIds.Contains(ed.DepartmentId))
+                        .ToListAsync();
+                    if (check_departments.Count != dto.departmentIds.Length)
                     {
-                        EmployeeId = employee.Id,
-                        DepartmentId = dto.EmployeeDepartment.DepartmentId,
-                        StorageId = employee.StorageId,
-                    };
-                    _context.EmployeeDepartments.Add(employeeDepartment);
+                        // Xóa các phòng ban hiện tại của nhân viên
+                        var existingDepartments = await _context.EmployeeDepartments.Where(ed => ed.EmployeeId == employee.Id).ToListAsync();
+                        foreach (var dept in existingDepartments)
+                        {
+                            dept.DeletedAt = DateTime.Now;
+                            dept.DeletedBy = userId;
+                            _context.EmployeeDepartments.Update(dept);    
+                        }
+
+                        // Thêm các phòng ban mới
+                        foreach (var deptId in dto.departmentIds)
+                        {
+                            var employeeDepartment = new EmployeeDepartment
+                            {
+                                EmployeeId = employee.Id,
+                                DepartmentId = deptId,
+                                StorageId = employee.StorageId,
+                            };
+                            _context.EmployeeDepartments.Add(employeeDepartment);
+                        }
+                    }
                 }
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();

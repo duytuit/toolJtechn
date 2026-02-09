@@ -80,46 +80,76 @@ namespace Vudaco.Auth.Repositories
                         .ToList();
                 }
             }
-            var accessToken = _tokenService.GenerateAccessToken(user, request.DeviceId, accessTokenExpiryMinutes);
+            var accessToken = _tokenService.GenerateAccessToken(user, request.DeviceId, accessTokenExpiryMinutes, request.Type);
             var refreshToken = _tokenService.GenerateRefreshToken();
-
             // 🔹 Redis key
             var redisKey = $"token:{user.Id}:{request.DeviceId}";
-
-            // 🔹 Kiểm tra xem đã có user token cho device này chưa
-            var existingToken = await _db.UserTokens
-                .FirstOrDefaultAsync(x => x.UserId == user.Id && x.DeviceId == request.DeviceId);
-
-           
-
-            if (existingToken != null)
+            var redisKeyApp = $"app_token:{user.Id}:{request.DeviceId}";
+            if (request.Type == "app")
             {
-                // 👉 Cập nhật token và refresh token mới
-                existingToken.Token = accessToken;
-                existingToken.RefreshToken = refreshToken;
-                existingToken.ExpiryTime = DateTime.Now.AddMinutes(accessTokenExpiryMinutes);
-
-                _db.UserTokens.Update(existingToken);
-            }
-            else
-            {
-                // 👉 Thêm mới nếu chưa có
+                var pattern = $"app_token:{user.Id}:*";
+                var keys = _redis.GetKeysByPattern(pattern);
+                foreach (var key in keys)
+                {
+                    await _redis.RemoveAsync(key);
+                }
+                var getUserHasToken = await _db.UserTokens.Where(x => x.UserId == user.Id && x.Type == request.Type).ToListAsync();
+                if (getUserHasToken.Any())
+                {
+                     _db.UserTokens.RemoveRange(getUserHasToken);
+                     await _db.SaveChangesAsync();
+                }
+                var getUserHasDeviceToken = await _db.UserDeviceTokens.Where(x => x.UserId == user.Id).ToListAsync();
+                if (getUserHasDeviceToken.Any())
+                {
+                     _db.UserDeviceTokens.RemoveRange(getUserHasDeviceToken);
+                     await _db.SaveChangesAsync();
+                }
                 var newUserToken = new UserToken
                 {
                     UserId = user.Id,
                     DeviceId = request.DeviceId,
+                    Type = request.Type,
                     Token = accessToken,
                     RefreshToken = refreshToken,
                     ExpiryTime = DateTime.Now.AddMinutes(accessTokenExpiryMinutes)
-            };
+                };
                 _db.UserTokens.Add(newUserToken);
+                // 🔹 Lưu vào Redis
+                await _redis.SetAsync(redisKeyApp, accessToken, TimeSpan.FromMinutes(accessTokenExpiryMinutes));
             }
+            else
+            {
+                // 🔹 Kiểm tra xem đã có user token cho device này chưa
+                var existingToken = await _db.UserTokens.FirstOrDefaultAsync(x => x.UserId == user.Id && x.DeviceId == request.DeviceId);
 
+                if (existingToken != null)
+                {
+                    // 👉 Cập nhật token và refresh token mới
+                    existingToken.Token = accessToken;
+                    existingToken.RefreshToken = refreshToken;
+                    existingToken.ExpiryTime = DateTime.Now.AddMinutes(accessTokenExpiryMinutes);
+
+                    _db.UserTokens.Update(existingToken);
+                }
+                else
+                {
+                    // 👉 Thêm mới nếu chưa có
+                    var newUserToken = new UserToken
+                    {
+                        UserId = user.Id,
+                        DeviceId = request.DeviceId,
+                        Type = request.Type,
+                        Token = accessToken,
+                        RefreshToken = refreshToken,
+                        ExpiryTime = DateTime.Now.AddMinutes(accessTokenExpiryMinutes)
+                    };
+                    _db.UserTokens.Add(newUserToken);
+                }
+                // 🔹 Cập nhật lại Redis
+                await _redis.SetAsync(redisKey, accessToken, TimeSpan.FromMinutes(accessTokenExpiryMinutes));
+            }
             await _db.SaveChangesAsync();
-
-            // 🔹 Cập nhật lại Redis
-            await _redis.SetAsync(redisKey, accessToken, TimeSpan.FromMinutes(accessTokenExpiryMinutes));
-
             // 🔹 Trả về token mới
             return (accessToken, refreshToken, employee);
         }
@@ -155,7 +185,7 @@ namespace Vudaco.Auth.Repositories
 
             // 🔹 Sinh token mới
             var employee = await _db.Employees.FirstOrDefaultAsync(e => e.UserId == user.Id);
-            var newAccessToken = _tokenService.GenerateAccessToken(user, request.DeviceId, accessTokenExpiryMinutes);
+            var newAccessToken = _tokenService.GenerateAccessToken(user, request.DeviceId, accessTokenExpiryMinutes, request.Type);
             var newRefreshToken = _tokenService.GenerateRefreshToken();
 
             // 🔹 Cập nhật lại DB

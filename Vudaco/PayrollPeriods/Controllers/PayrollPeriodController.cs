@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Vudaco.Comments.Dtos;
 using Vudaco.Controllers;
+using Vudaco.PayrollPeriods.Dtos;
 using Vudaco.PayrollPeriods.Repositories;
 using Vudaco.Shares.BaseRepository;
 
@@ -34,6 +35,20 @@ namespace Vudaco.PayrollPeriods.Controllers
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpPost("salary")]
+        public IActionResult GetSalary([FromQuery] PayrollPeriodDto payrollPeriodDto = null)
+        {
+             var fileUrl = "https://admin.vudaco.online/salary/SalaryByCycleName";
+
+             return ApiResponseResult(true, "Lấy dữ liệu thành công", new { fileUrl });
+        }
+        [HttpPost("SalaryByCycleName")]
+        public IActionResult SalaryByCycleName([FromQuery] PayrollPeriodDto payrollPeriodDto = null)
+        {
+             var fileUrl = "https://admin.vudaco.online/salary/SalaryByCycleName";
+
+             return ApiResponseResult(true, "Lấy dữ liệu thành công", new { fileUrl });
         }
       
     }

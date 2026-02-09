@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,6 +11,8 @@ using Vudaco.Comments.Dtos;
 using Vudaco.Comments.Models;
 using Vudaco.Comments.Repositories;
 using Vudaco.Controllers;
+using Vudaco.Notifys.Dtos;
+using Vudaco.Notifys.Repositories;
 using Vudaco.Shares.BaseRepository;
 
 namespace Vudaco.Comments.Controllers
@@ -20,12 +24,14 @@ namespace Vudaco.Comments.Controllers
         private readonly ICommentRepositories _repoComment;
         private readonly ILogger<CommentController> _logger;
         private readonly VudacoDBContext _context;
-         public int userId => (int)HttpContext.Items["UserId"];
+        private readonly IFcmQueue _fcmQueue;
+        public int userId => (int)HttpContext.Items["UserId"];
 
-        public CommentController(ILogger<CommentController> logger, ICommentRepositories repoComment, VudacoDBContext context)
+        public CommentController(ILogger<CommentController> logger, ICommentRepositories repoComment, VudacoDBContext context, IFcmQueue fcmQueue)
         {
             _logger = logger;
             _repoComment = repoComment;
+            _fcmQueue = fcmQueue;
             _context = context;
         }
         [HttpGet]
@@ -62,6 +68,30 @@ namespace Vudaco.Comments.Controllers
                 UpdatedAt = now,
             };
             comment = await _repoComment.CreateAsync(comment);
+            var getDebit = await _context.Debits.FirstOrDefaultAsync(x => x.Id == commentDto.PostId);
+            List<int> userIds = new List<int>();
+            if (getDebit?.CreatedBy != null)
+            {
+               userIds.Add(getDebit.CreatedBy.Value);
+            }
+            var getUserDriver = await _context.Comments.Where(x => x.PostId == comment.PostId && x.CreatedBy != userId).ToListAsync();
+            if (getUserDriver.Any())
+            {
+                userIds.AddRange( getUserDriver.Select(x => x.CreatedBy.Value).Distinct());
+            }
+            if (userIds.Any())
+            {
+                await _fcmQueue.EnqueueAsync(new FcmJobDto
+                {
+                    UserIds = userIds,
+                    Title = "Bình luận mới",
+                    Body = commentDto.Message,
+                    StorageId = commentDto.StorageId,
+                    PostId = commentDto.PostId,
+                    Type = commentDto.Type,
+                    Screen = "chuyenxe"
+                });
+            }
             return ApiResponseResult(true, "Thêm thành công", comment);
         }
         [HttpPost("ChangeStatus")]
@@ -116,6 +146,30 @@ namespace Vudaco.Comments.Controllers
             entity.DeletedBy = userId;
             entity.DeletedAt = DateTime.Now;
             await _repoComment.DeleteSoftAsync(entity);
+            var getDebit = await _context.Debits.FirstOrDefaultAsync(x => x.Id == commentDto.PostId);
+            List<int> userIds = new List<int>();
+            if (getDebit?.CreatedBy != null)
+            {
+               userIds.Add(getDebit.CreatedBy.Value);
+            }
+            var getUserDriver = await _context.Comments.Where(x => x.PostId == entity.PostId && x.CreatedBy != userId).ToListAsync();
+            if (getUserDriver.Any())
+            {
+                userIds.AddRange( getUserDriver.Select(x => x.CreatedBy.Value).Distinct());
+            }
+            if (userIds.Any())
+            {
+                await _fcmQueue.EnqueueAsync(new FcmJobDto
+                {
+                    UserIds = userIds,
+                    Title = "Xóa bình luận",
+                    Body = "Một bình luận đã bị xóa",
+                    StorageId = commentDto.StorageId,
+                    PostId = commentDto.PostId,
+                    Type = commentDto.Type,
+                    Screen = "chuyenxe"
+                });
+            }
             return ApiResponseResult<object>(true, "Xóa thành công", null);
         }
         [HttpGet("show")]

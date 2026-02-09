@@ -41,15 +41,13 @@ namespace Vudaco.Controllers
 
             if (tokens.Count == 0)
                 return Ok(new { message = "User không có token active" });
-
-            var response = await _fcmService.SendMulticastAsync(tokens, dto.Title, dto.Body, dto.Data);
+            // _ = Task.Run(() => _fcmService.SendMulticastAsync(tokens, dto.Title, dto.Body, dto.StorageId, dto.UserId, dto.PostId, dto.Type, dto.Data));
 
             return Ok(new
             {
                 message = "Sent",
                 totalTokens = tokens.Count,
-                successCount = response.SuccessCount,
-                failureCount = response.FailureCount
+               
             });
         }
     }

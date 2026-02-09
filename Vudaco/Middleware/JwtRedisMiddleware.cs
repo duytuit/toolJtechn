@@ -63,8 +63,8 @@ namespace Vudaco.Middlewares
 
                     var userId = jwtToken.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
                     var deviceId = jwtToken.Claims.FirstOrDefault(x => x.Type == "device_id")?.Value;
-
-                    if (!string.IsNullOrEmpty(deviceId))
+                    var type = jwtToken.Claims.FirstOrDefault(x => x.Type == "type")?.Value;
+                    if (string.IsNullOrEmpty(type))
                     {
                         var redisKey = $"token:{userId}:{deviceId}";
                         var redisToken = await _redis.GetAsync(redisKey);
@@ -72,6 +72,26 @@ namespace Vudaco.Middlewares
                         {
                             var _UserTokens = await _dbContext.UserTokens
                             .FirstOrDefaultAsync(s => s.UserId == int.Parse(userId) && s.DeviceId == deviceId);
+                            if (_UserTokens == null || _UserTokens.Token != token || _UserTokens.ExpiryTime < DateTime.UtcNow)
+                            {
+                                var response = new ApiResponse<object>(false, "Token đã hết hạn hoặc thiết bị không hợp lệ");
+                                context.Response.ContentType = "application/json";
+                                context.Response.StatusCode = 401;
+                                var json = JsonSerializer.Serialize(response);
+                                await context.Response.WriteAsync(json);
+                                return;
+                            }
+                            // 🔹 Token hợp lệ trong DB → cập nhật lại Redis
+                            var ttl = _UserTokens.ExpiryTime - DateTime.UtcNow;
+                            await _redis.SetAsync(redisKey, _UserTokens.Token, ttl > TimeSpan.Zero ? ttl : TimeSpan.FromDays(7));
+                        }
+                    }else{
+                        var redisKey = $"{type}_token:{userId}:{deviceId}";
+                        var redisToken = await _redis.GetAsync(redisKey);
+                        if (redisToken != token)
+                        {
+                            var _UserTokens = await _dbContext.UserTokens
+                            .FirstOrDefaultAsync(s => s.UserId == int.Parse(userId) && s.DeviceId == deviceId && s.Type == type);
                             if (_UserTokens == null || _UserTokens.Token != token || _UserTokens.ExpiryTime < DateTime.UtcNow)
                             {
                                 var response = new ApiResponse<object>(false, "Token đã hết hạn hoặc thiết bị không hợp lệ");

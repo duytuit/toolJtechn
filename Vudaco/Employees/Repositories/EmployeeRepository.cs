@@ -127,10 +127,9 @@ namespace Vudaco.Employees.Repositories
 
             if (entity == null) return null;
 
-            entity.EmployeeDepartment = await _context.EmployeeDepartments
-                .AsNoTracking()
-                .FirstOrDefaultAsync(d => d.EmployeeId == id);
-
+            entity.EmployeeDepartments = await _context.EmployeeDepartments
+                .Where(ed => ed.EmployeeId == id)
+                .ToListAsync();
             return entity;
         }
 

@@ -43,6 +43,7 @@ namespace Vudaco.Debits.Dtos
         public int? OvernightFee { get; set; }      // tiền ăn đêm
         public int? PenaltyFee { get; set; }        // tiền luật
         public int? GoodsFee { get; set; }          // lượng hàng về
+        public int? DeliveryPoint { get; set; }          // điểm giao hàng
         public int Status { get; set; }
         public string Data { get; set; }
         public string Bill { get; set; }

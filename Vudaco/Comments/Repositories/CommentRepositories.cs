@@ -8,6 +8,7 @@ using Vudaco.Comments.Dtos;
 using Vudaco.Comments.Models;
 using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
+using Vudaco.Shares.MysqlHelper;
 using Vudaco.Shares.SqlServerHelper;
 
 namespace Vudaco.Comments.Repositories
@@ -66,6 +67,19 @@ namespace Vudaco.Comments.Repositories
                         whereLikes: whereLikes,
                         dateRangeList: whereDateRange,
                         orderByList: orderByList,
+                        relations: new List<AdoRelation>
+                                {
+                                    new AdoRelation
+                                    {
+                                        Name = "employee",
+                                        Table = "employees",
+                                        Columns = new[] { "id","first_name","last_name","storage_id","deleted_at","avatar","phone","email","user_id"},
+                                        ParentKey = "employee_id",
+                                        ForeignKey = "id",
+                                        KeyName = "id",
+                                        IsCollection = false
+                                    },
+                                },
                         redisCache: _redis,
                         includeCount: false,
                         cancellationToken: cancellationToken

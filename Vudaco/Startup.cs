@@ -30,6 +30,7 @@ using Vudaco.PayrollPeriods;
 using Vudaco.SendMails;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using Vudaco.Notifys.Repositories;
 
 namespace Vudaco
 {
@@ -46,10 +47,16 @@ namespace Vudaco
         public void ConfigureServices(IServiceCollection services)
         {
             // Init Firebase
-            FirebaseApp.Create(new AppOptions()
+            if (FirebaseApp.DefaultInstance == null)
             {
-                Credential = GoogleCredential.FromFile("appvudaco-a5a65d4905b2.json")
-            });
+                FirebaseApp.Create(new AppOptions
+                {
+                    Credential = GoogleCredential.FromFile("appvudaco-a5a65d4905b2.json"),
+                    ProjectId = "appvudaco"
+                });
+            }
+            services.AddSingleton<IFcmQueue, FcmQueue>();
+            services.AddHostedService<FcmBackgroundWorker>();
             services.AddScoped<FcmService>();
             services.Configure<TelegramSettings>(Configuration.GetSection("Telegram"));
             services.AddCors(options =>

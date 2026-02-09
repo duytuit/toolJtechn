@@ -121,11 +121,11 @@ namespace Vudaco.ContractFiles.Repositories
                 // Cộng thêm 1 ngày cho ToDate
                 var toDateNext = FileInfoDetailDto.ToDate.Value.Date.AddDays(1);
                 // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
-                sql += $@" AND d.accounting_date >= '{FileInfoDetailDto.FromDate.Value:yyyy-MM-dd}' 
-                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                sql += $@" AND d.service_date >= '{FileInfoDetailDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.service_date < '{toDateNext:yyyy-MM-dd}'";
             }
 
-            sql += " ORDER BY d.service_date DESC";
+            sql += " ORDER BY d.service_date DESC, d.updated_at DESC";
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
             {
@@ -558,13 +558,19 @@ namespace Vudaco.ContractFiles.Repositories
                     whereSql += $" AND d.customer_detail_id = {DebitDto.CustomerDetailId}";
                 if (DebitDto.EmployeeDriverId > 0)
                     whereSql += $" AND d.employee_driver_id = {DebitDto.EmployeeDriverId}";
+                if (DebitDto.DriverStatus >= 0)
+                    whereSql += $" AND d.driver_status = {DebitDto.DriverStatus}";
+                if (!string.IsNullOrEmpty(DebitDto.Name))
+                    whereSql += $" AND d.name LIKE '%{DebitDto.Name}%'";
+                if (!string.IsNullOrEmpty(DebitDto.DispatchCode))
+                    whereSql += $" AND d.dispatch_code LIKE '%{DebitDto.DispatchCode}%'";    
 
                 if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
                 {
                     var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
                     whereSql += $@"
-                        AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}'
-                        AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'
+                        AND d.service_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}'
+                        AND d.service_date < '{toDateNext:yyyy-MM-dd}'
                     ";
                 }
 
@@ -578,7 +584,7 @@ namespace Vudaco.ContractFiles.Repositories
                         cf.updated_at AS cf_updated_at,
                         cf.updated_by AS cf_updated_by
                     {whereSql}
-                    ORDER BY d.service_date DESC
+                    ORDER BY d.service_date DESC, d.updated_at DESC
                     OFFSET {offset} ROWS
                     FETCH NEXT {pageSize} ROWS ONLY
                 ";

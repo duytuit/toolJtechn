@@ -14,11 +14,17 @@ namespace Vudaco.Notifys.Models
         [Required]
         [Column("storage_id")]
         public int StorageId { get; set; }
+        [Required]
+        [Column("post_id")]
+        public int PostId { get; set; }
 
         [Required]
         [Column("employee_id")]
         public int EmployeeId { get; set; }
 
+        [Column("screen")]
+        public string Screen { get; set; }
+        
         [Column("title")]
         [MaxLength(191)]
         public string? Title { get; set; }

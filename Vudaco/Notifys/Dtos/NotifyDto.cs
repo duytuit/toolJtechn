@@ -5,7 +5,9 @@ namespace Vudaco.Notifys.Dtos
     {
         public int Id { get; set; }
         public int StorageId { get; set; }
+        public int PostId { get; set; }
         public int EmployeeId { get; set; }
+        public string Screen { get; set; }
         public string? Title { get; set; }
         public string? Description { get; set; }
         public int Status { get; set; }

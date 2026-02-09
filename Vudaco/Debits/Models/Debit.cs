@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Vudaco.ContractFiles.Models;
+using Vudaco.Partners.Models;
 using Vudaco.Receipts.Models;
 
 namespace Vudaco.Debits.Models
@@ -98,6 +99,8 @@ namespace Vudaco.Debits.Models
 
         [Column("goods_fee")]
         public int? GoodsFee { get; set; }
+        [Column("delivery_point")]
+        public int? DeliveryPoint { get; set; }
 
         [Required]
         [Column("status")]
@@ -175,6 +178,10 @@ namespace Vudaco.Debits.Models
         public FileInfo FileInfo { get; set; }
         [NotMapped]
         public Receipt Receipt { get; set; }
+        [NotMapped]
+        public Partner CustomerDetail { get; set; }
+        [NotMapped]
+        public Partner SupplierDetail { get; set; }
 
     }
 }

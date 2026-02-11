@@ -93,7 +93,7 @@ namespace Vudaco.Employees.Controllers
             var employee = await _context.Employees.FirstOrDefaultAsync(u => u.StorageId == dto.StorageId && u.Phone == dto.Phone);
 
             if (employee != null) return ApiResponseResult<object>(false, "Số điện thoại nguoi dung đã tồn tại", null);   
-
+            var now = DateTime.Now;
             using var tran = await _context.Database.BeginTransactionAsync();
             try
             {
@@ -107,8 +107,8 @@ namespace Vudaco.Employees.Controllers
                         Email = dto.Email,
                         FirstName = dto.FirstName,
                         LastName = dto.LastName,
-                        CreatedAt = DateTime.Now,
-                        UpdatedAt = DateTime.Now,
+                        CreatedAt = now,
+                        UpdatedAt = now,
                         UpdatedBy = userId
                     };
 
@@ -126,13 +126,13 @@ namespace Vudaco.Employees.Controllers
                         LastName = dto.LastName,
                         StorageId = dto.StorageId,
                         CreatedBy = userId,
-                        BeginDateCompany = DateTime.Now,
+                        BeginDateCompany = now,
                         BaseSalary = dto.BaseSalary,
                         Phone = dto.Phone,
                         Email = dto.Email,
                         UserId = user.Id,
-                        CreatedAt = DateTime.Now,
-                        UpdatedAt = DateTime.Now,
+                        CreatedAt = now,
+                        UpdatedAt = now,
                         UpdatedBy = userId
                     };
                     _context.Employees.Add(employee);
@@ -156,6 +156,26 @@ namespace Vudaco.Employees.Controllers
                         }
                     }
                 }
+                if (dto.roleIds != null && dto.roleIds.Length > 0)
+                {
+                    foreach (var roleId in dto.roleIds)
+                    {
+                        var userRole = await _context.UserRoles.FirstOrDefaultAsync(u => u.RoleId == roleId && u.UserId == user.Id);
+                        if (userRole == null)
+                        {
+                            userRole = new UserRole
+                            {
+                                RoleId = roleId,
+                                UserId = user.Id,
+                                CreatedBy = userId,
+                                UpdatedBy = userId,
+                                CreatedAt = now,
+                                UpdatedAt = now
+                            };
+                            _context.UserRoles.Add(userRole);
+                        }
+                    }
+                }
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
                 return ApiResponseResult(true, "Thêm thành công", employee);
@@ -173,6 +193,7 @@ namespace Vudaco.Employees.Controllers
                 return ApiResponseResult<object>(false, "Id không hợp lệ", null);
 
             using var tran = await _context.Database.BeginTransactionAsync();
+            var now = DateTime.Now;
             try
             {
                 var employee = await _context.Employees.AsTracking()
@@ -202,7 +223,7 @@ namespace Vudaco.Employees.Controllers
                 user.FirstName = dto.FirstName;
                 user.LastName  = dto.LastName;
                 user.Email     = dto.Email;
-                user.UpdatedAt = DateTime.Now;
+                user.UpdatedAt = now;
                 user.UpdatedBy = userId;
 
 
@@ -214,7 +235,7 @@ namespace Vudaco.Employees.Controllers
                 employee.BaseSalary= dto.BaseSalary;
                 employee.Phone     = dto.Phone;
                 employee.Email     = dto.Email;
-                employee.UpdatedAt = DateTime.Now;
+                employee.UpdatedAt = now;
                 employee.UpdatedBy = userId;
 
                 if (dto.departmentIds != null && dto.departmentIds.Length > 0)
@@ -229,7 +250,7 @@ namespace Vudaco.Employees.Controllers
                         var existingDepartments = await _context.EmployeeDepartments.Where(ed => ed.EmployeeId == employee.Id).ToListAsync();
                         foreach (var dept in existingDepartments)
                         {
-                            dept.DeletedAt = DateTime.Now;
+                            dept.DeletedAt = now;
                             dept.DeletedBy = userId;
                             _context.EmployeeDepartments.Update(dept);    
                         }
@@ -244,6 +265,39 @@ namespace Vudaco.Employees.Controllers
                                 StorageId = employee.StorageId,
                             };
                             _context.EmployeeDepartments.Add(employeeDepartment);
+                        }
+                    }
+                }
+                if (dto.roleIds != null && dto.roleIds.Length > 0)
+                {
+                    var check_userRole = await _context.UserRoles
+                        .Where(ed => ed.UserId == user.Id)
+                        .Where(ed => dto.roleIds.Contains(ed.RoleId))
+                        .ToListAsync();
+                    if (check_userRole.Count != dto.roleIds.Length)
+                    {
+                        // Xóa các role hiện tại của nhân viên
+                        var userRoles = await _context.UserRoles.Where(ed => ed.UserId == user.Id).ToListAsync();
+                        foreach (var userRole in userRoles)
+                        {
+                            userRole.DeletedAt = now;
+                            userRole.DeletedBy = userId;
+                            _context.UserRoles.Update(userRole);    
+                        }
+
+                        // Thêm các role mới
+                        foreach (var role in dto.roleIds)
+                        {
+                           var _userRole = new UserRole
+                            {
+                                RoleId = role,
+                                UserId = user.Id,
+                                CreatedBy = userId,
+                                UpdatedBy = userId,
+                                CreatedAt = now,
+                                UpdatedAt = now
+                            };
+                            _context.UserRoles.Add(_userRole);
                         }
                     }
                 }

@@ -10,6 +10,7 @@ using Vudaco.Auth.Dtos;
 using Vudaco.Auth.Models;
 using Vudaco.Auth.Repositories;
 using Vudaco.Controllers;
+using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
 using Vudaco.Shares.Connects;
 
@@ -22,10 +23,12 @@ namespace Vudaco.Auth.Controllers
         private readonly IPermissionRepository repoPermission;
         private readonly ILogger<PermissionController> _logger;
         private readonly VudacoDBContext _context;
+        private readonly RedisService _redis;
         public int userId => (int)HttpContext.Items["UserId"];
-        public PermissionController(ILogger<PermissionController> logger, IPermissionRepository repoPermission, VudacoDBContext context)
+        public PermissionController(ILogger<PermissionController> logger,RedisService redis, IPermissionRepository repoPermission, VudacoDBContext context)
         {
             _logger = logger;
+            _redis = redis;
             this.repoPermission = repoPermission;
             _context = context;
         }
@@ -152,11 +155,21 @@ namespace Vudaco.Auth.Controllers
 
                     _context.RolePermissions.Add(rolePermission);
                 }
-
+                var pattern = $"token:*";
+                var keys = _redis.GetKeysByPattern(pattern);
+                foreach (var key in keys)
+                {
+                    await _redis.RemoveAsync(key);
+                }
+                // 2. Xóa DB
+                var tokens = await _context.UserTokens.Where(t => t.Type != "app" && t.UserId != userId).ToListAsync();
+                if (tokens.Any())
+                {
+                    _context.UserTokens.RemoveRange(tokens);
+                }
                 // 6) Save cuối
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
-
                 return ApiResponseResult(true, "Cập nhật nhóm quyền thành công", entity);
             }
             catch (DbUpdateException ex)

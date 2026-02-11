@@ -39,6 +39,7 @@ namespace Vudaco.Employees.Dtos
         public int? UserId { get; set; }
         public string StorageIds { get; set; }
         public int[] departmentIds { get; set; }
+        public int[] roleIds { get; set; }
         public EmployeeDepartment? EmployeeDepartment { get; set; } = null;
     }
 }

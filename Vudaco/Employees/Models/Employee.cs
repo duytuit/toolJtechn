@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Vudaco.Auth.Models;
 using Vudaco.Departments.Models;
 
 namespace Vudaco.Employees.Models
@@ -112,6 +113,8 @@ namespace Vudaco.Employees.Models
         public int? UserId { get; set; }
         [NotMapped]
         public List<EmployeeDepartment> EmployeeDepartments { get; set; }
+        [NotMapped]
+        public List<UserRole> UserRoles { get; set; }
         [NotMapped]
         public List<Department> Departments { get; set; }
         [NotMapped]

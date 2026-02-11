@@ -130,6 +130,9 @@ namespace Vudaco.Employees.Repositories
             entity.EmployeeDepartments = await _context.EmployeeDepartments
                 .Where(ed => ed.EmployeeId == id)
                 .ToListAsync();
+            entity.UserRoles = await _context.UserRoles
+                .Where(ed => ed.UserId == entity.UserId)
+                .ToListAsync();
             return entity;
         }
 

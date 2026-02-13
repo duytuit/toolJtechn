@@ -205,8 +205,10 @@ namespace Vudaco.Receipts.Controllers
                     int conlai_dv = item.GetProperty("conlai_dv").GetInt32();
                     int conlai_ch = item.GetProperty("conlai_ch").GetInt32();
                     int price = item.GetProperty("price").GetInt32();
+                    int vat = item.GetProperty("vat").GetInt32();
+                    int price_total = (int)Math.Round(price * (1 + vat / 100m));
                     int receipt_total = item.GetProperty("receipt_total").GetInt32();
-                    if (price - receipt_total <= 0)
+                    if (price_total - receipt_total <= 0)
                     {
                         continue;
                     }

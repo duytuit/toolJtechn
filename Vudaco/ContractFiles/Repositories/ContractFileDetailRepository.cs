@@ -88,6 +88,9 @@ namespace Vudaco.ContractFiles.Repositories
             var sql = $@"
                     SELECT 
                         d.*,
+                        CAST(ISNULL(rdt_total.amount, 0) AS INT) AS receipt_amount,
+                        CAST(ISNULL(rdt_total.vat, 0) AS INT) AS receipt_vat,
+                        CAST(ISNULL(rdt_total.total, 0) AS INT) AS receipt_total,
                         cf.note AS cf_note,
                         cf.status AS cf_status,
                         cf.status_confirm AS cf_status_confirm,
@@ -101,6 +104,24 @@ namespace Vudaco.ContractFiles.Repositories
                         ON p.id = d.customer_detail_id
                     LEFT JOIN confirm_file_infos cf 
                          ON d.id = cf.debit_id
+                      -- ✅ Tổng receipts
+                    OUTER APPLY (
+                            SELECT 
+                                    SUM(rdt.amount) AS amount,
+                                    MAX(rdt.vat) AS vat,
+                                    SUM(rdt.amount * (rdt.vat / 100.0)) + SUM(rdt.amount) AS total
+                            FROM receipts r
+                            LEFT JOIN income_expense_categorys iecat
+                            ON iecat.id = r.income_expense_category_id
+                            LEFT JOIN receipt_details rdt 
+                                    ON rdt.receipt_id = r.id
+                            WHERE 
+                                    d.id = r.debit_driver_id 
+                                    AND iecat.id = 38
+                                    AND (r.status IS NULL OR r.status = 1)
+                                    AND r.deleted_at IS NULL
+                                    AND rdt.deleted_at IS NULL
+                    ) AS rdt_total
                     WHERE 
                         d.type = 1
                         AND p.status = 1
@@ -126,6 +147,7 @@ namespace Vudaco.ContractFiles.Repositories
             }
 
             sql += " ORDER BY d.service_date DESC, d.updated_at DESC";
+            // _ = Task.Run(() => Helper.SendTelegramMessageAsync(sql));
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
             {

@@ -119,6 +119,17 @@ namespace Vudaco.Receipts.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
+        [HttpGet("GetPhiDiDuongCuaLaiXe")]
+        public async Task<IActionResult> GetPhiDiDuongCuaLaiXeAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] ReceiptDto ReceiptDto = null)
+        {
+            // test
+            var result = await _repoReceipt.GetPhiDiDuongCuaLaiXeAsync(ReceiptDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
         [HttpGet("GetSoDuDauKyAsync")]
         public async Task<IActionResult> GetSoDuDauKyAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] ReceiptDto ReceiptDto = null)
         {
@@ -694,6 +705,71 @@ namespace Vudaco.Receipts.Controllers
                         _db.UpsertFromObject("file_infos", file_infos_object,"id");
                     }
                 }
+                return ApiResponseResult(true, "Thêm thành công", entity);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
+            }
+        }
+        [HttpPost]
+        [Route("create/yeucauchilaixe")]
+        public async Task<IActionResult> CreateYeuCauChiLaiXe([FromBody] ReceiptYeuCauChiLaiXeDto ReceiptYeuCauChiLaiXeDto)
+        {
+            if (ReceiptYeuCauChiLaiXeDto.Amount <= 0 )
+                return ApiResponseResult<object>(false, "Không còn phát sinh phí đi đường của lái xe", null);
+            var _receipts = await _context.Receipts.FirstOrDefaultAsync(p => p.DebitDriverId == ReceiptYeuCauChiLaiXeDto.DebitId && p.Status == 0);
+            if (_receipts != null)
+                return ApiResponseResult<object>(false,"Phiếu "+_receipts.CodeReceipt+ " Đang chờ duyệt. Vui lòng liên hệ quản lý để duyệt", null);
+            using var tran = await _context.Database.BeginTransactionAsync();
+            var conn = _context.Database.GetDbConnection();
+            try
+            {
+                var now = DateTime.Now;
+                var PrefixCode = "PC"+ReceiptYeuCauChiLaiXeDto.AccountingDate.ToString("yyMM");
+                var code_receipt = await SqlServerHelpers.GenerateCodeEfAsync(conn, tran.GetDbTransaction(), "receipts", "code_receipt", ReceiptYeuCauChiLaiXeDto.StorageId, PrefixCode , 4);
+
+                var entity = new Receipt
+                {
+                    AccountingDate = ReceiptYeuCauChiLaiXeDto.AccountingDate,
+                    StorageId = ReceiptYeuCauChiLaiXeDto.StorageId,
+                    CodeReceipt = code_receipt,
+                    EmployeeId = ReceiptYeuCauChiLaiXeDto.EmployeeId,
+                    Object = ReceiptRepositories.DoiTuongNV,
+                    ObjectId = ReceiptYeuCauChiLaiXeDto.EmployeeId,
+                    Bill = ReceiptYeuCauChiLaiXeDto.Bill,
+                    Note = ReceiptYeuCauChiLaiXeDto.Note,
+                    Description =  ReceiptYeuCauChiLaiXeDto.Description,
+                    FormOfPayment = ReceiptYeuCauChiLaiXeDto.FormOfPayment,
+                    TypeReceipt = ReceiptRepositories.PhiDiDuongCuaLaiXe,
+                    DebitDriverId = ReceiptYeuCauChiLaiXeDto.DebitId,
+                    IncomeExpenseCategoryId = IncomeExpenseCategoryRepository.PhiDiDuongCuaLaiXe,
+                    Data = ReceiptYeuCauChiLaiXeDto.Data,
+                    Status = 0,
+                    CreatedBy = userId,
+                    CreatedAt = now,
+                    UpdatedAt = now,
+                    UpdatedBy = userId,
+                };
+
+                _context.Receipts.Add(entity);
+                await _context.SaveChangesAsync();
+                var entity_detail = new ReceiptDetail
+                {
+                    ReceiptId = entity.Id,
+                    StorageId = ReceiptYeuCauChiLaiXeDto.StorageId,
+                    AccountingDate = ReceiptYeuCauChiLaiXeDto.AccountingDate,
+                    Amount = ReceiptYeuCauChiLaiXeDto.Amount,
+                    Vat = ReceiptYeuCauChiLaiXeDto.Vat,
+                    CreatedBy = userId,
+                    CreatedAt = now,
+                    UpdatedAt = now
+
+                };
+                _context.ReceiptDetails.Add(entity_detail);
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
                 return ApiResponseResult(true, "Thêm thành công", entity);
             }
             catch (DbUpdateException ex)

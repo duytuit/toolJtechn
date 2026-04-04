@@ -118,7 +118,8 @@ namespace Vudaco.Debits.Models
 
         [Column("data")]
         public string Data { get; set; }
-
+        [Column("transportation_cost")]
+        public string TransportationCost { get; set; }
         [Column("note")]
         public string Note { get; set; }
         [Column("purchase_note")]

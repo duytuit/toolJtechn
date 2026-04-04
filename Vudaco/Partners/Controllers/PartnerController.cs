@@ -12,6 +12,7 @@ using Vudaco.Controllers;
 using Vudaco.Partners.Dtos;
 using Vudaco.Partners.Models;
 using Vudaco.Partners.Repositories;
+using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
 using Vudaco.Shares.SqlServerHelper;
 
@@ -26,13 +27,15 @@ namespace Vudaco.Partners.Controllers
         private readonly ILogger<PartnerController> _logger;
         private readonly VudacoDBContext _context;
         private readonly IConfiguration _configuration;
+        private readonly RedisService _redis;
         public int userId => (int)HttpContext.Items["UserId"];
-        public PartnerController(ILogger<PartnerController> logger,IConfiguration configuration, IPartnerRepository repoPartner, IPartnerDetailRepository repoPartnerDetail, VudacoDBContext context)
+        public PartnerController(ILogger<PartnerController> logger,RedisService redis,IConfiguration configuration, IPartnerRepository repoPartner, IPartnerDetailRepository repoPartnerDetail, VudacoDBContext context)
         {
             _logger = logger;
             _repoPartnerDetail = repoPartnerDetail;
             _repoPartner = repoPartner;
             _context = context;
+            _redis = redis;
             _configuration = configuration;
         }
         [HttpGet]
@@ -94,37 +97,37 @@ namespace Vudaco.Partners.Controllers
                 p.StorageId == dto.StorageId))
                 return ApiResponseResult<object>(false, "Tên viết tắt đối tác đã tồn tại trong kho này", null);
 
-            // Check trùng Phone nếu có nhập
-            if (!string.IsNullOrWhiteSpace(dto.Phone))
+            // Check trùng TaxCode nếu có nhập
+            if (!string.IsNullOrWhiteSpace(dto.TaxCode))
             {
                 if (await _context.Partners.AnyAsync(p =>
-                    p.Phone == dto.Phone &&
+                    p.TaxCode == dto.TaxCode &&
                     p.StorageId == dto.StorageId))
-                    return ApiResponseResult<object>(false, "Số điện thoại đã tồn tại trong kho này", null);
+                    return ApiResponseResult<object>(false, "Mã số thuế đã tồn tại trong kho này", null);
             }
 
             using var tran = await _context.Database.BeginTransactionAsync();
             try
             {
-                 var user = await _context.Users
-                .AsTracking()
-                .FirstOrDefaultAsync(p => p.Username == dto.Phone);
-                if (user == null)
-                {
-                       // ====== CREATE USER ======
-                    user = new User
-                    {
-                        Username  = dto.Phone,
-                        Password  = !string.IsNullOrWhiteSpace(dto.Password) ? BCrypt.Net.BCrypt.HashPassword(dto.Password) : BCrypt.Net.BCrypt.HashPassword(dto.Phone),
-                        Email     = dto.Email,
-                        LastName  = dto.Abbreviation,
-                        CreatedAt = DateTime.Now,
-                        UpdatedAt = DateTime.Now,
-                        UpdatedBy = userId
-                    };
-                    _context.Users.Add(user);
-                     await _context.SaveChangesAsync(); // cần để lấy user.Id
-                }
+                //  var user = await _context.Users
+                // .AsTracking()
+                // .FirstOrDefaultAsync(p => p.Username == dto.Phone);
+                // if (user == null)
+                // {
+                //        // ====== CREATE USER ======
+                //     user = new User
+                //     {
+                //         Username  = dto.Phone,
+                //         Password  = !string.IsNullOrWhiteSpace(dto.Password) ? BCrypt.Net.BCrypt.HashPassword(dto.Password) : BCrypt.Net.BCrypt.HashPassword(dto.Phone),
+                //         Email     = dto.Email,
+                //         LastName  = dto.Abbreviation,
+                //         CreatedAt = DateTime.Now,
+                //         UpdatedAt = DateTime.Now,
+                //         UpdatedBy = userId
+                //     };
+                //     _context.Users.Add(user);
+                //      await _context.SaveChangesAsync(); // cần để lấy user.Id
+                // }
                 // ====== CREATE PARTNER ======
                 var partner = new Partner
                 {
@@ -133,8 +136,8 @@ namespace Vudaco.Partners.Controllers
                     StorageId = dto.StorageId,
                     Address = dto.Address,
                     TaxCode = dto.TaxCode,
-                    Phone = dto.Phone,
-                    Email = dto.Email,
+                    // Phone = dto.Phone,
+                    // Email = dto.Email,
                     //BankAccount = dto.BankAccount,
                     //AllowedDebtDays = dto.AllowedDebtDays, // null allowed
                     //MaxDebt = dto.MaxDebt,                 // null allowed
@@ -143,7 +146,7 @@ namespace Vudaco.Partners.Controllers
                     CreatedBy = userId,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now,
-                    UserId = user.Id
+                    // UserId = user.Id
                 };
                 _context.Partners.Add(partner);
                 await _context.SaveChangesAsync();   
@@ -196,12 +199,12 @@ namespace Vudaco.Partners.Controllers
             if (partner == null)
                 return ApiResponseResult<object>(false, "Không tìm thấy đối tác", null);
 
-            var user = await _context.Users
-                .AsTracking()
-                .FirstOrDefaultAsync(p => p.Id == partner.UserId);
+            // var user = await _context.Users
+            //     .AsTracking()
+            //     .FirstOrDefaultAsync(p => p.Id == partner.UserId);
 
-            if (user == null)
-                return ApiResponseResult<object>(false, "Không tìm thấy tài khoản đối tác", null);
+            // if (user == null)
+            //     return ApiResponseResult<object>(false, "Không tìm thấy tài khoản đối tác", null);
 
             // ========== VALIDATE giống Create ==========
 
@@ -221,31 +224,31 @@ namespace Vudaco.Partners.Controllers
                     p.Id != dto.Id))
                 return ApiResponseResult<object>(false, "Tên đối tác đã tồn tại trong kho này", null);
 
-            // Check Phone (trong Partner + trong User)
-            if (!string.IsNullOrWhiteSpace(dto.Phone))
+            // Check TaxCode (trong Partner + trong User)
+            if (!string.IsNullOrWhiteSpace(dto.TaxCode))
             {
                 if (await _context.Partners.AnyAsync(p =>
-                    p.Phone == dto.Phone &&
+                    p.TaxCode == dto.TaxCode &&
                     p.StorageId == partner.StorageId &&
                     p.Id != dto.Id))
-                    return ApiResponseResult<object>(false, "Số điện thoại đã tồn tại trong kho này", null);
+                    return ApiResponseResult<object>(false, "Mã số thuế đã tồn tại trong kho này", null);
 
-                if (await _context.Users.AnyAsync(u =>
-                    u.Username == dto.Phone &&
-                    u.Id != partner.UserId))
-                    return ApiResponseResult<object>(false, "Số điện thoại đã được dùng làm username", null);
+                // if (await _context.Users.AnyAsync(u =>
+                //     u.Username == dto.Phone &&
+                //     u.Id != partner.UserId))
+                //     return ApiResponseResult<object>(false, "Số điện thoại đã được dùng làm username", null);
             }
 
             using var tran = await _context.Database.BeginTransactionAsync();
             try
             {
                 // ========== UPDATE PARTNER ==========
-                partner.Code          = dto.Code;
+                // partner.Code          = dto.Code;
                 partner.Name          = dto.Name;
                 partner.Address       = dto.Address;
                 partner.TaxCode       = dto.TaxCode;
-                partner.Phone         = dto.Phone;
-                partner.Email         = dto.Email;
+                // partner.Phone         = dto.Phone;
+                // partner.Email         = dto.Email;
                 partner.BankAccount   = dto.BankAccount;
                 partner.Abbreviation  = dto.Abbreviation;
                 partner.AllowedDebtDays = dto.AllowedDebtDays;
@@ -256,14 +259,14 @@ namespace Vudaco.Partners.Controllers
 
                 // ========== UPDATE USER nếu đổi phone/email ==========
 
-                if (!string.IsNullOrWhiteSpace(dto.Password))
-                    user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+                // if (!string.IsNullOrWhiteSpace(dto.Password))
+                //     user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
                     
-                user.Username = dto.Phone;  
-                user.Email = dto.Email;
-                user.LastName = dto.Abbreviation;
-                user.UpdatedAt = DateTime.Now;
-                user.UpdatedBy = userId;
+                // user.Username = dto.Phone;  
+                // user.Email = dto.Email;
+                // user.LastName = dto.Abbreviation;
+                // user.UpdatedAt = DateTime.Now;
+                // user.UpdatedBy = userId;
 
                 if (dto.CustomerId > 0)
                 {
@@ -288,7 +291,12 @@ namespace Vudaco.Partners.Controllers
 
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
-
+                var pattern = $"GetPartnerInfoById*";
+                var keys = _redis.GetKeysByPattern(pattern);
+                foreach (var key in keys)
+                {
+                    await _redis.RemoveAsync(key);
+                }
                 return ApiResponseResult(true, "Cập nhật đối tác thành công", partner);
             }
             catch (Exception ex)

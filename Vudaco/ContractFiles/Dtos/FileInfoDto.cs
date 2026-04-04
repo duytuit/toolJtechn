@@ -10,6 +10,10 @@ namespace Vudaco.ContractFiles.Dtos
         public int Id { get; set; }
         public int? CustomerDetailId { get; set; }
         public int StorageId { get; set; }
+        public DateTime? NgayKeoCont { get; set; }
+        public DateTime? NgayHetHan { get; set; }
+        public int HasDateCont { get; set; }
+        public int HasExpiryDateCont { get; set; }
         public DateTime AccountingDate { get; set; }
         public string FileNumber { get; set; }
         public string Declaration { get; set; }

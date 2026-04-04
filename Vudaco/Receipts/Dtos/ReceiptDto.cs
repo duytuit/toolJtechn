@@ -18,6 +18,7 @@ namespace Vudaco.Receipts.Dtos
         public int? OffsetId { get; set; }
         public int? DebitReceivableId { get; set; }
         public int? PurchaseDebitId { get; set; }
+        public int? DebitDriverId { get; set; }
         public int? EmployeeId { get; set; }
         public int? Type { get; set; }
         public DateTime AccountingDate { get; set; }

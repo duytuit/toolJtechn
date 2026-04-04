@@ -64,6 +64,8 @@ namespace Vudaco.Receipts.Models
 
         [Column("offset_id")]
         public int? OffsetId { get; set; }
+        [Column("debit_driver_id")]
+        public int? DebitDriverId { get; set; }
         [Column("debit_receivable_id")]
         public int? DebitReceivableId { get; set; }
         [Column("purchase_debit_id")]

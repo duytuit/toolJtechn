@@ -39,21 +39,61 @@ namespace Vudaco.Categorys.Controllers
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
         [HttpPost]
-        [Route("create")]
-        public async Task<IActionResult> Create([FromBody] BankDto BankDto)
+        [Route("createOrUpdate")]
+        public async Task<IActionResult> CreateOrUpdate([FromBody] BankDto bankDto)
         {
-            // Check trùng Name
-            var entity = await _context.Banks.FirstOrDefaultAsync(p => p.AccountNumber == BankDto.AccountNumber);
-            if (entity != null)
-                return ApiResponseResult<object>(false, "Tên dữ liệu đã tồn tại", null);
-            var Bank = new Bank
+            var now = DateTime.Now;
+
+            // CHECK TRÙNG AccountNumber (trừ chính nó khi update)
+            var existed = await _context.Banks
+                .FirstOrDefaultAsync(x => 
+                    x.AccountNumber == bankDto.AccountNumber 
+                    && x.Id != bankDto.Id);
+
+            if (existed != null)
+                return ApiResponseResult<object>(false, "Số tài khoản đã tồn tại", null);
+
+            Bank entity;
+
+            if (bankDto.Id > 0)
             {
-                CreatedBy = userId,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
-            };
-            entity = await _repoBankRepository.CreateAsync(Bank);
-            return ApiResponseResult(true, "Thêm thành công", entity);
+                // UPDATE
+                entity = await _context.Banks.FindAsync(bankDto.Id);
+                if (entity == null)
+                    return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+
+                entity.AccountNumber = bankDto.AccountNumber;
+                entity.AccountHolder = bankDto.AccountHolder;
+                entity.BankName = bankDto.BankName;
+                entity.BranchName = bankDto.BranchName;
+                entity.StorageId = bankDto.StorageId;
+                entity.UpdatedAt = now;
+                entity.UpdatedBy = userId; // nếu có
+
+                await _context.SaveChangesAsync();
+
+                return ApiResponseResult(true, "Cập nhật thành công", entity);
+            }
+            else
+            {
+                // CREATE
+                entity = new Bank
+                {
+                    AccountNumber = bankDto.AccountNumber,
+                    AccountHolder = bankDto.AccountHolder,
+                    BankName = bankDto.BankName,
+                    BranchName = bankDto.BranchName,
+                    StorageId = bankDto.StorageId,
+                    CreatedBy = userId,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                };
+
+                await _context.Banks.AddAsync(entity);
+                await _context.SaveChangesAsync();
+
+                return ApiResponseResult(true, "Thêm thành công", entity);
+            }
         }
        
         [HttpPost("delete")]

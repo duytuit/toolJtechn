@@ -58,6 +58,7 @@ namespace Vudaco.Auth.Repositories
                 sql += $@" AND ur.user_id = {RolePermissionDto.UserId}";
             }
             sql += $@" GROUP BY rp.permission_id,p.name,p.permission";
+            // _ = Task.Run(() => Helper.SendTelegramMessageAsync(sql));
             return await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
         }
 

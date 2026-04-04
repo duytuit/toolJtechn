@@ -74,7 +74,7 @@ namespace asyncDataSoltec
             // timer2
             // 
             this.timer2.Enabled = true;
-            this.timer2.Interval = 1860000;
+            this.timer2.Interval = 900000;
             this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
             // 
             // notifyIcon1

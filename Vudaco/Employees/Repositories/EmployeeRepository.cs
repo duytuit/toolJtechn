@@ -131,7 +131,7 @@ namespace Vudaco.Employees.Repositories
                 .Where(ed => ed.EmployeeId == id)
                 .ToListAsync();
             entity.UserRoles = await _context.UserRoles
-                .Where(ed => ed.UserId == entity.UserId)
+                .Where(ed => ed.UserId == entity.UserId && ed.StorageId == entity.StorageId)
                 .ToListAsync();
             return entity;
         }

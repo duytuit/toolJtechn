@@ -544,6 +544,29 @@ namespace Vudaco.ContractFiles.Controllers
             }
 
         }
+        [HttpPost("updateVoLuuCont")]
+        public async Task<IActionResult> UpdateVoLuuCont([FromBody] ConfirmFileInfoDto dto)
+        {
+            if (dto == null || dto.Ids == null || !dto.Ids.Any())
+                return ApiResponseResult<object>(false, "Danh sách Id không hợp lệ", null);
+
+            var entities = await _context.FileInfos
+                .Where(x => dto.Ids.Contains(x.Id))
+                .ToListAsync();
+
+            if (!entities.Any())
+                return ApiResponseResult<object>(false, "Không tìm thấy file", null);
+
+            foreach (var item in entities)
+            {
+                item.NgayHetHan = dto.NgayHetHan;
+                item.NgayKeoCont = dto.NgayKeoCont;
+            }
+
+            await _context.SaveChangesAsync(); // 🔥 QUAN TRỌNG
+
+            return ApiResponseResult(true, "Cập nhật file thành công", entities);
+        }
         [HttpPost("update")]
         public async Task<IActionResult> Update([FromBody] FileInfoDto dto)
         {
@@ -622,6 +645,34 @@ namespace Vudaco.ContractFiles.Controllers
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
                 return ApiResponseResult(true, "Cập nhật file thành công", entity);
+            }
+            catch (DbUpdateException ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
+            }
+        }
+        [HttpPost("updateNullVoLuuCont")]
+        public async Task<IActionResult> updateNullVoLuuCont([FromBody] FileInfoDto FileInfoDto)
+        {
+            using var tran = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                if (FileInfoDto.Id <= 0)
+                {
+                    return ApiResponseResult<object>(false, "Id không tồn tại", null);
+                }
+                var FileInfo = _context.FileInfos.Find(FileInfoDto.Id);
+                if (FileInfo == null)
+                {
+                    return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+                }
+                FileInfo.NgayKeoCont = null;
+                FileInfo.NgayHetHan = null;
+                _context.FileInfos.Update(FileInfo);
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+                return ApiResponseResult<object>(true, "Xóa thành công", null);
             }
             catch (DbUpdateException ex)
             {

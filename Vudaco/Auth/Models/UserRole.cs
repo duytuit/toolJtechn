@@ -19,6 +19,9 @@ namespace Vudaco.Auth.Models
         [Required]
         [Column("role_id")]
         public int RoleId { get; set; }
+        [Required]
+        [Column("storage_id")]
+        public int StorageId { get; set; }
 
         [Column("created_by")]
         public int? CreatedBy { get; set; }

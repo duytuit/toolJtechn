@@ -221,6 +221,7 @@ namespace Vudaco.ContractFiles.Repositories
         }
         public async Task<PaginatedResultReact<object>> GetObjectTaskAsync(FileInfoDto FileInfo, int page, int pageSize, CancellationToken cancellationToken)
         {
+            List<(string Sql, object[] Params)> whereCustoms = new();
             var whereEquals = new Dictionary<string, object>();
             var whereLikes = new Dictionary<string, string>();
             var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
@@ -231,16 +232,26 @@ namespace Vudaco.ContractFiles.Repositories
                 whereEquals["customer_detail_id"] = FileInfo.CustomerDetailId;
             if (FileInfo.FromDate.HasValue && FileInfo.ToDate.HasValue)
                 whereDateRange.Add(("accounting_date", FileInfo.FromDate.Value, FileInfo.ToDate.Value));
+            if (FileInfo.HasDateCont == 1)
+                whereCustoms.Add(("ngay_keo_cont IS NOT NULL", Array.Empty<object>()));
+            if (FileInfo.HasExpiryDateCont == 1)
+                whereCustoms.Add(("ngay_het_han IS NOT NULL", Array.Empty<object>()));
+            if (FileInfo.HasDateCont == 2)
+                whereCustoms.Add(("ngay_keo_cont IS NULL", Array.Empty<object>()));
+            if (FileInfo.HasExpiryDateCont == 2)
+                whereCustoms.Add(("ngay_het_han IS NULL", Array.Empty<object>()));
+
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "file_infos",
-                        new[] { "id", "customer_detail_id", "accounting_date", "storage_id", "file_number", "declaration", "bill", "quantity", "container_code", "sales", "type", "feature", "declaration_quantity", "declaration_type", "business", "occurrence", "note", "created_by", "updated_by", "deleted_by", "deleted_at", "created_at", "updated_at", },
+                        new[] { "id", "customer_detail_id", "accounting_date","ngay_keo_cont","ngay_het_han", "storage_id", "file_number", "declaration", "bill", "quantity", "container_code", "sales", "type", "feature", "declaration_quantity", "declaration_type", "business", "occurrence", "note", "created_by", "updated_by", "deleted_by", "deleted_at", "created_at", "updated_at", },
                         offset: null,
                         limit: null,
                         whereEquals: whereEquals,
                         whereLikes: whereLikes,
                         dateRangeList: whereDateRange,
                         orderByList: orderByList,
+                        whereCustom:whereCustoms,
                         relations: new List<AdoRelation>
                                 {
                                     new AdoRelation
@@ -642,6 +653,16 @@ namespace Vudaco.ContractFiles.Repositories
             };
             whereEquals?.Clear(); whereLikes?.Clear(); whereDateRange?.Clear();
             return _results;
+        }
+
+        public Task<PaginatedResultReact<object>> GetObjectNoVoLuuBai(FileInfoDto FileInfo, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<PaginatedResultReact<object>> GetObjectHasVoLuuBai(FileInfoDto FileInfo, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }

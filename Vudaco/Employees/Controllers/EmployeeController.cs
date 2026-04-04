@@ -160,13 +160,14 @@ namespace Vudaco.Employees.Controllers
                 {
                     foreach (var roleId in dto.roleIds)
                     {
-                        var userRole = await _context.UserRoles.FirstOrDefaultAsync(u => u.RoleId == roleId && u.UserId == user.Id);
+                        var userRole = await _context.UserRoles.FirstOrDefaultAsync(u => u.RoleId == roleId && u.UserId == user.Id && u.StorageId == employee.StorageId);
                         if (userRole == null)
                         {
                             userRole = new UserRole
                             {
                                 RoleId = roleId,
                                 UserId = user.Id,
+                                StorageId = employee.StorageId,
                                 CreatedBy = userId,
                                 UpdatedBy = userId,
                                 CreatedAt = now,
@@ -211,7 +212,7 @@ namespace Vudaco.Employees.Controllers
                 if (await _context.Users.AnyAsync(u => u.Username == dto.Phone && u.Id != user.Id))
                     return ApiResponseResult<object>(false, "Số điện thoại đã được dùng làm username của user khác", null);
 
-                if (await _context.Employees.AnyAsync(e => e.Phone == dto.Phone && e.Id != employee.Id))
+                if (await _context.Employees.AnyAsync(e => e.Phone == dto.Phone && e.Id != employee.Id && e.StorageId == dto.StorageId))
                     return ApiResponseResult<object>(false, "Số điện thoại đã tồn tại ở nhân viên khác", null);
 
 
@@ -271,13 +272,13 @@ namespace Vudaco.Employees.Controllers
                 if (dto.roleIds != null && dto.roleIds.Length > 0)
                 {
                     var check_userRole = await _context.UserRoles
-                        .Where(ed => ed.UserId == user.Id)
+                        .Where(ed => ed.UserId == user.Id && ed.StorageId == employee.StorageId)
                         .Where(ed => dto.roleIds.Contains(ed.RoleId))
                         .ToListAsync();
                     if (check_userRole.Count != dto.roleIds.Length)
                     {
                         // Xóa các role hiện tại của nhân viên
-                        var userRoles = await _context.UserRoles.Where(ed => ed.UserId == user.Id).ToListAsync();
+                        var userRoles = await _context.UserRoles.Where(ed => ed.UserId == user.Id && ed.StorageId == employee.StorageId).ToListAsync();
                         foreach (var userRole in userRoles)
                         {
                             userRole.DeletedAt = now;
@@ -292,6 +293,7 @@ namespace Vudaco.Employees.Controllers
                             {
                                 RoleId = role,
                                 UserId = user.Id,
+                                StorageId = employee.StorageId,
                                 CreatedBy = userId,
                                 UpdatedBy = userId,
                                 CreatedAt = now,

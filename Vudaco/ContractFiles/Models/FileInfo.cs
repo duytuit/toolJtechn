@@ -22,17 +22,21 @@ namespace Vudaco.ContractFiles.Models
         [Required]
         [Column("accounting_date")]
         public DateTime AccountingDate { get; set; }
+        [Column("ngay_keo_cont")]
+        public DateTime? NgayKeoCont { get; set; }
+        [Column("ngay_het_han")]
+        public DateTime? NgayHetHan { get; set; }
 
         [Required]
         [MaxLength(50)]
         [Column("file_number")]
         public string FileNumber { get; set; }
 
-        [MaxLength(50)]
+        [MaxLength(200)]
         [Column("declaration")]
         public string Declaration { get; set; }
 
-        [MaxLength(50)]
+        [MaxLength(200)]
         [Column("bill")]
         public string Bill { get; set; }
 

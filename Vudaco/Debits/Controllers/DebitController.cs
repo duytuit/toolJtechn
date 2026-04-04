@@ -669,15 +669,15 @@ namespace Vudaco.Debits.Controllers
               try
               {
                 // ==== LẤY THÔNG TIN KHÁCH HÀNG ====
+               
                 var kh = await _context.PartnerDetails.FirstOrDefaultAsync(x => x.Id == DebitDto.CustomerDetailId);
                 if (kh == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu khách hàng", null);
-
+               
                 var info_kh = await _context.Partners.FirstOrDefaultAsync(x => x.Id == kh.PartnerId);
                 if (info_kh == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu khách hàng", null);
 
                 var result = await _repoDebit.GetObjectDebitChiTietKHAsync(DebitDto, page, pageSize, cancellationToken);
                 if (result == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
-
                 // Chuẩn hóa dữ liệu về dynamic để đọc property
                 var data = result.Data.Select(x => (dynamic)x);
 
@@ -691,7 +691,7 @@ namespace Vudaco.Debits.Controllers
                     Items = g.ToList()
                 })
                 .ToList();
-
+                //return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", groupedData);
                 // Dữ liệu không có file
                 var groupedDataNoFile = data
                     .Where(x => x.file_info_id == null)
@@ -905,7 +905,9 @@ namespace Vudaco.Debits.Controllers
                     {
                         foreach (var item in group.Items)
                         {
-                              // Tính giá
+                            //check_error= item.toString();
+                            //return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", item);
+                            // Tính giá
                             decimal price_dv = (decimal)item.price + (decimal)item.price_com;
                             decimal price = (decimal)item.price;
 
@@ -1396,6 +1398,7 @@ namespace Vudaco.Debits.Controllers
          [HttpGet("excel/congnoncc_v1")]
         public async Task<IActionResult> ExportCongNoNCCVer1(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
         {
+              var check_error = "";
               try
               {
                 // ==== LẤY THÔNG TIN NHÀ CUNG CẤP ====
@@ -1460,10 +1463,10 @@ namespace Vudaco.Debits.Controllers
                         p => p.Id,
                         (pd, p) => new
                         {
-                            p.Id,
-                            p.AccountingDate,
-                            p.Note,
-                            pd.Amount
+                            Id = p.Id,
+                            accounting_date = p.AccountingDate,
+                            Note = p.Note,
+                            Amount = pd.Amount
                         }
                     ).ToListAsync();
                 // Merge vào chung loại anonymous type
@@ -1476,7 +1479,7 @@ namespace Vudaco.Debits.Controllers
                         type = 2 // chi tạm ứng tiền cho nhà cung cấp
                     });
                 }
-
+                // return ApiResponseResult<object>(false, null, groupedData);
                 groupedData = groupedData
                 .OrderBy(g => g.Items.Min(x => (DateTime)x.accounting_date))
                 .ToList();
@@ -1597,6 +1600,8 @@ namespace Vudaco.Debits.Controllers
                 {
                     var group = groupedData[i];
                     var first = group.Items.First();
+                    check_error = JsonSerializer.Serialize(group);
+                   
                     if (group.type != 2)
                     {
                         // Lấy bản ghi đầu tiên trong group (để lấy thông tin chung)
@@ -1644,7 +1649,7 @@ namespace Vudaco.Debits.Controllers
                                 // --- GHI DÒNG CHI TIẾT ---
                                    // return ApiResponseResult<object>(true, "Không tìm thấy dữ liệu khách hàng", first);
                                 ws.Cell(row, 1).Value = i + 1; // STT
-                                ws.Cell(row, 2).Value =  svc.accounting_date.ToString("dd/MM/yyyy"); 
+                                ws.Cell(row, 2).Value = svc.accounting_date?.ToString("dd/MM/yyyy") ?? "";
                                 ws.Cell(row, 3).Value =  svc.supplier_vehicle_type ??"";
                                 ws.Cell(row, 4).Value =  _fileInfo != null ? (_fileInfo.FileNumber??svc.dispatch_code) : svc.dispatch_code ?? "";
                                 ws.Cell(row, 5).Value =  _fileInfo != null ? _fileInfo.Declaration ??"" : "";
@@ -1688,7 +1693,7 @@ namespace Vudaco.Debits.Controllers
                                 decimal receiptTotal = first?.receipt_total ?? 0m;
                                 decimal conlai = (total_price_dv + price_ch ) - receiptTotal;
                                 ws.Cell(row, 1).Value = i + 1; // STT
-                                ws.Cell(row, 2).Value =  first.accounting_date.ToString("dd/MM/yyyy"); 
+                                ws.Cell(row, 2).Value = first.accounting_date?.ToString("dd/MM/yyyy") ?? "";
                                 ws.Cell(row, 3).Value =  first.supplier_vehicle_type ??"";
                                 ws.Cell(row, 4).Value =  first.dispatch_code ?? "";
                                 ws.Cell(row, 7).Value =  first.name ?? "";
@@ -1712,7 +1717,7 @@ namespace Vudaco.Debits.Controllers
                     {
                         decimal receiptTotal = first?.Amount ?? 0m;
                         ws.Cell(row, 1).Value = i + 1; // STT
-                        ws.Cell(row, 2).Value =  first.AccountingDate.ToString("dd/MM/yyyy"); 
+                        ws.Cell(row, 2).Value =  first.accounting_date?.ToString("dd/MM/yyyy") ??""; 
                         ws.Cell(row, 7).Value =  first.Note ?? "";
                         ws.Cell(row, 13).Value =  0;
                         ws.Cell(row, 13).Style.NumberFormat.Format = "#,##0";
@@ -1793,7 +1798,7 @@ namespace Vudaco.Debits.Controllers
                 var file = frame.GetFileName();
                 var method = frame.GetMethod()?.Name;
 
-                var errorMessage = $"Error at {file}:{line} in {method} - {ex.Message}";
+                var errorMessage = $"Error at {file}:{line} in {method} - {ex.Message} - {check_error}";
 
                 _logger.LogError(ex, errorMessage);
 
@@ -1967,107 +1972,9 @@ namespace Vudaco.Debits.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
-         [HttpPost]
-        [Route("create/muaban")]
-        public async Task<IActionResult> CreateMuaBan([FromBody] DebitMuaBanDto DebitMuaBanDto)
-        {
-            if (DebitMuaBanDto.FormOfPayment == 1 && (DebitMuaBanDto.FundId == null || DebitMuaBanDto.FundId == 0))
-                return ApiResponseResult<object>(false, "Mã quỹ bắt buộc", null);
-            if (DebitMuaBanDto.FormOfPayment == 2 && (DebitMuaBanDto.BankId == null || DebitMuaBanDto.BankId == 0))
-                return ApiResponseResult<object>(false, "Mã Ngân hàng bắt buộc", null);
-            if (DebitMuaBanDto.IncomeExpenseCategoryId == null || DebitMuaBanDto.IncomeExpenseCategoryId == 0)
-                return ApiResponseResult<object>(false, "ly do bắt buộc", null);
-            using var tran = await _context.Database.BeginTransactionAsync();
-            var conn = _context.Database.GetDbConnection();
-            try
-            {
-                var now = DateTime.Now;
-                int CycleName = int.Parse(DebitMuaBanDto.AccountingDate.ToString("MMyyyy"));
-                var DispatchCode = await SqlServerHelpers.GenerateSoChungTuEfAsync(conn,tran.GetDbTransaction(), "debits", "dispatch_code", DebitMuaBanDto.StorageId, "BHKH"+DebitMuaBanDto.AccountingDate.ToString("yyMM"),4);
-                var debit = new Debit
-                {
-                    CustomerDetailId = DebitMuaBanDto.CustomerDetailId,
-                    StorageId = DebitMuaBanDto.StorageId,
-                    Type = DebitRepositories.BanHangKH,
-                    DispatchCode = DispatchCode,
-                    Name = DebitMuaBanDto.Note,
-                    AccountingDate = DebitMuaBanDto.AccountingDate,
-                    ServiceDate = DebitMuaBanDto.AccountingDate,
-                    PurchasePrice = DebitMuaBanDto.Price,
-                    Price = DebitMuaBanDto.Price,
-                    Data = DebitMuaBanDto.Data,
-                    Note = DebitMuaBanDto.Note,
-                    CreatedBy = userId,
-                    CreatedAt = now,
-                    UpdatedAt = now,
-                    UpdatedBy = userId
-                };
-                _context.Debits.Add(debit);
-                await _context.SaveChangesAsync();  // phải có
-                var entity = new ConfirmFile
-                {
-                    StorageId = DebitMuaBanDto.StorageId,
-                    DebitId = debit.Id,
-                    PartnerDetailId = DebitMuaBanDto.CustomerDetailId,
-                    Status = ContractFileRepository.statusDebit,
-                    StatusConfirm = 0,
-                    CreatedBy = userId,
-                    CreatedAt = now,
-                };
-                _context.ConfirmFiles.Add(entity);
-                await _context.SaveChangesAsync();
-
-                 var code_receipt = await SqlServerHelpers.GenerateCodeEfAsync(conn, tran.GetDbTransaction(), "receipts", "code_receipt", DebitMuaBanDto.StorageId, "PT"+DebitMuaBanDto.AccountingDate.ToString("yyMM"), 4);
-
-                var receipt = new Receipt
-                {
-                    AccountingDate = DebitMuaBanDto.AccountingDate,
-                    StorageId = DebitMuaBanDto.StorageId,
-                    CodeReceipt = code_receipt,
-                    FundId = DebitMuaBanDto.FormOfPayment == 1 ? DebitMuaBanDto.FundId : 0,
-                    IncomeExpenseCategoryId = DebitMuaBanDto.IncomeExpenseCategoryId,
-                    Note = DebitMuaBanDto.Note,
-                    FormOfPayment = DebitMuaBanDto.FormOfPayment,
-                    TypeReceipt = ReceiptRepositories.ThuBanHangKH,
-                    BankId = DebitMuaBanDto.FormOfPayment == 2 ? DebitMuaBanDto.BankId : 0,
-                    Data = DebitMuaBanDto.Data,
-                    CreatedBy = userId,
-                    CreatedAt = now,
-                    UpdatedAt = now,
-                    UpdatedBy = userId,
-                };
-
-                _context.Receipts.Add(receipt);
-                await _context.SaveChangesAsync();
-                var entity_detail = new ReceiptDetail
-                {
-                    ReceiptId = receipt.Id,
-                    StorageId = DebitMuaBanDto.StorageId,
-                    DebitId = debit.Id,
-                    AccountingDate = DebitMuaBanDto.AccountingDate,
-                    Amount = DebitMuaBanDto.Price,
-                    Vat = DebitMuaBanDto.Vat,
-                    CreatedBy = userId,
-                    CreatedAt = now,
-                    UpdatedAt = now,
-                    UpdatedBy = userId,
-
-                };
-                _context.ReceiptDetails.Add(entity_detail);
-                await _context.SaveChangesAsync();
-                await tran.CommitAsync();
-                return ApiResponseResult<object>(true, "Thêm thành công", null);
-            }
-            catch (DbUpdateException ex)
-            {
-                await tran.RollbackAsync();
-                return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
-            }
-            
-        }
         [HttpPost]
         [Route("create")]
-        public async Task<IActionResult> Create([FromBody] DebitDto DebitDto)
+        public async Task<IActionResult> Create([FromBody] DebitTransportationCostDto DebitDto)
         {
             //if (string.IsNullOrEmpty(DebitDto.VehicleNumber))
             //{
@@ -2101,8 +2008,9 @@ namespace Vudaco.Debits.Controllers
                     DispatchCode = DispatchCode,
                     Name = DebitDto.Route,
                     AccountingDate = DebitDto.AccountingDate,
-                    ServiceDate = DebitDto.AccountingDate,
+                    ServiceDate = DebitDto.ServiceDate,
                     PurchasePrice = DebitDto.PurchasePrice,
+                    TransportationCost = JsonSerializer.Serialize(DebitDto.TransportationCost),
                     Price = DebitDto.Price,
                     Vat = DebitDto.Vat,
                     DriverFee = DebitDto.DriverFee,
@@ -2852,7 +2760,7 @@ namespace Vudaco.Debits.Controllers
         }
         [HttpPost]
         [Route("updateDebit")]
-        public async Task<IActionResult> UpdateDebit([FromBody] DebitDto DebitDto)
+        public async Task<IActionResult> UpdateDebit([FromBody] DebitTransportationCostDto DebitDto)
         {
             if (!DebitDto.CustomerDetailId.HasValue || DebitDto.CustomerDetailId <= 0)
             {
@@ -2874,9 +2782,10 @@ namespace Vudaco.Debits.Controllers
                 debit.EmployeeStaffId = DebitDto.EmployeeStaffId;
                 debit.StorageId = DebitDto.StorageId;
                 debit.Type = DebitRepositories.PhiVanChuyen;
+                debit.TransportationCost = JsonSerializer.Serialize(DebitDto.TransportationCost);
                 debit.Name = DebitDto.Route;
-                debit.AccountingDate = DebitDto.AccountingDate;
-                debit.ServiceDate = DebitDto.AccountingDate;
+                //debit.AccountingDate = DebitDto.AccountingDate;
+                debit.ServiceDate = DebitDto.ServiceDate;
                 debit.PurchasePrice = DebitDto.PurchasePrice;
                 debit.Price = DebitDto.Price;
                 debit.Vat = DebitDto.Vat;
@@ -3276,6 +3185,57 @@ namespace Vudaco.Debits.Controllers
                 return ApiResponseResult<object>(false, "Lỗi khi cập nhật: " + ex.InnerException?.Message, null);
             }
         }
+        [HttpPost("confirmFileGiaByIdFileGia")]
+        public async Task<IActionResult> ConfirmFileGiaByIdFileGia([FromBody] ConfirmFileInfoDto ConfirmFileInfoDto)
+        {
+            if (ConfirmFileInfoDto.Ids == null || ConfirmFileInfoDto.Ids.Length == 0)
+                return ApiResponseResult<object>(false, "Danh sách Id không hợp lệ", null);
+
+            await using var tran = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                var now = DateTime.Now;
+
+                var debits = await _context.Debits
+                                           .Where(x => x.FileInfoId.HasValue && ConfirmFileInfoDto.Ids.Contains(x.FileInfoId.Value))
+                                           .ToListAsync();
+
+                if (!debits.Any())
+                    return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+
+                // Ví dụ: cập nhật trạng thái xác nhận
+                foreach (var item in debits)
+                {
+                    var confirm_file = await _context.ConfirmFiles.FirstOrDefaultAsync(x => x.FileInfoId == item.FileInfoId && x.PartnerDetailId == item.CustomerDetailId && x.DebitId == item.Id); // duyệt file giá
+                    if (confirm_file == null)
+                    {
+                        await tran.RollbackAsync();
+                        return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu xác nhận chi phí. Hãy duyệt chi phí hải quan" +item.Id, null);
+                    }
+                    if (confirm_file.Status == 1 || confirm_file.Status == 2)
+                    {
+                        item.Status = ContractFileRepository.statusDebit; 
+                        item.UpdatedBy = userId;
+                        item.UpdatedAt = now;
+                        confirm_file.Status = ContractFileRepository.statusDebit;
+                        confirm_file.StatusConfirm = ConfirmFileInfoDto.StatusConfirm;
+                        confirm_file.UpdatedBy = userId;
+                        confirm_file.UpdatedAt = now;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+
+                return ApiResponseResult<object>(true, "Cập nhật thành công", null);
+            }
+            catch (Exception ex)
+            {
+                await tran.RollbackAsync();
+                return ApiResponseResult<object>(false, "Lỗi khi cập nhật: " + ex.Message, null);
+            }
+        }
         [HttpPost("confirmFileGia")]
         public async Task<IActionResult> ConfirmFileGia([FromBody] ConfirmFileDto ConfirmFileDto)
         {
@@ -3380,6 +3340,7 @@ namespace Vudaco.Debits.Controllers
                     var debit = await _context.Debits.FirstOrDefaultAsync(x => x.Id == item.Id);
                     if (debit == null) continue;
                     
+                    debit.AccountingDate = ConfirmFileDto.AccountingDate;
                     debit.UpdatedBy = userId;
                     debit.UpdatedAt = now;
                     debit.Vat = item.Vat;

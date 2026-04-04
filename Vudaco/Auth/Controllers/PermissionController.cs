@@ -202,7 +202,7 @@ namespace Vudaco.Auth.Controllers
             {
                 entity.DeletedAt = now;
                 entity.DeletedBy = userId;
-                var getUserRole = await _context.UserRoles.Where(x=>x.RoleId == entity.Id).ToListAsync();
+                var getUserRole = await _context.UserRoles.Where(x=>x.RoleId == entity.Id && x.StorageId == entity.StorageId).ToListAsync();
                 if (getUserRole.Any())
                 {
                     foreach (var item in getUserRole)

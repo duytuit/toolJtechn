@@ -80,7 +80,7 @@ namespace Vudaco.Categorys.Repositories
 
         public Task<Bank> ShowAsync(int id)
         {
-            return _context.Banks.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            return _context.Banks.FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public Task<Bank> UpdateAsync(Bank Bank)

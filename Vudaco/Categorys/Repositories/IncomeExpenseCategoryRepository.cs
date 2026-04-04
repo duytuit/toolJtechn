@@ -27,6 +27,7 @@ namespace Vudaco.Categorys.Repositories
         public const int ChiDoiTru = 32; // chi
         public const int ThuDoiTru = 31; // thu
         public const int ThuLaiXe = 29; // thu
+        public const int PhiDiDuongCuaLaiXe = 38; // chi
         public IncomeExpenseCategoryRepository(VudacoDBContext context, IConfiguration configuration, RedisService redis) : base(context)
         {
             _context = context;

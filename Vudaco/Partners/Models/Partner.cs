@@ -31,7 +31,6 @@ namespace Vudaco.Partners.Models
 
         [MaxLength(50)]
         [Column("phone")]
-         [Required]
         public string Phone { get; set; }
 
         [MaxLength(191)]
@@ -54,9 +53,8 @@ namespace Vudaco.Partners.Models
         [Required]
         [Column("storage_id")]
         public int StorageId { get; set; }
-        [Required]
         [Column("user_id")]
-        public int UserId { get; set; }
+        public int? UserId { get; set; }
 
         [Required]
         [MaxLength(50)]

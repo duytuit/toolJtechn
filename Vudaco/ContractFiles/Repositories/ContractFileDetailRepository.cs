@@ -43,6 +43,9 @@ namespace Vudaco.ContractFiles.Repositories
 
         public async Task<PaginatedResultReact<object>> GetObjectFileNotDispatchAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
         {
+            page = page <= 0 ? 1 : page;
+            pageSize = pageSize <= 0 ? 500 : pageSize;
+            int offset = (page - 1) * pageSize;
             var sql = $@"
               SELECT 
                     f.*
@@ -62,6 +65,18 @@ namespace Vudaco.ContractFiles.Repositories
                             AND d.deleted_at IS NULL
                             AND d.employee_staff_id IS NULL
                     )";
+            if (FileInfoDetailDto.Type > 0)
+            {
+                sql = $@"
+                        SELECT 
+                            f.*
+                        FROM file_infos f
+                        LEFT JOIN partner_details p ON p.id = f.customer_detail_id
+                        WHERE 
+                            f.deleted_at IS NULL
+                            AND p.status = 1
+                            AND p.deleted_at IS NULL";
+            }
             if (FileInfoDetailDto.StorageId > 0)
             {
                 sql += $@" AND f.storage_id = {FileInfoDetailDto.StorageId}";
@@ -75,11 +90,17 @@ namespace Vudaco.ContractFiles.Repositories
                 AND f.accounting_date < '{toDateNext:yyyy-MM-dd}'";
             }
 
-            sql += " ORDER BY f.updated_at DESC";
+            // 👉 ORDER + PAGINATION
+            sql += $@"
+                ORDER BY f.updated_at DESC
+                OFFSET {offset} ROWS
+                FETCH NEXT {pageSize} ROWS ONLY";
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
             {
                 Data = results,
+                PageNum = page,
+                PageSize = pageSize
             };
             return _results;
         }

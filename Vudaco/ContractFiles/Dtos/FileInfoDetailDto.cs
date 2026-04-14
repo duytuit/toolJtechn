@@ -14,6 +14,7 @@ namespace Vudaco.ContractFiles.Dtos
         public int EmployeeDriverId { get; set; }
         public double? Price { get; set; }
         public int? StorageId { get; set; }
+        public int? Type { get; set; }
         public int? CreatedBy { get; set; }
         public int? UpdatedBy { get; set; }
         public int? DeletedBy { get; set; }

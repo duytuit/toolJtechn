@@ -6,15 +6,29 @@ using FirebaseAdmin.Messaging;
 using Microsoft.EntityFrameworkCore;
 using Vudaco.Notifys.Models;
 using Vudaco.Shares.BaseRepository;
+using dotAPNS;
 
 namespace Vudaco.Shares
 {
     public class FcmService
     {
         private readonly VudacoDBContext _context;
-        public FcmService(VudacoDBContext context)
+        private readonly ApnsClient _client;
+        private readonly string _bundleId;
+        public FcmService(VudacoDBContext context, IConfiguration config)
         {
             _context = context;
+              var cfg = config.GetSection("Apns");
+
+            _bundleId = cfg["BundleId"];
+
+            _client = ApnsClient.CreateUsingJwt(new ApnsJwtOptions
+            {
+                TeamId = cfg["TeamId"],
+                KeyId = cfg["KeyId"],
+                PrivateKey = File.ReadAllText(cfg["P8Path"]),
+                UseSandbox = bool.Parse(cfg["UseSandbox"])
+            });
         }
         public async Task<bool> SendMulticastAsync(
             List<int> UserIds,
@@ -28,17 +42,26 @@ namespace Vudaco.Shares
         )
         {
             var now = DateTime.Now;
-            var tokens = await _context.UserDeviceTokens
-                .Where(x => UserIds.Contains(x.UserId) && x.IsActive)
+            var android_tokens = await _context.UserDeviceTokens
+                .Where(x => UserIds.Contains(x.UserId) && x.IsActive && x.Platform == "android")
                 .Select(x => x.DeviceToken)
                 .Distinct()
                 .ToListAsync();
-            _ = Task.Run(() => Helper.SendTelegramMessageAsync($"{string.Join(",", UserIds)} - {tokens.Count} tokens"));
-            if (!tokens.Any()) return false;
+            var ios_tokens = await _context.UserDeviceTokens
+                .Where(x => UserIds.Contains(x.UserId) && x.IsActive && x.Platform == "ios")
+                .Select(x => x.DeviceToken)
+                .Distinct()
+                .ToListAsync();
+            if (ios_tokens.Any())
+            {
+                 await Task.WhenAll(ios_tokens.Select(token => SendOne(token, title, body, data)));
+            }
+            _ = Task.Run(() => Helper.SendTelegramMessageAsync($"{string.Join(",", UserIds)} - {android_tokens.Count} tokens"));
+           
       
             var message = new MulticastMessage()
             {
-                Tokens = tokens,
+                Tokens = android_tokens,
                 Notification = new Notification()
                 {
                     Title = title,
@@ -93,6 +116,36 @@ namespace Vudaco.Shares
             }
             await _context.SaveChangesAsync();
             return true;
+        }
+         private async Task SendOne(string token, string title, string body, Dictionary<string, string> data)
+        {
+            var push = new ApplePush(ApplePushType.Alert)
+                .AddToken(token)
+                .AddAlert(title, body)
+                .AddSound("default");
+
+            // apns-topic bắt buộc
+            push.AddCustomProperty("apns-topic", _bundleId);
+
+            if (data != null)
+            {
+                foreach (var d in data)
+                    push.AddCustomProperty(d.Key, d.Value);
+            }
+
+            var result = await _client.SendAsync(push);
+
+            if (!result.IsSuccessful)
+            {
+                Console.WriteLine("APNS Error: " + result.Reason);
+
+                // disable token
+                var device = await _context.UserDeviceTokens
+                    .FirstOrDefaultAsync(x => x.DeviceToken == token);
+
+                if (device != null)
+                    device.IsActive = false;
+            }
         }
     }
 }

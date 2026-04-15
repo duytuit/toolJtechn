@@ -48,13 +48,16 @@ namespace Vudaco.ContractFiles.Repositories
             int offset = (page - 1) * pageSize;
             var sql = $@"
               SELECT 
-                    f.*
+                    f.*,
+                    pn.abbreviation
                 FROM file_infos f
                 LEFT JOIN partner_details p ON p.id = f.customer_detail_id
+                LEFT JOIN partners pn ON pn.id = p.partner_id
                 WHERE 
                     f.deleted_at IS NULL
                     AND p.status = 1
                     AND p.deleted_at IS NULL
+                    AND pn.deleted_at IS NULL
                     AND NOT EXISTS (
                         SELECT 1
                         FROM debits d
@@ -69,13 +72,16 @@ namespace Vudaco.ContractFiles.Repositories
             {
                 sql = $@"
                         SELECT 
-                            f.*
+                            f.*,
+                            pn.abbreviation
                         FROM file_infos f
                         LEFT JOIN partner_details p ON p.id = f.customer_detail_id
+                        LEFT JOIN partners pn ON pn.id = p.partner_id
                         WHERE 
                             f.deleted_at IS NULL
                             AND p.status = 1
-                            AND p.deleted_at IS NULL";
+                            AND p.deleted_at IS NULL
+                            AND pn.deleted_at IS NULL";
             }
             if (FileInfoDetailDto.StorageId > 0)
             {

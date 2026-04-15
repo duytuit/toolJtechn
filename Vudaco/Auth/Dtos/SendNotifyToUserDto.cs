@@ -17,6 +17,5 @@ namespace Vudaco.Auth.Dtos
         [Required]
         public string Body { get; set; }
 
-        public Dictionary<string, string> Data { get; set; }
     }
 }

@@ -375,3 +375,4 @@ secrets.json
 Firebase/*.json
 **/firebase-adminsdk*.json
 **/*service-account*.json
+*.p8

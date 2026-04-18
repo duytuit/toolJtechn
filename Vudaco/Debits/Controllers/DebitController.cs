@@ -2008,7 +2008,7 @@ namespace Vudaco.Debits.Controllers
                     DispatchCode = DispatchCode,
                     Name = DebitDto.Route,
                     AccountingDate = DebitDto.AccountingDate,
-                    ServiceDate = DebitDto.ServiceDate,
+                    ServiceDate = DebitDto.ServiceDate != default(DateTime) ? DebitDto.ServiceDate : DebitDto.AccountingDate,
                     PurchasePrice = DebitDto.PurchasePrice,
                     TransportationCost = JsonSerializer.Serialize(DebitDto.TransportationCost),
                     Price = DebitDto.Price,
@@ -2785,7 +2785,7 @@ namespace Vudaco.Debits.Controllers
                 debit.TransportationCost = JsonSerializer.Serialize(DebitDto.TransportationCost);
                 debit.Name = DebitDto.Route;
                 //debit.AccountingDate = DebitDto.AccountingDate;
-                debit.ServiceDate = DebitDto.ServiceDate;
+                debit.ServiceDate = DebitDto.ServiceDate != default(DateTime) ? DebitDto.ServiceDate : DebitDto.AccountingDate;
                 debit.PurchasePrice = DebitDto.PurchasePrice;
                 debit.Price = DebitDto.Price;
                 debit.Vat = DebitDto.Vat;

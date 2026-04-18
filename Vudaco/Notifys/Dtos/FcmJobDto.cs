@@ -12,6 +12,6 @@ namespace Vudaco.Notifys.Dtos
         public int StorageId { get; set; }
         public int PostId { get; set; }
         public int Type { get; set; }
-        public Dictionary<string, string> Data { get; set; } = new();
+        public string Data { get; set; }
     }
 }

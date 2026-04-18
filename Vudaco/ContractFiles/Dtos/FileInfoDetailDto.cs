@@ -19,6 +19,7 @@ namespace Vudaco.ContractFiles.Dtos
         public int? UpdatedBy { get; set; }
         public int? DeletedBy { get; set; }
         public string SalesIds { get; set; }
+        public string KeySearch { get; set; }
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
     }

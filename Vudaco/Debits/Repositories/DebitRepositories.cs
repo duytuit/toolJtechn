@@ -506,40 +506,71 @@ namespace Vudaco.Debits.Repositories
         public async Task<PaginatedResultReact<object>> GetObjectDebitChiTietKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
         {
              var sql = $@"
+                   WITH receipt_agg AS (
                     SELECT 
-                    d.*,
-                    CAST(ISNULL(rdt_total.amount, 0) AS INT) AS receipt_amount,
-                    CAST(ISNULL(rdt_total.vat, 0) AS INT) AS receipt_vat,
-                    CAST(ISNULL(rdt_total.total, 0) AS INT) AS receipt_total,
-                    p.customer_credit_limit
-                    FROM debits d
-                    LEFT JOIN file_infos f
-                    ON f.id = d.file_info_id
-                    LEFT JOIN partner_details p 
-                    ON p.id = d.customer_detail_id
-                    -- ✅ Tổng receipts
-                    OUTER APPLY (
-                            SELECT 
-                                    SUM(rdt.amount) AS amount,
-                                    MAX(rdt.vat) AS vat,
-                                    SUM(rdt.amount * (rdt.vat / 100.0)) + SUM(rdt.amount) AS total
-                            FROM receipts r
-                            LEFT JOIN income_expense_categorys iecat
-                            ON iecat.id = r.income_expense_category_id
-                            LEFT JOIN receipt_details rdt 
-                                    ON rdt.receipt_id = r.id
+                        rdt.debit_id,
+                        SUM(CAST(rdt.amount AS DECIMAL(18,2))) AS amount,
+                        MAX(rdt.vat) AS vat,
+                        SUM(CAST(rdt.amount AS DECIMAL(18,2)) * (rdt.vat / 100.0)) 
+                         + SUM(CAST(rdt.amount AS DECIMAL(18,2))) AS total
+                    FROM receipts r
+                    LEFT JOIN receipt_details rdt 
+                        ON rdt.receipt_id = r.id
+                    LEFT JOIN income_expense_categorys iecat
+                        ON iecat.id = r.income_expense_category_id
+                    WHERE 
+                        (r.status IS NULL OR r.status = 1)
+                        AND iecat.type = 0   -- ✅ đổi theo yêu cầu
+                        AND r.deleted_at IS NULL
+                        AND rdt.deleted_at IS NULL
+                    GROUP BY rdt.debit_id
+                ),
+
+                receipt_code_agg AS (
+                    SELECT 
+                        d.id AS debit_id,
+                        STUFF((
+                            SELECT ', ' + r2.code_receipt
+                            FROM receipts r2
+                            LEFT JOIN receipt_details rdt2 
+                                ON rdt2.receipt_id = r2.id
+                            LEFT JOIN income_expense_categorys iecat2
+                                ON iecat2.id = r2.income_expense_category_id
                             WHERE 
-                                    d.id = rdt.debit_id 
-                                    AND iecat.type = 0
-                                    AND (r.status IS NULL OR r.status = 1)
-                                    AND r.deleted_at IS NULL
-                                    AND rdt.deleted_at IS NULL
-                    ) AS rdt_total
-                    WHERE
+                                rdt2.debit_id = d.id
+                                AND (r2.status IS NULL OR r2.status = 1)
+                                AND iecat2.type = 0   -- ✅ đồng bộ điều kiện
+                                AND r2.deleted_at IS NULL
+                                AND rdt2.deleted_at IS NULL
+                            FOR XML PATH(''), TYPE
+                        ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS receipt_codes
+                    FROM debits d
+                )
+
+                SELECT 
+                    d.*,
+                    CAST(ISNULL(ra.amount, 0) AS BIGINT) AS receipt_amount,
+                    CAST(ISNULL(ra.vat, 0) AS BIGINT) AS receipt_vat,
+                    CAST(ISNULL(ra.total, 0) AS BIGINT) AS receipt_total,
+                    rca.receipt_codes,
+                    p.customer_credit_limit   -- ✅ thêm field
+                FROM debits d
+                LEFT JOIN file_infos f ON f.id = d.file_info_id
+                LEFT JOIN partner_details p ON p.id = d.customer_detail_id  -- ✅ đổi đúng
+
+                -- ✅ join aggregate
+                LEFT JOIN receipt_agg ra ON ra.debit_id = d.id
+                LEFT JOIN receipt_code_agg rca ON rca.debit_id = d.id
+
+                WHERE
                     p.status = 1
-                    AND d.type in (0,1,2,3,4,5,6,8)
+                    AND d.type IN (0,1,2,3,4,5,6,8)
                     AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                    AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (33) AND d.service_status > 2) OR d.service_id IS NULL )
+                    AND (
+                        d.service_id NOT IN (19,33) 
+                        OR (d.service_id = 33 AND d.service_status > 2) 
+                        OR d.service_id IS NULL
+                    )
                     AND p.deleted_at IS NULL
                     AND f.deleted_at IS NULL
                     AND d.deleted_at IS NULL";
@@ -1018,41 +1049,73 @@ namespace Vudaco.Debits.Repositories
         public async Task<PaginatedResultReact<object>> GetObjectDebitChiTietNCCAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
         {
              var sql = $@"
+                    WITH receipt_agg AS (
                     SELECT 
-                    d.*,
-                    CAST(ISNULL(rdt_total.amount, 0) AS INT) AS receipt_amount,
-                    CAST(ISNULL(rdt_total.vat, 0) AS INT) AS receipt_vat,
-                    CAST(ISNULL(rdt_total.total, 0) AS INT) AS receipt_total
-                    FROM debits d
-                    LEFT JOIN file_infos f
-                    ON f.id = d.file_info_id
-                    LEFT JOIN partner_details p 
-                    ON p.id = d.supplier_detail_id
-                    -- ✅ Tổng receipts
-                    OUTER APPLY (
-                            SELECT 
-                                    SUM(rdt.amount) AS amount,
-                                    MAX(rdt.vat) AS vat,
-                                    SUM(rdt.amount * (rdt.vat / 100.0)) + SUM(rdt.amount) AS total
-                            FROM receipts r
-                            LEFT JOIN income_expense_categorys iecat
-                            ON iecat.id = r.income_expense_category_id
-                            LEFT JOIN receipt_details rdt 
-                                    ON rdt.receipt_id = r.id
+                        rdt.debit_id,
+                       SUM(CAST(rdt.amount AS DECIMAL(18,2))) AS amount,
+                        MAX(rdt.vat) AS vat,
+                       SUM(CAST(rdt.amount AS DECIMAL(18,2)) * (rdt.vat / 100.0)) 
+                       + SUM(CAST(rdt.amount AS DECIMAL(18,2))) AS total
+                    FROM receipts r
+                    LEFT JOIN receipt_details rdt 
+                        ON rdt.receipt_id = r.id
+                    LEFT JOIN income_expense_categorys iecat
+                        ON iecat.id = r.income_expense_category_id
+                    WHERE 
+                        (r.status IS NULL OR r.status = 1)
+                        AND iecat.type = 1
+                        AND r.deleted_at IS NULL
+                        AND rdt.deleted_at IS NULL
+                    GROUP BY rdt.debit_id
+                ),
+
+                receipt_code_agg AS (
+                    SELECT 
+                        d.id AS debit_id,
+                        STUFF((
+                            SELECT ', ' + r2.code_receipt
+                            FROM receipts r2
+                            LEFT JOIN receipt_details rdt2 
+                                ON rdt2.receipt_id = r2.id
+                            LEFT JOIN income_expense_categorys iecat2
+                                ON iecat2.id = r2.income_expense_category_id
                             WHERE 
-                                    d.id = rdt.debit_id 
-                                    AND (r.status IS NULL OR r.status = 1)
-                                    AND iecat.type = 1
-                                    AND r.deleted_at IS NULL
-                                    AND rdt.deleted_at IS NULL
-                    ) AS rdt_total
-                    WHERE
+                                rdt2.debit_id = d.id
+                                AND (r2.status IS NULL OR r2.status = 1)
+                                AND iecat2.type = 1
+                                AND r2.deleted_at IS NULL
+                                AND rdt2.deleted_at IS NULL
+                            FOR XML PATH(''), TYPE
+                        ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS receipt_codes
+                    FROM debits d
+                )
+
+                SELECT 
+                    d.*,
+                    CAST(ISNULL(ra.amount, 0) AS BIGINT) AS receipt_amount,
+                    CAST(ISNULL(ra.vat, 0) AS BIGINT) AS receipt_vat,
+                    CAST(ISNULL(ra.total, 0) AS BIGINT) AS receipt_total,
+                    rca.receipt_codes
+                FROM debits d
+                LEFT JOIN file_infos f ON f.id = d.file_info_id
+                LEFT JOIN partner_details p ON p.id = d.supplier_detail_id
+
+                -- ✅ join dữ liệu đã gom
+                LEFT JOIN receipt_agg ra ON ra.debit_id = d.id
+                LEFT JOIN receipt_code_agg rca ON rca.debit_id = d.id
+
+                WHERE
                     p.status = 2
                     AND (d.status = 2 OR (d.status = 0 AND d.file_info_id IS NULL))
-                    AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (33) AND d.service_status > 2) OR d.service_id IS NULL )
+                    AND (
+                        d.service_id NOT IN (19,33) 
+                        OR (d.service_id IN (33) AND d.service_status > 2) 
+                        OR d.service_id IS NULL
+                    )
                     AND p.deleted_at IS NULL
                     AND f.deleted_at IS NULL
                     AND d.deleted_at IS NULL";
+            
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND d.storage_id = {DebitDto.StorageId}";
@@ -1074,6 +1137,7 @@ namespace Vudaco.Debits.Repositories
                 AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
             }
             sql += " ORDER BY d.accounting_date";
+            // _ = Task.Run(() => Helper.SendTelegramMessageAsync(sql));
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
             {

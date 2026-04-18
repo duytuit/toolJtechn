@@ -87,6 +87,10 @@ namespace Vudaco.ContractFiles.Repositories
             {
                 sql += $@" AND f.storage_id = {FileInfoDetailDto.StorageId}";
             }
+            if (!string.IsNullOrEmpty(FileInfoDetailDto.KeySearch))
+            {
+                sql += $@" AND (f.file_number LIKE '%{FileInfoDetailDto.KeySearch}%' OR pn.abbreviation LIKE '%{FileInfoDetailDto.KeySearch}%')";
+            }
             if (FileInfoDetailDto.FromDate.HasValue && FileInfoDetailDto.ToDate.HasValue)
             {
                 // Cộng thêm 1 ngày cho ToDate

@@ -38,7 +38,7 @@ namespace Vudaco.Controllers
 
             // 1) Token đã tồn tại -> update
             var existedByToken = await _context.UserDeviceTokens
-                .FirstOrDefaultAsync(x => x.DeviceToken == dto.DeviceToken);
+                .FirstOrDefaultAsync(x => x.DeviceToken == dto.DeviceToken && x.Env == dto.Env);
 
             if (existedByToken != null)
             {
@@ -46,6 +46,7 @@ namespace Vudaco.Controllers
                 existedByToken.Platform = dto.Platform;
                 existedByToken.DeviceId = dto.DeviceId;
                 existedByToken.IsActive = true;
+                existedByToken.Env = dto.Env;
                 existedByToken.UpdatedAt = DateTime.Now;
 
                 await _context.SaveChangesAsync();
@@ -57,13 +58,15 @@ namespace Vudaco.Controllers
             if (!string.IsNullOrEmpty(dto.DeviceId))
             {
                 var existedByDeviceId = await _context.UserDeviceTokens
-                    .FirstOrDefaultAsync(x => x.UserId == dto.UserId && x.DeviceId == dto.DeviceId);
+                    .FirstOrDefaultAsync(x => x.UserId == dto.UserId && x.DeviceId == dto.DeviceId && x.Env == dto.Env);
 
                 if (existedByDeviceId != null)
                 {
                     existedByDeviceId.DeviceToken = dto.DeviceToken;
                     existedByDeviceId.Platform = dto.Platform;
                     existedByDeviceId.IsActive = true;
+                    existedByDeviceId.Env = dto.Env;
+
                     existedByDeviceId.UpdatedAt = DateTime.UtcNow;
 
                     await _context.SaveChangesAsync();
@@ -79,6 +82,7 @@ namespace Vudaco.Controllers
                 Platform = dto.Platform,
                 DeviceId = dto.DeviceId,
                 IsActive = true,
+                Env = dto.Env,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
             };

@@ -18,5 +18,6 @@ namespace Vudaco.Auth.Dtos
         public string Platform { get; set; } // android | ios
 
         public string DeviceId { get; set; }
+        public string Env { get; set; }
     }
 }

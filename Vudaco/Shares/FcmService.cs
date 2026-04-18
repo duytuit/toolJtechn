@@ -5,8 +5,12 @@ using System.Threading.Tasks;
 using FirebaseAdmin.Messaging;
 using Microsoft.EntityFrameworkCore;
 using Vudaco.Notifys.Models;
-using Vudaco.Shares.BaseRepository;
 using dotAPNS;
+using Microsoft.Extensions.Configuration;
+using System.IO;
+using System.Net.Http;
+using Newtonsoft.Json;
+using Vudaco.Shares.BaseRepository;
 
 namespace Vudaco.Shares
 {
@@ -15,136 +19,225 @@ namespace Vudaco.Shares
         private readonly VudacoDBContext _context;
         private readonly ApnsClient _client;
         private readonly string _bundleId;
+        private readonly bool _useSandbox;
+
         public FcmService(VudacoDBContext context, IConfiguration config)
         {
             _context = context;
-              var cfg = config.GetSection("Apns");
+
+            var cfg = config.GetSection("Apns");
+            _useSandbox = bool.Parse(cfg["UseSandbox"] ?? "false");
 
             _bundleId = cfg["BundleId"];
 
-            _client = ApnsClient.CreateUsingJwt(new ApnsJwtOptions
-            {
-                TeamId = cfg["TeamId"],
-                KeyId = cfg["KeyId"],
-                PrivateKey = File.ReadAllText(cfg["P8Path"]),
-                UseSandbox = bool.Parse(cfg["UseSandbox"])
-            });
+            var keyContent = File.ReadAllText(cfg["P8Path"]);
+
+            var httpClient = new HttpClient();
+
+            _client = ApnsClient.CreateUsingJwt(
+                httpClient,
+                new ApnsJwtOptions
+                {
+                    TeamId = cfg["TeamId"],
+                    KeyId = cfg["KeyId"],
+                    CertContent = keyContent, // ✅ dùng content
+                    BundleId = _bundleId
+                });
+          
+
         }
+
         public async Task<bool> SendMulticastAsync(
-            List<int> UserIds,
+            List<int> userIds,
             string title,
             string body,
-            int StorageId = 0,
-            int PostId = 0,
-            int Type = 0,
+            int storageId = 0,
+            int postId = 0,
+            int type = 0,
             string screen = null,
-            Dictionary<string, string> data = null
+            string data = null
         )
         {
             var now = DateTime.Now;
-            var android_tokens = await _context.UserDeviceTokens
-                .Where(x => UserIds.Contains(x.UserId) && x.IsActive && x.Platform == "android")
+
+            // ================= ANDROID =================
+            var androidTokens = await _context.UserDeviceTokens
+                .Where(x => userIds.Contains(x.UserId) && x.IsActive && x.Platform == "android")
                 .Select(x => x.DeviceToken)
                 .Distinct()
                 .ToListAsync();
-            var ios_tokens = await _context.UserDeviceTokens
-                .Where(x => UserIds.Contains(x.UserId) && x.IsActive && x.Platform == "ios")
-                .Select(x => x.DeviceToken)
-                .Distinct()
-                .ToListAsync();
-            if (ios_tokens.Any())
+
+            if (androidTokens.Any())
             {
-                 await Task.WhenAll(ios_tokens.Select(token => SendOne(token, title, body, data)));
-            }
-            _ = Task.Run(() => Helper.SendTelegramMessageAsync($"{string.Join(",", UserIds)} - {android_tokens.Count} tokens"));
-           
-      
-            var message = new MulticastMessage()
-            {
-                Tokens = android_tokens,
-                Notification = new Notification()
+                var message = new MulticastMessage()
                 {
-                    Title = title,
-                    Body = body
-                },
-                Data = data ?? new Dictionary<string, string>()
-            };
-        
-            var getEmployees = await _context.Employees
-            .Where(e => e.UserId.HasValue 
-                    && UserIds.Contains(e.UserId.Value)
-                    && e.StorageId == StorageId)
-            .ToListAsync();
-            foreach (var emp in getEmployees)
+                    Tokens = androidTokens,
+                    Notification = new Notification
+                    {
+                        Title = title,
+                        Body = body
+                    },
+                    Data = new Dictionary<string, string>
+                    {
+                        { "type", type.ToString() },
+                        { "screen", screen },
+                        { "data", data }
+                    }
+                };
+
+                var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(message);
+
+                for (int i = 0; i < response.Responses.Count; i++)
+                {
+                    if (!response.Responses[i].IsSuccess)
+                    {
+                        var token = androidTokens[i];
+
+                        var device = await _context.UserDeviceTokens
+                            .FirstOrDefaultAsync(x => x.DeviceToken == token);
+
+                        if (device != null)
+                            device.IsActive = false;
+                    }
+                }
+            }
+
+            // ================= IOS =================
+            var iosProdTokens = await _context.UserDeviceTokens
+                .Where(x => userIds.Contains(x.UserId) && x.IsActive && x.Platform == "ios" && x.Env == "prod")
+                .Select(x => x.DeviceToken)
+                .Distinct()
+                .ToListAsync();
+
+            foreach (var token in iosProdTokens) // ✅ tránh DbContext crash
             {
-                var notify = new Notify
+                _ = Task.Run(() => Helper.SendTelegramMessageAsync($"{string.Join(",", token)} - tokens"));
+                await SendOne(token, title, body, type, screen, data);
+            }
+            var iosDevTokens = await _context.UserDeviceTokens
+                .Where(x => userIds.Contains(x.UserId) && x.IsActive && x.Platform == "ios" && x.Env == "dev")
+                .Select(x => x.DeviceToken)
+                .Distinct()
+                .ToListAsync();
+            foreach (var token in iosDevTokens) // ✅ tránh DbContext crash
+            {
+                _ = Task.Run(() => Helper.SendTelegramMessageAsync($"{string.Join(",", token)} - tokens"));
+                await SendOneDev(token, title, body, type, screen, data);
+            }
+            // ================= SAVE DB =================
+            var employees = await _context.Employees
+                .Where(e => e.UserId.HasValue &&
+                            userIds.Contains(e.UserId.Value) &&
+                            e.StorageId == storageId)
+                .ToListAsync();
+
+            foreach (var emp in employees)
+            {
+                _context.Notifys.Add(new Notify
                 {
                     StorageId = emp.StorageId,
                     EmployeeId = emp.Id,
-                    PostId = PostId,
+                    PostId = postId,
                     Title = title,
                     Description = body,
                     Status = 0,
-                    Type = Type,
+                    Type = type,
                     Screen = screen,
                     CreatedBy = emp.UserId ?? 0,
                     CreatedAt = now,
                     UpdatedBy = emp.UserId ?? 0,
                     UpdatedAt = now
-                };
-                _context.Notifys.Add(notify);
+                });
             }
-            await _context.SaveChangesAsync();
-            var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(message);
-            // token invalid -> disable
-            for (int i = 0; i < response.Responses.Count; i++)
-            {
-                var r = response.Responses[i];
-                if (!r.IsSuccess)
-                {
-                    var token = tokens[i];
 
-                    // disable token
-                    var device = await _context.UserDeviceTokens
-                        .FirstOrDefaultAsync(x => x.DeviceToken == token);
-
-                    if (device != null)
-                    {
-                        device.IsActive = false;
-                    }
-                }
-            }
             await _context.SaveChangesAsync();
+
             return true;
         }
-         private async Task SendOne(string token, string title, string body, Dictionary<string, string> data)
+
+        private async Task SendOne(string token, string title, string body, int type = 0,
+            string screen = null,  string data = null)
         {
             var push = new ApplePush(ApplePushType.Alert)
                 .AddToken(token)
                 .AddAlert(title, body)
+                .AddCustomProperty("type", type.ToString())
+                .AddCustomProperty("screen", screen)
                 .AddSound("default");
-
-            // apns-topic bắt buộc
-            push.AddCustomProperty("apns-topic", _bundleId);
-
-            if (data != null)
+            // thêm data
+            if (!string.IsNullOrEmpty(data))
             {
-                foreach (var d in data)
-                    push.AddCustomProperty(d.Key, d.Value);
+                push.AddCustomProperty("data", data);
             }
 
             var result = await _client.SendAsync(push);
 
             if (!result.IsSuccessful)
             {
-                Console.WriteLine("APNS Error: " + result.Reason);
+                var reason = result.Reason.ToString();
 
-                // disable token
-                var device = await _context.UserDeviceTokens
-                    .FirstOrDefaultAsync(x => x.DeviceToken == token);
+                Console.WriteLine($"APNS Error: {reason} | Token: {token}");
 
-                if (device != null)
-                    device.IsActive = false;
+                // gửi telegram
+                _ = Task.Run(() =>
+                    Helper.SendTelegramMessageAsync($"APNS Error: {reason} | Token: {token}")
+                );
+
+                // ✅ chỉ disable token chết thật
+                if (reason == "BadDeviceToken" || reason == "Unregistered")
+                {
+                    var device = await _context.UserDeviceTokens
+                        .FirstOrDefaultAsync(x => x.DeviceToken == token);
+
+                    if (device != null)
+                    {
+                        device.IsActive = false;
+                        await _context.SaveChangesAsync();
+                    }
+                }
+            }
+        }
+        private async Task SendOneDev(string token, string title, string body, int type = 0,
+            string screen = null,  string data = null)
+        {
+            var push = new ApplePush(ApplePushType.Alert)
+                .AddToken(token)
+                .AddAlert(title, body)
+                .AddCustomProperty("type", type.ToString())
+                .AddCustomProperty("screen", screen)
+                .AddSound("default");
+                 push.SendToDevelopmentServer();
+            // thêm data
+            if (!string.IsNullOrEmpty(data))
+            {
+                push.AddCustomProperty("data", data);
+            }
+
+            var result = await _client.SendAsync(push);
+
+            if (!result.IsSuccessful)
+            {
+                var reason = result.Reason.ToString();
+
+                Console.WriteLine($"APNS Error: {reason} | Token: {token}");
+
+                // gửi telegram
+                _ = Task.Run(() =>
+                    Helper.SendTelegramMessageAsync($"APNS Error: {reason} | Token: {token}")
+                );
+
+                // ✅ chỉ disable token chết thật
+                if (reason == "BadDeviceToken" || reason == "Unregistered")
+                {
+                    var device = await _context.UserDeviceTokens
+                        .FirstOrDefaultAsync(x => x.DeviceToken == token);
+
+                    if (device != null)
+                    {
+                        device.IsActive = false;
+                        await _context.SaveChangesAsync();
+                    }
+                }
             }
         }
     }

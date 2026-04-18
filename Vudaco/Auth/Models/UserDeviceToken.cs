@@ -22,6 +22,8 @@ namespace Vudaco.Auth.Models
 
         [Column("device_id")]
         public string DeviceId { get; set; }
+        [Column("env")]
+        public string Env { get; set; }
 
         [Column("is_active")]
         public bool IsActive { get; set; } = true;

@@ -48,8 +48,9 @@ namespace Vudaco.Controllers
                 Body = dto.Body,
                 StorageId = 1,
                 PostId = 1,
-                Type = 0,
-                Screen = "chuyenxe"
+                Type = dto.Type,
+                Screen = dto.Screen,
+                Data = dto.Data
             });
 
             return Ok(new

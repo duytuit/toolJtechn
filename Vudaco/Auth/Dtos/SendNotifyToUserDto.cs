@@ -16,6 +16,10 @@ namespace Vudaco.Auth.Dtos
 
         [Required]
         public string Body { get; set; }
+        public int Type { get; set; } = 0;
+        public string Screen { get; set; }
+        public string Data { get; set; }
+
 
     }
 }

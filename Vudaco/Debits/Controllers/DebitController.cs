@@ -2785,7 +2785,7 @@ namespace Vudaco.Debits.Controllers
                 debit.TransportationCost = JsonSerializer.Serialize(DebitDto.TransportationCost);
                 debit.Name = DebitDto.Route;
                 //debit.AccountingDate = DebitDto.AccountingDate;
-                debit.ServiceDate = DebitDto.ServiceDate;
+                debit.ServiceDate = DebitDto.AccountingDate;
                 debit.PurchasePrice = DebitDto.PurchasePrice;
                 debit.Price = DebitDto.Price;
                 debit.Vat = DebitDto.Vat;

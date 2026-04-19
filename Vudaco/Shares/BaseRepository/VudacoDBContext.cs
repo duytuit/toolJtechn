@@ -9,6 +9,7 @@ using Vudaco.Comments.Models;
 using Vudaco.ContractFiles.Models;
 using Vudaco.Debits.Models;
 using Vudaco.Departments.Models;
+using Vudaco.Depreciations.Models;
 using Vudaco.Employees.Models;
 using Vudaco.FormRequests.Models;
 using Vudaco.Notifys.Models;
@@ -60,6 +61,9 @@ namespace Vudaco.Shares.BaseRepository
         public DbSet<UserDeviceToken> UserDeviceTokens { get; set; }
         public DbSet<DriverConfirmStatus> DriverConfirmStatuses { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<Depreciation> Depreciations { get; set; }
+        public DbSet<DepreciationAllocation> DepreciationAllocations { get; set; }
+        public DbSet<DepreciationAllocationDetail> DepreciationAllocationDetails { get; set; }
 
         public VudacoDBContext(DbContextOptions<VudacoDBContext> options) : base(options)
         {
@@ -86,7 +90,7 @@ namespace Vudaco.Shares.BaseRepository
             modelBuider.Entity<UserStorage>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<Vehicle>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<VehicleDispatch>().HasQueryFilter(e => e.DeletedAt == null);
-            modelBuider.Entity<Bill>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<Depreciation>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<Debit>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<Receipt>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<ReceiptDetail>().HasQueryFilter(e => e.DeletedAt == null);
@@ -102,6 +106,9 @@ namespace Vudaco.Shares.BaseRepository
             modelBuider.Entity<UserDeviceToken>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<UserRole>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<DriverConfirmStatus>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<DepreciationAllocationDetail>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<DepreciationAllocation>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<Depreciation>().HasQueryFilter(e => e.DeletedAt == null);
         }           
     }
 }

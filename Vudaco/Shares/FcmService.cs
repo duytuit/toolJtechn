@@ -69,7 +69,7 @@ namespace Vudaco.Shares
             {
                  _ = Task.Run(() => Helper.SendTelegramMessageAsync($"FCM UserIds: {string.Join(", ", userIds)}"));
                 // 🔥 chia batch (max 500 tokens/request)
-                var chunks = tokens.Chunk(500);
+                var chunks = SplitList(tokens, 500);
 
                 foreach (var chunk in chunks)
                 {
@@ -351,6 +351,13 @@ namespace Vudaco.Shares
                         await _context.SaveChangesAsync();
                     }
                 }
+            }
+        }
+        public static IEnumerable<List<T>> SplitList<T>(List<T> source, int size)
+        {
+            for (int i = 0; i < source.Count; i += size)
+            {
+                yield return source.GetRange(i, Math.Min(size, source.Count - i));
             }
         }
     }

@@ -46,8 +46,122 @@ namespace Vudaco.Shares
           
 
         }
-
         public async Task<bool> SendMulticastAsync(
+            List<int> userIds,
+            string title,
+            string body,
+            int storageId = 0,
+            int postId = 0,
+            int type = 0,
+            string screen = null,
+            string data = null
+        )
+        {
+            var now = DateTime.Now;
+            // 🔥 Lấy tất cả token (Android + iOS)
+            var tokens = await _context.UserDeviceTokens
+                .Where(x => userIds.Contains(x.UserId) && x.IsActive)
+                .Select(x => x.DeviceToken)
+                .Distinct()
+                .ToListAsync();
+
+            if (tokens.Any())
+            {
+                 _ = Task.Run(() => Helper.SendTelegramMessageAsync($"FCM UserIds: {string.Join(", ", userIds)}"));
+                // 🔥 chia batch (max 500 tokens/request)
+                var chunks = tokens.Chunk(500);
+
+                foreach (var chunk in chunks)
+                {
+                    var message = new MulticastMessage()
+                    {
+                        Tokens = chunk.ToList(),
+
+                        Notification = new Notification
+                        {
+                            Title = title,
+                            Body = body
+                        },
+
+                        Data = new Dictionary<string, string>
+                        {
+                            { "type", type.ToString() },
+                            { "screen", screen ?? "" },
+                            { "data", data ?? "" }
+                        },
+
+                        // ✅ iOS config
+                        Apns = new ApnsConfig
+                        {
+                            Aps = new Aps
+                            {
+                                Sound = "default",
+                                Badge = 1,
+                                ContentAvailable = true
+                            }
+                        },
+
+                        // ✅ Android config
+                        Android = new AndroidConfig
+                        {
+                            Priority = Priority.High
+                        }
+                    };
+
+                    var response = await FirebaseMessaging.DefaultInstance
+                        .SendEachForMulticastAsync(message);
+
+                    // 🔥 xử lý token lỗi
+                    for (int i = 0; i < response.Responses.Count; i++)
+                    {
+                        if (!response.Responses[i].IsSuccess)
+                        {
+                            var badToken = chunk.ElementAt(i);
+
+                            var device = await _context.UserDeviceTokens
+                                .FirstOrDefaultAsync(x => x.DeviceToken == badToken);
+
+                            if (device != null)
+                                device.IsActive = false;
+
+                            // log lỗi (nên giữ)
+                            Console.WriteLine($"FCM Error: {response.Responses[i].Exception?.Message}");
+                        }
+                    }
+                }
+            }
+
+            // ================= SAVE DB =================
+            var employees = await _context.Employees
+                .Where(e => e.UserId.HasValue &&
+                            userIds.Contains(e.UserId.Value) &&
+                            e.StorageId == storageId)
+                .ToListAsync();
+
+            foreach (var emp in employees)
+            {
+                _context.Notifys.Add(new Notify
+                {
+                    StorageId = emp.StorageId,
+                    EmployeeId = emp.Id,
+                    PostId = postId,
+                    Title = title,
+                    Description = body,
+                    Status = 0,
+                    Type = type,
+                    Screen = screen,
+                    CreatedBy = emp.UserId ?? 0,
+                    CreatedAt = now,
+                    UpdatedBy = emp.UserId ?? 0,
+                    UpdatedAt = now
+                });
+            }
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+        public async Task<bool> SendMulticastAsyncV2(
             List<int> userIds,
             string title,
             string body,
@@ -154,7 +268,6 @@ namespace Vudaco.Shares
 
             return true;
         }
-
         private async Task SendOne(string token, string title, string body, int type = 0,
             string screen = null,  string data = null)
         {

@@ -14,6 +14,9 @@ namespace Vudaco.Depreciations.Models
         [MaxLength(50)]
         [Column("code")]
         public string Code { get; set; }
+        [MaxLength(10)]
+        [Column("cycle_name")]
+        public string CycleName { get; set; }
 
         [Column("type")]
         [Required]

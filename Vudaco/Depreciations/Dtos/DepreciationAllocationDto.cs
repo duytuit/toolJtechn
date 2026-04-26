@@ -8,9 +8,8 @@ namespace Vudaco.Depreciations.Dtos
     public class DepreciationAllocationDto
     {
         public int Id { get; set; }
-
         public string Code { get; set; }
-
+        public string CycleName { get; set; }
         public int? Type { get; set; }
 
         public string Description { get; set; }

@@ -67,7 +67,7 @@ namespace Vudaco.Shares
 
             if (tokens.Any())
             {
-                 _ = Task.Run(() => Helper.SendTelegramMessageAsync($"FCM UserIds: {string.Join(", ", userIds)}"));
+              
                 // 🔥 chia batch (max 500 tokens/request)
                 var chunks = SplitList(tokens, 500);
 
@@ -123,7 +123,7 @@ namespace Vudaco.Shares
 
                             if (device != null)
                                 device.IsActive = false;
-
+                               _ = Task.Run(() => Helper.SendTelegramMessageAsync($"Error:{response.Responses[i].Exception?.Message}-FCM UserIds: {string.Join(", ", badToken)}"));
                             // log lỗi (nên giữ)
                             Console.WriteLine($"FCM Error: {response.Responses[i].Exception?.Message}");
                         }

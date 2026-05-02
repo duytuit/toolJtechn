@@ -96,8 +96,6 @@ namespace Vudaco.Shares
                             Aps = new Aps
                             {
                                 Sound = "default",
-                                Badge = 1,
-                                ContentAvailable = true
                             }
                         },
 

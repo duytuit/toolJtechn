@@ -48,14 +48,14 @@ namespace Vudaco
         public void ConfigureServices(IServiceCollection services)
         {
             // Init Firebase
-            if (FirebaseApp.DefaultInstance == null)
-            {
-                FirebaseApp.Create(new AppOptions
-                {
-                    Credential = GoogleCredential.FromFile("appvudaco-a5a65d4905b2.json"),
-                    ProjectId = "appvudaco"
-                });
-            }
+            // if (FirebaseApp.DefaultInstance == null)
+            // {
+            //     FirebaseApp.Create(new AppOptions
+            //     {
+            //         Credential = GoogleCredential.FromFile("appvudaco-a5a65d4905b2.json"),
+            //         ProjectId = "appvudaco"
+            //     });
+            // }
             services.AddSingleton<IFcmQueue, FcmQueue>();
             services.AddHostedService<FcmBackgroundWorker>();
             services.AddScoped<FcmService>();

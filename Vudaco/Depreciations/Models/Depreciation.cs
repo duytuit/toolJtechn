@@ -39,6 +39,10 @@ namespace Vudaco.Depreciations.Models
         [Column("type")]
         public int Type { get; set; }
 
+        [Required]
+        [Column("status")]
+        public int Status { get; set; }
+
         [Column("note")]
         public string Note { get; set; }
 

@@ -5,6 +5,7 @@ using Vudaco.Depreciations.Dtos;
 using Vudaco.Depreciations.Models;
 using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
+using Microsoft.EntityFrameworkCore;
 
 namespace Vudaco.Depreciations.Repositories
 {
@@ -35,9 +36,9 @@ namespace Vudaco.Depreciations.Repositories
             throw new System.NotImplementedException();
         }
 
-        public Task<DepreciationAllocationDetail> ShowAsync(int id)
+        public  Task<DepreciationAllocationDetail> ShowAsync(int id)
         {
-            throw new System.NotImplementedException();
+            return  _context.DepreciationAllocationDetails.FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public Task<DepreciationAllocationDetail> UpdateAsync(DepreciationAllocationDetail DepreciationAllocationDetail)

@@ -27,7 +27,9 @@ namespace Vudaco.Depreciations.Repositories
 
         public Task<DepreciationAllocation> DeleteSoftAsync(DepreciationAllocation DepreciationAllocation)
         {
-            throw new System.NotImplementedException();
+            _context.DepreciationAllocations.Update(DepreciationAllocation);
+            _context.SaveChanges();
+            return Task.FromResult(DepreciationAllocation);
         }
 
         public Task<PaginatedResultReact<object>> GetObjectTaskAsync(DepreciationAllocationDto DepreciationAllocationDto, int page, int pageSize, CancellationToken cancellationToken)

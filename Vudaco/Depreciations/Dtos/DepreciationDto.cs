@@ -13,18 +13,18 @@ namespace Vudaco.Depreciations.Dtos
 
         public string Name { get; set; }
 
-        public decimal? OriginalCost { get; set; }
+        public int? OriginalCost { get; set; }
 
         public int? UsefulLife { get; set; }
 
         public DateTime? EndDate { get; set; }
 
-        public decimal? MonthlyDepreciation { get; set; }
+        public int? MonthlyDepreciation { get; set; }
 
         public int StorageId { get; set; }
 
         public int Type { get; set; }
-
+        public int Status { get; set; }
         public string Note { get; set; }
 
         public int? CreatedBy { get; set; }

@@ -13,6 +13,7 @@ namespace Vudaco.Depreciations.Repositories
     public interface IDepreciationRepositories : IBaseRepository<Depreciation>
     {
         Task<PaginatedResultReact<object>> GetObjectTaskAsync(DepreciationDto DepreciationDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<PaginatedResultReact<object>> GetDepreciationAllocationAsync(DepreciationAllocationDto DepreciationAllocationDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<Depreciation> ShowAsync(int id);
         Task<Depreciation> CreateAsync(Depreciation Depreciation);
         Task<Depreciation> UpdateAsync(Depreciation Depreciation);

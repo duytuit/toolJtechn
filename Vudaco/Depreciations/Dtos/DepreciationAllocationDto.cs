@@ -7,15 +7,10 @@ namespace Vudaco.Depreciations.Dtos
 {
     public class DepreciationAllocationDto
     {
-        public int Id { get; set; }
-        public string Code { get; set; }
+        public DateTime AccountingDate { get; set; }
         public string CycleName { get; set; }
-        public int? Type { get; set; }
-
-        public string Description { get; set; }
-
+        public int Type { get; set; }
         public string Note { get; set; }
-
         public int StorageId { get; set; }
 
         public int? CreatedBy { get; set; }

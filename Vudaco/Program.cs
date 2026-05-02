@@ -49,7 +49,14 @@ namespace Vudaco
                     if (!Directory.Exists(webRoot))
                         Directory.CreateDirectory(webRoot); 
 
-                    webBuilder.UseWebRoot("wwwroot").UseStartup<Startup>();
+                    webBuilder
+                     .UseWebRoot("wwwroot")
+                     .UseStartup<Startup>()
+                     .ConfigureKestrel(options =>
+                        {
+                            options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(5);
+                            options.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(2);
+                        });
                 });
     }
 }

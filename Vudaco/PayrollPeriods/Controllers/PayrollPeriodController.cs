@@ -40,6 +40,16 @@ namespace Vudaco.PayrollPeriods.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
+        [HttpGet("GetByCycleName")]
+        public async Task<IActionResult> GetByCycleName(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] PayrollPeriodDetailDto  payrollPeriodDetailDto = null)
+        {
+           var _result = await _context.PayrollPeriodDetails.FirstOrDefaultAsync(x => x.CycleName == payrollPeriodDetailDto.CycleName && x.EmployeeId == payrollPeriodDetailDto.EmployeeId && x.StorageId == payrollPeriodDetailDto.StorageId);
+            if (_result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", _result);
+        }
         [HttpPost("create")]
         public async Task<IActionResult> Create([FromBody] PayrollPeriodDetailDto PayrollPeriodDetailDto)
         {

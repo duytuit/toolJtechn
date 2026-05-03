@@ -108,6 +108,16 @@ namespace Vudaco.Receipts.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
+        [HttpGet("GetUngTienCuaLaiXeAsync")]
+        public async Task<IActionResult> GetUngTienCuaLaiXeAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] ReceiptDto ReceiptDto = null)
+        {
+            var result = await _repoReceipt.GetUngTienCuaLaiXeAsync(ReceiptDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
         [HttpGet("XacNhanChiPhiGiaoNhan")]
         public async Task<IActionResult> GetXacNhanChiPhiGiaoNhan(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] ReceiptDto ReceiptDto = null)
         {
@@ -1894,6 +1904,22 @@ namespace Vudaco.Receipts.Controllers
             entity.UpdatedBy = userId;
             await _context.SaveChangesAsync();
              return ApiResponseResult<object>(true, "Xóa thành công", null);
+        }
+        [HttpPost("updateAccountDate")]
+        public async Task<IActionResult> UpdateAccountDate([FromBody] ReceiptDto dto)
+        {
+            if (dto.Id <= 0)
+            return ApiResponseResult<object>(false, "Id không hợp lệ", null);
+            var entity = await _context.Receipts
+                    .AsTracking()
+                    .FirstOrDefaultAsync(p => p.Id == dto.Id);
+            if (entity == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            entity.AccountingDate = dto.AccountingDate;
+            entity.UpdatedAt = DateTime.Now;
+            entity.UpdatedBy = userId;
+            _context.Receipts.Update(entity);
+            await _context.SaveChangesAsync();
+            return ApiResponseResult<object>(true, "Cập nhật ngày hạch toán thành công", null);
         }
        [HttpPost("delete")]
         public async Task<IActionResult> Delete([FromBody] ReceiptDto dto)

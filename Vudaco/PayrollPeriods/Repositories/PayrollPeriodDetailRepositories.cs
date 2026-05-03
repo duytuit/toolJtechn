@@ -40,36 +40,28 @@ namespace Vudaco.PayrollPeriods.Repositories
 
         public async Task<PaginatedResultReact<object>> GetObjectTaskAsync(PayrollPeriodDetailDto payrollPeriodDetailDto, int page, int pageSize, CancellationToken cancellationToken)
         {
-            var whereEquals = new Dictionary<string, object>();
-            var whereLikes = new Dictionary<string, string>();
-            var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
-            var orderByList = new List<string> {  "updated_at desc" , "id"};
-            dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
-                        _configuration.GetConnectionString("DefaultConnection"),
-                        "payroll_periods",
-                        new[] { "id","name","start_date","end_date","created_by","updated_by","deleted_by","deleted_at","created_at","updated_at"},
-                        offset: null,
-                        limit: null,
-                        whereEquals: whereEquals,
-                        whereLikes: whereLikes,
-                        dateRangeList: whereDateRange,
-                        orderByList: orderByList,
-                        redisCache: _redis,
-                        includeCount: false,
-                        cancellationToken: cancellationToken
-                    );
-            int totalItems = results.Count;
-            var objectList = new List<object>();
-            objectList.AddRange(results.Data);
+            page = page <= 0 ? 1 : page;
+             pageSize = pageSize <= 0 ? 500 : pageSize;
+             int offset = (page - 1) * pageSize;
+             var sql = $@"
+                 SELECT d.* FROM payroll_period_details d
+                 WHERE d.deleted_at IS NULL";
+            if (payrollPeriodDetailDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {payrollPeriodDetailDto.StorageId}";
+            }
+            // 👉 ORDER + PAGINATION
+            sql += $@"
+                ORDER BY d.updated_at DESC
+                OFFSET {offset} ROWS
+                FETCH NEXT {pageSize} ROWS ONLY";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
             {
+                Data = results,
                 PageNum = page,
-                PageSize = pageSize,
-                First = (int)Math.Ceiling((double)totalItems / pageSize),
-                Total = totalItems,
-                Data = objectList,
+                PageSize = pageSize
             };
-            whereEquals?.Clear(); whereLikes?.Clear(); whereDateRange?.Clear(); orderByList?.Clear();
             return _results;
         }
 

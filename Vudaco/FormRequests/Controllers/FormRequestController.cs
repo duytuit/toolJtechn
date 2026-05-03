@@ -92,7 +92,7 @@ namespace Vudaco.FormRequests.Controllers
         [HttpPost("ChangeStatus")]
         public async Task<IActionResult> ChangeStatus([FromBody] FormRequestDto formRequestDto)
         {
-              if (formRequestDto.Id <= 0)
+            if (formRequestDto.Id <= 0)
             {
                 return ApiResponseResult<object>(false, "Id không tồn tại", null);
             }
@@ -101,6 +101,12 @@ namespace Vudaco.FormRequests.Controllers
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
             }
+            // So sánh theo UpdatedAt (hợp lý hơn CreatedAt)
+            var lastUpdateDate = (formRequest.UpdatedAt ?? formRequest.CreatedAt)?.Date;
+            var now = DateTime.Now;
+            if (lastUpdateDate.HasValue && lastUpdateDate.Value != now.Date && (formRequest.Status == 1 || formRequest.Status == 2))
+                return ApiResponseResult<object>(false, "Đã hết hạn thay đổi trạng thái", null);
+
             formRequest.Status = formRequestDto.Status;
             formRequest.ConfirmAt = formRequestDto.Status == 1 || formRequestDto.Status == 2 ? DateTime.Now : (DateTime?)null;
             formRequest.ConfirmBy = formRequestDto.Status == 1 || formRequestDto.Status == 2 ? userId : (int?)null;

@@ -3092,10 +3092,11 @@ namespace Vudaco.Debits.Controllers
                 {
                     int debit_id = item.GetProperty("id").GetInt32();
                     int vat = item.GetProperty("purchase_vat").GetInt32();
+                    DateTime service_date = Convert.ToDateTime(item.GetProperty("service_date").GetString());
                     var debit = await _context.Debits.FirstOrDefaultAsync(x => x.Id == debit_id);
                     if (debit == null) continue;
                    
-                    debit.PurchaseAccountingDate = ConfirmDebitNoFileDto.AccountingDate;
+                    debit.PurchaseAccountingDate = service_date;
                     debit.PurchaseVat = vat;
                     debit.PurchaseStatus = 1;
                     debit.UpdatedBy = userId;
@@ -3146,13 +3147,14 @@ namespace Vudaco.Debits.Controllers
                     int vat = item.GetProperty("vat").GetInt32();
                     int purchase_com = item.GetProperty("purchase_com").GetInt32();
                     int price_com = item.GetProperty("price_com").GetInt32();
+                    DateTime service_date = Convert.ToDateTime(item.GetProperty("service_date").GetString());
                     var debit = await _context.Debits.FirstOrDefaultAsync(x => x.Id == debit_id);
                     if (debit == null) continue;
                     var confirm_file = await _context.ConfirmFiles.FirstOrDefaultAsync(x => x.DebitId == debit.Id); // duyệt file giá
 
                     if (confirm_file.Status < 2)
                     {
-                        debit.AccountingDate = ConfirmDebitNoFileDto.AccountingDate;
+                        debit.AccountingDate = service_date;
                         debit.Vat = vat;
                         debit.PurchaseCom = purchase_com;
                         debit.PriceCom = price_com;

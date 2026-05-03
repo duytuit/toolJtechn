@@ -6,6 +6,9 @@ namespace Vudaco.PayrollPeriods.Dtos
         public int Id { get; set; }
         public int StorageId { get; set; }
         public int PayrollPeriodId { get; set; }
+        public string CycleName { get; set; }
+        public int EmployeeId { get; set; }
+        public int Status { get; set; }
         public int LuongCung { get; set; }
         public int SoNgayLam { get; set; }
         public int PhepTon { get; set; }
@@ -24,6 +27,9 @@ namespace Vudaco.PayrollPeriods.Dtos
         public int TongTru { get; set; }
         public int TongUng { get; set; }
         public int Thuong { get; set; }
+        public int TroCapKhac { get; set; }
+        public int ChiKhac { get; set; }
+        public int BaoHiemXaHoi { get; set; }
         public string? GhiChu { get; set; }
         public int DiemTraHang { get; set; }
         public int TienAn { get; set; }

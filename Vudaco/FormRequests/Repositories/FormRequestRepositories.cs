@@ -52,6 +52,8 @@ namespace Vudaco.FormRequests.Repositories
             {
                 whereEquals.Add("employee_id", formRequestDto.EmployeeId);
             }
+            if (formRequestDto.FromDate.HasValue && formRequestDto.ToDate.HasValue)
+                whereDateRange.Add(("created_at", formRequestDto.FromDate.Value, formRequestDto.ToDate.Value));
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "form_requests",

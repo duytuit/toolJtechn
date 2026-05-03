@@ -381,7 +381,6 @@ namespace Vudaco.ContractFiles.Repositories
                         )";
             if (FileInfoDetailDto.StorageId > 0)
             {
-
                 sql += $@" AND f.storage_id = {FileInfoDetailDto.StorageId}";
             }
             if (FileInfoDetailDto.EmployeeId > 0)

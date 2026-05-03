@@ -14,8 +14,14 @@ namespace Vudaco.PayrollPeriods.Models
         [Required]
         [Column("storage_id")]
         public int StorageId { get; set; }
-
         [Required]
+        [Column("cycle_name")]
+        public string CycleName { get; set; }
+        [Required]
+        [Column("employee_id")]
+        public int EmployeeId { get; set; }
+        [Column("status")]
+        public int Status { get; set; }
         [Column("payroll_period_id")]
         public int PayrollPeriodId { get; set; }
 
@@ -24,6 +30,13 @@ namespace Vudaco.PayrollPeriods.Models
 
         [Column("songaylam")]
         public int SoNgayLam { get; set; }
+
+        [Column("trocapkhac")]
+        public int TroCapKhac { get; set; }
+         [Column("chikhac")]
+        public int ChiKhac { get; set; }
+        [Column("baohiemxahoi")]
+        public int BaoHiemXaHoi { get; set; }
 
         [Column("phepton")]
         public int PhepTon { get; set; }
@@ -52,16 +65,16 @@ namespace Vudaco.PayrollPeriods.Models
         [Column("nghikhongluong")]
         public int NghiKhongLuong { get; set; }
 
-        [Column("chitietdebit", TypeName = "nvarchar(max)")]
+        [Column("chitietdebit")]
         public string? ChiTietDebit { get; set; }
 
-        [Column("chitietnghiphep", TypeName = "nvarchar(max)")]
+        [Column("chitietnghiphep")]
         public string? ChiTietNghiPhep { get; set; }
 
-        [Column("chitietphieuchi", TypeName = "nvarchar(max)")]
+        [Column("chitietphieuchi")]
         public string? ChiTietPhieuChi { get; set; }
 
-        [Column("chitietkhoanchi", TypeName = "nvarchar(max)")]
+        [Column("chitietkhoanchi")]
         public string? ChiTietKhoanChi { get; set; }
 
         [Column("tongtru")]
@@ -74,7 +87,6 @@ namespace Vudaco.PayrollPeriods.Models
         public int Thuong { get; set; }
 
         [Column("ghichu")]
-        [MaxLength(255)]
         public string? GhiChu { get; set; }
 
         [Column("diemtrahang")]

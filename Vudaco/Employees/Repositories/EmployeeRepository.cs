@@ -50,7 +50,7 @@ namespace Vudaco.Employees.Repositories
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                         _configuration.GetConnectionString("DefaultConnection"),
                         "employees",
-                        new[] { "id", "code", "first_name", "last_name", "identity_card", "native_land", "addresss", "birthday", "status", "marital", "worker", "positions", "begin_date_company", "end_date_company", "storage_id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "avatar", "phone", "email", "bank_number", "bank_name", "user_id" },
+                        new[] { "id", "code", "first_name", "last_name", "identity_card", "native_land", "addresss", "birthday", "status", "marital", "worker", "positions", "begin_date_company", "end_date_company", "storage_id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "avatar", "phone", "email", "bank_number", "bank_name", "user_id","base_salary" },
                         offset: null,
                         limit: null,
                         whereEquals: whereEquals,

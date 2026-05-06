@@ -121,7 +121,7 @@ namespace Vudaco.PayrollPeriods.Controllers
         public IActionResult GetSalary([FromQuery] PayrollPeriodDto payrollPeriodDto = null)
         {
               _ = Task.Run(() => Helper.SendTelegramMessageAsync(JsonSerializer.Serialize(payrollPeriodDto)));
-             var fileUrl = "https://admin.vudaco.online/salary/SalaryByCycleName";
+             var fileUrl = "https://admin.vudaco.online/salary/SalaryByCycleName?storageId=" + payrollPeriodDto.StorageId + "&employeeId=" + payrollPeriodDto.EmployeeId +"&fromDate="+payrollPeriodDto.FromDate+"&toDate="+payrollPeriodDto.ToDate;
 
              return ApiResponseResult(true, "Lấy dữ liệu thành công", new { fileUrl });
         }
@@ -129,7 +129,7 @@ namespace Vudaco.PayrollPeriods.Controllers
         public IActionResult SalaryByCycleName([FromQuery] PayrollPeriodDto payrollPeriodDto = null)
         {
               _ = Task.Run(() => Helper.SendTelegramMessageAsync(JsonSerializer.Serialize(payrollPeriodDto)));
-             var fileUrl = "https://admin.vudaco.online/salary/SalaryByCycleName";
+             var fileUrl = "https://admin.vudaco.online/salary/SalaryByCycleName?cycleName=" + payrollPeriodDto.CycleName + "&employeeId=" + payrollPeriodDto.EmployeeId + "&storageId=" + payrollPeriodDto.StorageId;
 
              return ApiResponseResult(true, "Lấy dữ liệu thành công", new { fileUrl });
         }

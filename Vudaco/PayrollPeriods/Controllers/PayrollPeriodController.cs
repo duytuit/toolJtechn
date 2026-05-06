@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Vudaco.Comments.Dtos;
@@ -9,6 +10,7 @@ using Vudaco.Controllers;
 using Vudaco.PayrollPeriods.Dtos;
 using Vudaco.PayrollPeriods.Models;
 using Vudaco.PayrollPeriods.Repositories;
+using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
 
 namespace Vudaco.PayrollPeriods.Controllers
@@ -118,6 +120,7 @@ namespace Vudaco.PayrollPeriods.Controllers
         [HttpPost("salary")]
         public IActionResult GetSalary([FromQuery] PayrollPeriodDto payrollPeriodDto = null)
         {
+              _ = Task.Run(() => Helper.SendTelegramMessageAsync("test"));
              var fileUrl = "https://admin.vudaco.online/salary/SalaryByCycleName";
 
              return ApiResponseResult(true, "Lấy dữ liệu thành công", new { fileUrl });
@@ -125,6 +128,7 @@ namespace Vudaco.PayrollPeriods.Controllers
         [HttpPost("SalaryByCycleName")]
         public IActionResult SalaryByCycleName([FromQuery] PayrollPeriodDto payrollPeriodDto = null)
         {
+              _ = Task.Run(() => Helper.SendTelegramMessageAsync("test"));
              var fileUrl = "https://admin.vudaco.online/salary/SalaryByCycleName";
 
              return ApiResponseResult(true, "Lấy dữ liệu thành công", new { fileUrl });

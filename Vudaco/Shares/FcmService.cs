@@ -108,20 +108,19 @@ namespace Vudaco.Shares
 
                     var response = await FirebaseMessaging.DefaultInstance
                         .SendEachForMulticastAsync(message);
-
+                     
                     // 🔥 xử lý token lỗi
                     for (int i = 0; i < response.Responses.Count; i++)
                     {
+                         var badToken = chunk.ElementAt(i);
+                          _ = Task.Run(() => Helper.SendTelegramMessageAsync($"Error:{response.Responses[i].Exception?.Message}-FCM UserIds: {string.Join(", ", badToken)}"));
                         if (!response.Responses[i].IsSuccess)
                         {
-                            var badToken = chunk.ElementAt(i);
-
                             var device = await _context.UserDeviceTokens
                                 .FirstOrDefaultAsync(x => x.DeviceToken == badToken);
 
                             if (device != null)
                                 device.IsActive = false;
-                               _ = Task.Run(() => Helper.SendTelegramMessageAsync($"Error:{response.Responses[i].Exception?.Message}-FCM UserIds: {string.Join(", ", badToken)}"));
                             // log lỗi (nên giữ)
                             Console.WriteLine($"FCM Error: {response.Responses[i].Exception?.Message}");
                         }

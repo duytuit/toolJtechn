@@ -270,7 +270,7 @@ namespace Vudaco.Receipts.Repositories
         {
             var sql = $@"
                     SELECT
-                        r.*,
+                        r.id,r.code_receipt,r.storage_id,r.partner_detail_id,r.accounting_date,r.object,r.object_id,r.offset_id,r.employee_id,r.file_info_id,r.fund_id,r.purchase_debit_id,r.debit_receivable_id,r.debit_driver_id,r.income_expense_category_id,r.bill,r.note,r.description,r.form_of_payment,r.type_receipt,r.type,r.bank_id,r.status,r.created_by,r.updated_by,r.deleted_by,r.deleted_at,r.created_at,r.updated_at,
                         iecat.type AS iecat_type,
                         iecat.name AS iecat_name,
                         d.amount,
@@ -370,7 +370,7 @@ namespace Vudaco.Receipts.Repositories
         {
             var sql = $@"
                     SELECT 
-                        r.*,
+                        r.id,r.code_receipt,r.storage_id,r.partner_detail_id,r.accounting_date,r.object,r.object_id,r.offset_id,r.employee_id,r.file_info_id,r.fund_id,r.purchase_debit_id,r.debit_receivable_id,r.debit_driver_id,r.income_expense_category_id,r.bill,r.note,r.description,r.form_of_payment,r.type_receipt,r.type,r.bank_id,r.status,r.created_by,r.updated_by,r.deleted_by,r.deleted_at,r.created_at,r.updated_at,
                         d.amount,
                         d.total
                     FROM receipts r
@@ -415,7 +415,7 @@ namespace Vudaco.Receipts.Repositories
         {
             var sql = $@"
                     SELECT 
-                        r.*,
+                        r.id,r.code_receipt,r.storage_id,r.partner_detail_id,r.accounting_date,r.object,r.object_id,r.offset_id,r.employee_id,r.file_info_id,r.fund_id,r.purchase_debit_id,r.debit_receivable_id,r.debit_driver_id,r.income_expense_category_id,r.bill,r.note,r.description,r.form_of_payment,r.type_receipt,r.type,r.bank_id,r.status,r.created_by,r.updated_by,r.deleted_by,r.deleted_at,r.created_at,r.updated_at,
                         d.amount,
                         d.total,
                         db.min_status
@@ -477,7 +477,7 @@ namespace Vudaco.Receipts.Repositories
         {
              var sql = $@"
                     SELECT 
-                        r.*,
+                        r.id,r.code_receipt,r.storage_id,r.partner_detail_id,r.accounting_date,r.object,r.object_id,r.offset_id,r.employee_id,r.file_info_id,r.fund_id,r.purchase_debit_id,r.debit_receivable_id,r.debit_driver_id,r.income_expense_category_id,r.bill,r.note,r.description,r.form_of_payment,r.type_receipt,r.type,r.bank_id,r.status,r.created_by,r.updated_by,r.deleted_by,r.deleted_at,r.created_at,r.updated_at,
                         d.amount,
                         d.total
                     FROM receipts r
@@ -602,7 +602,7 @@ namespace Vudaco.Receipts.Repositories
         {
              var sql = $@"
                     SELECT 
-                        r.*,
+                        r.id,r.code_receipt,r.storage_id,r.partner_detail_id,r.accounting_date,r.object,r.object_id,r.offset_id,r.employee_id,r.file_info_id,r.fund_id,r.purchase_debit_id,r.debit_receivable_id,r.debit_driver_id,r.income_expense_category_id,r.bill,r.note,r.description,r.form_of_payment,r.type_receipt,r.type,r.bank_id,r.status,r.created_by,r.updated_by,r.deleted_by,r.deleted_at,r.created_at,r.updated_at,
                         d.amount,
                         d.total
                     FROM receipts r

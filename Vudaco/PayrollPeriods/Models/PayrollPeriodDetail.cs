@@ -37,6 +37,12 @@ namespace Vudaco.PayrollPeriods.Models
         public int ChiKhac { get; set; }
         [Column("baohiemxahoi")]
         public int BaoHiemXaHoi { get; set; }
+        [Column("luongthucte")]
+        public int? LuongThucTe { get; set; }
+        [Column("truphep")]
+        public int? TruPhep { get; set; }
+        [Column("laixethucuoc")]
+        public int? LaiXeThuCuoc { get; set; }
 
         [Column("phepton")]
         public int PhepTon { get; set; }

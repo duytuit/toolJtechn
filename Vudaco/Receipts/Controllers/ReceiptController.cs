@@ -1743,7 +1743,9 @@ namespace Vudaco.Receipts.Controllers
             var entity = await _context.Receipts.FirstOrDefaultAsync(p => p.CodeReceipt == ReceiptDto.CodeReceipt);
             if (entity != null)
                 return ApiResponseResult<object>(false, "ma phieu chi đã tồn tại", null);
-
+            entity = await _context.Receipts.FirstOrDefaultAsync(p => p.FileInfoId == ReceiptDto.FileInfoId);
+            if (entity != null && entity.Id != ReceiptDto.Id)
+                return ApiResponseResult<object>(false, "Số file đã tồn tại trên phiếu chi khác " + entity.CodeReceipt, null);
             using var tran = await _context.Database.BeginTransactionAsync();
             var conn = _context.Database.GetDbConnection();
             try
@@ -1816,6 +1818,11 @@ namespace Vudaco.Receipts.Controllers
             var entity = await _context.Receipts.FirstOrDefaultAsync(p => p.Id == ReceiptDto.Id);
             if (entity == null)
                 return ApiResponseResult<object>(false, "Không tìm thấy phiếu chi giao nhận", null);
+
+            entity = await _context.Receipts.FirstOrDefaultAsync(p => p.FileInfoId == ReceiptDto.FileInfoId);
+
+            if (entity != null && entity.Id != ReceiptDto.Id)
+                return ApiResponseResult<object>(false, "Số file đã tồn tại trên phiếu chi khác " + entity.CodeReceipt, null);
 
             using var tran = await _context.Database.BeginTransactionAsync();
             try

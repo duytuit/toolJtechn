@@ -16,6 +16,9 @@ namespace Vudaco.PayrollPeriods.Dtos
         public int LamThemNgayThuong { get; set; }
         public int LamThemNgayNghi { get; set; }
         public int LamThemNgayLe { get; set; }
+        public int LuongThucTe { get; set; }
+        public int TruPhep { get; set; }
+        public int LaiXeThuCuoc { get; set; }
         public decimal TyLeHuongLuong { get; set; }
         public int DoanhSo { get; set; }
         public int NghiPhep { get; set; }

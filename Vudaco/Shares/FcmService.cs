@@ -25,24 +25,24 @@ namespace Vudaco.Shares
         {
             _context = context;
 
-            var cfg = config.GetSection("Apns");
-            _useSandbox = bool.Parse(cfg["UseSandbox"] ?? "false");
+            // var cfg = config.GetSection("Apns");
+            // _useSandbox = bool.Parse(cfg["UseSandbox"] ?? "false");
 
-            _bundleId = cfg["BundleId"];
+            // _bundleId = cfg["BundleId"];
 
-            var keyContent = File.ReadAllText(cfg["P8Path"]);
+            // var keyContent = File.ReadAllText(cfg["P8Path"]);
 
-            var httpClient = new HttpClient();
+            // var httpClient = new HttpClient();
 
-            _client = ApnsClient.CreateUsingJwt(
-                httpClient,
-                new ApnsJwtOptions
-                {
-                    TeamId = cfg["TeamId"],
-                    KeyId = cfg["KeyId"],
-                    CertContent = keyContent, // ✅ dùng content
-                    BundleId = _bundleId
-                });
+            // _client = ApnsClient.CreateUsingJwt(
+            //     httpClient,
+            //     new ApnsJwtOptions
+            //     {
+            //         TeamId = cfg["TeamId"],
+            //         KeyId = cfg["KeyId"],
+            //         CertContent = keyContent, // ✅ dùng content
+            //         BundleId = _bundleId
+            //     });
           
 
         }
@@ -113,7 +113,7 @@ namespace Vudaco.Shares
                     for (int i = 0; i < response.Responses.Count; i++)
                     {
                          var badToken = chunk.ElementAt(i);
-                          _ = Task.Run(() => Helper.SendTelegramMessageAsync($"Error:{response.Responses[i].Exception?.Message}-FCM UserIds: {string.Join(", ", badToken)}"));
+                        _ = Task.Run(() => Helper.SendTelegramMessageAsync($"{badToken} - tokens"));
                         if (!response.Responses[i].IsSuccess)
                         {
                             var device = await _context.UserDeviceTokens

@@ -94,11 +94,24 @@ namespace Vudaco.Controllers
         [HttpGet("GetByCycleName")]
         public async Task<IActionResult> GetByCycleName(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] PayrollPeriodDetailDto  payrollPeriodDetailDto = null)
         {
-           var _result = await _context.PayrollPeriodDetails.FirstOrDefaultAsync(x => x.CycleName == payrollPeriodDetailDto.CycleName && x.EmployeeId == payrollPeriodDetailDto.EmployeeId && x.StorageId == payrollPeriodDetailDto.StorageId);
+            var _result = await _context.PayrollPeriodDetails.FirstOrDefaultAsync(x => x.CycleName == payrollPeriodDetailDto.CycleName && x.EmployeeId == payrollPeriodDetailDto.EmployeeId && x.StorageId == payrollPeriodDetailDto.StorageId);
             if (_result == null)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
             }
+            var _employee = await _context.Employees.FirstOrDefaultAsync(x => x.Id == _result.EmployeeId);
+            var _emp_dep = await _context.EmployeeDepartments.FirstOrDefaultAsync(x => x.EmployeeId == _result.EmployeeId);
+            if (_emp_dep == null)
+            {
+                return ApiResponseResult<object>(false, "Nhân viên không thuộc phòng ban nào", null);
+            }
+            var _department = await _context.Departments.FirstOrDefaultAsync(x => x.Id == _emp_dep.DepartmentId);
+            if (_department == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy phòng ban", null);
+            }
+            _result.DepartmentName = _department.Name;
+            _result.Employee = _employee;
             return ApiResponseResult(true, "Lấy dữ liệu thành công", _result);
         }
     }

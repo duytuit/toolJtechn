@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Vudaco.Employees.Models;
 
 namespace Vudaco.PayrollPeriods.Models
 {
@@ -133,5 +134,10 @@ namespace Vudaco.PayrollPeriods.Models
 
         [Column("deleted_at")]
         public DateTime? DeletedAt { get; set; }
+        [NotMapped]
+        public string DepartmentName { get; set; }
+
+        [NotMapped]
+        public Employee Employee { get; set; }
     }
 }

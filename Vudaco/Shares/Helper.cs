@@ -221,7 +221,7 @@ namespace Vudaco.Shares
                 ? $"uploads/{folder}/{date_file}{file.FileName}"
                 : $"uploads/{date_file}{file.FileName}";
 
-            return new UploadResult(true, "OK", $"{relativePath}", "https://vudaco.online/"+$"{relativePath}");
+            return new UploadResult(true, "OK", $"{relativePath}", "https://vudaco.io.vn/"+$"{relativePath}");
         }
         public static string GetClientInfo(IHttpContextAccessor accessor, string clientNameFromBody = null)
         {

@@ -1939,11 +1939,16 @@ namespace Vudaco.Receipts.Controllers
             {
                 var now = DateTime.Now;
                 var receipt = await _context.Receipts.FirstOrDefaultAsync(x => x.Id == dto.Id);
-
+   
                 if (receipt == null)
                 {
                     await tran.RollbackAsync();
                     return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+                }
+                var file_info = await _context.FileInfos.FirstOrDefaultAsync(x => x.ReceiptId == receipt.Id);
+                if (file_info != null)
+                {
+                    file_info.ReceiptId = null;
                 }
                 if(receipt.DebitReceivableId != null)// phiếu thu hoặc chi tạm ứng kh, ncc
                 {
@@ -1988,11 +1993,7 @@ namespace Vudaco.Receipts.Controllers
                     detail.DeletedBy = userId;
                 }
 
-                var file_info = await _context.FileInfos.FirstOrDefaultAsync(x => x.ReceiptId == receipt.Id);
-                if (file_info != null)
-                {
-                    file_info.ReceiptId = null;
-                }
+              
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
 

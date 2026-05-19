@@ -1905,6 +1905,14 @@ namespace Vudaco.Receipts.Controllers
 
                 if (entity == null)
                     return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            var file_info = await _context.FileInfos.Where(x => x.ReceiptId == ReceiptDto.Id).ToListAsync();
+            if (file_info != null)
+            {
+                foreach (var info in file_info)
+                {
+                    info.ReceiptId = null;
+                }
+            }
             entity.Status = 0;
             entity.Note = null;
             entity.UpdatedAt = DateTime.Now;
@@ -1945,10 +1953,13 @@ namespace Vudaco.Receipts.Controllers
                     await tran.RollbackAsync();
                     return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
                 }
-                var file_info = await _context.FileInfos.FirstOrDefaultAsync(x => x.ReceiptId == receipt.Id);
+                var file_info = await _context.FileInfos.Where(x => x.ReceiptId == receipt.Id).ToListAsync();
                 if (file_info != null)
                 {
-                    file_info.ReceiptId = null;
+                    foreach (var info in file_info)
+                    {
+                        info.ReceiptId = null;
+                    }
                 }
                 if(receipt.DebitReceivableId != null)// phiếu thu hoặc chi tạm ứng kh, ncc
                 {

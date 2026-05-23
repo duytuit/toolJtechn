@@ -549,6 +549,10 @@ namespace Vudaco.Debits.Repositories
 
                 SELECT 
                     d.*,
+                    f.file_number,
+                    f.declaration,
+                    f.bill,
+                    f.container_code,
                     CAST(ISNULL(ra.amount, 0) AS BIGINT) AS receipt_amount,
                     CAST(ISNULL(ra.vat, 0) AS BIGINT) AS receipt_vat,
                     CAST(ISNULL(ra.total, 0) AS BIGINT) AS receipt_total,
@@ -1092,6 +1096,10 @@ namespace Vudaco.Debits.Repositories
 
                 SELECT 
                     d.*,
+                    f.file_number,
+                    f.declaration,
+                    f.bill,
+                    f.container_code,
                     CAST(ISNULL(ra.amount, 0) AS BIGINT) AS receipt_amount,
                     CAST(ISNULL(ra.vat, 0) AS BIGINT) AS receipt_vat,
                     CAST(ISNULL(ra.total, 0) AS BIGINT) AS receipt_total,
@@ -1151,6 +1159,10 @@ namespace Vudaco.Debits.Repositories
             var sql = $@"
                     SELECT 
                     d.*,
+                    f.file_number,
+                    f.declaration,
+                    f.bill,
+                    f.container_code,
                     CAST(ISNULL(rdt_total.amount, 0) AS INT) AS receipt_amount,
                     CAST(ISNULL(rdt_total.vat, 0) AS INT) AS receipt_vat,
                     CAST(ISNULL(rdt_total.total, 0) AS INT) AS receipt_total

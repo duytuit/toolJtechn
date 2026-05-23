@@ -618,9 +618,11 @@ namespace Vudaco.Receipts.Controllers
                     int debit_id = item.GetProperty("id").GetInt32();
                     int conlai_dv = item.GetProperty("conlai_dv").GetInt32();
                     int conlai_ch = item.GetProperty("conlai_ch").GetInt32();
+                    int purchase_vat = item.GetProperty("purchase_vat").GetInt32();
                     int purchase_price = item.GetProperty("purchase_price").GetInt32();
+                    int purchase_total = (int)Math.Round(purchase_price * (1 + purchase_vat / 100m));
                     int receipt_total = item.GetProperty("receipt_total").GetInt32();
-                    if (purchase_price - receipt_total <= 0)
+                    if (purchase_total - receipt_total <= 0)
                     {
                         continue;
                     }

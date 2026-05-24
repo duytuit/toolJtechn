@@ -34,7 +34,7 @@ namespace Vudaco.Controllers
         //}
         public IActionResult Index()
         {
-            ViewData["Message"] = "Chào mừng đến Web API + View4";
+            ViewData["Message"] = "Chào mừng đến Web API + View1";
             return View();
         }
     }

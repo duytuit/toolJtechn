@@ -618,9 +618,11 @@ namespace Vudaco.Receipts.Controllers
                     int debit_id = item.GetProperty("id").GetInt32();
                     int conlai_dv = item.GetProperty("conlai_dv").GetInt32();
                     int conlai_ch = item.GetProperty("conlai_ch").GetInt32();
+                    int purchase_vat = item.GetProperty("purchase_vat").GetInt32();
                     int purchase_price = item.GetProperty("purchase_price").GetInt32();
+                    int purchase_total = (int)Math.Round(purchase_price * (1 + purchase_vat / 100m));
                     int receipt_total = item.GetProperty("receipt_total").GetInt32();
-                    if (purchase_price - receipt_total <= 0)
+                    if (purchase_total - receipt_total <= 0)
                     {
                         continue;
                     }
@@ -1905,6 +1907,14 @@ namespace Vudaco.Receipts.Controllers
 
                 if (entity == null)
                     return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            var file_info = await _context.FileInfos.Where(x => x.ReceiptId == ReceiptDto.Id).ToListAsync();
+            if (file_info != null)
+            {
+                foreach (var info in file_info)
+                {
+                    info.ReceiptId = null;
+                }
+            }
             entity.Status = 0;
             entity.Note = null;
             entity.UpdatedAt = DateTime.Now;
@@ -1939,11 +1949,19 @@ namespace Vudaco.Receipts.Controllers
             {
                 var now = DateTime.Now;
                 var receipt = await _context.Receipts.FirstOrDefaultAsync(x => x.Id == dto.Id);
-
+   
                 if (receipt == null)
                 {
                     await tran.RollbackAsync();
                     return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+                }
+                var file_info = await _context.FileInfos.Where(x => x.ReceiptId == receipt.Id).ToListAsync();
+                if (file_info != null)
+                {
+                    foreach (var info in file_info)
+                    {
+                        info.ReceiptId = null;
+                    }
                 }
                 if(receipt.DebitReceivableId != null)// phiếu thu hoặc chi tạm ứng kh, ncc
                 {
@@ -1988,11 +2006,7 @@ namespace Vudaco.Receipts.Controllers
                     detail.DeletedBy = userId;
                 }
 
-                var file_info = await _context.FileInfos.FirstOrDefaultAsync(x => x.ReceiptId == receipt.Id);
-                if (file_info != null)
-                {
-                    file_info.ReceiptId = null;
-                }
+              
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
 

@@ -519,83 +519,100 @@ namespace Vudaco.Receipts.Repositories
             return _results;
         }
 
-        public async Task<PaginatedResultReact<object>> GetBaoCaoLuuChuyenTienTeAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken)
+       public async Task<PaginatedResultReact<object>> GetBaoCaoLuuChuyenTienTeAsync(
+            ReceiptDto receiptDto,
+            int page,
+            int pageSize,
+            CancellationToken cancellationToken)
         {
-            var _results = new PaginatedResultReact<object>();
-            var sql = $@"
-                    SELECT 
-                        iecat.id,
-                        iecat.name,
-                        SUM(ISNULL(d.amount, 0)) AS total_amount,
-                        SUM(ISNULL(d.total, 0))  AS total_with_vat
-                    FROM receipts r
-                    LEFT JOIN income_expense_categorys iecat
-                        ON iecat.id = r.income_expense_category_id
-                    LEFT JOIN (
-                        SELECT 
-                            receipt_id,
-                            SUM(amount) AS amount,
-                            SUM(amount * (1 + vat / 100.0)) AS total
-                        FROM receipt_details
-                        WHERE deleted_at IS NULL
-                        GROUP BY receipt_id
-                    ) d ON d.receipt_id = r.id
-                    WHERE (r.status IS NULL OR r.status = 1)
-                        AND r.deleted_at IS NULL
-                        AND iecat.id IN (1,3,24,25,14,15,10,11,13,21,37,16,17,18,20,19,35,36)
-                        AND iecat.deleted_at IS NULL";
-            if (ReceiptDto.StorageId > 0)
-            {
-                sql += $@" AND r.storage_id = {ReceiptDto.StorageId}";
-            }
-           
-            if (ReceiptDto.FromDate.HasValue && ReceiptDto.ToDate.HasValue)
-            {
-                // Cộng thêm 1 ngày cho ToDate
-                var toDateNext = ReceiptDto.ToDate.Value.Date.AddDays(1);
-                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
-                sql += $@" AND r.accounting_date >= '{ReceiptDto.FromDate.Value:yyyy-MM-dd}' 
-                AND r.accounting_date < '{toDateNext:yyyy-MM-dd}'";
-            }
-            sql += $@" GROUP BY iecat.id,iecat.name";
-            var bao_cao_tk_results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
-             _results.Extra["bao_cao_tk_results"] = bao_cao_tk_results;
-             sql = $@"
-                    SELECT 
-                        iecat.id,
-                        iecat.name,
-                        SUM(ISNULL(d.amount, 0)) AS total_amount,
-                        SUM(ISNULL(d.total, 0))  AS total_with_vat
-                    FROM receipts r
-                    LEFT JOIN income_expense_categorys iecat
-                        ON iecat.id = r.income_expense_category_id
-                    LEFT JOIN (
-                        SELECT 
-                            receipt_id,
-                            SUM(amount) AS amount,
-                            SUM(amount * (1 + vat / 100.0)) AS total
-                        FROM receipt_details
-                        WHERE deleted_at IS NULL
-                        GROUP BY receipt_id
-                    ) d ON d.receipt_id = r.id
-                    WHERE (r.status IS NULL OR r.status = 1)
-                        AND r.deleted_at IS NULL
-                        AND iecat.id IN (1,3,24,25,14,15,10,11,13,21,37,16,17,18,20,19,35,36)
-                        AND iecat.deleted_at IS NULL";
-            if (ReceiptDto.StorageId > 0)
-            {
-                sql += $@" AND r.storage_id = {ReceiptDto.StorageId}";
-            }
-           
-            if (ReceiptDto.FromDate.HasValue)
-            {
-                sql += $@" AND r.accounting_date < '{ReceiptDto.FromDate.Value:yyyy-MM-dd}'";
-            }
-            sql += $@" GROUP BY iecat.id,iecat.name";
-            var bao_cao_dk_results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
-             _results.Extra["bao_cao_dk_results"] = bao_cao_dk_results;
+            var result = new PaginatedResultReact<object>();
 
-            return _results;
+            string baseSql = @"
+                SELECT
+                    iecat.id,
+                    iecat.name,
+                    COALESCE(SUM(d.amount), 0) AS total_amount,
+                    COALESCE(SUM(d.total), 0) AS total_with_vat
+                FROM receipts r
+                LEFT JOIN income_expense_categorys iecat
+                    ON iecat.id = r.income_expense_category_id
+                LEFT JOIN
+                (
+                    SELECT
+                        receipt_id,
+                        SUM(CAST(amount AS DECIMAL(18,2))) AS amount,
+                        SUM(
+                            CAST(amount AS DECIMAL(18,2))
+                            * (1 + CAST(ISNULL(vat,0) AS DECIMAL(18,2)) / 100)
+                        ) AS total
+                    FROM receipt_details
+                    WHERE deleted_at IS NULL
+                    GROUP BY receipt_id
+                ) d ON d.receipt_id = r.id
+                WHERE
+                    (r.status IS NULL OR r.status = 1)
+                    AND r.deleted_at IS NULL
+                    AND iecat.deleted_at IS NULL
+                    AND iecat.id IN (
+                        1,3,24,25,14,15,10,11,13,
+                        21,37,16,17,18,20,19,35,36
+                    )";
+
+            if (receiptDto.StorageId > 0)
+            {
+                baseSql += $" AND r.storage_id = {receiptDto.StorageId}";
+            }
+
+            // ==========================
+            // Báo cáo trong kỳ
+            // ==========================
+            var sqlTrongKy = baseSql;
+
+            if (receiptDto.FromDate.HasValue && receiptDto.ToDate.HasValue)
+            {
+                var toDateNext = receiptDto.ToDate.Value.Date.AddDays(1);
+
+                sqlTrongKy += $@"
+                    AND r.accounting_date >= '{receiptDto.FromDate.Value:yyyy-MM-dd}'
+                    AND r.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+
+            sqlTrongKy += @"
+                GROUP BY
+                    iecat.id,
+                    iecat.name";
+
+            var baoCaoTrongKy = await SqlServerHelpers.ExecuteQuerySqlAsync(
+                _configuration.GetConnectionString("DefaultConnection"),
+                sqlTrongKy,
+                cancellationToken);
+
+            result.Extra["bao_cao_tk_results"] = baoCaoTrongKy;
+
+            // ==========================
+            // Báo cáo đầu kỳ
+            // ==========================
+            var sqlDauKy = baseSql;
+
+            if (receiptDto.FromDate.HasValue)
+            {
+                sqlDauKy += $@"
+                    AND r.accounting_date < '{receiptDto.FromDate.Value:yyyy-MM-dd}'";
+            }
+
+            sqlDauKy += @"
+                GROUP BY
+                    iecat.id,
+                    iecat.name";
+
+            var baoCaoDauKy = await SqlServerHelpers.ExecuteQuerySqlAsync(
+                _configuration.GetConnectionString("DefaultConnection"),
+                sqlDauKy,
+                cancellationToken);
+
+            result.Extra["bao_cao_dk_results"] = baoCaoDauKy;
+
+            return result;
         }
 
         public async Task<PaginatedResultReact<object>> GetUngTienCuaLaiXeAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken)

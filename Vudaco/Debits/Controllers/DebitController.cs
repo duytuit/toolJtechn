@@ -411,6 +411,32 @@ namespace Vudaco.Debits.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
+        [HttpGet("GetObjectBaoCaoLoiNhuanAsync")]
+        public async Task<IActionResult> GetObjectBaoCaoLoiNhuanAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            var group_result = new List<dynamic>();
+            var result = await _repoDebit.GetObjectLoiNhuanXeTrongAsync(DebitDto, page, pageSize, cancellationToken);
+            group_result.Add(new {
+                name = "loinhuanxetrong",
+                data = result.Extra
+            });
+            result = await _repoDebit.GetObjectLoiNhuanXeNgoaiAsync(DebitDto, page, pageSize, cancellationToken);
+            group_result.Add(new {
+                name = "loinhuanxengoai",
+                data = result.Data
+            });
+            result = await _repoDebit.GetObjectLoiNhuanHaiQuanAsync(DebitDto, page, pageSize, cancellationToken);
+            group_result.Add(new {
+                name = "loinhuanhaiquan",
+                data = result.Data
+            });
+            result = await _repoDebit.GetObjectLoiNhuanDoanhThuKhacAsync(DebitDto, page, pageSize, cancellationToken);
+            group_result.Add(new {
+                name = "loinhuandoanhthukhac",
+                data = result.Extra
+            });
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", group_result);
+        }
         [HttpGet("GetObjectDebitChiTietHasBillKHAsync")]
         public async Task<IActionResult> GetObjectDebitChiTietHasBillKHAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
         {

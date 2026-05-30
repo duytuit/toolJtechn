@@ -1281,6 +1281,246 @@ namespace Vudaco.Debits.Repositories
             };
             return _results;
         }
+        public async Task<PaginatedResultReact<object>> GetObjectLoiNhuanXeTrongAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
+         {
+            var _results = new PaginatedResultReact<object>();
+
+            var sql = @"
+            SELECT
+                v.id,
+                v.number_code,
+                v.note,
+                COALESCE(SUM(d.price), 0) AS total_price,
+                COALESCE(SUM(d.driver_fee), 0) AS total_driver_fee
+            FROM vehicles v
+            LEFT JOIN debits d
+                ON d.vehicle_id = v.id
+                AND d.type = 1
+                AND d.deleted_at IS NULL";
+
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+
+                sql += $@"
+                AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}'
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+
+            sql += @"
+            WHERE 1 = 1";
+
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@"
+                AND v.storage_id = {DebitDto.StorageId}";
+            }
+
+            sql += @"
+            GROUP BY
+                v.id,
+                v.number_code,
+                v.note
+            ORDER BY
+                v.number_code";
+
+            var debit_theoxe = await SqlServerHelpers.ExecuteQuerySqlAsync(
+                _configuration.GetConnectionString("DefaultConnection"),
+                sql,
+                cancellationToken);
+
+            _results.Extra["debit_theoxe"] = debit_theoxe;
+            // các loại phí
+            // 16: phí sửa chữa
+            // 17: phí dầu DO
+            // 18: Cước đường bộ
+            // 19: phí khác
+            // 20: phí lãi vạy
+            // 22 : trích lương nhân viên
+            // 34: trích BHXH
+            // 35: phí gửi xe
+            // 38: phí đi đường lái xe
+            sql = $@"SELECT v.number_code,v.note v_note,r.income_expense_category_id,rd.* FROM vehicles v LEFT JOIN receipt_details rd on rd.vehicle_id = v.id LEFT JOIN receipts r on r.id = rd.receipt_id WHERE r.deleted_at IS NULL AND rd.deleted_at IS NULL AND r.income_expense_category_id IN (38,34,35,22,19,20,18,17,16)";     
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND r.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND r.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND r.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }   
+            var chi_theoxe = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["chi_theoxe"] = chi_theoxe;
+            return _results;
+        }
+        public async Task<PaginatedResultReact<object>> GetObjectLoiNhuanXeNgoaiAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
+         {
+            var sql = $@"
+                    SELECT
+                        COALESCE(SUM(d.purchase_com), 0) AS total_purchase_com,
+                        COALESCE(SUM(d.price_com), 0) AS total_price_com,
+                        COALESCE(SUM(d.price), 0) AS total_price,
+                        COALESCE(SUM(d.purchase_price), 0) AS total_purchase_price,
+                        COALESCE(SUM(d.price), 0) - COALESCE(SUM(d.purchase_price), 0) AS profit
+                    FROM debits d
+                    WHERE d.type = 1
+                        AND d.deleted_at IS NULL AND d.vehicle_id IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
+        public async Task<PaginatedResultReact<object>> GetObjectLoiNhuanDoanhThuKhacAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
+         {
+            var _results = new PaginatedResultReact<object>();
+            var sql = $@"
+                    SELECT
+                        COALESCE(SUM(d.purchase_com), 0) AS total_purchase_com,
+                        COALESCE(SUM(d.price_com), 0) AS total_price_com,
+                        COALESCE(SUM(d.price), 0) AS total_price,
+                        COALESCE(SUM(d.purchase_price), 0) AS total_purchase_price,
+                        COALESCE(SUM(d.price), 0) - COALESCE(SUM(d.purchase_price), 0) AS profit
+                    FROM debits d
+                    WHERE d.type = 8
+                        AND d.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            var loinhuan_banhang = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["loinhuan_banhang"] = loinhuan_banhang;
+
+            sql = $@"
+                    SELECT
+                        COALESCE(SUM(d.purchase_com), 0) AS total_purchase_com,
+                        COALESCE(SUM(d.price_com), 0) AS total_price_com,
+                        COALESCE(SUM(d.price), 0) AS total_price,
+                        COALESCE(SUM(d.purchase_price), 0) AS total_purchase_price,
+                        COALESCE(SUM(d.price), 0) - COALESCE(SUM(d.purchase_price), 0) AS profit
+                    FROM debits d
+                    WHERE d.type = 1
+                        AND d.deleted_at IS NULL AND d.file_info_id IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            var loinhuan_com = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["loinhuan_com"] = loinhuan_com;
+             sql = $@"
+                    SELECT
+                        COALESCE(SUM(d.purchase_com), 0) AS total_purchase_com,
+                        COALESCE(SUM(d.price_com), 0) AS total_price_com,
+                        COALESCE(SUM(d.price), 0) AS total_price,
+                        COALESCE(SUM(d.purchase_price), 0) AS total_purchase_price,
+                        COALESCE(SUM(d.price), 0) - COALESCE(SUM(d.purchase_price), 0) AS profit
+                    FROM debits d
+                    WHERE d.type = 4
+                        AND d.deleted_at IS NULL AND d.file_info_id IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            var loinhuan_phikhac = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["loinhuan_phikhac"] = loinhuan_phikhac;
+              sql = $@"
+                    SELECT
+                        COALESCE(SUM(d.purchase_com), 0) AS total_purchase_com,
+                        COALESCE(SUM(d.price_com), 0) AS total_price_com,
+                        COALESCE(SUM(d.price), 0) AS total_price,
+                        COALESCE(SUM(d.purchase_price), 0) AS total_purchase_price,
+                        COALESCE(SUM(d.price), 0) - COALESCE(SUM(d.purchase_price), 0) AS profit
+                    FROM debits d
+                    WHERE d.type = 7
+                        AND d.deleted_at IS NULL AND d.file_info_id IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            var loinhuan_muahang = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["loinhuan_muahang"] = loinhuan_muahang;
+            return _results;
+        }
+        public async Task<PaginatedResultReact<object>> GetObjectLoiNhuanHaiQuanAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+              var sql = $@"
+                    SELECT
+                        COALESCE(SUM(d.purchase_com), 0) AS total_purchase_com,
+                        COALESCE(SUM(d.price_com), 0) AS total_price_com,
+                        COALESCE(SUM(d.price), 0) AS total_price,
+                        COALESCE(SUM(d.purchase_price), 0) AS total_purchase_price,
+                        COALESCE(SUM(d.price), 0) - COALESCE(SUM(d.purchase_price), 0) AS profit
+                    FROM debits d
+                    WHERE d.type = 0
+                        AND d.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
 
         public async Task<PaginatedResultReact<object>> GetObjectDebitBuTruKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
         {

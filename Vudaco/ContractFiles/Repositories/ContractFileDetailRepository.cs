@@ -186,6 +186,78 @@ namespace Vudaco.ContractFiles.Repositories
             };
             return _results;
         }
+        public async Task<PaginatedResultReact<object>> BaoCaoNhatKyDieuXeAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var sql = $@"
+                    SELECT 
+                        d.*,
+                        CAST(ISNULL(rdt_total.amount, 0) AS INT) AS receipt_amount,
+                        CAST(ISNULL(rdt_total.vat, 0) AS INT) AS receipt_vat,
+                        CAST(ISNULL(rdt_total.total, 0) AS INT) AS receipt_total,
+                        cf.note AS cf_note,
+                        cf.status AS cf_status,
+                        cf.status_confirm AS cf_status_confirm,
+                        cf.updated_at AS cf_updated_at,
+                        cf.updated_by AS cf_updated_by
+                    FROM debits d
+                    LEFT JOIN file_infos f 
+                        ON d.file_info_id = f.id
+                        AND d.customer_detail_id = f.customer_detail_id
+                    LEFT JOIN partner_details p 
+                        ON p.id = d.customer_detail_id
+                    LEFT JOIN confirm_file_infos cf 
+                         ON d.id = cf.debit_id
+                      -- ✅ Tổng receipts
+                    OUTER APPLY (
+                            SELECT 
+                                    SUM(rdt.amount) AS amount,
+                                    MAX(rdt.vat) AS vat,
+                                    SUM(rdt.amount * (rdt.vat / 100.0)) + SUM(rdt.amount) AS total
+                            FROM receipts r
+                            LEFT JOIN income_expense_categorys iecat
+                            ON iecat.id = r.income_expense_category_id
+                            LEFT JOIN receipt_details rdt 
+                                    ON rdt.receipt_id = r.id
+                            WHERE 
+                                    d.id = r.debit_driver_id 
+                                    AND iecat.id = 38
+                                    AND (r.status IS NULL OR r.status = 1)
+                                    AND r.deleted_at IS NULL
+                                    AND rdt.deleted_at IS NULL
+                    ) AS rdt_total
+                    WHERE 
+                        d.type = 1
+                        AND p.status = 1
+                        AND d.deleted_at IS NULL
+                        AND p.deleted_at IS NULL
+                        AND f.deleted_at IS NULL
+                        AND cf.deleted_at IS NULL";
+            if (FileInfoDetailDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {FileInfoDetailDto.StorageId}";
+            }
+            if (FileInfoDetailDto.CustomerDetailId > 0)
+            {
+                sql += $@" AND d.customer_detail_id = {FileInfoDetailDto.CustomerDetailId}";
+            }
+            if (FileInfoDetailDto.FromDate.HasValue && FileInfoDetailDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = FileInfoDetailDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date >= '{FileInfoDetailDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+
+            sql += " ORDER BY d.accounting_date DESC, d.updated_at DESC";
+            //_ = Task.Run(() => Helper.SendTelegramMessageAsync(sql));
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
         public async Task<PaginatedResultReact<object>> GetObjectNotNangHaAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken)
         {
             var sql = $@"

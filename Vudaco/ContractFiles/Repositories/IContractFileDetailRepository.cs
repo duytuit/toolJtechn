@@ -20,6 +20,7 @@ namespace Vudaco.ContractFiles.Repositories
         Task<PaginatedResultReact<object>> GetObjectNotServiceAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectFileNotDispatchAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectFileHasDispatchAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<PaginatedResultReact<object>> BaoCaoNhatKyDieuXeAsync(FileInfoDetailDto FileInfoDetailDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<PaginatedResultReact<object>> GetObjectFileHasDispatchByDriverAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<FileInfoDetail> ShowAsync(int id);
         Task<FileInfoDetail> CreateAsync(FileInfoDetail FileInfoDetail);

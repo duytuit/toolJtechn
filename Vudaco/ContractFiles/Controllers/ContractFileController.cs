@@ -262,8 +262,6 @@ namespace Vudaco.ContractFiles.Controllers
                     // ================= DATA =================
                     int row = headerRow + 1;
                     int stt = 1;
-                    long? FileId = 0;
-                    int debitId = 0;
                 foreach (var group in groupedData)
                 {
                     var first = group.Items.First();
@@ -413,6 +411,98 @@ namespace Vudaco.ContractFiles.Controllers
                         stream.ToArray(),
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         "ChiTietHoaDonKH.xlsx"
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, ex.Message);
+                    return ApiResponseResult<object>(false, ex.Message, null);
+                }
+        }
+        [HttpGet("excel/chitietfilegia")]
+        public async Task<IActionResult> ExportChiTietFileGia(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            try
+                {
+                    var result = await _repoDebit.GetObjectXuatHoaDonKHAsync(
+                        DebitDto, page, pageSize, cancellationToken);
+                    if (result?.Data == null || !result.Data.Any())
+                        return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+
+                    var rows = result.Data.Cast<object>().ToList();
+                    if (!rows.Any())
+                        return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+
+                    using var wb = new XLWorkbook();
+                    var ws = wb.Worksheets.Add("RawData");
+
+                    // Determine headers from the first row
+                    var firstRow = rows[0];
+                    var headers = new List<string>();
+                    if (firstRow is IDictionary<string, object> dictRow)
+                    {
+                        headers = dictRow.Keys.ToList();
+                    }
+                    else
+                    {
+                        headers = firstRow.GetType()
+                            .GetProperties()
+                            .Select(p => p.Name)
+                            .ToList();
+                    }
+
+                    // Write header row
+                    for (int col = 0; col < headers.Count; col++)
+                    {
+                        ws.Cell(1, col + 1).Value = headers[col];
+                    }
+
+                    ws.Range(1, 1, 1, headers.Count).Style.Font.Bold = true;
+                    ws.SheetView.FreezeRows(1);
+                    ws.Range(1, 1, 1, headers.Count).SetAutoFilter();
+
+                    string GetSafeCellText(object obj)
+                    {
+                        if (obj == null)
+                            return string.Empty;
+
+                        var text = obj.ToString() ?? string.Empty;
+                        const int maxLength = 32767;
+                        return text.Length <= maxLength
+                            ? text
+                            : text.Substring(0, maxLength);
+                    }
+
+                    // Write data rows
+                    for (int rowIndex = 0; rowIndex < rows.Count; rowIndex++)
+                    {
+                        var row = rows[rowIndex];
+                        for (int col = 0; col < headers.Count; col++)
+                        {
+                            object value = null;
+                            if (row is IDictionary<string, object> dynamicRow)
+                            {
+                                dynamicRow.TryGetValue(headers[col], out value);
+                            }
+                            else
+                            {
+                                var prop = row.GetType().GetProperty(headers[col]);
+                                value = prop?.GetValue(row);
+                            }
+
+                            ws.Cell(rowIndex + 2, col + 1).SetValue(GetSafeCellText(value));
+                        }
+                    }
+
+                    ws.Columns().AdjustToContents();
+
+                    using var stream = new MemoryStream();
+                    wb.SaveAs(stream);
+
+                    return File(
+                        stream.ToArray(),
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        "ChiTietFileGia.xlsx"
                     );
                 }
                 catch (Exception ex)

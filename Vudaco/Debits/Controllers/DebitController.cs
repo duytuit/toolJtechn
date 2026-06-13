@@ -1898,6 +1898,17 @@ namespace Vudaco.Debits.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
+        [HttpGet("BaoCaoNhatKyDieuXeAsync")]
+        public async Task<IActionResult> BaoCaoNhatKyDieuXeAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] FileInfoDetailDto FileInfoDetailDto = null)
+        {
+            // test
+            var result = await _repoContractFileDetail.BaoCaoNhatKyDieuXeAsync(FileInfoDetailDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
         [HttpGet("DispatchByDriver")]
         public async Task<IActionResult> GetObjectFileHasDispatchByDriverAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
         {

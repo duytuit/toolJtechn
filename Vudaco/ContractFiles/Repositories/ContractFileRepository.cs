@@ -574,6 +574,7 @@ namespace Vudaco.ContractFiles.Repositories
                 AND f.accounting_date < '{toDateNext:yyyy-MM-dd}'";
             }
             sql += " ORDER BY d_total.type,f.updated_at DESC";
+           // _ = Task.Run(() => Helper.SendTelegramMessageAsync(sql));
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
             {

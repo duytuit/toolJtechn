@@ -491,11 +491,11 @@ namespace Vudaco.Debits.Repositories
                     // Cộng thêm 1 ngày cho ToDate
                     var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
                     // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
-                    sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
-                            AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                    sql += $@" AND f.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                            AND f.accounting_date < '{toDateNext:yyyy-MM-dd}'";
                 }
             }
-            sql += " ORDER BY d.file_info_id,d.customer_detail_id,d.type,d.accounting_date";
+            sql += " ORDER BY d.file_info_id,d.customer_detail_id,d.type,f.accounting_date";
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
             {
@@ -1412,8 +1412,7 @@ namespace Vudaco.Debits.Repositories
                         COALESCE(SUM(d.purchase_price), 0) AS total_purchase_price,
                         COALESCE(SUM(d.price), 0) - COALESCE(SUM(d.purchase_price), 0) AS profit
                     FROM debits d
-                    WHERE d.type = 8
-                        AND d.deleted_at IS NULL";
+                    WHERE d.type = 8 AND d.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND d.storage_id = {DebitDto.StorageId}";
@@ -1437,8 +1436,7 @@ namespace Vudaco.Debits.Repositories
                         COALESCE(SUM(d.purchase_price), 0) AS total_purchase_price,
                         COALESCE(SUM(d.price), 0) - COALESCE(SUM(d.purchase_price), 0) AS profit
                     FROM debits d
-                    WHERE d.type = 1
-                        AND d.deleted_at IS NULL AND d.file_info_id IS NULL";
+                    WHERE d.type = 1 AND d.deleted_at IS NULL AND d.file_info_id IS NULL";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND d.storage_id = {DebitDto.StorageId}";
@@ -1461,8 +1459,7 @@ namespace Vudaco.Debits.Repositories
                         COALESCE(SUM(d.purchase_price), 0) AS total_purchase_price,
                         COALESCE(SUM(d.price), 0) - COALESCE(SUM(d.purchase_price), 0) AS profit
                     FROM debits d
-                    WHERE d.type = 4
-                        AND d.deleted_at IS NULL AND d.file_info_id IS NULL";
+                    WHERE d.type = 4 AND d.deleted_at IS NULL AND d.file_info_id IS NULL";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND d.storage_id = {DebitDto.StorageId}";
@@ -1485,8 +1482,7 @@ namespace Vudaco.Debits.Repositories
                         COALESCE(SUM(d.purchase_price), 0) AS total_purchase_price,
                         COALESCE(SUM(d.price), 0) - COALESCE(SUM(d.purchase_price), 0) AS profit
                     FROM debits d
-                    WHERE d.type = 7
-                        AND d.deleted_at IS NULL AND d.file_info_id IS NULL";
+                    WHERE d.type = 7 AND d.deleted_at IS NULL AND d.file_info_id IS NULL";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND d.storage_id = {DebitDto.StorageId}";
@@ -1513,8 +1509,7 @@ namespace Vudaco.Debits.Repositories
                         COALESCE(SUM(d.purchase_price), 0) AS total_purchase_price,
                         COALESCE(SUM(d.price), 0) - COALESCE(SUM(d.purchase_price), 0) AS profit
                     FROM debits d
-                    WHERE d.type = 0
-                        AND d.deleted_at IS NULL";
+                    WHERE d.type = 0 AND d.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND d.storage_id = {DebitDto.StorageId}";

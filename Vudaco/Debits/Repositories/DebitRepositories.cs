@@ -2207,8 +2207,20 @@ namespace Vudaco.Debits.Repositories
                         COALESCE(SUM(d.purchase_price), 0) AS total_purchase_price,
                         COALESCE(SUM(d.price), 0) - COALESCE(SUM(d.purchase_price), 0) AS profit
                     FROM debits d
+                    LEFT JOIN file_infos f 
+                        ON d.file_info_id = f.id
+                        AND d.customer_detail_id = f.customer_detail_id
+                    LEFT JOIN partner_details p 
+                        ON p.id = d.customer_detail_id
+                    LEFT JOIN confirm_file_infos cf 
+                         ON d.id = cf.debit_id
                     WHERE d.type = 1
-                        AND d.deleted_at IS NULL AND d.vehicle_id IS NULL";
+                        AND p.status = 1
+                        AND d.deleted_at IS NULL
+                        AND p.deleted_at IS NULL
+                        AND f.deleted_at IS NULL
+                        AND cf.deleted_at IS NULL
+                        AND d.vehicle_id IS NULL";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND d.storage_id = {DebitDto.StorageId}";
@@ -2221,6 +2233,7 @@ namespace Vudaco.Debits.Repositories
                 sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
                 AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
             }
+           // _ = Task.Run(() => Helper.SendTelegramMessageAsync(sql));
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
             {

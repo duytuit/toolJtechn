@@ -582,16 +582,24 @@ namespace Vudaco.ContractFiles.Controllers
                     f.StorageId == dto.StorageId);
                 if (fileInfos)
                     return ApiResponseResult<object>(false, "FileNumber đã tồn tại trong kho này", null);
-                var fileBill = await _context.FileInfos.AnyAsync(f =>
-                    f.Bill == dto.Bill &&
-                    f.StorageId == dto.StorageId);
-                if (fileBill)
-                    return ApiResponseResult<object>(false, "Hóa đơn đã tồn tại trong kho này", null);
-                var fileDeclaration = await _context.FileInfos.AnyAsync(f =>
-                    f.Declaration == dto.Declaration &&
-                    f.StorageId == dto.StorageId);
-                if (fileDeclaration)
-                    return ApiResponseResult<object>(false, "Số tờ khai đã tồn tại trong kho này", null);
+               if (!string.IsNullOrWhiteSpace(dto.Bill))
+                {
+                    var fileBill = await _context.FileInfos.AnyAsync(f =>
+                        f.Bill == dto.Bill &&
+                        f.StorageId == dto.StorageId);
+
+                    if (fileBill)
+                        return ApiResponseResult<object>(false, "Hóa đơn đã tồn tại trong kho này", null);
+                }
+                if (!string.IsNullOrWhiteSpace(dto.Declaration))
+                {
+                    var fileDeclaration = await _context.FileInfos.AnyAsync(f =>
+                        f.Declaration == dto.Declaration &&
+                        f.StorageId == dto.StorageId);
+
+                    if (fileDeclaration)
+                        return ApiResponseResult<object>(false, "Số tờ khai đã tồn tại trong kho này", null);
+                }
 
                 var entity = new Vudaco.ContractFiles.Models.FileInfo
                 {
@@ -684,19 +692,25 @@ namespace Vudaco.ContractFiles.Controllers
                 if (fileInfos)
                     return ApiResponseResult<object>(false, "FileNumber đã tồn tại trong kho này", null);
 
-                var fileBill = await _context.FileInfos.AnyAsync(f =>
-                    f.Id != dto.Id &&
-                    f.Bill == dto.Bill &&
-                    f.StorageId == dto.StorageId);
-                if (fileBill)
-                    return ApiResponseResult<object>(false, "Hóa đơn đã tồn tại trong kho này", null);
+                if (!string.IsNullOrWhiteSpace(dto.Bill))   
+                {
+                    var fileBill = await _context.FileInfos.AnyAsync(f =>
+                        f.Id != dto.Id &&
+                        f.Bill == dto.Bill &&
+                        f.StorageId == dto.StorageId);
+                    if (fileBill)
+                        return ApiResponseResult<object>(false, "Hóa đơn đã tồn tại trong kho này", null);
+                }
 
-                var fileDeclaration = await _context.FileInfos.AnyAsync(f =>
-                    f.Id != dto.Id &&
-                    f.Declaration == dto.Declaration &&
-                    f.StorageId == dto.StorageId);
-                if (fileDeclaration)
-                    return ApiResponseResult<object>(false, "Số tờ khai đã tồn tại trong kho này", null);
+                if (!string.IsNullOrWhiteSpace(dto.Declaration))
+                {
+                    var fileDeclaration = await _context.FileInfos.AnyAsync(f =>
+                        f.Id != dto.Id &&
+                        f.Declaration == dto.Declaration &&
+                        f.StorageId == dto.StorageId);
+                    if (fileDeclaration)
+                        return ApiResponseResult<object>(false, "Số tờ khai đã tồn tại trong kho này", null);
+                }
 
                 var totalPrice = await _context.FileInfoDetails
                 .Where(f =>

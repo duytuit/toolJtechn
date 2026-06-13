@@ -54,6 +54,7 @@ namespace Vudaco
                      .UseStartup<Startup>()
                      .ConfigureKestrel(options =>
                         {
+                            options.Limits.MaxRequestBodySize = 104857600; // 100 MB
                             options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(5);
                             options.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(2);
                         });

@@ -2431,6 +2431,10 @@ namespace Vudaco.Debits.Repositories
                     d.deleted_at,
                     d.created_at,
                     d.updated_at,
+                    f.file_number,
+                    f.declaration,
+                    f.bill,
+                    f.container_code,
                         p.customer_credit_limit,
                         CAST(ISNULL(rdt_total.amount, 0) AS INT) AS receipt_amount,
                         CAST(ISNULL(rdt_total.vat, 0) AS INT) AS receipt_vat,
@@ -2558,6 +2562,10 @@ namespace Vudaco.Debits.Repositories
                     d.deleted_at,
                     d.created_at,
                     d.updated_at,
+                    f.file_number,
+                    f.declaration,
+                    f.bill,
+                    f.container_code,
                         p.supplier_credit_limit,
                         CAST(ISNULL(rdt_total.amount, 0) AS INT) AS receipt_amount,
                         CAST(ISNULL(rdt_total.vat, 0) AS INT) AS receipt_vat,
@@ -2831,7 +2839,7 @@ namespace Vudaco.Debits.Repositories
                 -- doanh thu chi hộ
                 SELECT COALESCE(SUM(price), 0) AS total_price FROM debits d
                 LEFT JOIN file_infos f ON f.id = d.file_info_id
-                WHERE d.type IN (2,3) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL AND d.status in (1,2)";
+                WHERE d.type IN (2,3) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND f.storage_id = {DebitDto.StorageId}";
@@ -2851,7 +2859,7 @@ namespace Vudaco.Debits.Repositories
                -- chi phí chi ho
                 SELECT COALESCE(SUM(purchase_price), 0) AS total_purchase_price FROM debits d
                 LEFT JOIN file_infos f ON f.id = d.file_info_id
-                WHERE d.type IN (2,3) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL AND d.status IN (1,2)";
+                WHERE d.type IN (2,3) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND f.storage_id = {DebitDto.StorageId}";
@@ -2871,7 +2879,7 @@ namespace Vudaco.Debits.Repositories
                 -- doanh thu các lô hàng có lập file ,trừ mua hàng từ nhà cung cấp,trừ bán hàng cho khách hàng
                 SELECT COALESCE(SUM(price), 0) AS total_price FROM debits d
                 LEFT JOIN file_infos f ON f.id = d.file_info_id
-                WHERE d.type IN (0,1,4) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL AND d.status in (1,2)";
+                WHERE d.type IN (0,1,4) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND f.storage_id = {DebitDto.StorageId}";
@@ -2909,7 +2917,7 @@ namespace Vudaco.Debits.Repositories
                -- chi phí các lô hàng có lặp file
                 SELECT COALESCE(SUM(purchase_price), 0) AS total_purchase_price FROM debits d
                 LEFT JOIN file_infos f ON f.id = d.file_info_id
-                WHERE d.type IN (0,1,4) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL AND d.status IN (1,2)";
+                WHERE d.type IN (0,1,4) AND d.file_info_id>0 AND d.deleted_at IS NULL AND f.deleted_at IS NULL";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND f.storage_id = {DebitDto.StorageId}";

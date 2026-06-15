@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 namespace Vudaco.Controllers
 {
     [ApiController]
-    [Route("/")] // <-- Root path
     [AllowAnonymous]
     public class HomeController : Controller
     {
@@ -32,10 +31,16 @@ namespace Vudaco.Controllers
             //var value = _redisService.GetAsync("jtec_hn_database_update_AsyncKTNQ");
             //return value.Result ?? "No value found in Redis";
         //}
+        [HttpGet("/")]
         public IActionResult Index()
         {
             ViewData["Message"] = "Chào mừng đến Web API + View1";
             return View();
+        }
+        [HttpGet("/privacy")]
+        public IActionResult Privacy()
+        {
+            return View("Privacy");
         }
     }
 

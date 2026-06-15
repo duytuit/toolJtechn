@@ -454,6 +454,7 @@ namespace Vudaco.ContractFiles.Repositories
                     SELECT 
                         f.*,
                         d_total.bill AS debit_bill,
+                        d_total.dispatch_code AS debit_dispatch_code,
                         d_total.cus_bill AS debit_cus_bill,
                         d_total.cus_bill_date AS debit_cus_bill_date,
                         d_total.sup_bill AS debit_sup_bill,
@@ -493,6 +494,7 @@ namespace Vudaco.ContractFiles.Repositories
                     INNER JOIN (
                         SELECT 
                             d.file_info_id,
+                            d.dispatch_code,
                             d.customer_detail_id,
                             d.supplier_detail_id,
                             d.employee_staff_id,
@@ -523,6 +525,7 @@ namespace Vudaco.ContractFiles.Repositories
                         AND d.deleted_at IS NULL
                         GROUP BY 
                             d.file_info_id,
+                            d.dispatch_code,
                             d.supplier_detail_id,
                             d.customer_detail_id,
                             d.employee_staff_id,

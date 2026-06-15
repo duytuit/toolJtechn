@@ -420,12 +420,12 @@ namespace Vudaco.ContractFiles.Controllers
                 }
         }
         [HttpGet("excel/chitietfilegia")]
-        public async Task<IActionResult> ExportChiTietFileGia(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        public async Task<IActionResult> ExportChiTietFileGia(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] FileInfoDto FileInfoDto = null)
         {
             try
                 {
-                    var result = await _repoDebit.GetObjectXuatHoaDonKHAsync(
-                        DebitDto, page, pageSize, cancellationToken);
+                    var result = await _repoContractFile.GetObjectHasFileGia(
+                        FileInfoDto, page, pageSize, cancellationToken);
                     if (result?.Data == null || !result.Data.Any())
                         return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
 

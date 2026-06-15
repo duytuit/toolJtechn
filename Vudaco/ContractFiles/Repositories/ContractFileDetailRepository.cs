@@ -226,9 +226,7 @@ namespace Vudaco.ContractFiles.Repositories
                                     AND rdt.deleted_at IS NULL
                     ) AS rdt_total
                     WHERE 
-                        d.type = 1
-                        AND p.status = 1
-                        AND d.deleted_at IS NULL
+                        d.deleted_at IS NULL
                         AND p.deleted_at IS NULL
                         AND f.deleted_at IS NULL
                         AND cf.deleted_at IS NULL";

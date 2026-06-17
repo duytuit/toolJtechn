@@ -243,11 +243,11 @@ namespace Vudaco.ContractFiles.Repositories
                 // Cộng thêm 1 ngày cho ToDate
                 var toDateNext = FileInfoDetailDto.ToDate.Value.Date.AddDays(1);
                 // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
-                sql += $@" AND d.accounting_date >= '{FileInfoDetailDto.FromDate.Value:yyyy-MM-dd}' 
-                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                sql += $@" AND d.service_date >= '{FileInfoDetailDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.service_date < '{toDateNext:yyyy-MM-dd}'";
             }
 
-            sql += " ORDER BY d.accounting_date DESC, d.updated_at DESC";
+            sql += " ORDER BY d.service_date DESC, d.updated_at DESC";
             //_ = Task.Run(() => Helper.SendTelegramMessageAsync(sql));
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>

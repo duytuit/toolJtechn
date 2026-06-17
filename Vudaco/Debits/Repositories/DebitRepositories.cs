@@ -783,6 +783,138 @@ namespace Vudaco.Debits.Repositories
             };
             return _results;
         }
+         public async Task<PaginatedResultReact<object>> GetObjectXuatHoaDonKHInDebitAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+             var sql = $@"
+                    SELECT 
+                    d.id,
+                    d.bill_id,
+                    d.supplier_bill_id,
+                    d.vehicle_id,
+                    d.customer_detail_id,
+                    d.supplier_detail_id,
+                    d.file_info_id,
+                    d.employee_staff_id,
+                    d.employee_driver_id,
+                    d.storage_id,
+                    d.service_id,
+                    d.service_detail,
+                    d.type,
+                    d.dispatch_code,
+                    d.name,
+                    d.accounting_date,
+                    d.service_date,
+                    d.service_status,
+                    d.purchase_accounting_date,
+                    d.purchase_price,
+                    d.purchase_vat,
+                    d.price,
+                    d.vat,
+                    d.purchase_com,
+                    d.price_com,
+                    d.driver_fee,
+                    d.meal_fee,
+                    d.ticket_fee,
+                    d.overnight_fee,
+                    d.penalty_fee,
+                    d.goods_fee,
+                    d.delivery_point,
+                    d.purchase_status,
+                    d.status,
+                    d.transportation_cost,
+                    d.purchase_bill,
+                    d.bill,
+                    d.link_bill,
+                    d.code_bill,
+                    d.note,
+                    d.purchase_note,
+                    d.customer_vehicle_type,
+                    d.supplier_vehicle_type,
+                    d.vehicle_number,
+                    d.approved_by_user,
+                    d.approval_time,
+                    d.cus_bill,
+                    d.cus_bill_date,
+                    d.sup_bill,
+                    d.sup_bill_date,
+                    d.driver_status,
+                    d.created_by,
+                    d.updated_by,
+                    d.deleted_by,
+                    d.deleted_at,
+                    d.created_at,
+                    d.updated_at,
+                    CAST(ISNULL(rdt_total.amount, 0) AS INT) AS receipt_amount,
+                    CAST(ISNULL(rdt_total.vat, 0) AS INT) AS receipt_vat,
+                    CAST(ISNULL(rdt_total.total, 0) AS INT) AS receipt_total,
+                    p.customer_credit_limit
+                    FROM debits d
+                    LEFT JOIN file_infos f
+                    ON f.id = d.file_info_id
+                    LEFT JOIN partner_details p 
+                    ON p.id = d.customer_detail_id
+                    -- ✅ Tổng receipts
+                    OUTER APPLY (
+                            SELECT 
+                                    SUM(rdt.amount) AS amount,
+                                    MAX(rdt.vat) AS vat,
+                                    SUM(rdt.amount * (rdt.vat / 100.0)) + SUM(rdt.amount) AS total
+                            FROM receipts r
+                            LEFT JOIN income_expense_categorys iecat
+                            ON iecat.id = r.income_expense_category_id
+                            LEFT JOIN receipt_details rdt 
+                                    ON rdt.receipt_id = r.id
+                            WHERE 
+                                    d.id = rdt.debit_id 
+                                    AND iecat.type = 0
+                                    AND (r.status IS NULL OR r.status = 1)
+                                    AND r.deleted_at IS NULL
+                                    AND rdt.deleted_at IS NULL
+                    ) AS rdt_total
+                    WHERE
+                    p.status = 1
+                    AND d.type in (0,1,2,3,4,5,6,8)
+                    AND (d.status > 0 OR (d.status = 0 AND d.file_info_id IS NULL))
+                    AND ( d.service_id NOT IN (19,33) OR (d.service_id IN (33) AND d.service_status > 2) OR d.service_id IS NULL )
+                    AND p.deleted_at IS NULL
+                    AND f.deleted_at IS NULL
+                    AND d.deleted_at IS NULL";
+
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.ServiceId > 0)
+            {
+                sql += $@" AND d.service_id = {DebitDto.ServiceId}";
+            }
+            if (DebitDto.CustomerDetailId > 0)
+            {
+                sql += $@" AND d.customer_detail_id = {DebitDto.CustomerDetailId}";
+            }
+            if (DebitDto.FileInfoIds != null)
+            {
+                sql += $" AND d.file_info_id IN ({DebitDto.FileInfoIds})";
+            }
+            else
+            {
+                if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+                {
+                    // Cộng thêm 1 ngày cho ToDate
+                    var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                    // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                    sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                            AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                }
+            }
+            sql += " ORDER BY d.file_info_id,d.customer_detail_id,d.type,d.accounting_date";
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
         public async Task<PaginatedResultReact<object>> GetObjectDebitChiTietKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
         {
              var sql = $@"
@@ -2143,8 +2275,8 @@ namespace Vudaco.Debits.Repositories
                 var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
 
                 sql += $@"
-                AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}'
-                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                AND d.service_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}'
+                AND d.service_date < '{toDateNext:yyyy-MM-dd}'";
             }
 
             sql += @"
@@ -2230,8 +2362,8 @@ namespace Vudaco.Debits.Repositories
                 // Cộng thêm 1 ngày cho ToDate
                 var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
                 // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
-                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
-                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                sql += $@" AND d.service_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.service_date < '{toDateNext:yyyy-MM-dd}'";
             }
            // _ = Task.Run(() => Helper.SendTelegramMessageAsync(sql));
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
@@ -2262,8 +2394,8 @@ namespace Vudaco.Debits.Repositories
                 // Cộng thêm 1 ngày cho ToDate
                 var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
                 // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
-                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
-                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                sql += $@" AND d.service_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.service_date < '{toDateNext:yyyy-MM-dd}'";
             }
             var loinhuan_banhang = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["loinhuan_banhang"] = loinhuan_banhang;
@@ -2286,8 +2418,8 @@ namespace Vudaco.Debits.Repositories
                 // Cộng thêm 1 ngày cho ToDate
                 var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
                 // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
-                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
-                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                sql += $@" AND d.service_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.service_date < '{toDateNext:yyyy-MM-dd}'";
             }
             var loinhuan_com = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["loinhuan_com"] = loinhuan_com;
@@ -2299,7 +2431,7 @@ namespace Vudaco.Debits.Repositories
                         COALESCE(SUM(d.purchase_price), 0) AS total_purchase_price,
                         COALESCE(SUM(d.price), 0) - COALESCE(SUM(d.purchase_price), 0) AS profit
                     FROM debits d
-                    WHERE d.type = 4 AND d.deleted_at IS NULL AND d.file_info_id IS NULL";
+                    WHERE d.type = 4 AND d.deleted_at IS NULL AND d.dispatch_code LIKE 'PK%' ";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND d.storage_id = {DebitDto.StorageId}";
@@ -2309,8 +2441,8 @@ namespace Vudaco.Debits.Repositories
                 // Cộng thêm 1 ngày cho ToDate
                 var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
                 // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
-                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
-                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                sql += $@" AND d.service_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.service_date < '{toDateNext:yyyy-MM-dd}'";
             }
             var loinhuan_phikhac = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["loinhuan_phikhac"] = loinhuan_phikhac;
@@ -2332,8 +2464,8 @@ namespace Vudaco.Debits.Repositories
                 // Cộng thêm 1 ngày cho ToDate
                 var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
                 // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
-                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
-                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                sql += $@" AND d.service_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.service_date < '{toDateNext:yyyy-MM-dd}'";
             }
             var loinhuan_muahang = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["loinhuan_muahang"] = loinhuan_muahang;
@@ -2359,8 +2491,8 @@ namespace Vudaco.Debits.Repositories
                 // Cộng thêm 1 ngày cho ToDate
                 var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
                 // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
-                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
-                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                sql += $@" AND d.service_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.service_date < '{toDateNext:yyyy-MM-dd}'";
             }
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
@@ -2849,8 +2981,8 @@ namespace Vudaco.Debits.Repositories
                 // Cộng thêm 1 ngày cho ToDate
                 var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
                 // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
-                sql += $@" AND f.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
-                AND f.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                sql += $@" AND d.service_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.service_date < '{toDateNext:yyyy-MM-dd}'";
             }
             var dt_ch_hasfile_results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["dt_ch_hasfile_results"] = dt_ch_hasfile_results;
@@ -2869,8 +3001,8 @@ namespace Vudaco.Debits.Repositories
                 // Cộng thêm 1 ngày cho ToDate
                 var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
                 // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
-                sql += $@" AND f.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
-                AND f.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                sql += $@" AND d.service_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.service_date < '{toDateNext:yyyy-MM-dd}'";
             }
             var cp_ch_hasfile_results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["cp_ch_hasfile_results"] = cp_ch_hasfile_results;
@@ -2889,8 +3021,8 @@ namespace Vudaco.Debits.Repositories
                 // Cộng thêm 1 ngày cho ToDate
                 var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
                 // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
-                sql += $@" AND f.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
-                AND f.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                sql += $@" AND d.service_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.service_date < '{toDateNext:yyyy-MM-dd}'";
             }
             var dt_hasfile_results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["dt_hasfile_results"] = dt_hasfile_results;
@@ -2907,8 +3039,8 @@ namespace Vudaco.Debits.Repositories
                 // Cộng thêm 1 ngày cho ToDate
                 var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
                 // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
-                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
-                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                sql += $@" AND d.service_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.service_date < '{toDateNext:yyyy-MM-dd}'";
             }
             var dt_nofile_results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["dt_nofile_results"] = dt_nofile_results;
@@ -2927,8 +3059,8 @@ namespace Vudaco.Debits.Repositories
                 // Cộng thêm 1 ngày cho ToDate
                 var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
                 // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
-                sql += $@" AND f.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
-                AND f.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                sql += $@" AND d.service_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.service_date < '{toDateNext:yyyy-MM-dd}'";
             }
             var cp_hasfile_results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["cp_hasfile_results"] = cp_hasfile_results;
@@ -2945,8 +3077,8 @@ namespace Vudaco.Debits.Repositories
                 // Cộng thêm 1 ngày cho ToDate
                 var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
                 // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
-                sql += $@" AND d.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
-                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                sql += $@" AND d.service_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.service_date < '{toDateNext:yyyy-MM-dd}'";
             }
             var cp_nofile_results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["cp_nofile_results"] = cp_nofile_results;

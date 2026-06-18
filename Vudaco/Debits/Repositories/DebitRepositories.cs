@@ -825,7 +825,7 @@ namespace Vudaco.Debits.Repositories
                     d.purchase_bill,
                     d.bill,
                     d.link_bill,
-                    d.code_bill,
+                   d.code_bill,
                     d.note,
                     d.purchase_note,
                     d.customer_vehicle_type,
@@ -908,6 +908,7 @@ namespace Vudaco.Debits.Repositories
                 }
             }
             sql += " ORDER BY d.file_info_id,d.customer_detail_id,d.type,d.accounting_date";
+           //  _ = Task.Run(() => Helper.SendTelegramMessageAsync(sql));
             var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             var _results = new PaginatedResultReact<object>
             {
@@ -2447,14 +2448,29 @@ namespace Vudaco.Debits.Repositories
             var loinhuan_phikhac = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["loinhuan_phikhac"] = loinhuan_phikhac;
               sql = $@"
-                    SELECT
-                        COALESCE(SUM(d.purchase_com), 0) AS total_purchase_com,
-                        COALESCE(SUM(d.price_com), 0) AS total_price_com,
-                        COALESCE(SUM(d.price), 0) AS total_price,
-                        COALESCE(SUM(d.purchase_price), 0) AS total_purchase_price,
-                        COALESCE(SUM(d.price), 0) - COALESCE(SUM(d.purchase_price), 0) AS profit
+                   SELECT
+                        COALESCE(SUM(CAST(d.purchase_com AS BIGINT)), 0) AS total_purchase_com,
+                        COALESCE(SUM(CAST(d.price_com AS BIGINT)), 0) AS total_price_com,
+                        COALESCE(SUM(CAST(d.price AS BIGINT)), 0) AS total_price,
+                        COALESCE(SUM(ISNULL(x.total_amount,0)),0) AS total_purchase_price,
+                        COALESCE(SUM(CAST(d.price AS BIGINT)), 0) - COALESCE(SUM(ISNULL(x.total_amount,0)), 0) AS profit
                     FROM debits d
-                    WHERE d.type = 7 AND d.deleted_at IS NULL AND d.file_info_id IS NULL";
+                    LEFT JOIN
+                    (
+                        SELECT
+                            r.purchase_debit_id,
+                            COALESCE(SUM(CAST(rd.amount AS BIGINT)), 0) AS total_amount
+                        FROM receipts r
+                        INNER JOIN receipt_details rd
+                            ON r.id = rd.receipt_id
+                        WHERE r.deleted_at IS NULL
+                        AND rd.deleted_at IS NULL
+                        AND (rd.vehicle_id = 0 OR rd.vehicle_id IS NULL)
+                        GROUP BY r.purchase_debit_id
+                    ) x ON x.purchase_debit_id = d.id
+                    WHERE d.type = 7
+                    AND d.deleted_at IS NULL
+                    AND d.file_info_id IS NULL ";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND d.storage_id = {DebitDto.StorageId}";

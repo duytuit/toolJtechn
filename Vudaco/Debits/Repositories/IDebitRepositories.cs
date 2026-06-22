@@ -51,7 +51,7 @@ namespace Vudaco.Debits.Repositories
         Task<Debit> ShowAsync(int id);
         Task<Debit> ShowWithPurchaseNCCAsync(int id);
         Task<Debit> ShowWithFileInfoAsync(int id);
-        Task<Debit> ShowByFileIdAsync(int id);
+        Task<List<Debit>> ShowByFileIdAsync(int id);
         Task<Debit> CreateAsync(Debit Debit);
         Task<Debit> UpdateAsync(Debit Debit);
         Task<Debit> DeleteSoftAsync(Debit Debit);

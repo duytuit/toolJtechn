@@ -35,8 +35,8 @@
     <Folder Include="wwwroot\" />
   </ItemGroup>
   <ItemGroup>
-  <Content Update="web.config">
-    <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-  </Content>
-</ItemGroup>
+    <Content Update="web.config">
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

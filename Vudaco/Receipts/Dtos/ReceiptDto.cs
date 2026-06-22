@@ -40,6 +40,7 @@ namespace Vudaco.Receipts.Dtos
         public int? DeletedBy { get; set; }
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
+        public List<ListProDuctDto> ListProDuct { get; set; }
         public ChuyenTienNoiBo? ChuyenTu { get; set; }
         public ChuyenTienNoiBo? ChuyenDen { get; set; }
     }
@@ -48,6 +49,17 @@ namespace Vudaco.Receipts.Dtos
         public int? BankId { get; set; }
         public int FormOfPayment { get; set; }
         public int? FundId { get; set; }
+    }
+
+    public class ListProDuctDto
+    {
+        public string Note { get; set; }
+        public int Amount { get; set; }
+        public int Vat { get; set; }
+        public int ThanhTien { get; set; }
+        public string Bill { get; set; }
+        public int? VehicleId { get; set; }
+        public int Allocation { get; set; }
     }
   
 }

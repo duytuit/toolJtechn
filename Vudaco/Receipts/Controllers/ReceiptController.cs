@@ -20,6 +20,8 @@ using Vudaco.Receipts.Repositories;
 using Vudaco.Shares.BaseRepository;
 using Vudaco.Shares.Connects;
 using Vudaco.Shares.SqlServerHelper;
+using ClosedXML.Excel;
+using System.IO;
 
 namespace Vudaco.Receipts.Controllers
 {
@@ -43,6 +45,108 @@ namespace Vudaco.Receipts.Controllers
             _repoOffset = repoOffset;
             _context = context;
             _db = db;
+        }
+        [HttpGet("chitietthuchi")]
+        public async Task<IActionResult> GetChiTietThuChiAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] ReceiptDto ReceiptDto = null)
+        {
+            // test
+            var result = await _repoReceipt.GetChiTietThuChiAsync(ReceiptDto, page, pageSize, cancellationToken);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+         [HttpGet("excel/chitietthuchi")]
+        public async Task<IActionResult> ExportChiTietFileGia(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] ReceiptDto ReceiptDto = null)
+        {
+            try
+                {
+                    var result = await _repoReceipt.GetChiTietThuChiAsync(ReceiptDto, page, pageSize, cancellationToken);
+                    if (result?.Data == null || !result.Data.Any())
+                        return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+
+                    var rows = result.Data.Cast<object>().ToList();
+                    if (!rows.Any())
+                        return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+
+                    using var wb = new XLWorkbook();
+                    var ws = wb.Worksheets.Add("RawData");
+
+                    // Determine headers from the first row
+                    var firstRow = rows[0];
+                    var headers = new List<string>();
+                    if (firstRow is IDictionary<string, object> dictRow)
+                    {
+                        headers = dictRow.Keys.ToList();
+                    }
+                    else
+                    {
+                        headers = firstRow.GetType()
+                            .GetProperties()
+                            .Select(p => p.Name)
+                            .ToList();
+                    }
+
+                    // Write header row
+                    for (int col = 0; col < headers.Count; col++)
+                    {
+                        ws.Cell(1, col + 1).Value = headers[col];
+                    }
+
+                    ws.Range(1, 1, 1, headers.Count).Style.Font.Bold = true;
+                    ws.SheetView.FreezeRows(1);
+                    ws.Range(1, 1, 1, headers.Count).SetAutoFilter();
+
+                    string GetSafeCellText(object obj)
+                    {
+                        if (obj == null)
+                            return string.Empty;
+
+                        var text = obj.ToString() ?? string.Empty;
+                        const int maxLength = 32767;
+                        return text.Length <= maxLength
+                            ? text
+                            : text.Substring(0, maxLength);
+                    }
+
+                    // Write data rows
+                    for (int rowIndex = 0; rowIndex < rows.Count; rowIndex++)
+                    {
+                        var row = rows[rowIndex];
+                        for (int col = 0; col < headers.Count; col++)
+                        {
+                            object value = null;
+                            if (row is IDictionary<string, object> dynamicRow)
+                            {
+                                dynamicRow.TryGetValue(headers[col], out value);
+                            }
+                            else
+                            {
+                                var prop = row.GetType().GetProperty(headers[col]);
+                                value = prop?.GetValue(row);
+                            }
+
+                            ws.Cell(rowIndex + 2, col + 1).SetValue(GetSafeCellText(value));
+                        }
+                    }
+
+                    ws.Columns().AdjustToContents();
+
+                    using var stream = new MemoryStream();
+                    wb.SaveAs(stream);
+
+                    return File(
+                        stream.ToArray(),
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        "ChiTietThuChi.xlsx"
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, ex.Message);
+                    return ApiResponseResult<object>(false, ex.Message, null);
+                }
         }
         [HttpGet("phieuthu")]
         public async Task<IActionResult> GetPhieuThu(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] ReceiptDto ReceiptDto = null)
@@ -888,19 +992,45 @@ namespace Vudaco.Receipts.Controllers
 
                 _context.Receipts.Add(entity);
                 await _context.SaveChangesAsync();
-                var entity_detail = new ReceiptDetail
+                if (ReceiptDto.ListProDuct != null && ReceiptDto.ListProDuct.Any())
                 {
-                    ReceiptId = entity.Id,
-                    StorageId = ReceiptDto.StorageId,
-                    AccountingDate = ReceiptDto.AccountingDate,
-                    Amount = ReceiptDto.Amount,
-                    Vat = ReceiptDto.Vat,
-                    CreatedBy = userId,
-                    CreatedAt = now,
-                    UpdatedAt = now
+                    foreach (var item in ReceiptDto.ListProDuct)
+                    {
+                        var entity_detail = new ReceiptDetail
+                        {
+                            ReceiptId = entity.Id,
+                            StorageId = ReceiptDto.StorageId,
+                            AccountingDate = ReceiptDto.AccountingDate,
+                            Bill = item.Bill,
+                            Allocation = item.Allocation,
+                            VehicleId = item.VehicleId,
+                            Amount = item.Amount,
+                            Vat = item.Vat,
+                            Note = item.Note,
+                            CreatedBy = userId,
+                            CreatedAt = now,
+                            UpdatedAt = now
+                        };
+                        _context.ReceiptDetails.Add(entity_detail);
+                    }
+                }
+                else
+                {
+                    var entity_detail = new ReceiptDetail
+                    {
+                        ReceiptId = entity.Id,
+                        StorageId = ReceiptDto.StorageId,
+                        AccountingDate = ReceiptDto.AccountingDate,
+                        Amount = ReceiptDto.Amount,
+                        Vat = ReceiptDto.Vat,
+                        CreatedBy = userId,
+                        CreatedAt = now,
+                        UpdatedAt = now
 
-                };
-                _context.ReceiptDetails.Add(entity_detail);
+                    };
+                    _context.ReceiptDetails.Add(entity_detail);
+                }
+            
                 if (ReceiptDto.IncomeExpenseCategoryId == 4 && (ReceiptDto.Object == 0 || ReceiptDto.Object == 1))// thu tạm ứng khách hàng
                 {
                     var partner_detail = await _context.PartnerDetails.FirstOrDefaultAsync(p => p.Id == ReceiptDto.ObjectId);
@@ -1003,7 +1133,7 @@ namespace Vudaco.Receipts.Controllers
         [HttpPost("update/chinoibo")]
         public async Task<IActionResult> UpdateChiNoiBo([FromBody] ReceiptDto ReceiptDto)
         {
-            if (ReceiptDto.ObjectId == null || ReceiptDto.Object == 0)
+            if (ReceiptDto.ObjectId == null)
                 return ApiResponseResult<object>(false, "Doi tuong bắt buộc", null);
             if (ReceiptDto.FormOfPayment == 1 && (ReceiptDto.FundId == null || ReceiptDto.FundId == 0))
                 return ApiResponseResult<object>(false, "Mã quỹ bắt buộc", null);
@@ -1048,37 +1178,33 @@ namespace Vudaco.Receipts.Controllers
 
                 _context.Receipts.Update(entity);
                 await _context.SaveChangesAsync();
-
-                // Cập nhật chi tiết phiếu chi
-                var detail = await _context.ReceiptDetails.FirstOrDefaultAsync(d => d.ReceiptId == entity.Id);
-                if (detail != null)
+                var receiptDetailsToDelete = await _context.ReceiptDetails.Where(p => p.ReceiptId == entity.Id).ToListAsync();
+                foreach (var detail in receiptDetailsToDelete)
                 {
-                    detail.StorageId = ReceiptDto.StorageId;
-                    detail.AccountingDate = ReceiptDto.AccountingDate;
-                    detail.Amount = ReceiptDto.Amount;
-                    detail.Vat = ReceiptDto.Vat;
-                    detail.UpdatedAt = now;
-                    detail.UpdatedBy = userId;
-
+                    detail.DeletedAt = now;
+                    detail.DeletedBy = userId;
                     _context.ReceiptDetails.Update(detail);
                 }
-                else
+                foreach (var item in ReceiptDto.ListProDuct)
                 {
-                    // Nếu chưa có chi tiết thì thêm mới
-                    var newDetail = new ReceiptDetail
+                    var entity_detail = new ReceiptDetail
                     {
                         ReceiptId = entity.Id,
                         StorageId = ReceiptDto.StorageId,
                         AccountingDate = ReceiptDto.AccountingDate,
-                        Amount = ReceiptDto.Amount,
-                        Vat = ReceiptDto.Vat,
+                        Bill = item.Bill,
+                        Allocation = item.Allocation,
+                        VehicleId = item.VehicleId,
+                        Amount = item.Amount,
+                        Vat = item.Vat,
+                        Note = item.Note,
                         CreatedBy = userId,
                         CreatedAt = now,
-                        UpdatedAt = now,
-                        UpdatedBy = userId
+                        UpdatedAt = now
                     };
-                    _context.ReceiptDetails.Add(newDetail);
+                    _context.ReceiptDetails.Add(entity_detail);
                 }
+                await _context.SaveChangesAsync();
                 if (ReceiptDto.IncomeExpenseCategoryId == 4 && (ReceiptDto.Object == 0 || ReceiptDto.Object == 1))// thu tạm ứng khách hàng
                 {
                     if(entity.DebitReceivableId != null)// phiếu thu hoặc chi tạm ứng kh, ncc

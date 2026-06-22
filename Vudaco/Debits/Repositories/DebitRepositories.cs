@@ -2485,6 +2485,79 @@ namespace Vudaco.Debits.Repositories
             }
             var loinhuan_muahang = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["loinhuan_muahang"] = loinhuan_muahang;
+            sql = $@"
+                -- lấy phiếu chi có income_expense_categorys kiểu là chi phí kinh doanh
+                SELECT 
+                    d.total_amount,
+                    d.total_with_vat
+                FROM receipts r
+                LEFT JOIN income_expense_categorys iecat
+                ON iecat.id = r.income_expense_category_id
+                LEFT JOIN (
+                        SELECT 
+                            receipt_id,
+                            COALESCE(CAST(SUM(amount) AS BIGINT), 0) AS total_amount,
+                            COALESCE(CAST(SUM(amount * (1 + vat / 100.0)) AS BIGINT), 0) AS total_with_vat
+                        FROM receipt_details
+                        WHERE deleted_at IS NULL
+                        AND (vehicle_id = 0 OR vehicle_id IS NULL)
+                        GROUP BY receipt_id
+                ) d ON d.receipt_id = r.id
+                WHERE 
+                    (r.status IS NULL OR r.status = 1)
+                    AND iecat.type = 1
+                    AND (iecat.parent_id in (12) OR iecat.id = 12)
+                    AND r.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND r.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND r.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND r.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            var loinhuan_chi = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["loinhuan_chi"] = loinhuan_chi;
+            sql = $@"
+                -- lấy phiếu thu
+                SELECT 
+                     d.total_amount,
+                    d.total_with_vat
+                FROM receipts r
+                LEFT JOIN income_expense_categorys iecat
+                ON iecat.id = r.income_expense_category_id
+                LEFT JOIN (
+                        SELECT 
+                                receipt_id,
+                                COALESCE(CAST(SUM(amount) AS BIGINT), 0) AS total_amount,
+                                COALESCE(CAST(SUM(amount * (1 + vat / 100.0)) AS BIGINT), 0) AS total_with_vat
+                        FROM receipt_details
+                        WHERE deleted_at IS NULL
+                        GROUP BY receipt_id
+                ) d ON d.receipt_id = r.id
+                WHERE 
+                        (r.status IS NULL OR r.status = 1)
+                        AND iecat.type = 0
+                        AND r.income_expense_category_id = 36
+                        AND r.deleted_at IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND r.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND r.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND r.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            var loinhuan_thu = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["loinhuan_thu"] = loinhuan_thu;
             return _results;
         }
         public async Task<PaginatedResultReact<object>> GetObjectLoiNhuanHaiQuanAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
@@ -2517,7 +2590,6 @@ namespace Vudaco.Debits.Repositories
             };
             return _results;
         }
-
         public async Task<PaginatedResultReact<object>> GetObjectDebitBuTruKHAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
         {
              var sql = $@"

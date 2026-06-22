@@ -473,6 +473,50 @@ namespace Vudaco.Receipts.Repositories
             return _results;
         }
 
+        public async Task<PaginatedResultReact<object>> GetChiTietThuChiAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var sql = $@"
+                    SELECT
+                        r.id,r.code_receipt,r.storage_id,r.partner_detail_id,r.accounting_date,r.object,r.object_id,r.offset_id,r.employee_id,r.file_info_id,r.fund_id,r.income_expense_category_id,r.bill,r.note,r.description,r.form_of_payment,r.type_receipt,r.bank_id,r.created_by,r.updated_by,r.created_at,r.updated_at,
+                        rd.amount,
+                        rd.vat,
+                        COALESCE(CAST(rd.amount * (1 + rd.vat / 100.0) AS INT), 0) AS total_amount,
+                        iecat.name AS iecat_name,
+                        rd.vehicle_id,
+                        v.number_code,
+                        b.account_number AS bank_account_number
+                    FROM receipt_details rd
+                    LEFT JOIN receipts r
+                        ON rd.receipt_id = r.id
+                    LEFT JOIN income_expense_categorys iecat
+                        ON r.income_expense_category_id = iecat.id
+                    LEFT JOIN banks b
+                        ON r.bank_id = b.id
+                    LEFT JOIN vehicles v
+                        ON rd.vehicle_id = v.id
+                    WHERE
+                        rd.deleted_at IS NULL
+                        AND r.deleted_at IS NULL";
+            if (ReceiptDto.StorageId > 0)
+            {
+                sql += $@" AND r.storage_id = {ReceiptDto.StorageId}";
+            }
+           
+            if (ReceiptDto.FromDate.HasValue && ReceiptDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = ReceiptDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND r.accounting_date >= '{ReceiptDto.FromDate.Value:yyyy-MM-dd}' 
+                AND r.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            var results = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            var _results = new PaginatedResultReact<object>
+            {
+                Data = results,
+            };
+            return _results;
+        }
         public async Task<PaginatedResultReact<object>> GetSoDuDauKyAsync(ReceiptDto ReceiptDto, int page, int pageSize, CancellationToken cancellationToken)
         {
              var sql = $@"

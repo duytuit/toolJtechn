@@ -2338,6 +2338,7 @@ namespace Vudaco.Debits.Repositories
                         COALESCE(SUM(d.price_com), 0) AS total_price_com,
                         COALESCE(SUM(d.price), 0) AS total_price,
                         COALESCE(SUM(d.purchase_price), 0) AS total_purchase_price,
+                        coalesce(SUM(d.driver_fee), 0) AS total_driver_fee,
                         COALESCE(SUM(d.price), 0) - COALESCE(SUM(d.purchase_price), 0) AS profit
                     FROM debits d
                     LEFT JOIN file_infos f 
@@ -2353,7 +2354,7 @@ namespace Vudaco.Debits.Repositories
                         AND p.deleted_at IS NULL
                         AND f.deleted_at IS NULL
                         AND cf.deleted_at IS NULL
-                        AND d.vehicle_id IS NULL";
+                        AND d.vehicle_id IS NULL AND D.vehicle_number IS NOT NULL";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND d.storage_id = {DebitDto.StorageId}";
@@ -2424,6 +2425,30 @@ namespace Vudaco.Debits.Repositories
             }
             var loinhuan_com = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["loinhuan_com"] = loinhuan_com;
+             sql = $@"
+                    SELECT
+                        COALESCE(SUM(d.purchase_com), 0) AS total_purchase_com,
+                        COALESCE(SUM(d.price_com), 0) AS total_price_com,
+                        COALESCE(SUM(d.price), 0) AS total_price,
+                        COALESCE(SUM(d.purchase_price), 0) AS total_purchase_price,
+                        COALESCE(SUM(d.driver_fee), 0) AS total_driver_fee,
+                        COALESCE(SUM(d.price), 0) - COALESCE(SUM(d.purchase_price), 0) AS profit
+                    FROM debits d
+                    WHERE d.type = 1 AND d.deleted_at IS NULL AND d.vehicle_id IS NULL AND d.vehicle_number IS NULL";
+            if (DebitDto.StorageId > 0)
+            {
+                sql += $@" AND d.storage_id = {DebitDto.StorageId}";
+            }
+            if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.service_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.service_date < '{toDateNext:yyyy-MM-dd}'";
+            }
+            var loinhuan_banhang_laixe = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
+            _results.Extra["loinhuan_banhang_laixe"] = loinhuan_banhang_laixe;
              sql = $@"
                     SELECT
                         COALESCE(SUM(d.purchase_com), 0) AS total_purchase_com,

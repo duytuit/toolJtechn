@@ -2104,10 +2104,10 @@ namespace Vudaco.Debits.Controllers
         [Route("create")]
         public async Task<IActionResult> Create([FromBody] DebitTransportationCostDto DebitDto)
         {
-            //if (string.IsNullOrEmpty(DebitDto.VehicleNumber))
-            //{
-            //    return ApiResponseResult<object>(false, "Chưa nhập biển số xe", null);
-            //}
+            if (DebitDto.isExternalDriver == 0 && (!DebitDto.VehicleId.HasValue || DebitDto.VehicleId <= 0))
+            {
+               return ApiResponseResult<object>(false, "Chưa nhập biển số xe trong", null);
+            }
             if (!DebitDto.CustomerDetailId.HasValue || DebitDto.CustomerDetailId <= 0)
             {
                 return ApiResponseResult<object>(false, "Không được để trống khách hàng", null);
@@ -2137,7 +2137,7 @@ namespace Vudaco.Debits.Controllers
                     Name = DebitDto.Route,
                     AccountingDate = DebitDto.AccountingDate,
                     ServiceDate = DebitDto.ServiceDate != default(DateTime) ? DebitDto.ServiceDate : DebitDto.AccountingDate,
-                    PurchasePrice = DebitDto.PurchasePrice,
+                    PurchasePrice = DebitDto.isExternalDriver == 0 ? 0 : DebitDto.PurchasePrice,
                     TransportationCost = JsonSerializer.Serialize(DebitDto.TransportationCost),
                     Price = DebitDto.Price,
                     Vat = DebitDto.Vat,
@@ -2890,6 +2890,10 @@ namespace Vudaco.Debits.Controllers
         [Route("updateDebit")]
         public async Task<IActionResult> UpdateDebit([FromBody] DebitTransportationCostDto DebitDto)
         {
+            if (DebitDto.isExternalDriver == 0 && (!DebitDto.VehicleId.HasValue || DebitDto.VehicleId <= 0))
+            {
+               return ApiResponseResult<object>(false, "Chưa nhập biển số xe trong", null);
+            }
             if (!DebitDto.CustomerDetailId.HasValue || DebitDto.CustomerDetailId <= 0)
             {
                 return ApiResponseResult<object>(false, "Không được để trống khách hàng", null);
@@ -2914,7 +2918,7 @@ namespace Vudaco.Debits.Controllers
                 debit.Name = DebitDto.Route;
                 //debit.AccountingDate = DebitDto.AccountingDate;
                 debit.ServiceDate = DebitDto.ServiceDate != default(DateTime) ? DebitDto.ServiceDate : DebitDto.AccountingDate;
-                debit.PurchasePrice = DebitDto.PurchasePrice;
+                debit.PurchasePrice = DebitDto.isExternalDriver == 0 ? 0 : DebitDto.PurchasePrice; // nếu là xe ngoài thì mới có giá mua
                 debit.Price = DebitDto.Price;
                 debit.Vat = DebitDto.Vat;
                 debit.DriverFee = DebitDto.DriverFee;

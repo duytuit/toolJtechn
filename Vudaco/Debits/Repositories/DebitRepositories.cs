@@ -2354,7 +2354,7 @@ namespace Vudaco.Debits.Repositories
                         AND p.deleted_at IS NULL
                         AND f.deleted_at IS NULL
                         AND cf.deleted_at IS NULL
-                        AND d.vehicle_id IS NULL AND D.vehicle_number IS NOT NULL";
+                        AND d.vehicle_id IS NULL";
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND d.storage_id = {DebitDto.StorageId}";

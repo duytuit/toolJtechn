@@ -33,6 +33,7 @@ namespace Vudaco.Debits.Dtos
         public DateTime? PurchaseAccountingDate { get; set; }
         public DateTime ServiceDate { get; set; }
         public DateTime AccountingDate { get; set; }
+        public int isExternalDriver { get; set; }      // loại xe 0: xe công ty, 1: xe ngoài
         public int PurchasePrice { get; set; }      // Cước mua
         public int Price { get; set; }
         public int Vat { get; set; }

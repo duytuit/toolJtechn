@@ -7,7 +7,7 @@ namespace Vudaco.Depreciations.Dtos
 {
     public class DepreciationAllocationDto
     {
-        public DateTime AccountingDate { get; set; }
+        public DateTime? AccountingDate { get; set; }
         public string CycleName { get; set; }
         public int Type { get; set; }
         public string Note { get; set; }
@@ -18,5 +18,7 @@ namespace Vudaco.Depreciations.Dtos
         public int? UpdatedBy { get; set; }
 
         public int? DeletedBy { get; set; }
+        public DateTime? FromDate { get; set; }
+        public DateTime? ToDate { get; set; }
     }
 }

@@ -73,8 +73,10 @@ namespace Vudaco.Depreciations.Controllers
                         Type = ListDepreciationDto.Type,
                         OriginalCost = item.OriginalCost,
                         UsefulLife = item.UsefulLife,
+                        VehicleId = item.VehicleId,
                         MonthlyDepreciation = item.MonthlyDepreciation,
                         Note = item.Note,
+                        CreateDate = item.CreateDate,
                         StorageId = ListDepreciationDto.StorageId,
                         CreatedBy = userId,
                         CreatedAt = now,
@@ -106,13 +108,13 @@ namespace Vudaco.Depreciations.Controllers
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
             }
             // Check trùng Code
-            if (!string.IsNullOrWhiteSpace(DepreciationDto.CodeNumber) &&
-                await _context.Depreciations.AnyAsync(p =>
-                    p.CodeNumber == DepreciationDto.CodeNumber &&
-                    p.StorageId == Depreciation.StorageId &&
-                    p.Id != DepreciationDto.Id))
-                return ApiResponseResult<object>(false, "Code đã tồn tại trong kho này", null);
-                  // Check trùng Name
+            // if (!string.IsNullOrWhiteSpace(DepreciationDto.CodeNumber) &&
+            //     await _context.Depreciations.AnyAsync(p =>
+            //         p.CodeNumber == DepreciationDto.CodeNumber &&
+            //         p.StorageId == Depreciation.StorageId &&
+            //         p.Id != DepreciationDto.Id))
+            //     return ApiResponseResult<object>(false, "Code đã tồn tại trong kho này", null);
+            // Check trùng Name
             if (!string.IsNullOrWhiteSpace(DepreciationDto.Name) &&
                 await _context.Depreciations.AnyAsync(p =>
                     p.Name == DepreciationDto.Name &&
@@ -126,7 +128,9 @@ namespace Vudaco.Depreciations.Controllers
             Depreciation.UsefulLife = DepreciationDto.UsefulLife;
             Depreciation.MonthlyDepreciation = DepreciationDto.MonthlyDepreciation;
             Depreciation.StorageId = DepreciationDto.StorageId;
+            Depreciation.VehicleId = DepreciationDto.VehicleId;
             Depreciation.Note = DepreciationDto.Note;
+            Depreciation.CreateDate = DepreciationDto.CreateDate;
             Depreciation.UpdatedBy = userId;
             Depreciation.Status = DepreciationDto.Status;
             Depreciation.UpdatedAt = DateTime.Now;
@@ -151,6 +155,7 @@ namespace Vudaco.Depreciations.Controllers
                         Note = DepreciationAllocationDto.Note,
                         CycleName = DepreciationAllocationDto.CycleName,
                         Type = DepreciationAllocationDto.Type,  
+                        AccountingDate = DepreciationAllocationDto.AccountingDate,
                         StorageId = DepreciationAllocationDto.StorageId,
                         CreatedBy = userId,
                         CreatedAt = now,
@@ -161,6 +166,7 @@ namespace Vudaco.Depreciations.Controllers
                 else
                 {
                     entity.Note = DepreciationAllocationDto.Note;
+                    entity.AccountingDate = DepreciationAllocationDto.AccountingDate;
                     entity.UpdatedBy = userId;
                     entity.UpdatedAt = now;
                     _context.DepreciationAllocations.Update(entity);

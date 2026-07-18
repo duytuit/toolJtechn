@@ -2313,7 +2313,11 @@ namespace Vudaco.Debits.Repositories
             // 34: trích BHXH
             // 35: phí gửi xe
             // 38: phí đi đường lái xe
-            sql = $@"SELECT v.number_code,v.note v_note,r.income_expense_category_id,rd.* FROM vehicles v LEFT JOIN receipt_details rd on rd.vehicle_id = v.id LEFT JOIN receipts r on r.id = rd.receipt_id WHERE r.deleted_at IS NULL AND rd.deleted_at IS NULL AND r.income_expense_category_id IN (38,34,35,22,19,20,18,17,16)";     
+            sql = $@"SELECT v.number_code,v.note v_note,r.income_expense_category_id,rd.* 
+            FROM vehicles v 
+            LEFT JOIN receipt_details rd on rd.vehicle_id = v.id 
+            LEFT JOIN receipts r on r.id = rd.receipt_id 
+            WHERE r.deleted_at IS NULL AND rd.deleted_at IS NULL AND r.income_expense_category_id IN (38,34,35,22,19,20,18,17,16)";     
             if (DebitDto.StorageId > 0)
             {
                 sql += $@" AND r.storage_id = {DebitDto.StorageId}";
@@ -2328,6 +2332,47 @@ namespace Vudaco.Debits.Repositories
             }   
             var chi_theoxe = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["chi_theoxe"] = chi_theoxe;
+            sql = $@"
+                SELECT
+                    v.id,
+                    v.number_code,
+                    COALESCE(SUM(dat.monthly_depreciation), 0) AS total_monthly_depreciation
+                FROM vehicles v
+                LEFT JOIN depreciations d
+                    ON v.id = d.vehicle_id
+                    AND d.deleted_at IS NULL
+                    AND d.type IN (1,3)";
+                if (DebitDto.StorageId > 0)
+                {
+                    sql += $@"
+                    AND d.storage_id = {DebitDto.StorageId}";
+                }
+                sql += $@"
+                LEFT JOIN depreciation_allocation_details dat
+                    ON dat.depreciation_id = d.id
+                    AND dat.deleted_at IS NULL
+                LEFT JOIN depreciation_allocations da
+                    ON da.id = dat.depreciation_allocation_id
+                    AND da.deleted_at IS NULL";
+                if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+                {
+                    var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                    sql += $@"
+                    AND da.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}'
+                    AND da.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                }
+                sql += $@"
+                WHERE v.deleted_at IS NULL
+                GROUP BY
+                    v.id,
+                    v.number_code
+                ";
+                var khauhao_theoxe = await SqlServerHelpers.ExecuteQuerySqlAsync(
+                    _configuration.GetConnectionString("DefaultConnection"),
+                    sql,
+                    cancellationToken
+                );
+            _results.Extra["khauhao_theoxe"] = khauhao_theoxe;
             return _results;
         }
         public async Task<PaginatedResultReact<object>> GetObjectLoiNhuanXeNgoaiAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)
@@ -2583,6 +2628,37 @@ namespace Vudaco.Debits.Repositories
             }
             var loinhuan_thu = await SqlServerHelpers.ExecuteQuerySqlAsync(_configuration.GetConnectionString("DefaultConnection"), sql, cancellationToken);
             _results.Extra["loinhuan_thu"] = loinhuan_thu;
+            sql = $@"
+                SELECT
+                    COALESCE(SUM(dat.monthly_depreciation), 0) AS total_monthly_depreciation
+                FROM depreciation_allocation_details dat
+                INNER JOIN depreciations d
+                    ON d.id = dat.depreciation_id
+                    AND d.deleted_at IS NULL
+                    AND d.vehicle_id IS NULL
+                    AND d.type IN (1,3)
+                INNER JOIN depreciation_allocations da
+                    ON da.id = dat.depreciation_allocation_id
+                    AND da.deleted_at IS NULL
+                WHERE dat.deleted_at IS NULL";
+                if (DebitDto.StorageId > 0)
+                {
+                    sql += $@"
+                    AND d.storage_id = {DebitDto.StorageId}";
+                }
+                if (DebitDto.FromDate.HasValue && DebitDto.ToDate.HasValue)
+                {
+                    var toDateNext = DebitDto.ToDate.Value.Date.AddDays(1);
+                    sql += $@"
+                    AND da.accounting_date >= '{DebitDto.FromDate.Value:yyyy-MM-dd}'
+                    AND da.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+                }
+                var khauhao_chung = await SqlServerHelpers.ExecuteQuerySqlAsync(
+                    _configuration.GetConnectionString("DefaultConnection"),
+                    sql,
+                    cancellationToken
+                );
+                _results.Extra["khauhao_chung"] = khauhao_chung;
             return _results;
         }
         public async Task<PaginatedResultReact<object>> GetObjectLoiNhuanHaiQuanAsync(DebitDto DebitDto, int page, int pageSize, CancellationToken cancellationToken)

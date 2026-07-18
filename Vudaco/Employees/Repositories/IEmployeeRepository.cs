@@ -15,6 +15,7 @@ namespace Vudaco.Employees.Repositories
         Task<PaginatedResultReact<object>> GetObjectTaskAsync(EmployeeDto EmployeeDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<Employee> ShowAsync(int id);
         Task<Employee> InfoEmployeeAsync(int userId);
+        Task<Employee> InfoEmployeeByStoreAsync(int userId, int storeId);
         Task<Employee> CreateAsync(Employee Employee);
         Task<Employee> UpdateAsync(Employee Employee);
         Task<Employee> DeleteSoftAsync(Employee Employee);

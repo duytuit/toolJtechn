@@ -19,9 +19,12 @@ namespace Vudaco.Depreciations.Dtos
 
         public DateTime? EndDate { get; set; }
 
+        public DateTime CreateDate { get; set; }
+
         public int? MonthlyDepreciation { get; set; }
 
         public int StorageId { get; set; }
+        public int? VehicleId { get; set; }
 
         public int Type { get; set; }
         public int Status { get; set; }

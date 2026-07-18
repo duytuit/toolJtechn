@@ -1052,7 +1052,7 @@ namespace Vudaco.Receipts.Controllers
                         debit.DispatchCode = debit_code;
                         debit.Name = "Thu tạm ứng khách hàng " + ReceiptDto.Note;
                         debit.Type = DebitRepositories.PhiKhacNCC;
-                        debit.PurchasePrice = ReceiptDto.Amount;
+                        debit.PurchasePrice = ReceiptDto.ListProDuct != null && ReceiptDto.ListProDuct.Any() ? ReceiptDto.ListProDuct.Sum(x => x.Amount) : ReceiptDto.Amount;
                         debit.Status = ContractFileRepository.statusDebit;
                         debit.CreatedAt = now;
                         debit.CreatedBy = userId;
@@ -1097,7 +1097,7 @@ namespace Vudaco.Receipts.Controllers
                         debit.DispatchCode = debit_code;
                         debit.Name = "Chi tạm ứng tiền cho nhà cung cấp " + ReceiptDto.Note;
                         debit.Type = DebitRepositories.PhiKhac;
-                        debit.Price = ReceiptDto.Amount;
+                        debit.Price = ReceiptDto.ListProDuct != null && ReceiptDto.ListProDuct.Any() ? ReceiptDto.ListProDuct.Sum(x => x.Amount) : ReceiptDto.Amount;
                         debit.Status = ContractFileRepository.statusDebit;
                         debit.CreatedAt = now;
                         debit.CreatedBy = userId;
@@ -1237,7 +1237,7 @@ namespace Vudaco.Receipts.Controllers
                         debit.DispatchCode = debit_code;
                         debit.Name = "Thu tạm ứng khách hàng " + ReceiptDto.Note;
                         debit.Type = DebitRepositories.PhiKhacNCC;
-                        debit.PurchasePrice = ReceiptDto.Amount;
+                        debit.PurchasePrice = ReceiptDto.ListProDuct != null && ReceiptDto.ListProDuct.Any() ? ReceiptDto.ListProDuct.Sum(x => x.Amount) : ReceiptDto.Amount;
                         debit.Status = ContractFileRepository.statusDebit;
                         debit.CreatedAt = now;
                         debit.CreatedBy = userId;
@@ -1294,7 +1294,7 @@ namespace Vudaco.Receipts.Controllers
                         debit.DispatchCode = debit_code;
                         debit.Name = "Chi tạm ứng tiền cho nhà cung cấp " + ReceiptDto.Note;
                         debit.Type = DebitRepositories.PhiKhac;
-                        debit.Price = ReceiptDto.Amount;
+                        debit.Price = ReceiptDto.ListProDuct != null && ReceiptDto.ListProDuct.Any() ? ReceiptDto.ListProDuct.Sum(x => x.Amount) : ReceiptDto.Amount;
                         debit.Status = ContractFileRepository.statusDebit;
                         debit.CreatedAt = now;
                         debit.CreatedBy = userId;

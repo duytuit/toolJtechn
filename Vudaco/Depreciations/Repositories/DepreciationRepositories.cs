@@ -62,6 +62,14 @@ namespace Vudaco.Depreciations.Repositories
             {
                 sql += $@" AND d.type = {DepreciationAllocationDto.Type}";
             }
+            if (DepreciationAllocationDto.FromDate.HasValue && DepreciationAllocationDto.ToDate.HasValue)
+            {
+                // Cộng thêm 1 ngày cho ToDate
+                var toDateNext = DepreciationAllocationDto.ToDate.Value.Date.AddDays(1);
+                // Format chuẩn yyyy-MM-dd HH:mm:ss để SQL hiểu đúng
+                sql += $@" AND d.accounting_date >= '{DepreciationAllocationDto.FromDate.Value:yyyy-MM-dd}' 
+                AND d.accounting_date < '{toDateNext:yyyy-MM-dd}'";
+            }
             // 👉 ORDER + PAGINATION
             // sql += $@"
             //     ORDER BY d.updated_at DESC

@@ -30,6 +30,9 @@ namespace Vudaco.Depreciations.Models
         [Column("note")]
         public string Note { get; set; }
 
+        [Column("accounting_date")]
+        public DateTime? AccountingDate { get; set; }
+
         [Required]
         [Column("storage_id")]
         public int StorageId { get; set; }

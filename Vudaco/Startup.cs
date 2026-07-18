@@ -80,7 +80,11 @@ namespace Vudaco
             });
             // kết nối sql server
             services.AddDbContext<VudacoDBContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))
+                {
+                        options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                        options.EnableSensitiveDataLogging();
+                        options.EnableDetailedErrors();
+                }
             );
             // kết nối sql server kiểu ado
             services.Configure<ConnectionStrings>(Configuration.GetSection("ConnectionStrings"));

@@ -63,6 +63,16 @@ namespace Vudaco.Employees.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
+        [HttpGet("InfoEmployeeByStore")]
+        public async Task<IActionResult> InfoEmployeeByStore(CancellationToken cancellationToken, [FromQuery] int userId, [FromQuery] int storeId)
+        {
+            var result = await _repoEmployee.InfoEmployeeByStoreAsync(userId, storeId);
+            if (result == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
         [HttpGet("drivers")]
         public async Task<IActionResult> DriversEmployee(CancellationToken cancellationToken,[FromQuery] int page = 1, int pageSize = 50, [FromQuery] EmployeeDto EmployeeDto = null )
         {

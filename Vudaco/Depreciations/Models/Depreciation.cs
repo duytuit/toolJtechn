@@ -38,6 +38,11 @@ namespace Vudaco.Depreciations.Models
         [Required]
         [Column("type")]
         public int Type { get; set; }
+        [Column("vehicle_id")]
+        public int? VehicleId { get; set; }
+
+        [Column("create_date")]
+        public DateTime CreateDate { get; set; }
 
         [Required]
         [Column("status")]

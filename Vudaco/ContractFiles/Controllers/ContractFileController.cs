@@ -483,6 +483,7 @@ namespace Vudaco.ContractFiles.Controllers
                     ws.Cell("A9").Value = "- Các dòng dữ liệu phía dưới chỉ là ví dụ minh họa";
                     // ================= HEADER =================
                     int headerRow = 11;
+                   
                     string[] headers =
                     {
                         "Số thứ tự hóa đơn (*)","Ngày hóa đơn","Tên đơn vị mua hàng","Mã khách hàng","Địa chỉ","Mã số thuế",
@@ -497,7 +498,24 @@ namespace Vudaco.ContractFiles.Controllers
                         "BKS phương tiện vận chuyển","Người gửi hàng","Địa chỉ người gửi",
                         "MST người gửi","Số định danh người gửi"
                     };
-
+                    if(DebitDto.Version == 1)
+                    {
+                       headers = new string[]
+                        {
+                            "Số thứ tự hóa đơn (*)","Ngày hóa đơn","Tên đơn vị mua hàng","Mã khách hàng","Địa chỉ","Mã số thuế",
+                            "Người mua hàng","Mã địa điểm kinh doanh","Email","SĐT","CCCD","Số hộ chiếu","Mã ĐVCQHVNSNN","Ghi chú",
+                            "Hình thức thanh toán","Loại tiền","Tỷ giá",
+                            "Tỷ lệ CK(%)",
+                            "Tiền CK","Thuế suất GTGT (%)","Tiền thuế GTGT",
+                            "Tên hàng hóa/dịch vụ (*)","Mã hàng","ĐVT",
+                            "Số lượng","Đơn giá","Tỷ lệ CK (%)",
+                            "Tiền CK","Thành tiền(*)","Loại",
+                            "Loại hàng hoá đặc trưng",
+                            "Số khung","Số máy",
+                            "BKS phương tiện vận chuyển","Người gửi hàng","Địa chỉ người gửi",
+                            "MST người gửi","Số định danh người gửi"
+                        };
+                    }
                     for (int i = 0; i < headers.Length; i++)
                         ws.Cell(headerRow, i + 1).Value = headers[i];
 
@@ -554,20 +572,40 @@ namespace Vudaco.ContractFiles.Controllers
                             ws.Cell(row, 5).Value = kh?.Partner?.Address ?? "";
                             ws.Cell(row, 6).Value = string.IsNullOrWhiteSpace(taxCode) ? "" : $"MST: {taxCode}";
                             ws.Cell(row, 7).Value = fileInfo?.Sales ?? "";
-                            ws.Cell(row, 11).Value = fileInfo?.Bill ?? "";
-                            ws.Cell(row, 12).Value = "Chuyển khoản";
-                            ws.Cell(row, 13).Value = "VND";
-                            ws.Cell(row, 17).Value = 8;
-                            ws.Cell(row, 18).Value = vatDv;
-                            ws.Cell(row, 19).Value = "Phí dịch vụ giao nhận";
-                            ws.Cell(row, 21).Value = "chuyến";
-                            ws.Cell(row, 22).Value = 1;
-                            ws.Cell(row, 23).Value = giaDv;
-                            ws.Cell(row, 26).Value = giaDv;
-                            ws.Cell(row, 27).Value = 4;
-                            ws.Cell(row, 28).Value = 2;
-                            ws.Cell(row, 31).Value = dv.vehicle_number ?? "";
-
+                            if(DebitDto.Version == 1)
+                            {
+                               ws.Cell(row, 8).Value = "";
+                               ws.Cell(row, 12).Value = "";
+                               ws.Cell(row, 13).Value = "";
+                                ws.Cell(row, 15).Value = fileInfo?.Bill ?? "";
+                                ws.Cell(row, 16).Value = "Chuyển khoản";
+                                ws.Cell(row, 17).Value = "VND";
+                                ws.Cell(row, 20).Value = 8;
+                                ws.Cell(row, 21).Value = vatDv;
+                                ws.Cell(row, 22).Value = "Phí dịch vụ giao nhận";
+                                ws.Cell(row, 24).Value = "chuyến";
+                                ws.Cell(row, 25).Value = 1;
+                                ws.Cell(row, 26).Value = giaDv;
+                                ws.Cell(row, 29).Value = giaDv;
+                                ws.Cell(row, 30).Value = 4;
+                                ws.Cell(row, 31).Value = 2;
+                                ws.Cell(row, 34).Value = dv.vehicle_number ?? "";
+                            }else
+                            {
+                                ws.Cell(row, 11).Value = fileInfo?.Bill ?? "";
+                                ws.Cell(row, 12).Value = "Chuyển khoản";
+                                ws.Cell(row, 13).Value = "VND";
+                                ws.Cell(row, 17).Value = 8;
+                                ws.Cell(row, 18).Value = vatDv;
+                                ws.Cell(row, 19).Value = "Phí dịch vụ giao nhận";
+                                ws.Cell(row, 21).Value = "chuyến";
+                                ws.Cell(row, 22).Value = 1;
+                                ws.Cell(row, 23).Value = giaDv;
+                                ws.Cell(row, 26).Value = giaDv;
+                                ws.Cell(row, 27).Value = 4;
+                                ws.Cell(row, 28).Value = 2;
+                                ws.Cell(row, 31).Value = dv.vehicle_number ?? "";
+                            }
                             row++;
                         }
 
@@ -606,20 +644,41 @@ namespace Vudaco.ContractFiles.Controllers
                             ws.Cell(row, 5).Value = kh?.Partner?.Address ?? "";
                             ws.Cell(row, 6).Value = kh?.Partner?.TaxCode ?? "";
                             ws.Cell(row, 7).Value = fileInfo?.Sales ?? "";
-                            ws.Cell(row, 11).Value = fileInfo?.Bill ?? "";
-                            ws.Cell(row, 12).Value = "Chuyển khoản";
-                            ws.Cell(row, 13).Value = "VND";
-                            ws.Cell(row, 17).Value = 8;
-                            ws.Cell(row, 18).Value = vatDv;
-                            ws.Cell(row, 19).Value = DebitDto.ExportHasBill == 1? "CƯỚC VẬN CHUYỂN " + (item.name ?? "") +" BILL: "+(fileInfo?.Bill ?? ""): "CƯỚC VẬN CHUYỂN " + (item.name ?? "");
-                            ws.Cell(row, 21).Value = "chuyến";
-                            ws.Cell(row, 22).Value = 1;
-                            ws.Cell(row, 23).Value = giaDv;
-                            ws.Cell(row, 26).Value = giaDv;
-                            ws.Cell(row, 27).Value = 4;
-                            ws.Cell(row, 28).Value = 2;
-                            ws.Cell(row, 31).Value = item.vehicle_number ?? "";
-
+                            if(DebitDto.Version == 1)
+                            {
+                                ws.Cell(row, 8).Value = "";
+                                ws.Cell(row, 12).Value = "";
+                                ws.Cell(row, 13).Value = "";
+                                ws.Cell(row, 14).Value = fileInfo?.Bill ?? "";
+                                ws.Cell(row, 15).Value = "Chuyển khoản";
+                                ws.Cell(row, 16).Value = "VND";
+                                ws.Cell(row, 20).Value = 8;
+                                ws.Cell(row, 21).Value = vatDv;
+                                ws.Cell(row, 22).Value = DebitDto.ExportHasBill == 1? "CƯỚC VẬN CHUYỂN " + (item.name ?? "") +" BILL: "+(fileInfo?.Bill ?? ""): "CƯỚC VẬN CHUYỂN " + (item.name ?? "");
+                                ws.Cell(row, 24).Value = "chuyến";
+                                ws.Cell(row, 25).Value = 1;
+                                ws.Cell(row, 26).Value = giaDv;
+                                ws.Cell(row, 29).Value = giaDv;
+                                ws.Cell(row, 30).Value = 4;
+                                ws.Cell(row, 31).Value = 2;
+                                ws.Cell(row, 34).Value = item.vehicle_number ?? "";
+                            }
+                            else
+                            {
+                                ws.Cell(row, 11).Value = fileInfo?.Bill ?? "";
+                                ws.Cell(row, 12).Value = "Chuyển khoản";
+                                ws.Cell(row, 13).Value = "VND";
+                                ws.Cell(row, 17).Value = 8;
+                                ws.Cell(row, 18).Value = vatDv;
+                                ws.Cell(row, 19).Value = DebitDto.ExportHasBill == 1? "CƯỚC VẬN CHUYỂN " + (item.name ?? "") +" BILL: "+(fileInfo?.Bill ?? ""): "CƯỚC VẬN CHUYỂN " + (item.name ?? "");
+                                ws.Cell(row, 21).Value = "chuyến";
+                                ws.Cell(row, 22).Value = 1;
+                                ws.Cell(row, 23).Value = giaDv;
+                                ws.Cell(row, 26).Value = giaDv;
+                                ws.Cell(row, 27).Value = 4;
+                                ws.Cell(row, 28).Value = 2;
+                                ws.Cell(row, 31).Value = item.vehicle_number ?? "";
+                            }
                             row++;
                         }
                     }
@@ -639,19 +698,37 @@ namespace Vudaco.ContractFiles.Controllers
                                 ws.Cell(row, 4).Value = kh?.Partner?.Abbreviation ?? "";
                                 ws.Cell(row, 5).Value = kh?.Partner?.Address ?? "";
                                 ws.Cell(row, 6).Value = kh?.Partner?.TaxCode ?? "";
-                                ws.Cell(row, 12).Value = "Chuyển khoản";
-                                ws.Cell(row, 13).Value = "VND";
-                                ws.Cell(row, 17).Value = 8;
-                                ws.Cell(row, 18).Value = vat;
-                                ws.Cell(row, 19).Value = item.type == 1 ? "CƯỚC VẬN CHUYỂN " + (item.name ?? ""): "Phí dịch vụ giao nhận";
-                                ws.Cell(row, 21).Value = "chuyến";
-                                ws.Cell(row, 22).Value = 1;
-                                ws.Cell(row, 23).Value = price;
-                                ws.Cell(row, 26).Value = price;
-                                ws.Cell(row, 27).Value = 4;
-                                ws.Cell(row, 28).Value = 2;
-                                ws.Cell(row, 31).Value = item.vehicle_number ?? "";
-
+                                if(DebitDto.Version == 1)
+                                {
+                                    ws.Cell(row, 8).Value = "";
+                                    ws.Cell(row, 12).Value = "";
+                                    ws.Cell(row, 13).Value = "";
+                                    ws.Cell(row, 14).Value = "Chuyển khoản";
+                                    ws.Cell(row, 15).Value = "VND";
+                                    ws.Cell(row, 19).Value = 8;
+                                    ws.Cell(row, 20).Value = vat;
+                                    ws.Cell(row, 21).Value = item.type == 1 ? "CƯỚC VẬN CHUYỂN " + (item.name ?? ""): "Phí dịch vụ giao nhận";
+                                    ws.Cell(row, 23).Value = "chuyến";
+                                    ws.Cell(row, 24).Value = 1;
+                                    ws.Cell(row, 25).Value = price;
+                                    ws.Cell(row, 28).Value = price;
+                                    ws.Cell(row, 29).Value = 4;
+                                    ws.Cell(row, 30).Value = 2;
+                                    ws.Cell(row, 33).Value = item.vehicle_number ?? "";
+                                }else{
+                                    ws.Cell(row, 12).Value = "Chuyển khoản";
+                                    ws.Cell(row, 13).Value = "VND";
+                                    ws.Cell(row, 17).Value = 8;
+                                    ws.Cell(row, 18).Value = vat;
+                                    ws.Cell(row, 19).Value = item.type == 1 ? "CƯỚC VẬN CHUYỂN " + (item.name ?? ""): "Phí dịch vụ giao nhận";
+                                    ws.Cell(row, 21).Value = "chuyến";
+                                    ws.Cell(row, 22).Value = 1;
+                                    ws.Cell(row, 23).Value = price;
+                                    ws.Cell(row, 26).Value = price;
+                                    ws.Cell(row, 27).Value = 4;
+                                    ws.Cell(row, 28).Value = 2;
+                                    ws.Cell(row, 31).Value = item.vehicle_number ?? "";
+                                }
                                 row++;
                             }
                         }

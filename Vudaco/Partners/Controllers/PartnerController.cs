@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Vudaco.Auth.Models;
@@ -80,6 +81,153 @@ namespace Vudaco.Partners.Controllers
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
+        }
+        [HttpPost("importPartner")]
+        public async Task<IActionResult> ImportDauKy([FromBody] ImportPartnerDto dto)
+        {
+            if (string.IsNullOrEmpty(dto.Data))
+            {
+                return ApiResponseResult<object>(false, "Không có chi tiết", null);
+            }
+
+            List<JsonElement> list;
+
+            try
+            {
+                list = JsonSerializer.Deserialize<List<JsonElement>>(dto.Data);
+            }
+            catch
+            {
+                return ApiResponseResult<object>(false, "Dữ liệu chi tiết không hợp lệ", null);
+            }
+
+            if (list == null || list.Count == 0)
+            {
+                return ApiResponseResult<object>(false, "Không có chi tiết", null);
+            }
+
+            using var tran = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                // Load toàn bộ dữ liệu existing trước
+                var existingPartners = await _context.Partners
+                    .Where(x => x.StorageId == dto.StorageId)
+                    .Select(x => new
+                    {
+                        x.Name,
+                        x.Abbreviation
+                    })
+                    .ToListAsync();
+
+                var existingNames = existingPartners
+                    .Select(x => x.Name)
+                    .ToHashSet();
+
+                var existingAbbreviations = existingPartners
+                    .Select(x => x.Abbreviation)
+                    .ToHashSet();
+
+                var partnersToAdd = new List<Partner>();
+
+                foreach (var item in list)
+                {
+                    string tencongty = item.TryGetProperty("tencongty", out var tenCongTyProp) ? tenCongTyProp.GetString() : "";
+                    string tenviettat = item.TryGetProperty("tenviettat", out var tenVietTatProp) ? tenVietTatProp.GetString() : ""; 
+                    string masothue = item.TryGetProperty("masothue", out var maSoThueProp) ? maSoThueProp.GetString() : "";
+                    string diachi = item.TryGetProperty("diachi", out var diaChiProp) ? diaChiProp.GetString() : "";
+                    if (existingNames.Contains(tencongty))
+                        continue;
+
+                    if (!string.IsNullOrEmpty(tenviettat)
+                        && existingAbbreviations.Contains(tenviettat))
+                        continue;
+
+                    var partner = new Partner
+                    {
+                        Name = tencongty,
+                        StorageId = dto.StorageId,
+                        Address = diachi,
+                        TaxCode = masothue,
+                        Abbreviation = tenviettat,
+                        CreatedBy = userId,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
+                    };
+
+                    partnersToAdd.Add(partner);
+
+                    existingNames.Add(tencongty);
+
+                    if (!string.IsNullOrEmpty(tenviettat))
+                    {
+                        existingAbbreviations.Add(tenviettat);
+                    }
+                }
+
+                // Insert bulk
+                await _context.Partners.AddRangeAsync(partnersToAdd);
+
+                // Save 1 lần
+                await _context.SaveChangesAsync();
+
+                var partnerDetails = new List<PartnerDetail>();
+
+                foreach (var partner in partnersToAdd)
+                {
+                    partnerDetails.Add(new PartnerDetail
+                    {
+                        PartnerId = partner.Id,
+                        Status = 0,
+                        Code = SqlServerHelpers.GenerateSoChungTu(
+                            _configuration.GetConnectionString("DefaultConnection"),
+                            "partner_details",
+                            "code",
+                            dto.StorageId,
+                            "KH",
+                            4),
+                        StorageId = dto.StorageId,
+                        CreatedBy = userId,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
+                    });
+
+                    partnerDetails.Add(new PartnerDetail
+                    {
+                        PartnerId = partner.Id,
+                        Status = 0,
+                        Code = SqlServerHelpers.GenerateSoChungTu(
+                            _configuration.GetConnectionString("DefaultConnection"),
+                            "partner_details",
+                            "code",
+                            dto.StorageId,
+                            "NCC",
+                            4),
+                        StorageId = dto.StorageId,
+                        CreatedBy = userId,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
+                    });
+                }
+
+                await _context.PartnerDetails.AddRangeAsync(partnerDetails);
+
+                await _context.SaveChangesAsync();
+
+                await tran.CommitAsync();
+
+                return ApiResponseResult<object>(true, "Cập nhật thành công", null);
+            }
+            catch (Exception ex)
+            {
+                await tran.RollbackAsync();
+
+                return ApiResponseResult<object>(
+                    false,
+                    ex.Message,
+                    null
+                );
+            }
         }
         [HttpPost("create")]
         public async Task<IActionResult> Create([FromBody] PartnerDto dto)

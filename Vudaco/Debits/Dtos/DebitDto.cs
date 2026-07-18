@@ -69,6 +69,7 @@ namespace Vudaco.Debits.Dtos
         public int ExportHasBill { get; set; }
         public int? IncomeExpenseCategoryId { get; set; }
         public int? EmployeeId { get; set; }
+        public int? Version { get; set; }
         public List<MuaHangNCCDto> MuaHangNCC { get; set; }
         public List<serviceDto> productChiho { get; set; }
         public List<serviceDto> productHaiquan { get; set; }

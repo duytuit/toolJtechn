@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Vudaco.Shares.BaseRepository;
 using Vudaco.Shares;
 using Microsoft.AspNetCore.Authorization;
+using System.Threading.Tasks;
 
 namespace Vudaco.Controllers
 {
@@ -24,12 +25,12 @@ namespace Vudaco.Controllers
         /// List users
         /// </summary>
         /// <returns></returns>
-       //[HttpGet]
-       //public string Get([FromQuery] int page = 1, [FromQuery] int pageSize = 50)
-       //{
-            //return "Chào mừng bạn đến với chúng tôi....";
-            //var value = _redisService.GetAsync("jtec_hn_database_update_AsyncKTNQ");
-            //return value.Result ?? "No value found in Redis";
+        //[HttpGet]
+        //public string Get([FromQuery] int page = 1, [FromQuery] int pageSize = 50)
+        //{
+        //return "Chào mừng bạn đến với chúng tôi....";
+        //var value = _redisService.GetAsync("jtec_hn_database_update_AsyncKTNQ");
+        //return value.Result ?? "No value found in Redis";
         //}
         [HttpGet("/")]
         public IActionResult Index()
@@ -42,6 +43,27 @@ namespace Vudaco.Controllers
         {
             return View("Privacy");
         }
-    }
+        [HttpGet("/support")]
+        public IActionResult Support()
+        {
+            return View("Support");
+        }
+        [HttpPost("support")]
+        public async Task<IActionResult> Contact([FromBody] ContactSupportRequest request)
+        {
+            return Ok(new
+            {
+                success = true,
+                message = "Support request received."
+            });
+        }
 
+    }
+}
+public class ContactSupportRequest
+{
+    public string FullName { get; set; }
+    public string Email { get; set; }
+    public string Subject { get; set; }
+    public string Content { get; set; }
 }

@@ -19,6 +19,7 @@ using Vudaco.Receipts.Models;
 using Vudaco.SendMails.Models;
 using Vudaco.Storages.Models;
 using Vudaco.Vehicles.Models;
+using Vudaco.Works.Models;
 
 namespace Vudaco.Shares.BaseRepository
 {
@@ -64,6 +65,7 @@ namespace Vudaco.Shares.BaseRepository
         public DbSet<Depreciation> Depreciations { get; set; }
         public DbSet<DepreciationAllocation> DepreciationAllocations { get; set; }
         public DbSet<DepreciationAllocationDetail> DepreciationAllocationDetails { get; set; }
+        public DbSet<Work> Works { get; set; }
 
         public VudacoDBContext(DbContextOptions<VudacoDBContext> options) : base(options)
         {
@@ -109,6 +111,7 @@ namespace Vudaco.Shares.BaseRepository
             modelBuider.Entity<DepreciationAllocationDetail>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<DepreciationAllocation>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<Depreciation>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<Work>().HasQueryFilter(e => e.DeletedAt == null);
         }           
     }
 }

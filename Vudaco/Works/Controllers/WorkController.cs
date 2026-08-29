@@ -33,74 +33,15 @@ namespace Vudaco.Works.Controllers
         public async Task<IActionResult> GetWork(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] WorkDto WorkDto = null)
         {
             // test
-            var result = await _repoWork.GetObjectWorkAsync(WorkDto, page, pageSize, cancellationToken);
+            var result = await _repoWork.GetObjectTaskAsync(WorkDto, page, pageSize, cancellationToken);
             if (result == null)
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", result);
         }
-        [HttpPost]
-        [Route("create")]
-        public async Task<IActionResult> Create([FromBody] WorkDto WorkDto)
-        {
-            // Check trùng Name
-            var entity = await _context.Works.FirstOrDefaultAsync(p =>p.StorageId == WorkDto.StorageId && p.Name == WorkDto.Name);
-            if (entity != null)
-                return ApiResponseResult<object>(false, "Tên dữ liệu đã tồn tại", null);
-            // Check trùng Code
-            entity = await _context.Works.FirstOrDefaultAsync(p => p.StorageId == WorkDto.StorageId && p.Code == WorkDto.Code);
-            if (entity != null)
-                return ApiResponseResult<object>(false, "code dữ liệu đã tồn tại", null);
-                
-            var Work = new Work
-            {
-                Code = WorkDto.Code,
-                Name = WorkDto.Name,
-                StorageId = WorkDto.StorageId,
-                CreatedBy = userId,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
-            };
-            Work = await _repoWork.CreateAsync(Work);
-            return ApiResponseResult(true, "Thêm thành công", Work);
-        }
-        [HttpPost("update")]
-        public async Task<IActionResult> Update([FromBody] WorkDto WorkDto)
-        {
-            if (WorkDto.Id <= 0)
-            {
-                return ApiResponseResult<object>(false, "Id không tồn tại", null);
-            }
-            var Work = _context.Works.Find(WorkDto.Id);
-            if (Work == null)
-            {
-                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
-            }
-            // Check trùng Code
-            if (!string.IsNullOrWhiteSpace(WorkDto.Code) &&
-                await _context.Works.AnyAsync(p =>
-                    p.Code == WorkDto.Code &&
-                    p.StorageId == Work.StorageId &&
-                    p.Id != WorkDto.Id))
-                return ApiResponseResult<object>(false, "Code đã tồn tại trong kho này", null);
-                  // Check trùng Name
-            if (!string.IsNullOrWhiteSpace(WorkDto.Name) &&
-                await _context.Works.AnyAsync(p =>
-                    p.Name == WorkDto.Name &&
-                    p.StorageId == Work.StorageId &&
-                    p.Id != WorkDto.Id))
-                return ApiResponseResult<object>(false, "Tên đã tồn tại trong kho này", null);
-            
-            Work.Code = WorkDto.Code;
-            Work.Name = WorkDto.Name;
-            Work.StorageId = WorkDto.StorageId;
-            Work.UpdatedBy = userId;
-            Work.UpdatedAt = DateTime.Now;
-           
-            Work = await _repoWork.UpdateAsync(Work);
-            return ApiResponseResult(true, "Cập nhật thành công", Work);
-        }
+       
+      
         [HttpPost("delete")]
         public async Task<IActionResult> Delete([FromBody]  WorkDto WorkDto)
         {

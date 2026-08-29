@@ -510,7 +510,7 @@ namespace Vudaco.Debits.Controllers
                     DataTable table = new DataTable();
                     var columnDisplayMap = new Dictionary<string, string>
                     {
-                        ["supplier_detail_id"] = "Nhà cung cấp",
+                        ["supplier_detail_id"] = "Mã nhà cung cấp",
                         ["file_info_id"] = "Hồ sơ",
                         ["employee_staff_id"] = "Nhân viên xử lý",
                         ["employee_driver_id"] = "Tài xế",
@@ -568,6 +568,7 @@ namespace Vudaco.Debits.Controllers
 
                         // 🔹 CỘT MAP THÊM
                         ["customer"] = "Khách hàng",
+                        ["partner"] = "Nhà cung cấp",
                         ["employee_driver"] = "Tên tài xế",
                         ["fileNumber"] = "Số hồ sơ"
                     };
@@ -584,12 +585,13 @@ namespace Vudaco.Debits.Controllers
                     table.Columns.Add(col.ColumnName, col.DataType);
                 }
                 table.Columns.Add("customer", typeof(string));
-                    table.Columns.Add("employee_driver", typeof(string));
-                    table.Columns.Add("fileNumber", typeof(string));
-                    // table: bảng mới sau khi map (đã tạo sẵn cột)
-                    // 🔹 Lookup cho nhanh 
-                    var khDict = list_kh.ToDictionary( x => x.Id, x => $"{x.Abbreviation}" ); 
-                    var employeeDict = list_employee.ToDictionary( x => x.Id, x => $"{x.LastName} {x.FirstName}" );// đổi field nếu khác );
+                table.Columns.Add("partner", typeof(string));
+                table.Columns.Add("employee_driver", typeof(string));
+                table.Columns.Add("fileNumber", typeof(string));
+                // table: bảng mới sau khi map (đã tạo sẵn cột)
+                // 🔹 Lookup cho nhanh 
+                var khDict = list_kh.ToDictionary( x => x.Id, x => $"{x.Abbreviation}" ); 
+                var employeeDict = list_employee.ToDictionary( x => x.Id, x => $"{x.LastName} {x.FirstName}" );// đổi field nếu khác );
                 foreach (DataRow item in dataTable.Rows)
                 {
                     var row = table.NewRow();
@@ -602,7 +604,17 @@ namespace Vudaco.Debits.Controllers
 
                         row[col.ColumnName] = item[col.ColumnName];
                     }
-
+                    // 🔹 MAP Partner
+                    if (item.Table.Columns.Contains("supplier_detail_id") &&
+                        item["supplier_detail_id"] != DBNull.Value &&
+                        khDict.TryGetValue(Convert.ToInt32(item["supplier_detail_id"]), out var supplier))
+                    {
+                        row["partner"] = supplier;
+                    }
+                    else
+                    {
+                        row["partner"] = "";
+                    }
                     // 🔹 MAP CUSTOMER
                     if (item.Table.Columns.Contains("customer_detail_id") &&
                         item["customer_detail_id"] != DBNull.Value &&

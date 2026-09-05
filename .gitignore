@@ -376,4 +376,4 @@ Firebase/*.json
 **/firebase-adminsdk*.json
 **/*service-account*.json
 *.p8
-wwwroot/uploads/
+**/wwwroot/uploads/

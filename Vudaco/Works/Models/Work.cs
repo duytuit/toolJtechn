@@ -22,6 +22,9 @@ namespace Vudaco.Works.Models
         [Required]
         [Column("type")]
         public int Type { get; set; }
+        
+        [Column("group")]
+        public bool Group { get; set; }
 
         [Column("parent_id")]
         public int? ParentId { get; set; }
@@ -29,12 +32,13 @@ namespace Vudaco.Works.Models
         [Column("storage_id")]
         public int StorageId { get; set; }
 
-        [Required]
         [Column("status")]
         public int Status { get; set; }
 
-        [Column("assignee_ids", TypeName = "nvarchar(max)")]
+        [Column("assignee_ids")]
         public string AssigneeIds { get; set; }
+        [Column("attachments")]
+        public string Attachments { get; set; }
 
         [Column("due_date")]
         public DateTime? DueDate { get; set; }
@@ -42,7 +46,6 @@ namespace Vudaco.Works.Models
         [Column("completed_date")]
         public DateTime? CompletedDate { get; set; }
 
-        [Required]
         [Column("priority")]
         public int Priority { get; set; }
 

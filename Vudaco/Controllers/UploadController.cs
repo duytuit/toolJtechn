@@ -26,14 +26,14 @@ namespace Vudaco.Controllers
         }
         // POST api/upload/single
         [HttpPost("single")]
-        public async Task<IActionResult> UploadSingle(IFormFile file, [FromForm] string? folder)
+        public async Task<IActionResult> UploadSingle(IFormFile files, [FromForm] string? folder)
         {
           
-            var result = await Helper.ProcessFileAsync(file, _env.WebRootPath, folder);
+            var result = await Helper.ProcessFileAsync(files, _env.WebRootPath, folder);
             if (result.Success)
-                return Ok(result);
+                return Ok(new { success = true, message = "OK", path = result.Path, fullPath = result.FullPath, fileName = result.FileName });
             else
-                return BadRequest("Có lỗi xảy ra.");
+                return BadRequest(new { success = false, message = result.Message });
         }
 
         // POST api/upload/multiple
@@ -51,7 +51,7 @@ namespace Vudaco.Controllers
 
             var successPaths = results
                 .Where(r => r.Success)
-                .Select(r => r.Path)
+                .Select(r => new { Path = r.Path, FileName = r.FileName, FullPath = r.FullPath })
                 .ToList();
 
             var failed = results

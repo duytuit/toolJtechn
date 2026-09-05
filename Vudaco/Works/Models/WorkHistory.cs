@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Vudaco.Works.Models
 {
-    [Table("work_histories")]
+    [Table("work_historys")]
     public class WorkHistory
     {
         [Key]
@@ -15,7 +15,7 @@ namespace Vudaco.Works.Models
         [Column("type")]
         public int Type { get; set; }
 
-        [Column("content", TypeName = "nvarchar(max)")]
+        [Column("content")]
         public string Content { get; set; }
 
         [Column("storage_id")]

@@ -18,11 +18,9 @@ namespace Vudaco.Works.Models
         [Column("model")]
         public string Model { get; set; }
 
-        [Required]
         [Column("recurrence_type")]
         public int RecurrenceType { get; set; }
 
-        [Required]
         [Column("recurrence_interval")]
         public int RecurrenceInterval { get; set; }
 
@@ -41,7 +39,6 @@ namespace Vudaco.Works.Models
         [Column("last_run_at")]
         public DateTime? LastRunAt { get; set; }
 
-        [Required]
         [Column("is_active")]
         public bool IsActive { get; set; }
 

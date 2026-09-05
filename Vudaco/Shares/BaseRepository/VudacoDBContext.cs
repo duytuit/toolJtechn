@@ -66,6 +66,12 @@ namespace Vudaco.Shares.BaseRepository
         public DbSet<DepreciationAllocation> DepreciationAllocations { get; set; }
         public DbSet<DepreciationAllocationDetail> DepreciationAllocationDetails { get; set; }
         public DbSet<Work> Works { get; set; }
+        public DbSet<WorkDetail> WorkDetails { get; set; }
+        public DbSet<WorkComment> WorkComments { get; set; }
+        public DbSet<WorkCronJob> WorkCronJobs { get; set; }
+        public DbSet<WorkHistory> WorkHistories { get; set; }
+        public DbSet<WorkTemplate> WorkTemplates { get; set; }
+        public DbSet<WorkTemplateDetail> WorkTemplateDetails { get; set; }
 
         public VudacoDBContext(DbContextOptions<VudacoDBContext> options) : base(options)
         {
@@ -112,6 +118,12 @@ namespace Vudaco.Shares.BaseRepository
             modelBuider.Entity<DepreciationAllocation>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<Depreciation>().HasQueryFilter(e => e.DeletedAt == null);
             modelBuider.Entity<Work>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<WorkDetail>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<WorkTemplate>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<WorkTemplateDetail>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<WorkHistory>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<WorkCronJob>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<WorkComment>().HasQueryFilter(e => e.DeletedAt == null);
         }           
     }
 }

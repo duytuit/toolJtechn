@@ -12,7 +12,7 @@ namespace Vudaco.Works.Repositories
 {
     public interface IWorkRepositories : IBaseRepository<Work>
     {
-        Task<PaginatedResultReact<object>> GetObjectTaskAsync(WorkDto WorkDto, int page, int pageSize, CancellationToken cancellationToken);
+        Task<PaginatedResultReact<object>> GetObjectTaskAsync(WorkListDto WorkListDto, int page, int pageSize, CancellationToken cancellationToken);
         Task<Work> ShowAsync(int id);
         Task<Work> CreateAsync(Work Work);
         Task<Work> UpdateAsync(Work Work);

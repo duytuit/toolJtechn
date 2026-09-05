@@ -32,6 +32,7 @@ using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Vudaco.Notifys.Repositories;
 using Vudaco.Depreciations;
+using Vudaco.Works;
 
 namespace Vudaco
 {
@@ -128,6 +129,7 @@ namespace Vudaco
             services.AddPayrollPeriodModule();
             services.AddSendMailModule();
             services.AddDepreciationModule();
+            services.AddWorkModule();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

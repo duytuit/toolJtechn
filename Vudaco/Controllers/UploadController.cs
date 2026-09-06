@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
@@ -17,12 +18,14 @@ namespace Vudaco.Controllers
         private readonly VudacoDBContext _context;
         private readonly IWebHostEnvironment _env;
         public int userId => (int)HttpContext.Items["UserId"];
+        private readonly IConfiguration _configuration;
 
-        public UploadController(ILogger<UploadController> logger, VudacoDBContext context, IWebHostEnvironment env)
+        public UploadController(ILogger<UploadController> logger, VudacoDBContext context, IWebHostEnvironment env, IConfiguration configuration)
         {
             _logger = logger;
             _context = context;
             _env = env;
+            _configuration = configuration;
         }
         // POST api/upload/single
         [HttpPost("single")]
@@ -31,7 +34,7 @@ namespace Vudaco.Controllers
           
             var result = await Helper.ProcessFileAsync(files, _env.WebRootPath, folder);
             if (result.Success)
-                return Ok(new { success = true, message = "OK", path = result.Path, fullPath = result.FullPath, fileName = result.FileName });
+                return Ok(new { success = true, message = "OK", path = result.Path, fullPath =$"{_configuration["BaseUrl"]}/{result.FullPath}", fileName = result.FileName });
             else
                 return BadRequest(new { success = false, message = result.Message });
         }
@@ -51,7 +54,7 @@ namespace Vudaco.Controllers
 
             var successPaths = results
                 .Where(r => r.Success)
-                .Select(r => new { Path = r.Path, FileName = r.FileName, FullPath = r.FullPath })
+                .Select(r => new { Path = r.Path, FileName = r.FileName, FullPath = $"{_configuration["BaseUrl"]}/{r.FullPath}" })
                 .ToList();
 
             var failed = results

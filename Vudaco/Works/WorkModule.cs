@@ -12,6 +12,9 @@ namespace Vudaco.Works
         public static IServiceCollection AddWorkModule(this IServiceCollection services)
         {
             services.AddScoped<IWorkRepositories, WorkRepositories>();
+            services.AddScoped<IHistoryRepositories, HistoryRepositories>();
+            services.AddScoped<ICommentRepositories, CommentRepositories>();
+            services.AddScoped<IWorkDetailRepositories, WorkDetailRepositories>();
             return services;
         }
     }

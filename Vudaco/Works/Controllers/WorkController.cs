@@ -20,15 +20,19 @@ namespace Vudaco.Works.Controllers
     public class WorkController : BaseApiController
     {
         private readonly IWorkRepositories _repoWork;
+        private readonly ICommentRepositories _repoWorkComment;
+        private readonly IHistoryRepositories _repoWorkHistory;
         private readonly ILogger<WorkController> _logger;
         private readonly VudacoDBContext _context;
          public int userId => (int)HttpContext.Items["UserId"];
 
-        public WorkController(ILogger<WorkController> logger, IWorkRepositories repoWork, VudacoDBContext context)
+        public WorkController(ILogger<WorkController> logger, IWorkRepositories repoWork, VudacoDBContext context, ICommentRepositories repoWorkComment, IHistoryRepositories repoWorkHistory)
         {
             _logger = logger;
             _repoWork = repoWork;
             _context = context;
+            _repoWorkComment = repoWorkComment;
+            _repoWorkHistory = repoWorkHistory;
         }
          [HttpGet]
         public async Task<IActionResult> GetWork(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] WorkListDto WorkDto = null)
@@ -262,24 +266,76 @@ namespace Vudaco.Works.Controllers
                 return ApiResponseResult<object>(false, "Lỗi khi thêm: " + ex.InnerException.Message, null);
             }
         }
+        [HttpPost("updateAttachment")]
+        public async Task<IActionResult> UpdateAttachment([FromBody] UpdateAttachmentDto updateAttachmentDto)
+        {
+            if (updateAttachmentDto == null || updateAttachmentDto.Id <= 0)
+            {
+                return ApiResponseResult<object>(false, "Dữ liệu không hợp lệ", null);
+            }
+
+            var entity = await _context.Works.FindAsync(updateAttachmentDto.Id);
+            if (entity == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+
+            entity.Attachments = updateAttachmentDto.Attachments != null && updateAttachmentDto.Attachments.Any() ? JsonConvert.SerializeObject(updateAttachmentDto.Attachments) : null;
+            var now = DateTime.Now;
+            await _repoWork.UpdateAsync(entity);
+            var history = new WorkHistory{
+                StorageId = entity.StorageId,
+                Action = 2, // 2: Update
+                Type = 0, // 0: Work
+                ModelId = entity.Id,
+                Model = "Work",
+                Content = $"Tệp đính kèm đã được cập nhật {string.Join(", ", updateAttachmentDto.Attachments.Select(a => a.ExternalLink))}",
+                CreatedBy = userId,
+                CreatedAt = now,
+                UpdatedAt = now
+            };
+            _context.WorkHistories.Add(history);
+            await _context.SaveChangesAsync();
+            return ApiResponseResult(true, "Cập nhật dữ liệu thành công", entity);
+        }
       
-        // [HttpPost("delete")]
-        // public async Task<IActionResult> Delete([FromBody]  WorkDto WorkDto)
-        // {
-            // if (WorkDto.Id <= 0)
-            // {
-            //     return ApiResponseResult<object>(false, "Id không tồn tại", null);
-            // }
-            // var entity = _context.Works.Find(WorkDto.Id);
-            // if (entity == null)
-            // {
-            //     return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
-            // }
-            // entity.DeletedBy = userId;
-            // entity.DeletedAt = DateTime.Now;
-            // await _repoWork.DeleteSoftAsync(entity);
-            // return ApiResponseResult<object>(true, "Xóa thành công", null);
-        // }
+        [HttpPost("delete")]
+        public async Task<IActionResult> Delete([FromBody]  CreateWorkRequest WorkDto)
+        {
+            if (WorkDto == null || WorkDto.Id <= 0)
+            {
+                return ApiResponseResult<object>(false, "Id không tồn tại", null);
+            }
+            var entity = await _context.Works.FindAsync(WorkDto.Id);
+            if (entity == null)
+            {
+                return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
+            }
+            var deletedAt = DateTime.Now;
+            var parentId = entity.ParentId;
+            entity.DeletedBy = userId;
+            entity.DeletedAt = deletedAt;
+            await _repoWork.DeleteSoftAsync(entity);
+
+            if (parentId.HasValue)
+            {
+                var hasActiveChildren = await _context.Works
+                    .AnyAsync(x => x.ParentId == parentId.Value && x.DeletedAt == null);
+
+                if (!hasActiveChildren)
+                {
+                    var parent = await _context.Works.FindAsync(parentId.Value);
+                    if (parent != null && parent.DeletedAt == null)
+                    {
+                        parent.DeletedBy = userId;
+                        parent.DeletedAt = deletedAt;
+                        await _repoWork.DeleteSoftAsync(parent);
+                    }
+                }
+            }
+
+            return ApiResponseResult<object>(true, "Xóa thành công", null);
+        }
         [HttpGet("show")]
         public async Task<IActionResult> Show([FromQuery] int id)
         {
@@ -292,6 +348,10 @@ namespace Vudaco.Works.Controllers
             {
                 return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
             }
+            var comments = await _repoWorkComment.GetByModelId(id, "Work", CancellationToken.None);
+            var histories = await _repoWorkHistory.GetByModelId(id, "Work", CancellationToken.None);
+            entity.Comments = comments;
+            entity.Histories = histories;
             return ApiResponseResult(true, "Lấy dữ liệu thành công", entity);
         }
     }

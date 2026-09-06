@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
 namespace Vudaco.Works.Models
 {
@@ -66,5 +67,13 @@ namespace Vudaco.Works.Models
 
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
+        [NotMapped]
+         public List<Work> ChildWorks { get; set; } = null;
+         [NotMapped]
+         public List<WorkDetail> WorkDetails { get; set; } = null;
+        [NotMapped]
+        public List<WorkComment> Comments { get; set; } = null;
+        [NotMapped]
+        public List<WorkHistory> Histories { get; set; } = null;
     }
 }

@@ -34,6 +34,12 @@
     <Folder Include="Requireds\Repositories\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
+    <!-- Không publish thư mục uploads -->
+  <ItemGroup>
+    <Content Update="wwwroot\uploads\**\*">
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
   <ItemGroup>
     <Content Update="web.config">
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>

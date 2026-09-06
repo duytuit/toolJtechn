@@ -28,24 +28,21 @@ namespace Vudaco.Works.Repositories
 
         public Task<Work> CreateAsync(Work Work)
         {
-              _context.Works.Add(Work);
+            _context.Works.Add(Work);
             _context.SaveChanges();
             return Task.FromResult(Work);
         }
 
         public Task<Work> DeleteSoftAsync(Work Work)
         {
-              _context.Works.Update(Work);
+            _context.Works.Update(Work);
             _context.SaveChanges();
             return Task.FromResult(Work);
         }
 
         public async Task<PaginatedResultReact<object>> GetObjectTaskAsync(WorkListDto WorkListDto, int page, int pageSize, CancellationToken cancellationToken)
         {
-            WorkListDto ??= new WorkListDto();
-            page = page < 1 ? 1 : page;
-            pageSize = pageSize < 1 ? 50 : pageSize;
-
+            List<(string Sql, object[] Params)> whereCustoms = new();
             var whereEquals = new Dictionary<string, object>();
             var whereLikes = new Dictionary<string, string>();
             var whereDateRange = new List<(string Field, DateTime From, DateTime To)>();
@@ -66,18 +63,19 @@ namespace Vudaco.Works.Repositories
             if (!string.IsNullOrWhiteSpace(WorkListDto.Name))
                 whereLikes["name"] = WorkListDto.Name;
             if (WorkListDto.FromDate.HasValue || WorkListDto.ToDate.HasValue)
-                whereDateRange.Add(("created_at", WorkListDto.FromDate ?? DateTime.MinValue, WorkListDto.ToDate ?? DateTime.MaxValue));
+                whereDateRange.Add(("created_at", WorkListDto.FromDate ?? DateTime.MinValue, WorkListDto.ToDate?.AddDays(1) ?? DateTime.MaxValue));
 
             dynamic results = await AdoRelationQuerySqlServer.WithRelationsAdoAsync(
                 _configuration.GetConnectionString("DefaultConnection"),
                 "works",
                 new[] { "id", "name", "description", "type", "group", "parent_id", "storage_id", "status", "assignee_ids", "attachments", "due_date", "completed_date", "priority", "created_by", "updated_by", "deleted_by", "deleted_at", "created_at", "updated_at" },
-                offset: (page - 1) * pageSize,
-                limit: pageSize,
+                offset: null,
+                limit: null,
                 whereEquals: whereEquals,
                 whereLikes: whereLikes,
                 dateRangeList: whereDateRange,
                 orderByList: orderByList,
+                whereCustom: whereCustoms,
                 relations: new List<AdoRelation>
                 {
                     new AdoRelation
@@ -92,7 +90,7 @@ namespace Vudaco.Works.Repositories
                     }
                 },
                 redisCache: _redis,
-                includeCount: true,
+                includeCount: false,
                 cancellationToken: cancellationToken);
 
             var objectList = new List<object>();
@@ -107,9 +105,41 @@ namespace Vudaco.Works.Repositories
             };
         }
 
-        public Task<Work> ShowAsync(int id)
+        public async Task<Work> ShowAsync(int id)
         {
-            return _context.Works.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            var work = await _context.Works
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (work == null)
+            {
+                return null;
+            }
+
+            work.ChildWorks = await _context.Works
+                .Where(x => x.ParentId == work.Id)
+                .ToListAsync();
+
+            var workIds = work.ChildWorks
+                .Select(x => x.Id)
+                .Append(work.Id)
+                .ToList();
+
+            var workDetails = await _context.WorkDetails
+                .Where(x => workIds.Contains(x.WorkId))
+                .ToListAsync();
+
+            work.WorkDetails = workDetails
+                .Where(x => x.WorkId == work.Id)
+                .ToList();
+
+            foreach (var childWork in work.ChildWorks)
+            {
+                childWork.WorkDetails = workDetails
+                    .Where(x => x.WorkId == childWork.Id)
+                    .ToList();
+            }
+
+            return work;
         }
 
         public Task<Work> UpdateAsync(Work Work)

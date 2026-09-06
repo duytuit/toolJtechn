@@ -17,8 +17,6 @@ namespace WindowsFormsApp5
         private int gridSize = 20;
 
         private List<LineObject> lines = new List<LineObject>();
-        private bool isDrawingLine = false;
-        private Point lineStart;
         private int currentLineThickness = 2;
 
         private bool isResizing = false;
@@ -32,6 +30,11 @@ namespace WindowsFormsApp5
         private int customPaperWidth = 1000;  // pixel
         private int customPaperHeight = 1000; // pixel
         private float dpi = 96f; // mặc định 96dpi
+
+        private bool isDrawingLine = false;
+        private bool isLineDragging = false;
+        private Point lineStart;
+        private Point lineCurrentEnd;
 
         public Form1()
         {
@@ -50,7 +53,7 @@ namespace WindowsFormsApp5
             panelRulerLeft.Paint += DrawLeftRuler;
 
             // Design panel
-            designPanel = new Panel
+            designPanel = new BufferedPanel
             {
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle,
@@ -60,8 +63,8 @@ namespace WindowsFormsApp5
             designPanel.Paint += DrawGrid;
             designPanel.MouseDown += DesignPanel_MouseDown;
             designPanel.MouseDown += DesignPanel_DrawLine_MouseDown;
+            designPanel.MouseMove += DesignPanel_DrawLine_MouseMove;
             designPanel.MouseUp += DesignPanel_DrawLine_MouseUp;
-
             // Control panel on the right
             int ctrlX = 900;
             var btnSave = new Button { Text = "Lưu bố cục", Location = new Point(ctrlX, 30), Size = new Size(150, 30) };
@@ -149,6 +152,16 @@ namespace WindowsFormsApp5
             {
                 using (var pen = new Pen(Color.Black, line.Thickness))
                     g.DrawLine(pen, line.Start, line.End);
+            }
+
+            if (isDrawingLine && isLineDragging)
+            {
+                using (var previewPen = new Pen(Color.FromArgb(180, Color.Red), currentLineThickness))
+                {
+                    previewPen.StartCap = System.Drawing.Drawing2D.LineCap.Round;
+                    previewPen.EndCap = System.Drawing.Drawing2D.LineCap.Round;
+                    g.DrawLine(previewPen, lineStart, lineCurrentEnd);
+                }
             }
 
             // --- Vẽ khung tạm theo khổ giấy ---
@@ -248,14 +261,52 @@ namespace WindowsFormsApp5
         private void DesignPanel_DrawLine_MouseDown(object sender, MouseEventArgs e)
         {
             if (isDrawingLine && e.Button == MouseButtons.Left)
+            {
+                isLineDragging = true;
                 lineStart = e.Location;
+                lineCurrentEnd = e.Location;
+                designPanel.Capture = true;
+            }
+        }
+
+        private void DesignPanel_DrawLine_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!isDrawingLine || !isLineDragging)
+                return;
+
+            var oldEnd = lineCurrentEnd;
+            lineCurrentEnd = e.Location;
+
+            var dirtyRegion = Rectangle.Inflate(
+                Rectangle.FromLTRB(
+                    Math.Min(lineStart.X, Math.Min(oldEnd.X, lineCurrentEnd.X)),
+                    Math.Min(lineStart.Y, Math.Min(oldEnd.Y, lineCurrentEnd.Y)),
+                    Math.Max(lineStart.X, Math.Max(oldEnd.X, lineCurrentEnd.X)),
+                    Math.Max(lineStart.Y, Math.Max(oldEnd.Y, lineCurrentEnd.Y))),
+                currentLineThickness + 6,
+                currentLineThickness + 6);
+
+            designPanel.Invalidate(dirtyRegion);
         }
 
         private void DesignPanel_DrawLine_MouseUp(object sender, MouseEventArgs e)
         {
-            if (isDrawingLine && e.Button == MouseButtons.Left)
+            if (isDrawingLine && isLineDragging && e.Button == MouseButtons.Left)
             {
-                lines.Add(new LineObject { Start = lineStart, End = e.Location, Thickness = currentLineThickness });
+                lineCurrentEnd = e.Location;
+
+                if (lineStart != lineCurrentEnd)
+                {
+                    lines.Add(new LineObject
+                    {
+                        Start = lineStart,
+                        End = lineCurrentEnd,
+                        Thickness = currentLineThickness
+                    });
+                }
+
+                isLineDragging = false;
+                designPanel.Capture = false;
                 designPanel.Invalidate();
             }
         }
@@ -608,6 +659,20 @@ namespace WindowsFormsApp5
             if (layout.Lines != null)
                 lines = new List<LineObject>(layout.Lines);
             designPanel.Invalidate();
+        }
+
+        private sealed class BufferedPanel : Panel
+        {
+            public BufferedPanel()
+            {
+                DoubleBuffered = true;
+                ResizeRedraw = true;
+                SetStyle(
+                    ControlStyles.UserPaint |
+                    ControlStyles.AllPaintingInWmPaint |
+                    ControlStyles.OptimizedDoubleBuffer,
+                    true);
+            }
         }
 
         public class LineObject { public Point Start { get; set; } public Point End { get; set; } public int Thickness { get; set; } }

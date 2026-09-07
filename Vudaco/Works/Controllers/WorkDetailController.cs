@@ -102,7 +102,7 @@ namespace Vudaco.Works.Controllers
                 Type=0, // 0: Checklist
                 ModelId=entity.WorkId,
                 Model="Work",
-                Content="Cập nhật trạng thái checklist: " + CheckListDto.Name + " thành " + (CheckListDto.Checked ? "Đã hoàn thành" : "Chưa hoàn thành"),
+                Content="Cập nhật trạng thái checklist: " + entity.Name + " thành " + (CheckListDto.Checked ? "Đã hoàn thành" : "Chưa hoàn thành"),
                 CreatedBy=userId,
                 CreatedAt=DateTime.Now,
                 UpdatedAt=DateTime.Now
@@ -147,7 +147,7 @@ namespace Vudaco.Works.Controllers
                 Type=0, // 0: Checklist
                 ModelId=entity.WorkId,
                 Model="Work",
-                Content="Xóa checklist: " + CheckListDto.Name,
+                Content="Xóa checklist: " + entity.Name,
                 CreatedBy=userId,
                 CreatedAt=DateTime.Now,
                 UpdatedAt=DateTime.Now

@@ -68,7 +68,7 @@ namespace Vudaco.Works.Controllers
                 StorageId=CheckListDto.StorageId,
                 Action=1, // 1: Create
                 Type=0, // 0: Checklist
-                ModelId=CheckListDto.Id,
+                ModelId=CheckListDto.WorkId,
                 Model="Work",
                 Content="Tạo checklist: " + CheckListDto.Name,
                 CreatedBy=userId,
@@ -100,9 +100,9 @@ namespace Vudaco.Works.Controllers
                 StorageId=CheckListDto.StorageId,
                 Action=2, // 2: Update
                 Type=0, // 0: Checklist
-                ModelId=CheckListDto.Id,
+                ModelId=entity.WorkId,
                 Model="Work",
-                Content="Cập nhật trạng thái checklist: " + CheckListDto.Name + " thành " + (CheckListDto.Checked ? "Đã hoàn thành" : "Chưa hoàn thành"),
+                Content="Cập nhật trạng thái checklist: " + entity.Name + " thành " + (CheckListDto.Checked ? "Đã hoàn thành" : "Chưa hoàn thành"),
                 CreatedBy=userId,
                 CreatedAt=DateTime.Now,
                 UpdatedAt=DateTime.Now
@@ -145,9 +145,9 @@ namespace Vudaco.Works.Controllers
                 StorageId=CheckListDto.StorageId,
                 Action=3, // 3: Delete
                 Type=0, // 0: Checklist
-                ModelId=CheckListDto.Id,
+                ModelId=entity.WorkId,
                 Model="Work",
-                Content="Xóa checklist: " + CheckListDto.Name,
+                Content="Xóa checklist: " + entity.Name,
                 CreatedBy=userId,
                 CreatedAt=DateTime.Now,
                 UpdatedAt=DateTime.Now

@@ -351,7 +351,22 @@ namespace WindowsFormsApp5
                 if (ctrl is Label lbl)
                 {
                     using (var brush = new SolidBrush(lbl.ForeColor))
-                        g.DrawString(lbl.Text, lbl.Font, brush, new PointF(lbl.Left, lbl.Top));
+                    {
+                        if (lbl is RotatableLabel rotatable && rotatable.VerticalText)
+                        {
+                            var text = (lbl.Text ?? string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty);
+                            var y = (float)(lbl.Top + lbl.Padding.Top);
+                            foreach (var character in text)
+                            {
+                                g.DrawString(character.ToString(), lbl.Font, brush, lbl.Left + lbl.Padding.Left, y);
+                                y += g.MeasureString(character.ToString(), lbl.Font).Height;
+                            }
+                        }
+                        else
+                        {
+                            g.DrawString(lbl.Text, lbl.Font, brush, new PointF(lbl.Left, lbl.Top));
+                        }
+                    }
                 }
                 else if (ctrl is PictureBox pic && pic.Image != null)
                 {
@@ -362,7 +377,7 @@ namespace WindowsFormsApp5
 
         private void AddDraggableText(Point location, string text = "{ProductName}")
         {
-            var lbl = new Label { Text = text, Location = location, AutoSize = true, BackColor = Color.LightYellow, BorderStyle = BorderStyle.FixedSingle };
+            var lbl = new RotatableLabel { Text = text, Location = location, AutoSize = true, BackColor = Color.LightYellow, BorderStyle = BorderStyle.FixedSingle };
             AddCommonHandlers(lbl);
             designPanel.Controls.Add(lbl);
         }
@@ -536,6 +551,12 @@ namespace WindowsFormsApp5
                 using (var dlg = new Form { Width = 300, Height = 200, Text = "Chỉnh sửa text" })
                 {
                     var txt = new TextBox { Text = lbl.Text, Dock = DockStyle.Top };
+                    var chkVertical = new CheckBox
+                    {
+                        Text = "Chữ dọc (từ trên xuống)",
+                        Checked = lbl is RotatableLabel initialRotatable && initialRotatable.VerticalText,
+                        Dock = DockStyle.Top
+                    };
                     var pnlFont = new Panel { Height = 40, Dock = DockStyle.Top };
                     var lblFontSize = new Label { Text = "Cỡ chữ:", AutoSize = true, Location = new Point(5, 10) };
                     var txtFontSize = new TextBox { Text = lbl.Font.Size.ToString(), Location = new Point(60, 7), Width = 50 };
@@ -549,14 +570,35 @@ namespace WindowsFormsApp5
                         {
                             lbl.Font = new Font(lbl.Font.FontFamily, newSize, lbl.Font.Style);
                         }
+                        if (lbl is RotatableLabel rotatable)
+                            SetLabelOrientation(rotatable, chkVertical.Checked);
                         dlg.Close();
                     };
                     dlg.Controls.Add(txt);
+                    dlg.Controls.Add(chkVertical);
                     dlg.Controls.Add(pnlFont);
                     dlg.Controls.Add(btn);
                     dlg.ShowDialog();
                 }
             }
+        }
+
+        private void SetLabelOrientation(RotatableLabel label, bool vertical)
+        {
+            label.VerticalText = vertical;
+            if (vertical)
+            {
+                var text = (label.Text ?? string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty);
+                var characterSize = TextRenderer.MeasureText("W", label.Font);
+                label.AutoSize = false;
+                label.Width = characterSize.Width + label.Padding.Horizontal + 4;
+                label.Height = Math.Max(characterSize.Height * Math.Max(text.Length, 1) + label.Padding.Vertical + 4, 20);
+            }
+            else
+            {
+                label.AutoSize = true;
+            }
+            label.Invalidate();
         }
 
         private void SaveLayout(string filePath)
@@ -573,7 +615,8 @@ namespace WindowsFormsApp5
                         Y = lbl.Top,
                         Width = lbl.Width,
                         Height = lbl.Height,
-                        FontSize = lbl.Font.Size // Lưu cỡ chữ
+                        FontSize = lbl.Font.Size,
+                        VerticalText = lbl is RotatableLabel rotatable && rotatable.VerticalText
                     });
                 else if (ctrl is PictureBox pic)
                 {
@@ -627,8 +670,12 @@ namespace WindowsFormsApp5
                     case "Label":
                         AddDraggableText(loc, item.Text);
                         var lbl = designPanel.Controls[designPanel.Controls.Count - 1] as Label;
-                        if (lbl != null && item.FontSize.HasValue)
-                            lbl.Font = new Font(lbl.Font.FontFamily, item.FontSize.Value, lbl.Font.Style);
+                        if (lbl is RotatableLabel rotatable)
+                        {
+                            if (item.FontSize.HasValue)
+                                rotatable.Font = new Font(rotatable.Font.FontFamily, item.FontSize.Value, rotatable.Font.Style);
+                            SetLabelOrientation(rotatable, item.VerticalText ?? false);
+                        }
                         break;
                     case "Barcode":
                         AddBarcode(loc, item.Text, item.PureBarcode ?? true);
@@ -675,6 +722,37 @@ namespace WindowsFormsApp5
             }
         }
 
+        private sealed class RotatableLabel : Label
+        {
+            public bool VerticalText { get; set; }
+
+            protected override void OnPaint(PaintEventArgs e)
+            {
+                if (!VerticalText)
+                {
+                    base.OnPaint(e);
+                    return;
+                }
+
+                e.Graphics.Clear(BackColor);
+                var text = (Text ?? string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty);
+                using (var brush = new SolidBrush(ForeColor))
+                {
+                    var y = Padding.Top;
+                    foreach (var character in text)
+                    {
+                        e.Graphics.DrawString(character.ToString(), Font, brush, Padding.Left, y);
+                        y += Font.Height;
+                    }
+                }
+
+                if (BorderStyle == BorderStyle.FixedSingle)
+                    ControlPaint.DrawBorder(e.Graphics, ClientRectangle, ForeColor, ButtonBorderStyle.Solid);
+                else if (BorderStyle == BorderStyle.Fixed3D)
+                    ControlPaint.DrawBorder3D(e.Graphics, ClientRectangle, Border3DStyle.Sunken);
+            }
+        }
+
         public class LineObject { public Point Start { get; set; } public Point End { get; set; } public int Thickness { get; set; } }
         public class ElementData
         {
@@ -692,6 +770,7 @@ namespace WindowsFormsApp5
             public int Height { get; set; }
             public float? FontSize { get; set; } // Thêm dòng này
             public bool? PureBarcode { get; set; }
+            public bool? VerticalText { get; set; }
         }
         public class LayoutData
         {

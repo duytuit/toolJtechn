@@ -9,6 +9,7 @@ namespace Vudaco.Works.Dtos
     {
         public int Id { get; set; }
         public int WorkId { get; set; }
+        public int ParentWorkId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public int StorageId { get; set; }

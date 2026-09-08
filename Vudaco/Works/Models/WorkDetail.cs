@@ -13,6 +13,9 @@ namespace Vudaco.Works.Models
 
         [Column("work_id")]
         public int WorkId { get; set; }
+        
+        [Column("parent_work_id")]
+        public int ParentWorkId { get; set; }
 
         [Required]
         [MaxLength(255)]

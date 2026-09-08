@@ -24,6 +24,8 @@ namespace Vudaco.Works.Models
 
         [Column("storage_id")]
         public int StorageId { get; set; }
+        [Column("parent_work_template_id")]
+        public int ParentWorkTemplateId { get; set; }
 
         [Column("created_by")]
         public int? CreatedBy { get; set; }

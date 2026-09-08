@@ -133,6 +133,7 @@ namespace Vudaco.Works.Controllers
                             var workDetail = new WorkDetail
                             {
                                 WorkId = childWork.Id,
+                                ParentWorkId = parentWork.Id,
                                 Name = checklistItem.Trim(),
                                 Description = null,
                                 StorageId = CreateWorkRequest.StorageId,
@@ -218,6 +219,7 @@ namespace Vudaco.Works.Controllers
                                 var workTemplateDetail = new WorkTemplateDetail
                                 {
                                     WorkTemplateId = childWorkTemplate.Id,
+                                    ParentWorkTemplateId = parentWorkTemplate.Id,
                                     Name = checklistItem.Trim(),
                                     Description = null,
                                     StorageId = CreateWorkRequest.StorageId,

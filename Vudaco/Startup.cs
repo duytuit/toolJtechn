@@ -22,6 +22,7 @@ using Vudaco.Departments;
 using Vudaco.Receipts;
 using Vudaco.Vehicles;
 using Vudaco.Shares.Connects;
+using Vudaco.Shares.Services;
 using Microsoft.Extensions.Options;
 using Vudaco.Comments;
 using Vudaco.Notifys;
@@ -108,6 +109,12 @@ namespace Vudaco
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("super-secret-key"))
                 };
             });
+             // Backup
+            services.AddSingleton<CloudflareR2Service>();
+            services.AddSingleton<DatabaseBackupService>();
+            services.AddHostedService<BackupBackgroundService>();
+            //services.AddSingleton<TestGoogleDriveService>();
+            //services.AddHostedService<TestBackgroundService>();
             services.AddResponseCompression();
             services.AddControllersWithViews(); // 👈 hỗ trợ cả View + API
             services.AddHttpClient(); // Add HttpClient factory

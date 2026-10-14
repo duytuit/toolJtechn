@@ -1,277 +1,104 @@
 ﻿@{
-    ViewData["Title"] = "Trang chủ";
+    ViewData["Title"] = "Northstar Studio";
+    Layout = null;
 }
 
-<style>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Northstar Studio | SaaS portfolio</title>
+    <link rel="stylesheet" href="~/frontend/css/style.css" asp-append-version="true" />
+    <script src="~/frontend/js/tailwind.config.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body class="creative-page font-sans antialiased">
+    <header id="siteHeader" class="absolute inset-x-0 top-0 z-30">
+        <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-8" aria-label="Điều hướng chính">
+            <a href="#top" class="font-display text-xl font-bold tracking-tight text-white">northstar<span class="text-lime-300">.</span></a>
+            <div id="desktopNav" class="hidden items-center gap-8 text-sm font-semibold md:flex">
+                <a class="transition hover:text-lime-300" href="#work">Explore</a>
+                <a class="transition hover:text-lime-300" href="#approach">Studio</a>
+                <div class="blog-menu relative">
+                    <button class="flex items-center gap-1 transition hover:text-lime-300" type="button">Discover <span class="text-xs">⌄</span></button>
+                    <div class="blog-submenu absolute left-1/2 top-full mt-3 w-56 -translate-x-1/2 rounded-2xl border border-ink/10 bg-white p-2 text-sm shadow-soft">
+                        <a class="block rounded-xl px-3 py-2 transition hover:bg-cloud" href="#journal">All notes</a>
+                        <a class="block rounded-xl px-3 py-2 transition hover:bg-cloud" href="#journal" data-blog-filter="Product">Product thinking</a>
+                        <a class="block rounded-xl px-3 py-2 transition hover:bg-cloud" href="#journal" data-blog-filter="Systems">Systems & craft</a>
+                    </div>
+                </div>
+                <a class="transition hover:text-lime-300" href="/admin">Admin</a>
+                <button id="themeToggle" class="rounded-full border border-ink/15 px-3 py-2 text-xs transition hover:bg-ink hover:text-white" type="button" aria-label="Bật giao diện tối">☾</button>
+                <a href="#contact" class="rounded-full bg-lime-300 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-white">Start creating <span aria-hidden="true">↗</span></a>
+            </div>
+            <div class="flex items-center gap-2 md:hidden"><button id="mobileThemeToggle" class="rounded-full border border-ink/15 px-3 py-2 text-xs" type="button" aria-label="Bật giao diện tối">☾</button><button id="mobileMenuButton" class="rounded-full border border-ink/15 p-3" type="button" aria-label="Mở menu" aria-expanded="false">☰</button></div>
+        </nav>
+        <div id="mobileMenuBackdrop" class="mobile-backdrop fixed inset-0 z-40 bg-ink/40 md:hidden"></div>
+        <div id="mobileMenu" class="mobile-drawer fixed inset-y-0 left-0 z-50 w-[min(82vw,340px)] bg-ink p-7 text-white shadow-soft md:hidden">
+            <div class="mb-12 flex items-center justify-between"><span class="font-display text-xl font-bold">northstar<span class="text-mint">.</span></span><button id="mobileMenuClose" class="rounded-full border border-white/20 px-3 py-2" type="button" aria-label="Đóng menu">×</button></div>
+            <div class="grid gap-5 text-xl font-semibold">
+                <a href="#work">Work</a><a href="#approach">Approach</a>
+                <details class="group"><summary class="cursor-pointer list-none">Journal <span class="float-right text-mint">+</span></summary><div class="mt-4 grid gap-3 pl-4 text-base font-normal text-white/65"><a href="#journal">All notes</a><a href="#journal">Product thinking</a><a href="#journal">Systems & craft</a></div></details>
+                <a href="/admin">Admin</a><a class="text-mint" href="#contact">Start a project ↗</a>
+            </div>
+        </div>
+    </header>
 
-    @@keyframes scrollDown {
-        0% {
-            top: 100%;
-        }
+    <main id="top">
+        <section class="creative-hero relative overflow-hidden pb-16 pt-32 lg:pb-24 lg:pt-44">
+            <div class="relative mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="reveal mx-auto max-w-4xl text-center">
+                    <p class="mb-6 text-xs font-bold uppercase tracking-[.28em] text-lime-300">The creative operating system</p>
+                    <h1 class="font-display text-5xl font-bold leading-[.92] tracking-[-.06em] text-white sm:text-7xl lg:text-8xl">Make the idea<br /><span class="hero-gradient-text">impossible to ignore.</span></h1>
+                    <p class="mx-auto mt-7 max-w-2xl text-base leading-7 text-white/60 sm:text-lg">Northstar turns rough ideas into sharp visual systems, expressive products and work people remember.</p>
+                    <div class="mt-9 flex flex-wrap justify-center gap-3"><a href="#work" class="rounded-full bg-lime-300 px-6 py-3.5 text-sm font-bold text-slate-950 transition hover:-translate-y-1 hover:bg-white">Start exploring <span aria-hidden="true">↗</span></a><a href="#approach" class="rounded-full border border-white/20 px-6 py-3.5 text-sm font-bold text-white transition hover:border-lime-300 hover:text-lime-300">See how it works</a></div>
+                </div>
+                <div class="creative-canvas reveal mx-auto mt-16 max-w-6xl" style="transition-delay: .15s">
+                    <div class="canvas-toolbar"><span class="font-display font-bold text-white">northstar / playground</span><span class="hidden text-white/40 sm:block">Create · refine · share</span><span class="flex gap-1.5"><i></i><i></i><i></i></span></div>
+                    <div class="canvas-grid">
+                        <div class="canvas-copy"><span class="canvas-kicker">Concept 04 / 24</span><h2>Ideas, with room to move.</h2><p>Build a visual language that stays unmistakably yours.</p><button type="button">Open canvas <span>↗</span></button></div>
+                        <div class="canvas-art canvas-art-main"></div><div class="canvas-art canvas-art-side"></div><div class="canvas-art canvas-art-small"></div>
+                    </div>
+                </div>
+                <div class="creative-tools reveal" style="transition-delay: .25s"><button type="button" class="is-active"><span>✦</span> Image</button><button type="button"><span>◌</span> Motion</button><button type="button"><span>⌘</span> Edit</button><button type="button"><span>↗</span> Upscale</button></div>
+            </div>
+        </section>
 
-        100% {
-            top: -100%;
-        }
-    }
+        <div class="overflow-hidden border-y border-ink/10 bg-ink py-5 text-white"><div class="marquee flex w-max items-center gap-10 whitespace-nowrap text-sm font-semibold tracking-wide"><span>Product strategy</span><b class="text-mint">✳</b><span>UX systems</span><b class="text-aqua">✳</b><span>Web applications</span><b class="text-mint">✳</b><span>Brand clarity</span><b class="text-aqua">✳</b><span>Product strategy</span><b class="text-mint">✳</b><span>UX systems</span><b class="text-aqua">✳</b><span>Web applications</span><b class="text-mint">✳</b><span>Brand clarity</span></div></div>
 
-    .tooltip {
-        display: none;
-        position: absolute;
-        background: #fff;
-        padding: 5px 10px;
-        border: 1px solid #ccc;
-        font-size: 12px;
-        pointer-events: none;
-    }
+        <section class="creative-feature-band px-6 py-24 lg:px-8 lg:py-32">
+            <div class="mx-auto max-w-7xl">
+                <div class="reveal flex flex-col justify-between gap-7 lg:flex-row lg:items-end"><div><p class="mb-4 text-xs font-bold uppercase tracking-[.28em] text-lime-300">One creative workspace</p><h2 class="max-w-3xl font-display text-4xl font-bold leading-[.95] tracking-[-.05em] text-white sm:text-6xl">From first spark<br />to final frame.</h2></div><p class="max-w-sm text-sm leading-7 text-white/50">A focused toolkit for teams who want more range, more control and fewer dead ends.</p></div>
+                <div class="feature-tabs reveal mt-12" role="tablist" aria-label="Creative tools"><button class="is-active" type="button" data-feature-tab="create" role="tab" aria-selected="true">Create</button><button type="button" data-feature-tab="motion" role="tab" aria-selected="false">Motion</button><button type="button" data-feature-tab="edit" role="tab" aria-selected="false">Edit</button></div>
+                <div class="feature-panel reveal mt-5" data-feature-panel="create"><div class="feature-panel-copy"><span class="canvas-kicker">01 / Create</span><h3>Make the visual<br />you had in mind.</h3><p>Explore directions quickly, then turn the one with a pulse into a system your team can actually use.</p><a href="#contact">Open the studio <span>↗</span></a></div><div class="feature-panel-image feature-image-create"></div></div>
+                <div class="feature-panel reveal mt-5" data-feature-panel="motion" hidden><div class="feature-panel-copy"><span class="canvas-kicker">02 / Motion</span><h3>Give still ideas<br />a little gravity.</h3><p>Shape movement, rhythm and story without losing the character of the original idea.</p><a href="#contact">Explore motion <span>↗</span></a></div><div class="feature-panel-image feature-image-motion"></div></div>
+                <div class="feature-panel reveal mt-5" data-feature-panel="edit" hidden><div class="feature-panel-copy"><span class="canvas-kicker">03 / Edit</span><h3>Keep the signal.<br />Lose the noise.</h3><p>Refine composition, detail and tone while protecting the parts that make the work yours.</p><a href="#contact">Refine a concept <span>↗</span></a></div><div class="feature-panel-image feature-image-edit"></div></div>
+            </div>
+        </section>
 
-    svg {
-        background: #eafcff;
-        font-family: sans-serif;
-    }
+        <section id="work" class="mx-auto max-w-7xl px-6 py-24 lg:px-8 lg:py-32">
+            <div class="reveal flex flex-col justify-between gap-6 md:flex-row md:items-end"><div><p class="mb-4 text-xs font-bold uppercase tracking-[.24em] text-lime-300">Made in the studio</p><h2 class="max-w-2xl font-display text-4xl font-bold tracking-[-.045em] text-white sm:text-6xl">A bigger canvas<br />for better ideas.</h2></div><p class="max-w-xs text-sm leading-6 text-white/50">A living collection of visual systems, expressive interfaces and useful experiments.</p></div>
+            <div class="mt-14 grid gap-6 lg:grid-cols-12">
+                <article class="reveal group overflow-hidden rounded-[1.6rem] bg-[#dceee7] lg:col-span-7"><div class="relative min-h-[380px] p-8"><div class="relative z-10 flex items-center justify-between text-xs font-bold uppercase tracking-widest text-ink/60"><span>01 / Fintech</span><span>Orbit</span></div><div class="absolute bottom-0 left-1/2 w-[76%] -translate-x-1/2 translate-y-8 rounded-t-3xl border-8 border-ink/10 bg-white p-4 shadow-soft transition duration-500 group-hover:-translate-y-2"><div class="mb-4 flex justify-between text-xs font-bold"><span>Monthly runway</span><span class="text-emerald-600">Healthy</span></div><div class="font-display text-4xl font-bold">$248,920</div><div class="mt-5 h-20"><svg viewBox="0 0 500 90" class="h-full w-full" fill="none"><path d="M0 75C50 68 56 40 100 51s55-8 80-20 47 19 79-4 53 12 77-10 44-5 70-17 50-5 94-30" stroke="#10b981" stroke-width="6" stroke-linecap="round"/></svg></div></div></div><div class="flex items-center justify-between bg-ink p-6 text-white"><h3 class="font-display text-2xl font-bold">Money, made legible.</h3><span class="text-mint">↗</span></div></article>
+                <article class="reveal group overflow-hidden rounded-[1.6rem] bg-[#f0dfc8] lg:col-span-5" style="transition-delay: .12s"><div class="flex min-h-[380px] flex-col justify-between p-8"><div class="flex justify-between text-xs font-bold uppercase tracking-widest text-ink/60"><span>02 / Health</span><span>Pulse</span></div><div class="mx-auto w-full max-w-[260px] rounded-[2rem] border-8 border-ink bg-[#f9f6ee] p-3 shadow-soft transition duration-500 group-hover:rotate-3"><div class="rounded-[1.4rem] bg-aqua p-5"><span class="text-4xl">◌</span><p class="mt-12 text-xs font-bold">Your daily rhythm</p><strong class="font-display text-3xl">84 bpm</strong><div class="mt-5 h-1 rounded-full bg-ink/20"><div class="h-1 w-3/4 rounded-full bg-ink"></div></div></div></div><h3 class="font-display text-2xl font-bold">Small signals.<br />Better days.</h3></div></article>
+            </div>
+        </section>
 
-    .point:hover + .tooltip {
-        display: block;
-    }
+        <section id="approach" class="bg-ink px-6 py-24 text-white lg:px-8 lg:py-32"><div class="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[.8fr_1.2fr]"><div class="reveal"><p class="mb-4 text-xs font-bold uppercase tracking-[.24em] text-mint">Our approach</p><h2 class="font-display text-4xl font-bold leading-tight tracking-[-.045em] sm:text-6xl">Clear thinking.<br /><span class="text-aqua">Brave making.</span></h2></div><div class="grid gap-x-10 gap-y-12 sm:grid-cols-2"><div class="reveal border-t border-white/15 pt-5" style="transition-delay: .1s"><span class="font-display text-4xl text-mint">01</span><h3 class="mt-8 text-xl font-bold">Find the signal</h3><p class="mt-3 text-sm leading-7 text-white/55">We map the messy bits, listen to users and find the one useful thing that should feel effortless.</p></div><div class="reveal border-t border-white/15 pt-5" style="transition-delay: .2s"><span class="font-display text-4xl text-aqua">02</span><h3 class="mt-8 text-xl font-bold">Shape the system</h3><p class="mt-3 text-sm leading-7 text-white/55">Strategy, voice, interface and interaction come together as one coherent product language.</p></div><div class="reveal border-t border-white/15 pt-5" style="transition-delay: .3s"><span class="font-display text-4xl text-mint">03</span><h3 class="mt-8 text-xl font-bold">Make it real</h3><p class="mt-3 text-sm leading-7 text-white/55">We prototype in public, ship in slices and leave your team with momentum, not mystery.</p></div><div class="reveal border-t border-white/15 pt-5" style="transition-delay: .4s"><span class="font-display text-4xl text-aqua">04</span><h3 class="mt-8 text-xl font-bold">Measure what matters</h3><p class="mt-3 text-sm leading-7 text-white/55">Good design earns its keep. We define the signal and keep learning after launch.</p></div></div></div></section>
 
-    text {
-        font-size: 12px;
-    }
+        <section id="journal" class="mx-auto max-w-7xl px-6 py-24 lg:px-8 lg:py-32"><div class="reveal flex flex-col justify-between gap-6 md:flex-row md:items-end"><div><p class="mb-4 text-xs font-bold uppercase tracking-[.24em] text-emerald-700">From the journal</p><h2 class="font-display text-4xl font-bold tracking-[-.045em] sm:text-6xl">Notes for making.</h2></div><a href="#contact" class="line-link relative w-fit py-3 text-sm font-bold">Read all notes <span class="absolute bottom-1 left-0 h-px w-8 bg-ink"></span></a></div><div class="mt-14 grid gap-6 md:grid-cols-3"><article data-blog-category="Product" data-blog-title="The quiet power of a good default." data-blog-copy="The best product decisions often disappear into the experience. We look at how thoughtful defaults reduce friction and help users reach value sooner." class="blog-card reveal group" style="transition-delay: .1s"><div class="aspect-[4/3] overflow-hidden rounded-2xl bg-[#cfe8e0]"><img class="h-full w-full object-cover transition duration-700 group-hover:scale-105" src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=900&q=80" alt="Đội ngũ làm việc quanh bàn" /></div><p class="mt-5 text-xs font-bold uppercase tracking-widest text-emerald-700">Product / 6 min</p><h3 class="mt-2 font-display text-xl font-bold leading-snug">The quiet power of a good default.</h3></article><article data-blog-category="Systems" data-blog-title="Design systems are team systems." data-blog-copy="A design system is less about a box of components and more about creating shared language, shared confidence and a faster way to make decisions." class="blog-card reveal group" style="transition-delay: .2s"><div class="aspect-[4/3] overflow-hidden rounded-2xl bg-[#f0dfc8]"><img class="h-full w-full object-cover transition duration-700 group-hover:scale-105" src="https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=900&q=80" alt="Bảng ý tưởng sản phẩm" /></div><p class="mt-5 text-xs font-bold uppercase tracking-widest text-emerald-700">Systems / 8 min</p><h3 class="mt-2 font-display text-xl font-bold leading-snug">Design systems are team systems.</h3></article><article data-blog-category="Culture" data-blog-title="A slower inbox makes sharper work." data-blog-copy="The way a team communicates shapes the quality of its thinking. A little more space can create a lot more clarity." class="blog-card reveal group" style="transition-delay: .3s"><div class="aspect-[4/3] overflow-hidden rounded-2xl bg-aqua"><img class="h-full w-full object-cover mix-blend-multiply transition duration-700 group-hover:scale-105" src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=900&q=80" alt="Bàn làm việc với sổ tay" /></div><p class="mt-5 text-xs font-bold uppercase tracking-widest text-emerald-700">Culture / 4 min</p><h3 class="mt-2 font-display text-xl font-bold leading-snug">A slower inbox makes sharper work.</h3></article></div></section>
 
-    .label {
-        font-weight: bold;
-    }
+        <div id="blogModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-ink/60 p-5 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="blogModalTitle"><div class="relative w-full max-w-xl rounded-[2rem] bg-white p-7 shadow-soft sm:p-10"><button id="blogModalClose" class="absolute right-5 top-5 rounded-full border border-ink/10 px-3 py-1 text-xl" type="button" aria-label="Đóng bài viết">×</button><p id="blogModalCategory" class="text-xs font-bold uppercase tracking-[.2em] text-emerald-700"></p><h2 id="blogModalTitle" class="mt-4 max-w-md font-display text-3xl font-bold leading-tight"></h2><p id="blogModalCopy" class="mt-5 text-base leading-8 text-ink/65"></p><div class="mt-8 border-t border-ink/10 pt-5 text-sm font-semibold text-ink/55">Northstar Journal · 2026</div></div></div>
 
-    .subtitle {
-        font-size: 14px;
-        fill: #555;
-    }
-</style>
-<h1>@ViewData["Message"]</h1>
-<p>Đây là nội dung hiển thị từ View Razor trong Web API.</p>
+        <section id="contact" class="relative overflow-hidden bg-mint px-6 py-24 lg:px-8 lg:py-32"><div class="relative mx-auto max-w-7xl"><p class="mb-5 text-xs font-bold uppercase tracking-[.24em] text-ink/65">Have a good problem?</p><h2 class="max-w-4xl font-display text-5xl font-bold leading-[.95] tracking-[-.06em] sm:text-8xl">Let’s make it<br />worth using.</h2><div class="mt-12 flex flex-wrap items-center gap-6"><a href="mailto:hello@northstar.studio" class="rounded-full bg-ink px-7 py-4 text-sm font-bold text-white transition hover:-translate-y-1 hover:bg-emerald-700">hello@northstar.studio ↗</a><span class="text-sm font-semibold text-ink/65">Usually replies within 2 working days.</span></div></div><div class="absolute -right-10 -top-20 h-72 w-72 rounded-full border-[40px] border-ink/10"></div></section>
+    </main>
 
-<div style="height: 600px;width:100% ;overflow: hidden; position: relative;">
-    <div style="
-    position: absolute;
-    width: 100%;
-    animation: scrollDown 20s linear infinite;
-  ">
-        <p>Chữ chạy xuống</p>
-        <p>Tiếp theo</p>
-        <p>Vẫn tiếp tục</p>
-        <svg width="500" height="300" style="border: 1px solid #ccc;">
-            <!-- Trục tọa độ -->
-            <line x1="50" y1="250" x2="450" y2="250" stroke="#000" />
-            <line x1="50" y1="50" x2="50" y2="250" stroke="#000" />
+    <footer class="bg-ink px-6 py-8 text-white lg:px-8"><div class="mx-auto flex max-w-7xl flex-col justify-between gap-5 text-sm text-white/55 sm:flex-row"><span class="font-display font-bold text-white">northstar<span class="text-mint">.</span></span><span>© 2026 Northstar Studio. Made for useful things.</span><div class="flex gap-5"><a href="#top" class="transition hover:text-mint">Back to top ↑</a><a href="mailto:hello@northstar.studio" class="transition hover:text-mint">Email us</a></div></div></footer>
+    <script src="~/frontend/js/main.js" asp-append-version="true"></script>
+</body>
+</html>
 
-            <!-- Đường nối các điểm -->
-            <polyline fill="none"
-                      stroke="#2196F3"
-                      stroke-width="2"
-                      points="
-      50,210
-      125,130
-      200,170
-      275,110
-      350,140
-    " />
-
-            <!-- Các điểm dữ liệu -->
-            <circle cx="50" cy="210" r="4" fill="blue" />
-            <circle cx="125" cy="130" r="4" fill="blue" />
-            <circle cx="200" cy="170" r="4" fill="blue" />
-            <circle cx="275" cy="110" r="4" fill="blue" />
-            <circle cx="350" cy="140" r="4" fill="blue" />
-
-            <!-- Nhãn số -->
-            <text x="45" y="200" font-size="12">20</text>
-            <text x="120" y="120" font-size="12">40</text>
-            <text x="195" y="160" font-size="12">30</text>
-            <text x="270" y="100" font-size="12">50</text>
-            <text x="345" y="130" font-size="12">35</text>
-
-            <!-- Nhãn trục X -->
-            <text x="40" y="270" font-size="12">Tháng 1</text>
-            <text x="115" y="270" font-size="12">Tháng 2</text>
-            <text x="190" y="270" font-size="12">Tháng 3</text>
-            <text x="265" y="270" font-size="12">Tháng 4</text>
-            <text x="340" y="270" font-size="12">Tháng 5</text>
-        </svg>
-
-    </div>
-</div>
-
-<svg viewBox="0 0 1000 500" width="100%" height="auto">
-
-    <!-- Grid -->
-    <g stroke="#ccc" stroke-dasharray="4">
-        <line x1="80" y1="450" x2="950" y2="450" />
-        <line x1="80" y1="375" x2="950" y2="375" />
-        <line x1="80" y1="300" x2="950" y2="300" />
-        <line x1="80" y1="225" x2="950" y2="225" />
-        <line x1="80" y1="150" x2="950" y2="150" />
-        <line x1="80" y1="75" x2="950" y2="75" />
-    </g>
-
-    <!-- Axes -->
-    <line x1="80" y1="50" x2="80" y2="450" stroke="black" />
-    <line x1="80" y1="450" x2="950" y2="450" stroke="black" />
-
-    <!-- Y Labels -->
-    <g font-size="12">
-        <text x="50" y="455">0</text>
-        <text x="45" y="380">1000</text>
-        <text x="45" y="305">2000</text>
-        <text x="45" y="230">3000</text>
-        <text x="45" y="155">4000</text>
-        <text x="45" y="80">5000</text>
-    </g>
-
-    <!-- X Labels -->
-    <g font-size="10">
-        <text x="80" y="470">6:00</text>
-        <text x="140" y="470">7:00</text>
-        <text x="200" y="470">8:00</text>
-        <text x="260" y="470">9:00</text>
-        <text x="320" y="470">10:00</text>
-        <text x="380" y="470">11:00</text>
-        <text x="440" y="470">12:00</text>
-        <text x="500" y="470">13:00</text>
-        <text x="560" y="470">14:00</text>
-        <text x="620" y="470">15:00</text>
-        <text x="680" y="470">16:00</text>
-        <text x="740" y="470">17:00</text>
-        <text x="800" y="470">18:00</text>
-        <text x="860" y="470">19:00</text>
-        <text x="920" y="470">20:00</text>
-    </g>
-
-    <!-- Target line -->
-    <polyline fill="none" stroke="blue" stroke-width="2"
-              points="80,440 140,410 200,380 260,350 320,320 380,290 440,260 500,230 560,200 620,170 680,140 740,110 800,80 860,70 920,60" />
-
-    <!-- Actual line -->
-    <polyline fill="none" stroke="orange" stroke-width="2"
-              points="80,440 140,420 200,390 260,350 320,310 380,270 440,260" />
-
-    <!-- Labels and points -->
-    <g fill="blue" font-size="10">
-        <circle cx="140" cy="410" r="3" />
-        <text x="140" y="400" text-anchor="middle">1000</text>
-
-        <circle cx="200" cy="380" r="3" />
-        <text x="200" y="370" text-anchor="middle">2000</text>
-
-        <circle cx="320" cy="320" r="3" />
-        <text x="320" y="310" text-anchor="middle">3000</text>
-
-        <circle cx="440" cy="260" r="3" />
-        <text x="440" y="250" text-anchor="middle">4000</text>
-    </g>
-
-    <g fill="orange" font-size="10">
-        <circle cx="140" cy="420" r="3" />
-        <text x="140" y="410" text-anchor="middle">800</text>
-
-        <circle cx="260" cy="350" r="3" />
-        <text x="260" y="340" text-anchor="middle">1600</text>
-
-        <circle cx="320" cy="310" r="3" />
-        <text x="320" y="300" text-anchor="middle">2400</text>
-    </g>
-
-    <!-- Legend -->
-    <rect x="800" y="60" width="10" height="10" fill="blue" />
-    <text x="815" y="70" font-size="12">Target</text>
-    <rect x="800" y="80" width="10" height="10" fill="orange" />
-    <text x="815" y="90" font-size="12">Actual</text>
-</svg>
-<svg viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet">
-    <text x="80" y="30" class="title">D05</text>
-    <text x="80" y="50" >Mục tiêu và thực tế sản xuất</text>
-    <text x="80" y="70" >Dữ liệu được cập nhật theo ca sản xuất hôm nay</text>
-
-    <!-- Lưới ngang -->
-    <g stroke="#ddd">
-        <line x1="80" y1="450" x2="980" y2="450" />
-        <line x1="80" y1="375" x2="980" y2="375" />
-        <line x1="80" y1="300" x2="980" y2="300" />
-        <line x1="80" y1="225" x2="980" y2="225" />
-        <line x1="80" y1="150" x2="980" y2="150" />
-        <line x1="80" y1="75" x2="980" y2="75" />
-    </g>
-
-    <!-- Trục Y -->
-    <line x1="80" y1="50" x2="80" y2="450" stroke="black" />
-    <!-- Trục X -->
-    <line x1="80" y1="450" x2="980" y2="450" stroke="black" />
-
-    <!-- Nhãn trục Y -->
-    <g text-anchor="end">
-        <text x="75" y="455">0</text>
-        <text x="75" y="380">1,000</text>
-        <text x="75" y="305">2,000</text>
-        <text x="75" y="230">3,000</text>
-        <text x="75" y="155">4,000</text>
-        <text x="75" y="80">5,000</text>
-        <text class="label" x="100" y="200" transform="rotate(-90 90,250)">Sản lượng</text>
-    </g>
-
-    <!-- Nhãn trục X -->
-    <g text-anchor="middle">
-        <text x="80" y="470">6:00</text>
-        <text x="160" y="470">7:00</text>
-        <text x="240" y="470">8:00</text>
-        <text x="320" y="470">9:00</text>
-        <text x="400" y="470">10:00</text>
-        <text x="480" y="470">11:00</text>
-        <text x="560" y="470">12:00</text>
-        <text x="640" y="470">13:00</text>
-        <text x="720" y="470">14:00</text>
-        <text x="800" y="470">15:00</text>
-        <text x="880" y="470">16:00</text>
-        <text x="960" y="470">17:00</text>
-        <text class="label" x="530" y="495">Thời gian</text>
-    </g>
-
-    <!-- Đường Target -->
-    <polyline fill="none" stroke="blue" stroke-width="2"
-              points="80,440 160,410 240,380 320,350 400,320 480,290 560,260 640,230 720,200 800,170 880,140 960,110" />
-
-    <!-- Đường Actual -->
-    <polyline fill="none" stroke="orange" stroke-width="2"
-              points="80,440 160,420 240,390 320,360 400,310 480,280 560,260" />
-
-    <!-- Chấm Target -->
-    <g fill="blue">
-        <circle cx="160" cy="410" r="3" />
-        <circle cx="240" cy="380" r="3" />
-        <circle cx="320" cy="350" r="3" />
-        <circle cx="400" cy="320" r="3" />
-        <circle cx="480" cy="290" r="3" />
-        <circle cx="560" cy="260" r="3" />
-        <circle cx="640" cy="230" r="3" />
-        <circle cx="720" cy="200" r="3" />
-        <circle cx="800" cy="170" r="3" />
-        <circle cx="880" cy="140" r="3" />
-        <circle cx="960" cy="110" r="3" />
-    </g>
-
-    <!-- Chấm Actual -->
-    <g fill="orange">
-        <circle cx="160" cy="420" r="3" />
-        <circle cx="240" cy="390" r="3" />
-        <circle cx="320" cy="360" r="3" />
-        <circle cx="400" cy="310" r="3" />
-        <circle cx="480" cy="280" r="3" />
-        <circle cx="560" cy="260" r="3" />
-    </g>
-
-    <!-- Chú thích -->
-    <g font-size="12">
-        <rect x="800" y="60" width="10" height="10" fill="blue" />
-        <text x="815" y="70">Target</text>
-        <rect x="800" y="80" width="10" height="10" fill="orange" />
-        <text x="815" y="90">Actual</text>
-    </g>
-
-</svg>

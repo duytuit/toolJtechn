@@ -1,0 +1,140 @@
+@{
+    ViewData["Title"] = "Trang quản trị";
+    Layout = "_Layout";
+}
+
+<div class="page-header">
+    <div>
+        <p class="section-kicker">Tổng quan</p>
+        <h2 class="mb-0">Trang quản trị viên</h2>
+    </div>
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#reportForm">+ Tạo báo cáo</button>
+</div>
+
+<div id="statsGrid" class="row g-4 mb-4" aria-live="polite"></div>
+
+<div class="row g-4 mb-4">
+    <div class="col-xl-8">
+        <div class="panel-card h-100">
+            <div class="panel-head">
+                <h5>Biểu đồ sản lượng</h5>
+                <span class="badge-soft">7 ngày gần nhất</span>
+            </div>
+            <div id="productionChart" class="chart-box" aria-label="Biểu đồ sản lượng"></div>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="panel-card h-100">
+            <div class="panel-head">
+                <h5>Nhập dữ liệu</h5>
+            </div>
+            <form id="reportForm" class="collapse show">
+                <div class="mb-3">
+                    <label class="form-label" for="reportTitle">Tên báo cáo</label>
+                    <input id="reportTitle" class="form-control" required placeholder="Ví dụ: Báo cáo sản lượng" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="reportDepartment">Bộ phận</label>
+                    <select id="reportDepartment" class="form-select">
+                        <option>Sản xuất</option>
+                        <option>Lắp ráp</option>
+                        <option>Kho vật tư</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary w-100" type="submit">Lưu dữ liệu</button>
+                <div id="formMessage" class="small mt-3" role="status"></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="panel-card">
+    <div class="panel-head flex-wrap gap-3">
+        <div>
+            <h5 class="mb-1">Danh sách đơn hàng</h5>
+            <small class="text-muted">Dữ liệu được tải từ dashboard API</small>
+        </div>
+        <input id="orderFilter" class="form-control table-filter" type="search" placeholder="Lọc mã, bộ phận, trạng thái..." />
+    </div>
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Mã đơn</th>
+                    <th>Bộ phận</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày cập nhật</th>
+                </tr>
+            </thead>
+            <tbody id="ordersTable"></tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const statsGrid = document.querySelector('#statsGrid');
+            const chart = document.querySelector('#productionChart');
+            const ordersTable = document.querySelector('#ordersTable');
+            const filter = document.querySelector('#orderFilter');
+            let orders = [];
+
+            const renderStats = (stats) => {
+                statsGrid.innerHTML = stats.map(stat => `
+                    <div class="col-lg-3 col-md-6">
+                        <div class="stat-card">
+                            <span class="stat-label">${stat.label}</span>
+                            <h3>${stat.value}</h3>
+                            <small class="text-${stat.tone}">${stat.trend}</small>
+                        </div>
+                    </div>`).join('');
+            };
+
+            const renderChart = (values) => {
+                chart.innerHTML = values.map((value, index) => `
+                    <div class="chart-bar-wrap">
+                        <span class="chart-value">${value}</span>
+                        <span class="chart-bar" style="height: ${value}%"></span>
+                        <small>Ngày ${index + 1}</small>
+                    </div>`).join('');
+            };
+
+            const renderOrders = () => {
+                const keyword = filter.value.trim().toLowerCase();
+                const filtered = orders.filter(order =>
+                    `${order.code} ${order.department} ${order.status} ${order.date}`.toLowerCase().includes(keyword));
+
+                ordersTable.innerHTML = filtered.length
+                    ? filtered.map(order => `
+                        <tr>
+                            <td><strong>${order.code}</strong></td>
+                            <td>${order.department}</td>
+                            <td><span class="status-pill">${order.status}</span></td>
+                            <td>${order.date}</td>
+                        </tr>`).join('')
+                    : '<tr><td colspan="4" class="text-center text-muted py-4">Không tìm thấy dữ liệu</td></tr>';
+            };
+
+            try {
+                const response = await fetch('/api/admin/dashboard/data');
+                if (!response.ok) throw new Error('Không tải được dữ liệu dashboard');
+                const data = await response.json();
+                orders = data.orders;
+                renderStats(data.stats);
+                renderChart(data.production);
+                renderOrders();
+            } catch (error) {
+                statsGrid.innerHTML = `<div class="col-12"><div class="alert alert-danger">${error.message}</div></div>`;
+            }
+
+            filter.addEventListener('input', renderOrders);
+            document.querySelector('#reportForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+                document.querySelector('#formMessage').className = 'small mt-3 text-success';
+                document.querySelector('#formMessage').textContent = 'Đã lưu dữ liệu mẫu thành công.';
+                event.target.reset();
+            });
+        });
+    </script>
+}

@@ -15,7 +15,7 @@ using JtechnApi.Employees.Repositories;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
 using JtechnApi.Shares.AdoHelper;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 using System.Threading;
 using System.Configuration;
 using Microsoft.Extensions.Configuration;

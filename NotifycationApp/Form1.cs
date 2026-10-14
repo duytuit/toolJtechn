@@ -30,6 +30,9 @@ namespace NotifycationApp
         private CancellationTokenSource _cts;
         private List<notify> _notify = new List<notify>();
         private ContextMenuStrip contextMenu;
+        private bool _isLoadingData;
+        private readonly SemaphoreSlim _socketMessageLock = new SemaphoreSlim(1, 1);
+        private volatile string _employeeCode;
         public Form1()
         {
             InitializeComponent();
@@ -37,6 +40,7 @@ namespace NotifycationApp
             richTextBox1.LinkClicked += RichTextBox1_LinkClicked;
             string code = Environment.GetEnvironmentVariable("MY_APP_CODENV", EnvironmentVariableTarget.User);
             txtCodeNV.Text = code;
+            _employeeCode = code;
             Rectangle workingArea = Screen.GetWorkingArea(this);
             this.Location = new Point(workingArea.Right - Size.Width, workingArea.Bottom - Size.Height);
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -67,124 +71,7 @@ namespace NotifycationApp
             _client = new WebSocketClient("wss://192.168.207.6:5007/ws");
 
             //_client.OnLog += (msg) => Invoke((Action)(() => richTextBox1.AppendText(msg + "\n")));
-            _client.OnMessageReceived += (msg) => Invoke((Action)(() => {
-                try
-                {
-                    var data = JsonConvert.DeserializeObject<JObject>(msg); // parse chuỗi JSON
-                    if (IsJsonObject(data["messageText"]))
-                    {
-                        // Chuyển messageText từ string JSON sang JObject
-                        var msgObj = JsonConvert.DeserializeObject<JObject>(data["messageText"].ToString());
-
-                        // ✅ Trích xuất dữ liệu từ msgObj
-                        int job_id = int.Parse(msgObj["job_id"]?.ToString());
-                        string job_name = msgObj["job_name"]?.ToString();
-                        string app = msgObj["app"]?.ToString();
-                        string code = msgObj["code"]?.ToString();
-                        string link = msgObj["link"]?.ToString();
-                        int status = int.Parse( msgObj["status"]?.ToString());
-                        if (txtCodeNV.Text == code)
-                        {
-                            // ⚠️ code lỗi của bạn: `"Code "` có khoảng trắng => phải sửa lại `"Code"`
-                            notify check_notify = _notify.FirstOrDefault(x =>
-                                x.JobId == job_id &&
-                                x.App == app &&
-                                x.Code == code
-                            );
-
-                            if (check_notify == null)
-                            {
-
-                                var newNotify = new notify
-                                {
-                                    JobId = job_id,
-                                    JobName = job_name,
-                                    App = app,
-                                    Code = code,
-                                    Link = msgObj["link"]?.ToString(),
-                                    Status = msgObj["status"]?.Value<int>() ?? 0 // add
-                                };
-                                var newNotify_object = new
-                                {
-                                    id = 0,
-                                    job_id = job_id,
-                                    job_name = job_name,
-                                    app = app,
-                                    code = code,
-                                    link = msgObj["link"]?.ToString(),
-                                    status = msgObj["status"]?.Value<int>() ?? 0 // add
-                                };
-                                _notify.Add(newNotify);
-
-                                string _title = $"Công việc - {job_name}:\n";
-                                AppendColoredText(richTextBox1, _title, Color.Yellow, Color.Black, bold: true);
-                                string _link = $"{msgObj["link"]?.ToString()}\n";
-                                AppendColoredText(richTextBox1,_link);
-
-                                // Tạo hình tròn nằm trên ảnh
-                                DrawCircleAbovePicture(pic, _notify.Count, 405, 18);
-                              
-                            }
-                            else
-                            {
-                                if (status == 1) // xóa
-                                {
-                                    richTextBox1.Text = "";
-                                    _notify.Remove(check_notify);
-                                    foreach (var item in _notify)
-                                    {
-                                        string _title = $"Công việc - {item.JobName}:\n";
-                                        AppendColoredText(richTextBox1, _title, Color.Yellow, Color.Black, bold: true);
-                                        string _link = $"{item.Link}\n";
-                                        AppendColoredText(richTextBox1, _link);
-                                    }
-                                    DrawCircleAbovePicture(pic, _notify.Count, 405, 18);
-                                    using (var _db = new clsKetNoi())
-                                    {
-                                        var whereEquals = new Dictionary<string, object>
-                                        {
-                                            ["job_id"] = job_id,
-                                            ["app"] = app,
-                                            ["code"] = code
-                                        };
-                                        _db.DeleteWhere("Notifycation", whereEquals);
-                                    }
-
-                                }
-                            }
-                        }
-                        if (status == 3) // xóa all
-                        {
-                            richTextBox1.Text = "";
-                            _notify.RemoveAll(x => x.JobId == job_id && x.App == app);
-                            foreach (var item in _notify)
-                            {
-                                string _title = $"Công việc - {item.JobName}:\n";
-                                AppendColoredText(richTextBox1, _title, Color.Yellow, Color.Black, bold: true);
-                                string _link = $"{item.Link}\n";
-                                AppendColoredText(richTextBox1, _link);
-                            }
-                            DrawCircleAbovePicture(pic, _notify.Count, 405, 18);
-                            using (var _db = new clsKetNoi())
-                            {
-                                var whereEquals = new Dictionary<string, object>
-                                {
-                                    ["job_id"] = job_id,
-                                    ["app"] = app
-                                };
-                                _db.DeleteWhere("Notifycation", whereEquals);
-                            }
-
-                        }
-
-                    }
-                }
-                catch (Exception ex)
-                {
-                    richTextBox1.AppendText($"[Error parsing message] {ex.Message}\n");
-                }
-
-            }));
+            _client.OnMessageReceived += HandleSocketMessage;
             // _client.OnConnected += () => Invoke((Action)(() => labelStatus.Text = "🟢 Connected"));
             // _client.OnDisconnected += () => Invoke((Action)(() => labelStatus.Text = "🔴 Disconnected"));
             _client.OnLog += (log) =>
@@ -204,6 +91,162 @@ namespace NotifycationApp
             };
             string jsonData = JsonConvert.SerializeObject(obj);
             await _client.SendMessageAsync(jsonData, _cts.Token);
+        }
+
+        private async void HandleSocketMessage(string message)
+        {
+            await _socketMessageLock.WaitAsync();
+            try
+            {
+                var data = JsonConvert.DeserializeObject<JObject>(message);
+                JToken messageToken = data?["messageText"];
+                if (!IsJsonObject(messageToken))
+                    return;
+
+                var messageObject = messageToken.Type == JTokenType.Object
+                    ? (JObject)messageToken
+                    : JsonConvert.DeserializeObject<JObject>(messageToken.ToString());
+                if (messageObject == null ||
+                    !int.TryParse(messageObject["job_id"]?.ToString(), out int jobId) ||
+                    !int.TryParse(messageObject["status"]?.ToString(), out int status))
+                {
+                    throw new FormatException("Gói tin thiếu job_id hoặc status hợp lệ.");
+                }
+
+                var notification = new notify
+                {
+                    JobId = jobId,
+                    JobName = messageObject["job_name"]?.ToString(),
+                    App = messageObject["app"]?.ToString(),
+                    Code = messageObject["code"]?.ToString(),
+                    Link = messageObject["link"]?.ToString(),
+                    Status = status
+                };
+
+                bool isClearAll = status == 3;
+                if (!isClearAll && notification.Code != _employeeCode)
+                    return;
+
+                await Task.Run(() =>
+                {
+                    using (var db = new clsKetNoi())
+                    {
+                        if (status == 1)
+                        {
+                            db.DeleteWhere("Notifycation", new Dictionary<string, object>
+                            {
+                                ["job_id"] = notification.JobId,
+                                ["app"] = notification.App,
+                                ["code"] = notification.Code
+                            });
+                        }
+                        else if (isClearAll)
+                        {
+                            db.DeleteWhere("Notifycation", new Dictionary<string, object>
+                            {
+                                ["job_id"] = notification.JobId,
+                                ["app"] = notification.App
+                            });
+                        }
+                        else
+                        {
+                            const string sql = @"
+IF EXISTS (
+    SELECT 1 FROM Notifycation
+    WHERE job_id = @job_id AND app = @app AND code = @code
+)
+    UPDATE Notifycation
+    SET job_name = @job_name, link = @link, status = @status
+    WHERE job_id = @job_id AND app = @app AND code = @code
+ELSE
+    INSERT INTO Notifycation (job_id, job_name, app, code, link, status)
+    VALUES (@job_id, @job_name, @app, @code, @link, @status)";
+
+                            db.UpdateTable(
+                                sql,
+                                new[] { "@job_id", "@job_name", "@app", "@code", "@link", "@status" },
+                                new object[]
+                                {
+                                    notification.JobId,
+                                    (object)notification.JobName ?? DBNull.Value,
+                                    (object)notification.App ?? DBNull.Value,
+                                    (object)notification.Code ?? DBNull.Value,
+                                    (object)notification.Link ?? DBNull.Value,
+                                    notification.Status
+                                },
+                                6);
+                        }
+                    }
+                });
+
+                if (IsDisposed || !IsHandleCreated)
+                    return;
+
+                BeginInvoke((Action)(() =>
+                {
+                    if (status == 1)
+                    {
+                        _notify.RemoveAll(x =>
+                            x.JobId == notification.JobId &&
+                            x.App == notification.App &&
+                            x.Code == notification.Code);
+                    }
+                    else if (isClearAll)
+                    {
+                        _notify.RemoveAll(x =>
+                            x.JobId == notification.JobId &&
+                            x.App == notification.App);
+                    }
+                    else
+                    {
+                        var existing = _notify.FirstOrDefault(x =>
+                            x.JobId == notification.JobId &&
+                            x.App == notification.App &&
+                            x.Code == notification.Code);
+
+                        if (existing == null)
+                            _notify.Add(notification);
+                        else
+                        {
+                            existing.JobName = notification.JobName;
+                            existing.Link = notification.Link;
+                            existing.Status = notification.Status;
+                        }
+                    }
+
+                    RenderNotifications();
+                }));
+            }
+            catch (Exception ex)
+            {
+                FileLogger.Log($"Socket message was not applied to database: {ex}");
+                if (!IsDisposed && IsHandleCreated)
+                {
+                    BeginInvoke((Action)(() =>
+                        richTextBox1.AppendText($"[Lỗi xử lý thông báo socket/DB] {ex.Message}\n")));
+                }
+            }
+            finally
+            {
+                _socketMessageLock.Release();
+            }
+        }
+
+        private void RenderNotifications()
+        {
+            richTextBox1.Clear();
+            foreach (var item in _notify)
+            {
+                AppendColoredText(
+                    richTextBox1,
+                    $"Công việc - {item.JobName}:\n",
+                    Color.Yellow,
+                    Color.Black,
+                    bold: true);
+                AppendColoredText(richTextBox1, $"{item.Link}\n");
+            }
+
+            DrawCircleAbovePicture(pic, _notify.Count, 405, 18);
         }
         private void DrawCircleAbovePicture(PictureBox basePicture, int number, int x, int y)
         {
@@ -296,73 +339,87 @@ namespace NotifycationApp
         }
         private async Task LoadDataAsync()
         {
+            if (_isLoadingData)
+                return;
+
+            _isLoadingData = true;
+            button1.Enabled = false;
+
             try
             {
-                // Xóa giao diện
+                string code = txtCodeNV.Text;
+                List<notify> loadedNotifications = await Task.Run(() =>
+                {
+                    using (var db = new clsKetNoi())
+                    {
+                        string sql = $@"SELECT job_id, job_name, app, code, link, status 
+                                FROM Notifycation
+                                WHERE code = @code";
+
+                        DataTable table = db.LoadTable(
+                            sql,
+                            new[] { "@code" },
+                            new object[] { code },
+                            1);
+
+                        return table.AsEnumerable()
+                            .Select(row => new notify
+                            {
+                                JobId = Convert.ToInt32(row["job_id"]),
+                                JobName = row["job_name"].ToString(),
+                                App = row["app"].ToString(),
+                                Code = row["code"].ToString(),
+                                Link = row["link"].ToString(),
+                                Status = Convert.ToInt32(row["status"])
+                            })
+                            .ToList();
+                    }
+                });
+
                 richTextBox1.Clear();
                 _notify.Clear();
+                _notify.AddRange(loadedNotifications);
 
-                // Ẩn hình tròn lúc mới load
                 if (circle != null)
                 {
                     circle.Visible = false;
                 }
 
-                string code = txtCodeNV.Text;
-                DataTable tb = null;
-
-                // 🔥 THREAD PHỤ: chạy DB
-                await Task.Run(() =>
+                const int batchSize = 25;
+                for (int start = 0; start < loadedNotifications.Count; start += batchSize)
                 {
-                    using (var db = new clsKetNoi())
+                    int end = Math.Min(start + batchSize, loadedNotifications.Count);
+                    for (int i = start; i < end; i++)
                     {
-                        string sql = $@"SELECT job_id, job_name, app, code, link, status 
-                                FROM Notifycation 
-                                WHERE code = N'{code}'";
+                        var notification = loadedNotifications[i];
+                        if (!_notify.Contains(notification))
+                            continue;
 
-                        tb = db.LoadTable(sql);
+                        string title = $"Công việc - {notification.JobName}:\n";
+                        AppendColoredText(richTextBox1, title, Color.Yellow, Color.Black, true);
+                        AppendColoredText(richTextBox1, notification.Link + "\n");
                     }
-                });
 
-                // Nếu null thì thoát
-                if (tb == null || tb.Rows.Count == 0)
-                {
-                    DrawCircleAbovePicture(pic, 0, 405, 18); // hiện số 0
-                    return;
+                    if (end < loadedNotifications.Count)
+                        await Task.Yield();
                 }
 
-                // 🔥 UI THREAD – xử lý dữ liệu
-                foreach (DataRow row in tb.Rows)
-                {
-                    var notify = new notify
-                    {
-                        JobId = Convert.ToInt32(row["job_id"]),
-                        JobName = row["job_name"].ToString(),
-                        App = row["app"].ToString(),
-                        Code = row["code"].ToString(),
-                        Link = row["link"].ToString(),
-                        Status = Convert.ToInt32(row["status"])
-                    };
-
-                    _notify.Add(notify);
-
-                    string title = $"Công việc - {notify.JobName}:\n";
-                    AppendColoredText(richTextBox1, title, Color.Yellow, Color.Black, true);
-
-                    AppendColoredText(richTextBox1, notify.Link + "\n");
-                }
-
-                // 🔥 VẼ LẠI HÌNH TRÒN SAU KHI ĐÃ LOAD XONG HẾT
                 DrawCircleAbovePicture(pic, _notify.Count, 405, 18);
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Lỗi LoadDataAsync: " + ex.Message);
             }
+            finally
+            {
+                _isLoadingData = false;
+                button1.Enabled = true;
+            }
         }
         private void button1_Click(object sender, EventArgs e)
         {
             Environment.SetEnvironmentVariable("MY_APP_CODENV", txtCodeNV.Text, EnvironmentVariableTarget.User);
+            _employeeCode = txtCodeNV.Text;
             _ = LoadDataAsync();
         }
         private void timer1_Tick(object sender, EventArgs e)
@@ -466,7 +523,10 @@ namespace NotifycationApp
             // Dùng font hiện tại, chỉ thay size nếu có
             float size = fontSize ?? box.Font.Size;
 
-            box.SelectionFont = new Font(box.Font.FontFamily, size, style);
+            using (var font = new Font(box.Font.FontFamily, size, style))
+            {
+                box.SelectionFont = font;
+            }
 
             // Bỏ chọn
             box.Select(box.TextLength, 0);

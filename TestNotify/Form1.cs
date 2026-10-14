@@ -90,5 +90,25 @@ namespace TestNotify
             string jsonData = JsonConvert.SerializeObject(obj);
             await _client.SendMessageAsync(jsonData, _cts.Token);
         }
+
+        private async void button3_Click(object sender, EventArgs e)
+        {
+            var obj = new
+            {
+                Event = 15,
+                Chanel = "dencanhbao_cd_dap",
+                MessageText = JsonConvert.SerializeObject(new
+                {
+                    job_id = 123,
+                    app = "task",
+                    job_name = "34ACVEG6",
+                    code = "240404",
+                    link = "http://192.168.207.6:8088/admin",
+                    status = 2
+                })
+            };
+            string jsonData = JsonConvert.SerializeObject(obj);
+            await _client.SendMessageAsync(jsonData, _cts.Token);
+        }
     }
 }

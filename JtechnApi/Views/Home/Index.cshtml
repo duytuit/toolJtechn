@@ -1,104 +1,141 @@
-﻿@{
-    ViewData["Title"] = "Northstar Studio";
+@{
+    ViewData["Title"] = "Aether AI | Create beyond limits";
     Layout = null;
 }
-
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Northstar Studio | SaaS portfolio</title>
-    <link rel="stylesheet" href="~/frontend/css/style.css" asp-append-version="true" />
-    <script src="~/frontend/js/tailwind.config.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="theme-color" content="#080b12" />
+    <meta name="description" content="Aether is an intelligent creative workspace for turning ambitious ideas into extraordinary work." />
+    <title>@ViewData["Title"]</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/hero.css" asp-append-version="true" />
 </head>
-<body class="creative-page font-sans antialiased">
-    <header id="siteHeader" class="absolute inset-x-0 top-0 z-30">
-        <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-8" aria-label="Điều hướng chính">
-            <a href="#top" class="font-display text-xl font-bold tracking-tight text-white">northstar<span class="text-lime-300">.</span></a>
-            <div id="desktopNav" class="hidden items-center gap-8 text-sm font-semibold md:flex">
-                <a class="transition hover:text-lime-300" href="#work">Explore</a>
-                <a class="transition hover:text-lime-300" href="#approach">Studio</a>
-                <div class="blog-menu relative">
-                    <button class="flex items-center gap-1 transition hover:text-lime-300" type="button">Discover <span class="text-xs">⌄</span></button>
-                    <div class="blog-submenu absolute left-1/2 top-full mt-3 w-56 -translate-x-1/2 rounded-2xl border border-ink/10 bg-white p-2 text-sm shadow-soft">
-                        <a class="block rounded-xl px-3 py-2 transition hover:bg-cloud" href="#journal">All notes</a>
-                        <a class="block rounded-xl px-3 py-2 transition hover:bg-cloud" href="#journal" data-blog-filter="Product">Product thinking</a>
-                        <a class="block rounded-xl px-3 py-2 transition hover:bg-cloud" href="#journal" data-blog-filter="Systems">Systems & craft</a>
+<body>
+    <main>
+        <section class="ai-hero" id="top" aria-labelledby="heroTitle">
+            <div class="hero-background" aria-hidden="true">
+                <div class="hero-grid"></div>
+                <div class="hero-vignette"></div>
+                <div class="hero-glow hero-glow--blue" data-parallax="-0.35"></div>
+                <div class="hero-glow hero-glow--violet" data-parallax="0.22"></div>
+                <div class="hero-glow hero-glow--cyan" data-parallax="-0.18"></div>
+                <div class="hero-noise"></div>
+            </div>
+
+            <header class="hero-header">
+                <a class="brand" href="#top" aria-label="Aether home">
+                    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2.5 29.5 26H2.5L16 2.5Z" /><path d="M16 11.5 22.2 22H9.8L16 11.5Z" /></svg>
+                    <span>AETHER<span class="brand-period">.</span></span>
+                </a>
+
+                <nav class="desktop-nav" aria-label="Main navigation">
+                    <a href="#platform">Menu</a>
+                    <a href="#get-started">Contact</a>
+                </nav>
+
+                <div class="header-actions">
+                    <a class="login-link" href="/Home/Login">Log in</a>
+                </div>
+
+                <button class="menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobileNav">
+                    <span></span><span></span>
+                </button>
+            </header>
+
+            <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation" inert>
+                <a href="#platform">Menu</a>
+                <a href="#get-started">Contact</a>
+                <a href="/Home/Login">Log in</a>
+            </nav>
+
+            <div class="hero-copy" data-parallax="0.08">
+                <p class="hero-badge"><span class="status-dot"></span><span>INTELLIGENCE, IN A NEW LIGHT</span><span class="badge-index">NO. 01</span></p>
+                <h1 class="hero-title" id="heroTitle" aria-label="Build the future with AI">
+                    <span class="title-line"><span class="title-word">BUILD</span><span class="title-word title-word--the">THE</span></span>
+                    <span class="title-line"><span class="title-word title-word--gradient">FUTURE</span><span class="title-word title-word--with">WITH</span></span>
+                    <span class="title-line title-line--last"><span class="title-word">AI</span><span class="title-line-note">A CREATIVE<br />INTELLIGENCE</span></span>
+                </h1>
+                <p class="hero-description">Powerful AI tools for modern digital creators.<br class="desktop-break" /> Imagine further. Make it real.</p>
+                <div class="hero-actions">
+                    <a class="button button-primary magnetic-button" href="#get-started" aria-label="Get started with Aether">
+                        <span>Get started</span><span class="button-arrow" aria-hidden="true">↗</span>
+                    </a>
+                    <a class="button button-secondary magnetic-button" href="#platform" aria-label="Explore the Aether platform">
+                        <span class="play-icon" aria-hidden="true">▶</span><span>Explore</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="hero-stage" role="img" aria-label="Abstract animated AI neural core">
+                <div class="stage-orbit stage-orbit--outer"></div>
+                <div class="stage-orbit stage-orbit--middle"></div>
+                <div class="stage-orbit stage-orbit--inner"></div>
+                <div class="stage-core-wrap">
+                    <div class="stage-core" data-parallax="0.22">
+                        <div class="core-shine"></div>
+                        <svg class="core-network" viewBox="0 0 500 500" role="presentation" aria-hidden="true">
+                            <defs>
+                                <radialGradient id="coreFill" cx="35%" cy="28%" r="75%"><stop offset="0" stop-color="#f2ffff" stop-opacity=".95" /><stop offset=".2" stop-color="#93e9e7" stop-opacity=".72" /><stop offset=".58" stop-color="#5575e8" stop-opacity=".25" /><stop offset="1" stop-color="#11172b" stop-opacity=".04" /></radialGradient>
+                                <linearGradient id="coreLine" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e8ffff" stop-opacity=".9" /><stop offset=".48" stop-color="#7ce5e3" stop-opacity=".72" /><stop offset="1" stop-color="#918bff" stop-opacity=".42" /></linearGradient>
+                                <clipPath id="coreClip"><circle cx="250" cy="250" r="181" /></clipPath>
+                            </defs>
+                            <circle cx="250" cy="250" r="181" fill="url(#coreFill)" />
+                            <g clip-path="url(#coreClip)" fill="none" stroke="url(#coreLine)" stroke-width="1.25">
+                                <ellipse cx="250" cy="250" rx="170" ry="58" transform="rotate(-34 250 250)" />
+                                <ellipse cx="250" cy="250" rx="170" ry="58" transform="rotate(34 250 250)" />
+                                <ellipse cx="250" cy="250" rx="156" ry="84" transform="rotate(90 250 250)" />
+                                <path d="M70 234c52-58 114-83 180-75 66 8 126 42 181 102M70 276c55 60 115 94 181 102 66 8 128-17 180-75M105 129c58 42 108 82 145 121 37 39 87 79 145 121M107 371c57-43 105-83 143-121 38-38 88-78 143-121" />
+                            </g>
+                            <circle cx="250" cy="250" r="181" fill="none" stroke="#d8ffff" stroke-opacity=".36" />
+                            <circle cx="250" cy="250" r="5" fill="#f4ffff" />
+                        </svg>
+                        <span class="core-glint core-glint--one"></span>
+                        <span class="core-glint core-glint--two"></span>
                     </div>
                 </div>
-                <a class="transition hover:text-lime-300" href="/admin">Admin</a>
-                <button id="themeToggle" class="rounded-full border border-ink/15 px-3 py-2 text-xs transition hover:bg-ink hover:text-white" type="button" aria-label="Bật giao diện tối">☾</button>
-                <a href="#contact" class="rounded-full bg-lime-300 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-white">Start creating <span aria-hidden="true">↗</span></a>
-            </div>
-            <div class="flex items-center gap-2 md:hidden"><button id="mobileThemeToggle" class="rounded-full border border-ink/15 px-3 py-2 text-xs" type="button" aria-label="Bật giao diện tối">☾</button><button id="mobileMenuButton" class="rounded-full border border-ink/15 p-3" type="button" aria-label="Mở menu" aria-expanded="false">☰</button></div>
-        </nav>
-        <div id="mobileMenuBackdrop" class="mobile-backdrop fixed inset-0 z-40 bg-ink/40 md:hidden"></div>
-        <div id="mobileMenu" class="mobile-drawer fixed inset-y-0 left-0 z-50 w-[min(82vw,340px)] bg-ink p-7 text-white shadow-soft md:hidden">
-            <div class="mb-12 flex items-center justify-between"><span class="font-display text-xl font-bold">northstar<span class="text-mint">.</span></span><button id="mobileMenuClose" class="rounded-full border border-white/20 px-3 py-2" type="button" aria-label="Đóng menu">×</button></div>
-            <div class="grid gap-5 text-xl font-semibold">
-                <a href="#work">Work</a><a href="#approach">Approach</a>
-                <details class="group"><summary class="cursor-pointer list-none">Journal <span class="float-right text-mint">+</span></summary><div class="mt-4 grid gap-3 pl-4 text-base font-normal text-white/65"><a href="#journal">All notes</a><a href="#journal">Product thinking</a><a href="#journal">Systems & craft</a></div></details>
-                <a href="/admin">Admin</a><a class="text-mint" href="#contact">Start a project ↗</a>
-            </div>
-        </div>
-    </header>
 
-    <main id="top">
-        <section class="creative-hero relative overflow-hidden pb-16 pt-32 lg:pb-24 lg:pt-44">
-            <div class="relative mx-auto max-w-7xl px-6 lg:px-8">
-                <div class="reveal mx-auto max-w-4xl text-center">
-                    <p class="mb-6 text-xs font-bold uppercase tracking-[.28em] text-lime-300">The creative operating system</p>
-                    <h1 class="font-display text-5xl font-bold leading-[.92] tracking-[-.06em] text-white sm:text-7xl lg:text-8xl">Make the idea<br /><span class="hero-gradient-text">impossible to ignore.</span></h1>
-                    <p class="mx-auto mt-7 max-w-2xl text-base leading-7 text-white/60 sm:text-lg">Northstar turns rough ideas into sharp visual systems, expressive products and work people remember.</p>
-                    <div class="mt-9 flex flex-wrap justify-center gap-3"><a href="#work" class="rounded-full bg-lime-300 px-6 py-3.5 text-sm font-bold text-slate-950 transition hover:-translate-y-1 hover:bg-white">Start exploring <span aria-hidden="true">↗</span></a><a href="#approach" class="rounded-full border border-white/20 px-6 py-3.5 text-sm font-bold text-white transition hover:border-lime-300 hover:text-lime-300">See how it works</a></div>
+                <div class="orbit-point orbit-point--one" aria-hidden="true"><span></span></div>
+                <div class="orbit-point orbit-point--two" aria-hidden="true"><span></span></div>
+                <div class="orbit-point orbit-point--three" aria-hidden="true"><span></span></div>
+
+                <div class="float-card float-card--prompt" data-float="1" data-parallax="0.42" aria-hidden="true">
+                    <span class="card-kicker"><span class="card-spark">✳</span> PROMPT / 014</span>
+                    <span class="card-prompt">A world<br />without edges</span>
+                    <span class="card-progress"><i></i></span>
                 </div>
-                <div class="creative-canvas reveal mx-auto mt-16 max-w-6xl" style="transition-delay: .15s">
-                    <div class="canvas-toolbar"><span class="font-display font-bold text-white">northstar / playground</span><span class="hidden text-white/40 sm:block">Create · refine · share</span><span class="flex gap-1.5"><i></i><i></i><i></i></span></div>
-                    <div class="canvas-grid">
-                        <div class="canvas-copy"><span class="canvas-kicker">Concept 04 / 24</span><h2>Ideas, with room to move.</h2><p>Build a visual language that stays unmistakably yours.</p><button type="button">Open canvas <span>↗</span></button></div>
-                        <div class="canvas-art canvas-art-main"></div><div class="canvas-art canvas-art-side"></div><div class="canvas-art canvas-art-small"></div>
-                    </div>
+                <div class="float-card float-card--signal" data-float="2" data-parallax="-0.32" aria-hidden="true">
+                    <span class="signal-label">NEURAL SIGNAL</span>
+                    <span class="signal-value">98<span>%</span></span>
+                    <span class="signal-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
                 </div>
-                <div class="creative-tools reveal" style="transition-delay: .25s"><button type="button" class="is-active"><span>✦</span> Image</button><button type="button"><span>◌</span> Motion</button><button type="button"><span>⌘</span> Edit</button><button type="button"><span>↗</span> Upscale</button></div>
+                <div class="float-chip" data-float="3" data-parallax="0.55" aria-hidden="true"><span class="chip-pulse"></span> MODEL ACTIVE</div>
             </div>
+
+            <a class="scroll-indicator" href="#platform" aria-label="Scroll to explore the platform">
+                <span class="scroll-label">SCROLL TO EXPLORE</span>
+                <span class="scroll-track"><span></span></span>
+            </a>
+            <div class="hero-coordinates" aria-hidden="true"><span>CREATIVE SYSTEMS</span><span>37° 46' 30.0" N</span></div>
         </section>
 
-        <div class="overflow-hidden border-y border-ink/10 bg-ink py-5 text-white"><div class="marquee flex w-max items-center gap-10 whitespace-nowrap text-sm font-semibold tracking-wide"><span>Product strategy</span><b class="text-mint">✳</b><span>UX systems</span><b class="text-aqua">✳</b><span>Web applications</span><b class="text-mint">✳</b><span>Brand clarity</span><b class="text-aqua">✳</b><span>Product strategy</span><b class="text-mint">✳</b><span>UX systems</span><b class="text-aqua">✳</b><span>Web applications</span><b class="text-mint">✳</b><span>Brand clarity</span></div></div>
-
-        <section class="creative-feature-band px-6 py-24 lg:px-8 lg:py-32">
-            <div class="mx-auto max-w-7xl">
-                <div class="reveal flex flex-col justify-between gap-7 lg:flex-row lg:items-end"><div><p class="mb-4 text-xs font-bold uppercase tracking-[.28em] text-lime-300">One creative workspace</p><h2 class="max-w-3xl font-display text-4xl font-bold leading-[.95] tracking-[-.05em] text-white sm:text-6xl">From first spark<br />to final frame.</h2></div><p class="max-w-sm text-sm leading-7 text-white/50">A focused toolkit for teams who want more range, more control and fewer dead ends.</p></div>
-                <div class="feature-tabs reveal mt-12" role="tablist" aria-label="Creative tools"><button class="is-active" type="button" data-feature-tab="create" role="tab" aria-selected="true">Create</button><button type="button" data-feature-tab="motion" role="tab" aria-selected="false">Motion</button><button type="button" data-feature-tab="edit" role="tab" aria-selected="false">Edit</button></div>
-                <div class="feature-panel reveal mt-5" data-feature-panel="create"><div class="feature-panel-copy"><span class="canvas-kicker">01 / Create</span><h3>Make the visual<br />you had in mind.</h3><p>Explore directions quickly, then turn the one with a pulse into a system your team can actually use.</p><a href="#contact">Open the studio <span>↗</span></a></div><div class="feature-panel-image feature-image-create"></div></div>
-                <div class="feature-panel reveal mt-5" data-feature-panel="motion" hidden><div class="feature-panel-copy"><span class="canvas-kicker">02 / Motion</span><h3>Give still ideas<br />a little gravity.</h3><p>Shape movement, rhythm and story without losing the character of the original idea.</p><a href="#contact">Explore motion <span>↗</span></a></div><div class="feature-panel-image feature-image-motion"></div></div>
-                <div class="feature-panel reveal mt-5" data-feature-panel="edit" hidden><div class="feature-panel-copy"><span class="canvas-kicker">03 / Edit</span><h3>Keep the signal.<br />Lose the noise.</h3><p>Refine composition, detail and tone while protecting the parts that make the work yours.</p><a href="#contact">Refine a concept <span>↗</span></a></div><div class="feature-panel-image feature-image-edit"></div></div>
+        <section class="next-section" id="platform" aria-labelledby="platformTitle">
+            <div class="next-section-inner">
+                <p class="section-eyebrow"><span></span> A DIFFERENT KIND OF TOOLKIT</p>
+                <h2 id="platformTitle">Your ideas,<br /><span>without the ceiling.</span></h2>
+                <p id="studio">One intelligent workspace to imagine, refine, and bring your next big thing to life.</p>
+                <a id="get-started" class="next-link" href="mailto:hello@aether.ai">Meet your creative edge <span aria-hidden="true">↗</span></a>
             </div>
+            <div class="next-glow" aria-hidden="true"></div>
         </section>
-
-        <section id="work" class="mx-auto max-w-7xl px-6 py-24 lg:px-8 lg:py-32">
-            <div class="reveal flex flex-col justify-between gap-6 md:flex-row md:items-end"><div><p class="mb-4 text-xs font-bold uppercase tracking-[.24em] text-lime-300">Made in the studio</p><h2 class="max-w-2xl font-display text-4xl font-bold tracking-[-.045em] text-white sm:text-6xl">A bigger canvas<br />for better ideas.</h2></div><p class="max-w-xs text-sm leading-6 text-white/50">A living collection of visual systems, expressive interfaces and useful experiments.</p></div>
-            <div class="mt-14 grid gap-6 lg:grid-cols-12">
-                <article class="reveal group overflow-hidden rounded-[1.6rem] bg-[#dceee7] lg:col-span-7"><div class="relative min-h-[380px] p-8"><div class="relative z-10 flex items-center justify-between text-xs font-bold uppercase tracking-widest text-ink/60"><span>01 / Fintech</span><span>Orbit</span></div><div class="absolute bottom-0 left-1/2 w-[76%] -translate-x-1/2 translate-y-8 rounded-t-3xl border-8 border-ink/10 bg-white p-4 shadow-soft transition duration-500 group-hover:-translate-y-2"><div class="mb-4 flex justify-between text-xs font-bold"><span>Monthly runway</span><span class="text-emerald-600">Healthy</span></div><div class="font-display text-4xl font-bold">$248,920</div><div class="mt-5 h-20"><svg viewBox="0 0 500 90" class="h-full w-full" fill="none"><path d="M0 75C50 68 56 40 100 51s55-8 80-20 47 19 79-4 53 12 77-10 44-5 70-17 50-5 94-30" stroke="#10b981" stroke-width="6" stroke-linecap="round"/></svg></div></div></div><div class="flex items-center justify-between bg-ink p-6 text-white"><h3 class="font-display text-2xl font-bold">Money, made legible.</h3><span class="text-mint">↗</span></div></article>
-                <article class="reveal group overflow-hidden rounded-[1.6rem] bg-[#f0dfc8] lg:col-span-5" style="transition-delay: .12s"><div class="flex min-h-[380px] flex-col justify-between p-8"><div class="flex justify-between text-xs font-bold uppercase tracking-widest text-ink/60"><span>02 / Health</span><span>Pulse</span></div><div class="mx-auto w-full max-w-[260px] rounded-[2rem] border-8 border-ink bg-[#f9f6ee] p-3 shadow-soft transition duration-500 group-hover:rotate-3"><div class="rounded-[1.4rem] bg-aqua p-5"><span class="text-4xl">◌</span><p class="mt-12 text-xs font-bold">Your daily rhythm</p><strong class="font-display text-3xl">84 bpm</strong><div class="mt-5 h-1 rounded-full bg-ink/20"><div class="h-1 w-3/4 rounded-full bg-ink"></div></div></div></div><h3 class="font-display text-2xl font-bold">Small signals.<br />Better days.</h3></div></article>
-            </div>
-        </section>
-
-        <section id="approach" class="bg-ink px-6 py-24 text-white lg:px-8 lg:py-32"><div class="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[.8fr_1.2fr]"><div class="reveal"><p class="mb-4 text-xs font-bold uppercase tracking-[.24em] text-mint">Our approach</p><h2 class="font-display text-4xl font-bold leading-tight tracking-[-.045em] sm:text-6xl">Clear thinking.<br /><span class="text-aqua">Brave making.</span></h2></div><div class="grid gap-x-10 gap-y-12 sm:grid-cols-2"><div class="reveal border-t border-white/15 pt-5" style="transition-delay: .1s"><span class="font-display text-4xl text-mint">01</span><h3 class="mt-8 text-xl font-bold">Find the signal</h3><p class="mt-3 text-sm leading-7 text-white/55">We map the messy bits, listen to users and find the one useful thing that should feel effortless.</p></div><div class="reveal border-t border-white/15 pt-5" style="transition-delay: .2s"><span class="font-display text-4xl text-aqua">02</span><h3 class="mt-8 text-xl font-bold">Shape the system</h3><p class="mt-3 text-sm leading-7 text-white/55">Strategy, voice, interface and interaction come together as one coherent product language.</p></div><div class="reveal border-t border-white/15 pt-5" style="transition-delay: .3s"><span class="font-display text-4xl text-mint">03</span><h3 class="mt-8 text-xl font-bold">Make it real</h3><p class="mt-3 text-sm leading-7 text-white/55">We prototype in public, ship in slices and leave your team with momentum, not mystery.</p></div><div class="reveal border-t border-white/15 pt-5" style="transition-delay: .4s"><span class="font-display text-4xl text-aqua">04</span><h3 class="mt-8 text-xl font-bold">Measure what matters</h3><p class="mt-3 text-sm leading-7 text-white/55">Good design earns its keep. We define the signal and keep learning after launch.</p></div></div></div></section>
-
-        <section id="journal" class="mx-auto max-w-7xl px-6 py-24 lg:px-8 lg:py-32"><div class="reveal flex flex-col justify-between gap-6 md:flex-row md:items-end"><div><p class="mb-4 text-xs font-bold uppercase tracking-[.24em] text-emerald-700">From the journal</p><h2 class="font-display text-4xl font-bold tracking-[-.045em] sm:text-6xl">Notes for making.</h2></div><a href="#contact" class="line-link relative w-fit py-3 text-sm font-bold">Read all notes <span class="absolute bottom-1 left-0 h-px w-8 bg-ink"></span></a></div><div class="mt-14 grid gap-6 md:grid-cols-3"><article data-blog-category="Product" data-blog-title="The quiet power of a good default." data-blog-copy="The best product decisions often disappear into the experience. We look at how thoughtful defaults reduce friction and help users reach value sooner." class="blog-card reveal group" style="transition-delay: .1s"><div class="aspect-[4/3] overflow-hidden rounded-2xl bg-[#cfe8e0]"><img class="h-full w-full object-cover transition duration-700 group-hover:scale-105" src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=900&q=80" alt="Đội ngũ làm việc quanh bàn" /></div><p class="mt-5 text-xs font-bold uppercase tracking-widest text-emerald-700">Product / 6 min</p><h3 class="mt-2 font-display text-xl font-bold leading-snug">The quiet power of a good default.</h3></article><article data-blog-category="Systems" data-blog-title="Design systems are team systems." data-blog-copy="A design system is less about a box of components and more about creating shared language, shared confidence and a faster way to make decisions." class="blog-card reveal group" style="transition-delay: .2s"><div class="aspect-[4/3] overflow-hidden rounded-2xl bg-[#f0dfc8]"><img class="h-full w-full object-cover transition duration-700 group-hover:scale-105" src="https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=900&q=80" alt="Bảng ý tưởng sản phẩm" /></div><p class="mt-5 text-xs font-bold uppercase tracking-widest text-emerald-700">Systems / 8 min</p><h3 class="mt-2 font-display text-xl font-bold leading-snug">Design systems are team systems.</h3></article><article data-blog-category="Culture" data-blog-title="A slower inbox makes sharper work." data-blog-copy="The way a team communicates shapes the quality of its thinking. A little more space can create a lot more clarity." class="blog-card reveal group" style="transition-delay: .3s"><div class="aspect-[4/3] overflow-hidden rounded-2xl bg-aqua"><img class="h-full w-full object-cover mix-blend-multiply transition duration-700 group-hover:scale-105" src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=900&q=80" alt="Bàn làm việc với sổ tay" /></div><p class="mt-5 text-xs font-bold uppercase tracking-widest text-emerald-700">Culture / 4 min</p><h3 class="mt-2 font-display text-xl font-bold leading-snug">A slower inbox makes sharper work.</h3></article></div></section>
-
-        <div id="blogModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-ink/60 p-5 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="blogModalTitle"><div class="relative w-full max-w-xl rounded-[2rem] bg-white p-7 shadow-soft sm:p-10"><button id="blogModalClose" class="absolute right-5 top-5 rounded-full border border-ink/10 px-3 py-1 text-xl" type="button" aria-label="Đóng bài viết">×</button><p id="blogModalCategory" class="text-xs font-bold uppercase tracking-[.2em] text-emerald-700"></p><h2 id="blogModalTitle" class="mt-4 max-w-md font-display text-3xl font-bold leading-tight"></h2><p id="blogModalCopy" class="mt-5 text-base leading-8 text-ink/65"></p><div class="mt-8 border-t border-ink/10 pt-5 text-sm font-semibold text-ink/55">Northstar Journal · 2026</div></div></div>
-
-        <section id="contact" class="relative overflow-hidden bg-mint px-6 py-24 lg:px-8 lg:py-32"><div class="relative mx-auto max-w-7xl"><p class="mb-5 text-xs font-bold uppercase tracking-[.24em] text-ink/65">Have a good problem?</p><h2 class="max-w-4xl font-display text-5xl font-bold leading-[.95] tracking-[-.06em] sm:text-8xl">Let’s make it<br />worth using.</h2><div class="mt-12 flex flex-wrap items-center gap-6"><a href="mailto:hello@northstar.studio" class="rounded-full bg-ink px-7 py-4 text-sm font-bold text-white transition hover:-translate-y-1 hover:bg-emerald-700">hello@northstar.studio ↗</a><span class="text-sm font-semibold text-ink/65">Usually replies within 2 working days.</span></div></div><div class="absolute -right-10 -top-20 h-72 w-72 rounded-full border-[40px] border-ink/10"></div></section>
     </main>
 
-    <footer class="bg-ink px-6 py-8 text-white lg:px-8"><div class="mx-auto flex max-w-7xl flex-col justify-between gap-5 text-sm text-white/55 sm:flex-row"><span class="font-display font-bold text-white">northstar<span class="text-mint">.</span></span><span>© 2026 Northstar Studio. Made for useful things.</span><div class="flex gap-5"><a href="#top" class="transition hover:text-mint">Back to top ↑</a><a href="mailto:hello@northstar.studio" class="transition hover:text-mint">Email us</a></div></div></footer>
-    <script src="~/frontend/js/main.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+    <script src="~/js/hero.js" asp-append-version="true" defer></script>
 </body>
 </html>
-

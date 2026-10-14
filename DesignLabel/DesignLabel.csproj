@@ -5,13 +5,31 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{CAFBD4E8-0785-4447-A64F-5EF3C1D38E02}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <RootNamespace>WindowsFormsApp5</RootNamespace>
     <AssemblyName>WindowsFormsApp5</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>\\192.168.207.6\jtecdata\QUAN LY SAN XUAT\5.In Chốt Lô-Check Sheet-EDP\phần mềm in chốt lô\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Unc</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
+    <WebPage>publish.htm</WebPage>
+    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -35,6 +53,18 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>9C15F992FF767A7FCDA56318B8AC19501C08EBD2</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>DesignLabel_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -48,6 +78,30 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="ClosedXML">
+      <HintPath>$(NuGetPackageRoot)closedxml\0.105.1\lib\netstandard2.0\ClosedXML.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml">
+      <HintPath>$(NuGetPackageRoot)documentformat.openxml\*\lib\netstandard2.0\DocumentFormat.OpenXml.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(NuGetPackageRoot)newtonsoft.json\13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Oracle.ManagedDataAccess">
+      <HintPath>$(NuGetPackageRoot)oracle.manageddataaccess\23.26.301\lib\net472\Oracle.ManagedDataAccess.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="System.Diagnostics.DiagnosticSource">
+      <HintPath>$(NuGetPackageRoot)system.diagnostics.diagnosticsource\8.0.1\lib\net462\System.Diagnostics.DiagnosticSource.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="zxing">
+      <HintPath>$(NuGetPackageRoot)zxing.net\0.16.8\lib\netstandard2.0\zxing.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Conditional.cs">
@@ -55,6 +109,18 @@
     </Compile>
     <Compile Include="Conditional.Designer.cs">
       <DependentUpon>Conditional.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DesignForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DesignForm.Designer.cs">
+      <DependentUpon>DesignForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ExportEDP.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ExportEDP.Designer.cs">
+      <DependentUpon>ExportEDP.cs</DependentUpon>
     </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
@@ -68,16 +134,38 @@
     <Compile Include="ImportExcel.Designer.cs">
       <DependentUpon>ImportExcel.cs</DependentUpon>
     </Compile>
+    <Compile Include="OracleHelper.cs" />
+    <Compile Include="PrintEDP.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PrintEDP.Designer.cs">
+      <DependentUpon>PrintEDP.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PrintLotNo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PrintLotNo.Designer.cs">
+      <DependentUpon>PrintLotNo.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Conditional.resx">
       <DependentUpon>Conditional.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ExportEDP.resx">
+      <DependentUpon>ExportEDP.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ImportExcel.resx">
       <DependentUpon>ImportExcel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PrintEDP.resx">
+      <DependentUpon>PrintEDP.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PrintLotNo.resx">
+      <DependentUpon>PrintLotNo.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -108,6 +196,12 @@
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.3</Version>
     </PackageReference>
+    <PackageReference Include="Oracle.ManagedDataAccess">
+      <Version>23.26.301</Version>
+    </PackageReference>
+    <PackageReference Include="System.Diagnostics.DiagnosticSource">
+      <Version>8.0.1</Version>
+    </PackageReference>
     <PackageReference Include="PDFsharp">
       <Version>6.2.0</Version>
     </PackageReference>
@@ -117,6 +211,18 @@
     <PackageReference Include="ZXing.Net">
       <Version>0.16.8</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

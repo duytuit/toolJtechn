@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace JtechnApi.Controllers
 {
     [ApiController]
-    public class BaseApiController : ControllerBase
+    public class BaseApiController : Controller
     {
         protected ObjectResult ApiResponseResult<T>(bool status, string message, T data = default)
         {

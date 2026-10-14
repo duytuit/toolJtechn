@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace JtechnApi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/admin")]
     public class AdminController : ControllerBase
     {
 

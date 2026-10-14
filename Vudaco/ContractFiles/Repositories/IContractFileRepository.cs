@@ -7,6 +7,7 @@ using Vudaco.ContractFiles.Dtos;
 using Vudaco.ContractFiles.Models;
 using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
+using FileInfo = Vudaco.ContractFiles.Models.FileInfo;
 
 namespace Vudaco.ContractFiles.Repositories
 {

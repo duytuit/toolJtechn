@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Vudaco.ContractFiles.Models;
 using Vudaco.Partners.Models;
 using Vudaco.Receipts.Models;
+using FileInfo = Vudaco.ContractFiles.Models.FileInfo;
 
 namespace Vudaco.Debits.Models
 {

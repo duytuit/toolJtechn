@@ -1,0 +1,201 @@
+@{
+    ViewData["Title"] = "Quản lý nhân viên";
+    Layout = "_Layout";
+}
+
+<div class="page-header">
+    <div>
+        <p class="section-kicker">Nhân sự</p>
+        <h2 class="mb-0">Quản lý nhân viên</h2>
+    </div>
+    <button class="btn btn-primary" type="button" id="newEmployeeButton">+ Thêm nhân viên</button>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-8">
+        <div class="panel-card">
+            <div class="panel-head flex-wrap gap-3">
+                <div>
+                    <h5 class="mb-1">Danh sách nhân viên</h5>
+                    <small id="employeeCount" class="text-muted">Đang tải dữ liệu...</small>
+                </div>
+                <input id="employeeSearch" class="form-control table-filter" type="search" placeholder="Tìm mã, tên, email..." />
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Mã</th>
+                            <th>Nhân viên</th>
+                            <th>Bộ phận</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeeTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="panel-card" id="employeeFormPanel">
+            <div class="panel-head">
+                <h5 id="formTitle">Thêm nhân viên</h5>
+                <button id="cancelEditButton" class="btn btn-sm btn-light d-none" type="button">Hủy</button>
+            </div>
+            <form id="employeeForm">
+                <input id="employeeId" type="hidden" />
+                <div class="mb-3">
+                    <label class="form-label" for="employeeCode">Mã nhân viên</label>
+                    <input id="employeeCode" class="form-control" required placeholder="NV-004" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="employeeName">Họ và tên</label>
+                    <input id="employeeName" class="form-control" required placeholder="Nguyễn Văn A" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="employeeEmail">Email</label>
+                    <input id="employeeEmail" class="form-control" type="email" required placeholder="a@jtechn.vn" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="employeeDepartment">Bộ phận</label>
+                    <select id="employeeDepartment" class="form-select">
+                        <option>Sản xuất</option>
+                        <option>Lắp ráp</option>
+                        <option>Kho vật tư</option>
+                        <option>Kiểm tra chất lượng</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="employeeStatus">Trạng thái</label>
+                    <select id="employeeStatus" class="form-select">
+                        <option>Đang làm việc</option>
+                        <option>Tạm nghỉ</option>
+                        <option>Nghỉ việc</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary w-100" type="submit" id="saveEmployeeButton">Lưu nhân viên</button>
+                <div id="employeeMessage" class="small mt-3" role="status"></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const apiUrl = '/api/admin/employees';
+            const table = document.querySelector('#employeeTable');
+            const search = document.querySelector('#employeeSearch');
+            const form = document.querySelector('#employeeForm');
+            const message = document.querySelector('#employeeMessage');
+            const count = document.querySelector('#employeeCount');
+            let employees = [];
+
+            const showMessage = (text, isError) => {
+                message.className = `small mt-3 ${isError ? 'text-danger' : 'text-success'}`;
+                message.textContent = text;
+            };
+
+            const render = () => {
+                const keyword = search.value.trim().toLowerCase();
+                const visible = employees.filter(employee =>
+                    `${employee.code} ${employee.name} ${employee.email} ${employee.department}`.toLowerCase().includes(keyword));
+
+                count.textContent = `${visible.length} nhân viên`;
+                table.innerHTML = visible.length
+                    ? visible.map(employee => `
+                        <tr>
+                            <td><strong>${employee.code}</strong></td>
+                            <td><div>${employee.name}</div><small class="text-muted">${employee.email}</small></td>
+                            <td>${employee.department}</td>
+                            <td><span class="status-pill">${employee.status}</span></td>
+                            <td class="text-end text-nowrap">
+                                <button class="btn btn-sm btn-outline-primary js-edit" type="button" data-id="${employee.id}">Sửa</button>
+                                <button class="btn btn-sm btn-outline-danger js-delete" type="button" data-id="${employee.id}">Xóa</button>
+                            </td>
+                        </tr>`).join('')
+                    : '<tr><td colspan="5" class="text-center text-muted py-4">Không có nhân viên phù hợp</td></tr>';
+            };
+
+            const loadEmployees = async () => {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Không tải được danh sách nhân viên.');
+                employees = await response.json();
+                render();
+            };
+
+            const resetForm = () => {
+                form.reset();
+                document.querySelector('#employeeId').value = '';
+                document.querySelector('#formTitle').textContent = 'Thêm nhân viên';
+                document.querySelector('#saveEmployeeButton').textContent = 'Lưu nhân viên';
+                document.querySelector('#cancelEditButton').classList.add('d-none');
+                message.textContent = '';
+            };
+
+            const editEmployee = (employee) => {
+                document.querySelector('#employeeId').value = employee.id;
+                document.querySelector('#employeeCode').value = employee.code;
+                document.querySelector('#employeeName').value = employee.name;
+                document.querySelector('#employeeEmail').value = employee.email;
+                document.querySelector('#employeeDepartment').value = employee.department;
+                document.querySelector('#employeeStatus').value = employee.status;
+                document.querySelector('#formTitle').textContent = 'Sửa nhân viên';
+                document.querySelector('#saveEmployeeButton').textContent = 'Cập nhật nhân viên';
+                document.querySelector('#cancelEditButton').classList.remove('d-none');
+                document.querySelector('#employeeFormPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+
+            form.addEventListener('submit', async function (event) {
+                event.preventDefault();
+                const id = document.querySelector('#employeeId').value;
+                const payload = {
+                    code: document.querySelector('#employeeCode').value,
+                    name: document.querySelector('#employeeName').value,
+                    email: document.querySelector('#employeeEmail').value,
+                    department: document.querySelector('#employeeDepartment').value,
+                    status: document.querySelector('#employeeStatus').value
+                };
+
+                try {
+                    const response = await fetch(id ? `${apiUrl}/${id}` : apiUrl, {
+                        method: id ? 'PUT' : 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = response.status === 204 ? null : await response.json();
+                    if (!response.ok) throw new Error(result?.message || 'Không thể lưu nhân viên.');
+                    await loadEmployees();
+                    resetForm();
+                    showMessage(id ? 'Đã cập nhật nhân viên.' : 'Đã thêm nhân viên.', false);
+                } catch (error) {
+                    showMessage(error.message, true);
+                }
+            });
+
+            table.addEventListener('click', async function (event) {
+                const editButton = event.target.closest('.js-edit');
+                const deleteButton = event.target.closest('.js-delete');
+                if (editButton) {
+                    editEmployee(employees.find(employee => employee.id === Number(editButton.dataset.id)));
+                }
+                if (deleteButton && confirm('Bạn có chắc muốn xóa nhân viên này?')) {
+                    const response = await fetch(`${apiUrl}/${deleteButton.dataset.id}`, { method: 'DELETE' });
+                    if (response.ok) {
+                        await loadEmployees();
+                        showMessage('Đã xóa nhân viên.', false);
+                    } else {
+                        showMessage('Không thể xóa nhân viên.', true);
+                    }
+                }
+            });
+
+            search.addEventListener('input', render);
+            document.querySelector('#newEmployeeButton').addEventListener('click', resetForm);
+            document.querySelector('#cancelEditButton').addEventListener('click', resetForm);
+            loadEmployees().catch(error => showMessage(error.message, true));
+        });
+    </script>
+}

@@ -15,6 +15,7 @@ using Vudaco.Shares;
 using Vudaco.Shares.BaseRepository;
 using Vudaco.Shares.MysqlHelper;
 using Vudaco.Shares.SqlServerHelper;
+using FileInfo = Vudaco.ContractFiles.Models.FileInfo;
 
 namespace Vudaco.ContractFiles.Repositories
 {

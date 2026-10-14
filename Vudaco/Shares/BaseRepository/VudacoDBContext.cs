@@ -20,6 +20,7 @@ using Vudaco.SendMails.Models;
 using Vudaco.Storages.Models;
 using Vudaco.Vehicles.Models;
 using Vudaco.Works.Models;
+using FileInfo = Vudaco.ContractFiles.Models.FileInfo;
 
 namespace Vudaco.Shares.BaseRepository
 {

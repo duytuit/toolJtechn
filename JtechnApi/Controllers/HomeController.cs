@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using Oracle.ManagedDataAccess.Client;
 using System.Data;
@@ -19,6 +20,7 @@ using System.IO;
 using System;
 using JtechnApi.UploadKTNQ.Dtos;
 using JtechnApi.UploadKTNQ.Models;
+using JtechnApi.Shares.Connects;
 
 namespace JtechnApi.Controllers
 {
@@ -28,17 +30,21 @@ namespace JtechnApi.Controllers
     {
         private readonly OracleConnection _conn_oracle;
         private readonly ILogger<HomeController> _logger;
+        private readonly AdoJtecDB_Khoa _db;
         private readonly DBContext _context;
         private readonly RedisService _redisService;
         private readonly IDepartmentRepository _dept;
         private readonly IEmployeeRepository _emp;
         private readonly IEmployeeDepartmentRepository _emp_dept;
 
-        public HomeController(ILogger<HomeController> logger, OracleConnection conn_oracle, RedisService redisService, DBContext context, IDepartmentRepository dept, IEmployeeRepository emp, IEmployeeDepartmentRepository emp_dept)
+        [ActivatorUtilitiesConstructor]
+        public HomeController(ILogger<HomeController> logger,AdoJtecDB_Khoa db, OracleConnection conn_oracle, RedisService redisService, DBContext context, IDepartmentRepository dept, IEmployeeRepository emp, IEmployeeDepartmentRepository emp_dept)
         {
             _logger = logger;
             _conn_oracle = conn_oracle;
             _redisService = redisService;
+            _db = db;
+            _context = context;
             _dept = dept;
             _emp = emp;
             _emp_dept = emp_dept;
@@ -48,12 +54,69 @@ namespace JtechnApi.Controllers
         /// List users
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
-        public string Get([FromQuery] int page = 1, [FromQuery] int pageSize = 50)
+        [HttpGet("/")]
+        public IActionResult Index()
         {
-            return "Chào mừng bạn đến với chúng tôi....";
-            //var value = _redisService.GetAsync("jtec_hn_database_update_AsyncKTNQ");
-            //return value.Result ?? "No value found in Redis";
+            ViewData["Message"] = "Chào mừng đến Web API + View1";
+            return View();
+        }
+
+        [HttpGet("login")]
+        public IActionResult Login()
+        {
+            ViewData["Title"] = "Đăng nhập";
+            return View();
+        }
+
+        [HttpPost("login")]
+        public IActionResult Login([FromForm] string username, [FromForm] string password)
+        {
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            {
+                TempData["LoginError"] = "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.";
+                return RedirectToAction(nameof(Login));
+            }
+
+            return Redirect("/admin");
+        }
+
+        [HttpGet("logout")]
+        public IActionResult Logout()
+        {
+            return Redirect("/login");
+        }
+
+        [HttpGet("admin")]
+        [HttpGet("admin/dashboard")]
+        public IActionResult AdminDashboard()
+        {
+            ViewData["Title"] = "Trang quản trị";
+            return View();
+        }
+
+        [HttpGet("api/admin/dashboard/data")]
+        [HttpGet("admin/dashboard/data")]
+        [HttpGet("dashboard/data")]
+        public IActionResult DashboardData()
+        {
+            return Ok(new
+            {
+                stats = new[]
+                {
+                    new { label = "Nhân sự", value = "1,284", trend = "+8.2% so với tháng trước", tone = "success" },
+                    new { label = "Sản lượng", value = "84.6K", trend = "+5.4% so với tuần trước", tone = "success" },
+                    new { label = "Đơn hàng", value = "328", trend = "12 cần xử lý", tone = "warning" },
+                    new { label = "Báo cáo", value = "96", trend = "4 sự cố cần chú ý", tone = "danger" }
+                },
+                production = new[] { 55, 72, 68, 86, 92, 80, 98 },
+                orders = new[]
+                {
+                    new { code = "J-2048", department = "Sản xuất", status = "Hoàn tất", date = "24/09/2026" },
+                    new { code = "J-2047", department = "Lắp ráp", status = "Đang xử lý", date = "24/09/2026" },
+                    new { code = "J-2046", department = "Kho vật tư", status = "Chờ duyệt", date = "23/09/2026" },
+                    new { code = "J-2045", department = "Kiểm tra chất lượng", status = "Hoàn tất", date = "23/09/2026" }
+                }
+            });
         }
         //public IActionResult Index()
         //{
@@ -95,9 +158,24 @@ namespace JtechnApi.Controllers
             var emp = await _emp.GetAll();
             return ApiResponseResult<object>(true, "Lấy dữ liệu ok", new { config = Helper.ConfigRequiredByType(type), emp = emp });
         }
+        [HttpGet("jtechn/test")]
+        public IActionResult TestData()
+        {
+              string sql = $@"SELECT * FROM khsx WHERE masp IN ('{string.Join("','", new[] { "4160665241-01" })}')";
+              DataTable result = _db.LoadTable(sql);
+              var rows = result.AsEnumerable()
+                  .Select(row => result.Columns.Cast<DataColumn>()
+                      .ToDictionary(
+                          column => column.ColumnName,
+                          column => row.IsNull(column) ? null : row[column]))
+                  .ToList();
+
+              return Ok(rows);
+
+        }
         // POST api/upload/single
         [HttpPost("upload/single")]
-        public async Task<IActionResult> UploadSingle(IFormFile file, [FromForm] string? folder)
+        public async Task<IActionResult> UploadSingle(IFormFile file, [FromForm] string folder)
         {
              var result = await Helper.ProcessFileAsync(file, folder);
             if (result.Success)
@@ -108,7 +186,7 @@ namespace JtechnApi.Controllers
 
         // POST api/upload/multiple
         [HttpPost("upload/multiple")]
-        public async Task<IActionResult> UploadMultiple([FromForm] IFormFile[] files, [FromForm] string? folder)
+        public async Task<IActionResult> UploadMultiple([FromForm] IFormFile[] files, [FromForm] string folder)
         {
            if (files == null || files.Length == 0)
             return BadRequest(new { success = false, message = "Không có file nào." });

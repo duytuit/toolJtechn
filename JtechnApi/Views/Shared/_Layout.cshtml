@@ -1,0 +1,220 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Jtechn</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/admin-theme.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <div class="page-wrap">
+        <aside class="sidebar">
+            <div class="brand">
+                <span class="brand-mark">J</span>
+                <div>
+                    <strong>Jtechn</strong><br />
+                    <small class="text-white-50">Admin Portal</small>
+                </div>
+            </div>
+
+            <nav>
+                <a class="active" href="/admin">
+                    <span aria-hidden="true">▣</span><span class="nav-label">Dashboard</span>
+                </a>
+                <a asp-controller="Home" asp-action="Index">
+                    <span aria-hidden="true">◫</span><span class="nav-label">Trang chủ</span>
+                </a>
+                <div class="nav-item">
+                    <button class="nav-parent" type="button" aria-expanded="false">
+                        <span aria-hidden="true">◍</span><span class="nav-label">Nhân sự</span><span class="nav-chevron" aria-hidden="true">›</span>
+                    </button>
+                    <div class="sidebar-menu" role="menu">
+                        <a href="/admin/employees" role="menuitem">Danh sách nhân viên</a>
+                        <a href="#" role="menuitem">Phân quyền</a>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <button class="nav-parent" type="button" aria-expanded="false">
+                        <span aria-hidden="true">◌</span><span class="nav-label">Sản xuất</span><span class="nav-chevron" aria-hidden="true">›</span>
+                    </button>
+                    <div class="sidebar-menu" role="menu">
+                        <a href="#" role="menuitem">Kế hoạch sản xuất</a>
+                        <a href="#" role="menuitem">Tiến độ thực hiện</a>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <button class="nav-parent" type="button" aria-expanded="false">
+                        <span aria-hidden="true">◎</span><span class="nav-label">Báo cáo</span><span class="nav-chevron" aria-hidden="true">›</span>
+                    </button>
+                    <div class="sidebar-menu" role="menu">
+                        <a href="#" role="menuitem">Báo cáo ngày</a>
+                        <a href="#" role="menuitem">Báo cáo sự cố</a>
+                    </div>
+                </div>
+                <a asp-controller="Home" asp-action="Login">
+                    <span aria-hidden="true">⇄</span><span class="nav-label">Đăng nhập</span>
+                </a>
+            </nav>
+        </aside>
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+
+        <main class="content-area">
+            <nav class="navbar-custom navbar-expand-lg rounded-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center w-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <button class="sidebar-toggle" type="button" aria-label="Thu gọn thanh bên" aria-expanded="true" title="Thu gọn thanh bên">
+                            <span aria-hidden="true">☰</span>
+                        </button>
+                        <strong>@ViewData["Title"]</strong>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="appearance-controls" role="group" aria-label="Tùy chỉnh giao diện">
+                            <button id="fontDecrease" class="appearance-button" type="button" title="Giảm cỡ chữ" aria-label="Giảm cỡ chữ">A−</button>
+                            <button id="fontIncrease" class="appearance-button" type="button" title="Tăng cỡ chữ" aria-label="Tăng cỡ chữ">A+</button>
+                            <button id="themeToggle" class="appearance-button" type="button" title="Bật giao diện tối" aria-label="Bật giao diện tối">☾</button>
+                        </div>
+                        <span class="text-muted">Xin chào, Admin</span>
+                        <a href="/logout" class="btn btn-outline-danger rounded-pill">Đăng xuất</a>
+                    </div>
+                </div>
+            </nav>
+
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/jquery-4.0.0.min.js"></script>
+    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const pageWrap = document.querySelector('.page-wrap');
+            const toggle = document.querySelector('.sidebar-toggle');
+            const backdrop = document.querySelector('.sidebar-backdrop');
+            const mobileQuery = window.matchMedia('(max-width: 991px)');
+            const themeToggle = document.querySelector('#themeToggle');
+            const fontDecrease = document.querySelector('#fontDecrease');
+            const fontIncrease = document.querySelector('#fontIncrease');
+
+            if (!pageWrap || !toggle) return;
+
+            const fontSizes = ['normal', 'large', 'xlarge'];
+            const setFontSize = (size) => {
+                document.body.classList.remove('font-size-large', 'font-size-xlarge');
+                if (size !== 'normal') document.body.classList.add(`font-size-${size}`);
+                localStorage.setItem('jtechn-font-size', size);
+            };
+
+            const setTheme = (dark) => {
+                document.body.classList.toggle('theme-dark', dark);
+                themeToggle?.setAttribute('aria-pressed', String(dark));
+                themeToggle?.setAttribute('title', dark ? 'Tắt giao diện tối' : 'Bật giao diện tối');
+                themeToggle?.setAttribute('aria-label', dark ? 'Tắt giao diện tối' : 'Bật giao diện tối');
+                if (themeToggle) themeToggle.textContent = dark ? '☀' : '☾';
+                localStorage.setItem('jtechn-theme', dark ? 'dark' : 'light');
+            };
+
+            setFontSize(localStorage.getItem('jtechn-font-size') || 'normal');
+            setTheme(localStorage.getItem('jtechn-theme') === 'dark');
+
+            const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
+            pageWrap.querySelectorAll('.sidebar nav .active').forEach(function (item) {
+                item.classList.remove('active');
+            });
+            pageWrap.querySelectorAll('.sidebar nav a[href]').forEach(function (link) {
+                const linkPath = new URL(link.href, window.location.origin).pathname.replace(/\/$/, '') || '/';
+                if (linkPath !== currentPath || link.getAttribute('href') === '#') return;
+
+                link.classList.add('active');
+                const parentItem = link.closest('.nav-item');
+                if (parentItem) {
+                    parentItem.classList.add('menu-popover-open');
+                    parentItem.querySelector('.nav-parent')?.classList.add('active');
+                    parentItem.querySelector('.nav-parent')?.setAttribute('aria-expanded', 'true');
+                }
+            });
+
+            fontDecrease?.addEventListener('click', function () {
+                const current = fontSizes.indexOf(localStorage.getItem('jtechn-font-size') || 'normal');
+                setFontSize(fontSizes[Math.max(0, current - 1)]);
+            });
+
+            fontIncrease?.addEventListener('click', function () {
+                const current = fontSizes.indexOf(localStorage.getItem('jtechn-font-size') || 'normal');
+                setFontSize(fontSizes[Math.min(fontSizes.length - 1, current + 1)]);
+            });
+
+            themeToggle?.addEventListener('click', function () {
+                setTheme(!document.body.classList.contains('theme-dark'));
+            });
+
+            const setSidebarState = (collapsed) => {
+                pageWrap.classList.toggle('sidebar-collapsed', collapsed);
+                toggle.setAttribute('aria-expanded', String(!collapsed));
+                toggle.setAttribute('aria-label', collapsed ? 'Mở thanh bên' : 'Thu gọn thanh bên');
+                toggle.title = collapsed ? 'Mở thanh bên' : 'Thu gọn thanh bên';
+            };
+
+            setSidebarState(localStorage.getItem('jtechn-sidebar-collapsed') === 'true');
+
+            toggle.addEventListener('click', function () {
+                if (mobileQuery.matches) {
+                    pageWrap.classList.toggle('sidebar-mobile-open');
+                    return;
+                }
+
+                const collapsed = !pageWrap.classList.contains('sidebar-collapsed');
+                setSidebarState(collapsed);
+                localStorage.setItem('jtechn-sidebar-collapsed', String(collapsed));
+            });
+
+            backdrop?.addEventListener('click', function () {
+                pageWrap.classList.remove('sidebar-mobile-open');
+            });
+
+            pageWrap.querySelectorAll('.nav-parent').forEach(function (parent) {
+                parent.addEventListener('click', function () {
+                    const item = parent.closest('.nav-item');
+                    const isOpen = item.classList.contains('menu-popover-open');
+
+                    pageWrap.querySelectorAll('.nav-item').forEach(function (otherItem) {
+                        otherItem.classList.remove('menu-popover-open');
+                        otherItem.querySelector('.nav-parent')?.setAttribute('aria-expanded', 'false');
+                    });
+
+                    if (!isOpen) {
+                        item.classList.add('menu-popover-open');
+                        parent.setAttribute('aria-expanded', 'true');
+                    }
+                });
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!pageWrap.classList.contains('sidebar-collapsed')) return;
+                if (event.target.closest('.nav-item.menu-popover-open')) return;
+
+                pageWrap.querySelectorAll('.nav-item.menu-popover-open').forEach(function (item) {
+                    item.classList.remove('menu-popover-open');
+                    item.querySelector('.nav-parent')?.setAttribute('aria-expanded', 'false');
+                });
+            });
+
+            pageWrap.querySelectorAll('.sidebar-menu a').forEach(function (link) {
+                link.addEventListener('click', function (event) {
+                    if (link.getAttribute('href') === '#') event.preventDefault();
+                    pageWrap.classList.remove('sidebar-mobile-open');
+                });
+            });
+        });
+    </script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

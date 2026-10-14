@@ -249,33 +249,47 @@ namespace Vudaco.Employees.Controllers
                 employee.UpdatedAt = now;
                 employee.UpdatedBy = userId;
 
-                if (dto.departmentIds != null && dto.departmentIds.Length > 0)
+                if (dto.departmentIds != null)
                 {
-                    var check_departments = await _context.EmployeeDepartments
+                    var requestedDepartmentIds = dto.departmentIds.Distinct().ToHashSet();
+                    var employeeDepartments = await _context.EmployeeDepartments
+                        .IgnoreQueryFilters()
                         .Where(ed => ed.EmployeeId == employee.Id)
-                        .Where(ed => dto.departmentIds.Contains(ed.DepartmentId))
                         .ToListAsync();
-                    if (check_departments.Count != dto.departmentIds.Length)
+
+                    foreach (var department in employeeDepartments.Where(ed => ed.DeletedAt == null))
                     {
-                        // Xóa các phòng ban hiện tại của nhân viên
-                        var existingDepartments = await _context.EmployeeDepartments.Where(ed => ed.EmployeeId == employee.Id).ToListAsync();
-                        foreach (var dept in existingDepartments)
+                        if (!requestedDepartmentIds.Contains(department.DepartmentId))
                         {
-                            dept.DeletedAt = now;
-                            dept.DeletedBy = userId;
-                            _context.EmployeeDepartments.Update(dept);    
+                            department.DeletedAt = now;
+                            department.DeletedBy = userId;
+                        }
+                    }
+
+                    foreach (var departmentId in requestedDepartmentIds)
+                    {
+                        var department = employeeDepartments.FirstOrDefault(ed =>
+                            ed.DepartmentId == departmentId && ed.DeletedAt == null);
+                        if (department != null)
+                        {
+                            continue;
                         }
 
-                        // Thêm các phòng ban mới
-                        foreach (var deptId in dto.departmentIds)
+                        department = employeeDepartments.FirstOrDefault(ed =>
+                            ed.DepartmentId == departmentId && ed.DeletedAt != null);
+                        if (department != null)
                         {
-                            var employeeDepartment = new EmployeeDepartment
+                            department.DeletedAt = null;
+                            department.DeletedBy = null;
+                        }
+                        else
+                        {
+                            _context.EmployeeDepartments.Add(new EmployeeDepartment
                             {
                                 EmployeeId = employee.Id,
-                                DepartmentId = deptId,
+                                DepartmentId = departmentId,
                                 StorageId = employee.StorageId,
-                            };
-                            _context.EmployeeDepartments.Add(employeeDepartment);
+                            });
                         }
                     }
                 }

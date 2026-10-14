@@ -8,5 +8,6 @@ namespace JtechnApi.Shares.Connects
     public class ConnectionStrings
     {
         public string DefaultConnection { get; set; }
+        public string JtecDB_Khoa { get; set; }
     }
 }

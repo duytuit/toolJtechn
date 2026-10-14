@@ -21,6 +21,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using StackExchange.Redis;
 
 namespace JtechnApi
@@ -61,7 +62,12 @@ namespace JtechnApi
             ConnectionStrings con = new ConnectionStrings();
             Configuration.Bind("ConnectionStrings", con);
             services.AddSingleton(con);
-            services.AddDbContext<DBContext>(o => o.UseMySql(Configuration.GetConnectionString("DefaultConnection"), mySqlOptions =>
+            services.Configure<ConnectionStrings>(Configuration.GetSection("ConnectionStrings"));
+            services.AddScoped<AdoJtecDB_Khoa>();
+            services.AddDbContext<DBContext>(o => o.UseMySql(
+                Configuration.GetConnectionString("DefaultConnection"),
+                ServerVersion.AutoDetect(Configuration.GetConnectionString("DefaultConnection")),
+                mySqlOptions =>
             {
                 mySqlOptions.EnableRetryOnFailure(
                 maxRetryCount: 5,
@@ -104,6 +110,7 @@ namespace JtechnApi
             services.AddEmployeesModule();
             services.AddBorrowProductModule();
             services.AddHttpClient(); // Add HttpClient factory
+            services.AddResponseCompression();
             //services.AddResponseCompression(options =>
             //{
             //    options.Providers.Add<GzipCompressionProvider>();
@@ -130,10 +137,9 @@ namespace JtechnApi
             app.UseCors("AllowAll"); // Quan trọng: phải đặt trước UseAuthorization nếu có
 
             app.UseMiddleware<ExceptionMiddleware>();
-            
             //app.UseAuthorization();
-
-            //app.UseResponseCompression();
+            app.UseStaticFiles(); // Cho phép truy cập các file tĩnh trong wwwroot
+            app.UseResponseCompression();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

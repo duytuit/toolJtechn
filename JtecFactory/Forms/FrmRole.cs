@@ -223,7 +223,7 @@ namespace JtecFactory.Forms
                         Name = role.Name,
                         Description = role.Description,
                         IsActive = role.IsActive,
-                        CreatedAt = role.CreatedAt
+                        created_at = role.created_at
                     };
 
                 Text = isNew ? "Tạo nhóm quyền" : "Sửa nhóm quyền";

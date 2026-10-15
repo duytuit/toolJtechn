@@ -1,0 +1,35 @@
+@model JtechnApi.ViewModels.DateTimeRangeModel
+@{
+    var startId = $"{Model.Id}-start";
+    var endId = $"{Model.Id}-end";
+    var validationId = $"{Model.Id}-validation";
+}
+<fieldset id="@Model.Id" class="compact-field compact-range" data-datetime-range>
+    <legend class="form-label">@Model.Label</legend>
+    <div class="compact-range-fields">
+        <div>
+            <label class="visually-hidden" for="@startId">@Model.StartLabel</label>
+            <input id="@startId"
+                   name="@Model.StartName"
+                   type="@Model.InputType"
+                   value="@Model.StartValue"
+                   class="form-control"
+                   data-range-start
+                   data-inline-validation
+                   aria-describedby="@validationId" />
+        </div>
+        <span class="compact-range-separator" aria-hidden="true">—</span>
+        <div>
+            <label class="visually-hidden" for="@endId">@Model.EndLabel</label>
+            <input id="@endId"
+                   name="@Model.EndName"
+                   type="@Model.InputType"
+                   value="@Model.EndValue"
+                   class="form-control"
+                   data-range-end
+                   data-inline-validation
+                   aria-describedby="@validationId" />
+        </div>
+    </div>
+    <span id="@validationId" class="field-validation-error" data-validation-message aria-live="polite"></span>
+</fieldset>

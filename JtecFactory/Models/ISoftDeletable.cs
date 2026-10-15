@@ -4,6 +4,6 @@ namespace JtecFactory.Models
 {
     public interface ISoftDeletable
     {
-        DateTime? DeletedAt { get; set; }
+        DateTime? deleted_at { get; set; }
     }
 }

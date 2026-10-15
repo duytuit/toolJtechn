@@ -17,13 +17,13 @@ BEGIN
         ProbationEndDate DATE NULL,
         LeaveDate     DATE NULL,
         IsActive      BIT NOT NULL DEFAULT 1,
-        CreatedAt     DATETIME2 NOT NULL DEFAULT GETDATE(),
-        UpdatedAt     DATETIME2 NULL,
-        DeletedAt     DATETIME2 NULL
+        created_at     DATETIME2 NOT NULL DEFAULT GETDATE(),
+        updated_at     DATETIME2 NULL,
+        deleted_at     DATETIME2 NULL
     );
 END;
 GO
 
-IF COL_LENGTH(N'dbo.employee', N'DeletedAt') IS NULL
-    ALTER TABLE [dbo].[employee] ADD DeletedAt DATETIME2 NULL;
+IF COL_LENGTH(N'dbo.employee', N'deleted_at') IS NULL
+    ALTER TABLE [dbo].[employee] ADD deleted_at DATETIME2 NULL;
 GO

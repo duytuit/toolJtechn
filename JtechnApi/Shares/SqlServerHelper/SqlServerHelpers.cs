@@ -276,9 +276,6 @@ FROM {tableNameWithAlias} {joinSql}
             string tableName = parts[0];
             string alias = parts.Length > 1 ? parts[1] : null;
 
-            // Helper thêm alias vào cột nếu cần
-            string ColWithAlias(string col) => col.Contains(".") ? col : (alias != null ? $"{alias}.[{col}]" : $"[{col}]");
-
             // WHERE =
             if (whereEquals != null)
             {
@@ -437,7 +434,7 @@ FROM {tableNameWithAlias} {joinSql}
         }
         public static async Task<string> GenerateFileNumberEfAsync(
             DbConnection conn,
-            DbTransaction? tran,
+            DbTransaction tran,
             string tableName,
             string columnName,
             int storageId,
@@ -538,7 +535,7 @@ FROM {tableNameWithAlias} {joinSql}
         }
         public static async Task<string> GenerateCodeEfAsync(
             DbConnection conn,
-            DbTransaction? tran,
+            DbTransaction tran,
             string tableName,
             string columnName,
             int storageId,
@@ -635,7 +632,7 @@ FROM {tableNameWithAlias} {joinSql}
         }
         public static async Task<string> GenerateSoChungTuEfAsync(
         DbConnection conn,
-        DbTransaction? tran,
+        DbTransaction tran,
         string tableName,
         string columnName,
         int storageId,

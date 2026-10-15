@@ -31,7 +31,7 @@ namespace JtecFactory.Services
                 throw new InvalidOperationException("This role code already exists.");
 
             role.IsActive = true;
-            role.CreatedAt = DateTime.UtcNow;
+            role.created_at = DateTime.UtcNow;
             return repository.Insert(role);
         }
 
@@ -46,7 +46,7 @@ namespace JtecFactory.Services
             if (repository.ExistsCode(role.Code.Trim(), role.Id))
                 throw new InvalidOperationException("This role code already exists.");
 
-            role.UpdatedAt = DateTime.UtcNow;
+            role.updated_at = DateTime.UtcNow;
             return repository.Update(role);
         }
 

@@ -17,8 +17,8 @@ namespace JtecFactory.Repositories
         public List<EmployeeModel> GetAll(bool includeInactive = true, bool includeDeleted = false)
         {
             var result = new List<EmployeeModel>();
-            const string sql = "SELECT Id, EmployeeCode, Username, FullName, PasswordHash, Email, Phone, Department, DateOfBirth, Gender, Position, JoinDate, ProbationEndDate, LeaveDate, IsActive, CreatedAt, UpdatedAt, DeletedAt FROM employee " +
-                              "WHERE (@includeDeleted = 1 OR DeletedAt IS NULL) AND (@includeInactive = 1 OR IsActive = 1) ORDER BY FullName ASC";
+            const string sql = "SELECT Id, EmployeeCode, Username, FullName, PasswordHash, Email, Phone, Department, DateOfBirth, Gender, Position, JoinDate, ProbationEndDate, LeaveDate, IsActive, created_at, updated_at, deleted_at FROM employee " +
+                              "WHERE (@includeDeleted = 1 OR deleted_at IS NULL) AND (@includeInactive = 1 OR IsActive = 1) ORDER BY FullName ASC";
 
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
@@ -38,7 +38,7 @@ namespace JtecFactory.Repositories
 
         public EmployeeModel GetById(int id, bool includeDeleted = false)
         {
-            const string sql = "SELECT Id, EmployeeCode, Username, FullName, PasswordHash, Email, Phone, Department, DateOfBirth, Gender, Position, JoinDate, ProbationEndDate, LeaveDate, IsActive, CreatedAt, UpdatedAt, DeletedAt FROM employee WHERE Id = @Id AND (@includeDeleted = 1 OR DeletedAt IS NULL)";
+            const string sql = "SELECT Id, EmployeeCode, Username, FullName, PasswordHash, Email, Phone, Department, DateOfBirth, Gender, Position, JoinDate, ProbationEndDate, LeaveDate, IsActive, created_at, updated_at, deleted_at FROM employee WHERE Id = @Id AND (@includeDeleted = 1 OR deleted_at IS NULL)";
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
             {
@@ -57,7 +57,7 @@ namespace JtecFactory.Repositories
 
         public EmployeeModel GetByUsername(string username, bool includeDeleted = false)
         {
-            const string sql = "SELECT Id, EmployeeCode, Username, FullName, PasswordHash, Email, Phone, Department, DateOfBirth, Gender, Position, JoinDate, ProbationEndDate, LeaveDate, IsActive, CreatedAt, UpdatedAt, DeletedAt FROM employee WHERE Username = @Username AND (@includeDeleted = 1 OR DeletedAt IS NULL)";
+            const string sql = "SELECT Id, EmployeeCode, Username, FullName, PasswordHash, Email, Phone, Department, DateOfBirth, Gender, Position, JoinDate, ProbationEndDate, LeaveDate, IsActive, created_at, updated_at, deleted_at FROM employee WHERE Username = @Username AND (@includeDeleted = 1 OR deleted_at IS NULL)";
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
             {
@@ -76,7 +76,7 @@ namespace JtecFactory.Repositories
 
         public EmployeeModel GetByEmployeeCode(string employeeCode, bool includeDeleted = false)
         {
-            const string sql = "SELECT Id, EmployeeCode, Username, FullName, PasswordHash, Email, Phone, Department, DateOfBirth, Gender, Position, JoinDate, ProbationEndDate, LeaveDate, IsActive, CreatedAt, UpdatedAt, DeletedAt FROM employee WHERE EmployeeCode = @EmployeeCode AND (@includeDeleted = 1 OR DeletedAt IS NULL)";
+            const string sql = "SELECT Id, EmployeeCode, Username, FullName, PasswordHash, Email, Phone, Department, DateOfBirth, Gender, Position, JoinDate, ProbationEndDate, LeaveDate, IsActive, created_at, updated_at, deleted_at FROM employee WHERE EmployeeCode = @EmployeeCode AND (@includeDeleted = 1 OR deleted_at IS NULL)";
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
             {
@@ -95,8 +95,8 @@ namespace JtecFactory.Repositories
 
         public int Insert(EmployeeModel employee)
         {
-            const string sql = "INSERT INTO employee (EmployeeCode, Username, FullName, PasswordHash, Email, Phone, Department, DateOfBirth, Gender, Position, JoinDate, ProbationEndDate, LeaveDate, IsActive, CreatedAt, UpdatedAt) " +
-                              "VALUES (@EmployeeCode, @Username, @FullName, @PasswordHash, @Email, @Phone, @Department, @DateOfBirth, @Gender, @Position, @JoinDate, @ProbationEndDate, @LeaveDate, @IsActive, @CreatedAt, @UpdatedAt); SELECT CAST(SCOPE_IDENTITY() AS INT);";
+            const string sql = "INSERT INTO employee (EmployeeCode, Username, FullName, PasswordHash, Email, Phone, Department, DateOfBirth, Gender, Position, JoinDate, ProbationEndDate, LeaveDate, IsActive, created_at, updated_at) " +
+                              "VALUES (@EmployeeCode, @Username, @FullName, @PasswordHash, @Email, @Phone, @Department, @DateOfBirth, @Gender, @Position, @JoinDate, @ProbationEndDate, @LeaveDate, @IsActive, @created_at, @updated_at); SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
@@ -115,8 +115,8 @@ namespace JtecFactory.Repositories
                 cmd.Parameters.AddWithValue("@ProbationEndDate", (object)employee.ProbationEndDate ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@LeaveDate", (object)employee.LeaveDate ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@IsActive", employee.IsActive);
-                cmd.Parameters.AddWithValue("@CreatedAt", DateTime.UtcNow);
-                cmd.Parameters.AddWithValue("@UpdatedAt", (object)employee.UpdatedAt ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@created_at", DateTime.UtcNow);
+                cmd.Parameters.AddWithValue("@updated_at", (object)employee.updated_at ?? DBNull.Value);
 
                 conn.Open();
                 var result = cmd.ExecuteScalar();
@@ -126,7 +126,7 @@ namespace JtecFactory.Repositories
 
         public bool Update(EmployeeModel employee)
         {
-            const string sql = "UPDATE employee SET EmployeeCode = @EmployeeCode, Username = @Username, FullName = @FullName, PasswordHash = @PasswordHash, Email = @Email, Phone = @Phone, Department = @Department, DateOfBirth = @DateOfBirth, Gender = @Gender, Position = @Position, JoinDate = @JoinDate, ProbationEndDate = @ProbationEndDate, LeaveDate = @LeaveDate, IsActive = @IsActive, UpdatedAt = @UpdatedAt WHERE Id = @Id AND DeletedAt IS NULL";
+            const string sql = "UPDATE employee SET EmployeeCode = @EmployeeCode, Username = @Username, FullName = @FullName, PasswordHash = @PasswordHash, Email = @Email, Phone = @Phone, Department = @Department, DateOfBirth = @DateOfBirth, Gender = @Gender, Position = @Position, JoinDate = @JoinDate, ProbationEndDate = @ProbationEndDate, LeaveDate = @LeaveDate, IsActive = @IsActive, updated_at = @updated_at WHERE Id = @Id AND deleted_at IS NULL";
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
             {
@@ -145,7 +145,7 @@ namespace JtecFactory.Repositories
                 cmd.Parameters.AddWithValue("@ProbationEndDate", (object)employee.ProbationEndDate ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@LeaveDate", (object)employee.LeaveDate ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@IsActive", employee.IsActive);
-                cmd.Parameters.AddWithValue("@UpdatedAt", DateTime.UtcNow);
+                cmd.Parameters.AddWithValue("@updated_at", DateTime.UtcNow);
                 conn.Open();
                 return cmd.ExecuteNonQuery() > 0;
             }
@@ -203,9 +203,9 @@ namespace JtecFactory.Repositories
                 ProbationEndDate = reader["ProbationEndDate"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["ProbationEndDate"]),
                 LeaveDate = reader["LeaveDate"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["LeaveDate"]),
                 IsActive = Convert.ToBoolean(reader["IsActive"]),
-                CreatedAt = reader["CreatedAt"] == DBNull.Value ? DateTime.UtcNow : Convert.ToDateTime(reader["CreatedAt"]),
-                UpdatedAt = reader["UpdatedAt"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["UpdatedAt"]),
-                DeletedAt = reader["DeletedAt"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["DeletedAt"])
+                created_at = reader["created_at"] == DBNull.Value ? DateTime.UtcNow : Convert.ToDateTime(reader["created_at"]),
+                updated_at = reader["updated_at"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["updated_at"]),
+                deleted_at = reader["deleted_at"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["deleted_at"])
             };
         }
     }

@@ -17,7 +17,7 @@ namespace JtecFactory.Repositories
         public List<RolePermissionModel> GetByRoleId(int roleId)
         {
             var result = new List<RolePermissionModel>();
-            const string sql = "SELECT Id, RoleId, PermissionId, CreatedAt FROM role_permission WHERE RoleId = @RoleId ORDER BY PermissionId ASC";
+            const string sql = "SELECT Id, RoleId, PermissionId, created_at FROM role_permission WHERE RoleId = @RoleId ORDER BY PermissionId ASC";
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
             {
@@ -36,7 +36,7 @@ namespace JtecFactory.Repositories
         public List<RolePermissionModel> GetByPermissionId(int permissionId)
         {
             var result = new List<RolePermissionModel>();
-            const string sql = "SELECT Id, RoleId, PermissionId, CreatedAt FROM role_permission WHERE PermissionId = @PermissionId ORDER BY RoleId ASC";
+            const string sql = "SELECT Id, RoleId, PermissionId, created_at FROM role_permission WHERE PermissionId = @PermissionId ORDER BY RoleId ASC";
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
             {
@@ -54,13 +54,13 @@ namespace JtecFactory.Repositories
 
         public int Insert(int roleId, int permissionId)
         {
-            const string sql = "INSERT INTO role_permission (RoleId, PermissionId, CreatedAt) VALUES (@RoleId, @PermissionId, @CreatedAt); SELECT CAST(SCOPE_IDENTITY() AS INT);";
+            const string sql = "INSERT INTO role_permission (RoleId, PermissionId, created_at) VALUES (@RoleId, @PermissionId, @created_at); SELECT CAST(SCOPE_IDENTITY() AS INT);";
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
             {
                 cmd.Parameters.AddWithValue("@RoleId", roleId);
                 cmd.Parameters.AddWithValue("@PermissionId", permissionId);
-                cmd.Parameters.AddWithValue("@CreatedAt", DateTime.UtcNow);
+                cmd.Parameters.AddWithValue("@created_at", DateTime.UtcNow);
                 conn.Open();
                 var result = cmd.ExecuteScalar();
                 return result == null || result == DBNull.Value ? 0 : Convert.ToInt32(result);
@@ -89,7 +89,7 @@ namespace JtecFactory.Repositories
                 Id = Convert.ToInt32(reader["Id"]),
                 RoleId = Convert.ToInt32(reader["RoleId"]),
                 PermissionId = Convert.ToInt32(reader["PermissionId"]),
-                CreatedAt = Convert.ToDateTime(reader["CreatedAt"])
+                created_at = Convert.ToDateTime(reader["created_at"])
             };
         }
     }

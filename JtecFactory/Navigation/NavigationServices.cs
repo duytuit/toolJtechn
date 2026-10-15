@@ -282,8 +282,8 @@ namespace JtecFactory.Navigation
                 Code = role.Code,
                 Description = role.Description,
                 IsActive = role.IsActive,
-                CreatedAt = role.CreatedAt,
-                UpdatedAt = role.UpdatedAt
+                created_at = role.created_at,
+                updated_at = role.updated_at
             }).ToList();
         }
 

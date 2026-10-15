@@ -1,0 +1,29 @@
+@model JtechnApi.ViewModels.FilterDropdownModel
+@{
+    var searchId = $"{Model.Id}-search";
+    var listId = $"{Model.Id}-options";
+    var validationId = $"{Model.Id}-validation";
+}
+<div class="compact-field filter-dropdown" data-filter-dropdown>
+    <label class="form-label" for="@searchId">@Model.Label</label>
+    <input id="@searchId"
+           type="search"
+           class="form-control"
+           placeholder="@Model.Placeholder"
+           role="combobox"
+           aria-autocomplete="list"
+           aria-expanded="false"
+           aria-controls="@listId"
+           aria-describedby="@validationId"
+           data-filter-search
+           data-inline-validation
+           autocomplete="off" />
+    <input type="hidden" id="@Model.Id" name="@Model.Name" value="@Model.Value" data-filter-value required="@Model.Required" />
+    <div id="@listId" class="filter-dropdown-options" role="listbox" hidden>
+        @foreach (var option in Model.Options)
+        {
+            <button type="button" class="filter-dropdown-option" role="option" data-value="@option.Value">@option.Text</button>
+        }
+    </div>
+    <span id="@validationId" class="field-validation-error" data-validation-message aria-live="polite"></span>
+</div>

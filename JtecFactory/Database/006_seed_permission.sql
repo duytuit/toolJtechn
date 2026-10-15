@@ -1,6 +1,6 @@
 IF NOT EXISTS (SELECT 1 FROM [dbo].[permission])
 BEGIN
-    INSERT INTO [dbo].[permission] (Code, Name, Description, MenuCode, FormName, IsActive, CreatedAt)
+    INSERT INTO [dbo].[permission] (Code, Name, Description, MenuCode, FormName, IsActive, created_at)
     VALUES
         ('DASHBOARD_VIEW', 'View Dashboard', 'Access dashboard overview', 'dashboard', 'FrmDashboard', 1, GETDATE()),
 

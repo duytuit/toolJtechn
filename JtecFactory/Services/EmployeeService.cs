@@ -71,7 +71,7 @@ namespace JtecFactory.Services
             if (employeeRepository.ExistsEmployeeCode(employee.EmployeeCode))
                 throw new InvalidOperationException("This employee code already exists.");
 
-            employee.CreatedAt = DateTime.UtcNow;
+            employee.created_at = DateTime.UtcNow;
             if (!string.IsNullOrWhiteSpace(employee.PasswordHash))
             {
                 employee.PasswordHash = PasswordHasher.HashPassword(employee.PasswordHash);
@@ -115,7 +115,7 @@ namespace JtecFactory.Services
                 employee.PasswordHash = PasswordHasher.HashPassword(employee.PasswordHash);
             }
 
-            employee.UpdatedAt = DateTime.UtcNow;
+            employee.updated_at = DateTime.UtcNow;
             var updated = employeeRepository.Update(employee);
             if (!updated)
                 return false;

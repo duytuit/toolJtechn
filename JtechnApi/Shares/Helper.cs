@@ -257,7 +257,7 @@ namespace JtechnApi.Shares
             }
             return result;
         }
-        public static async Task<UploadResult> ProcessFileAsync(IFormFile file,string? folder)
+        public static async Task<UploadResult> ProcessFileAsync(IFormFile file,string folder)
         {
             long _fileSizeLimit = 50 * 1024 * 1024;            // 50 MB
             string[] _permittedExtensions = { ".jpg", ".png", ".pdf" ,".xls",".xlsx"};

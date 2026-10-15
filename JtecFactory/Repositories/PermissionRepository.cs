@@ -17,8 +17,8 @@ namespace JtecFactory.Repositories
         public List<PermissionModel> GetAll(bool includeInactive = true, bool includeDeleted = false)
         {
             var result = new List<PermissionModel>();
-            const string sql = "SELECT Id, Code, Name, Description, MenuCode, FormName, IsActive, CreatedAt, UpdatedAt, DeletedAt FROM permission " +
-                              "WHERE (@includeDeleted = 1 OR DeletedAt IS NULL) AND (@includeInactive = 1 OR IsActive = 1) ORDER BY Name ASC";
+            const string sql = "SELECT Id, Code, Name, Description, MenuCode, FormName, IsActive, created_at, updated_at, deleted_at FROM permission " +
+                              "WHERE (@includeDeleted = 1 OR deleted_at IS NULL) AND (@includeInactive = 1 OR IsActive = 1) ORDER BY Name ASC";
 
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
@@ -38,7 +38,7 @@ namespace JtecFactory.Repositories
 
         public PermissionModel GetById(int id, bool includeDeleted = false)
         {
-            const string sql = "SELECT Id, Code, Name, Description, MenuCode, FormName, IsActive, CreatedAt, UpdatedAt, DeletedAt FROM permission WHERE Id = @Id AND (@includeDeleted = 1 OR DeletedAt IS NULL)";
+            const string sql = "SELECT Id, Code, Name, Description, MenuCode, FormName, IsActive, created_at, updated_at, deleted_at FROM permission WHERE Id = @Id AND (@includeDeleted = 1 OR deleted_at IS NULL)";
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
             {
@@ -57,7 +57,7 @@ namespace JtecFactory.Repositories
 
         public PermissionModel GetByCode(string code, bool includeDeleted = false)
         {
-            const string sql = "SELECT Id, Code, Name, Description, MenuCode, FormName, IsActive, CreatedAt, UpdatedAt, DeletedAt FROM permission WHERE Code = @Code AND (@includeDeleted = 1 OR DeletedAt IS NULL)";
+            const string sql = "SELECT Id, Code, Name, Description, MenuCode, FormName, IsActive, created_at, updated_at, deleted_at FROM permission WHERE Code = @Code AND (@includeDeleted = 1 OR deleted_at IS NULL)";
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
             {
@@ -77,7 +77,7 @@ namespace JtecFactory.Repositories
         public List<PermissionModel> GetByMenuCode(string menuCode, bool includeDeleted = false)
         {
             var result = new List<PermissionModel>();
-            const string sql = "SELECT Id, Code, Name, Description, MenuCode, FormName, IsActive, CreatedAt, UpdatedAt, DeletedAt FROM permission WHERE MenuCode = @MenuCode AND (@includeDeleted = 1 OR (IsActive = 1 AND DeletedAt IS NULL)) ORDER BY Code ASC";
+            const string sql = "SELECT Id, Code, Name, Description, MenuCode, FormName, IsActive, created_at, updated_at, deleted_at FROM permission WHERE MenuCode = @MenuCode AND (@includeDeleted = 1 OR (IsActive = 1 AND deleted_at IS NULL)) ORDER BY Code ASC";
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
             {
@@ -96,8 +96,8 @@ namespace JtecFactory.Repositories
 
         public int Insert(PermissionModel permission)
         {
-            const string sql = "INSERT INTO permission (Code, Name, Description, MenuCode, FormName, IsActive, CreatedAt, UpdatedAt) " +
-                              "VALUES (@Code, @Name, @Description, @MenuCode, @FormName, @IsActive, @CreatedAt, @UpdatedAt); SELECT CAST(SCOPE_IDENTITY() AS INT);";
+            const string sql = "INSERT INTO permission (Code, Name, Description, MenuCode, FormName, IsActive, created_at, updated_at) " +
+                              "VALUES (@Code, @Name, @Description, @MenuCode, @FormName, @IsActive, @created_at, @updated_at); SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
@@ -108,8 +108,8 @@ namespace JtecFactory.Repositories
                 cmd.Parameters.AddWithValue("@MenuCode", (object)permission.MenuCode ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@FormName", (object)permission.FormName ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@IsActive", permission.IsActive);
-                cmd.Parameters.AddWithValue("@CreatedAt", DateTime.UtcNow);
-                cmd.Parameters.AddWithValue("@UpdatedAt", (object)permission.UpdatedAt ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@created_at", DateTime.UtcNow);
+                cmd.Parameters.AddWithValue("@updated_at", (object)permission.updated_at ?? DBNull.Value);
                 conn.Open();
                 var result = cmd.ExecuteScalar();
                 return result == null || result == DBNull.Value ? 0 : Convert.ToInt32(result);
@@ -118,7 +118,7 @@ namespace JtecFactory.Repositories
 
         public bool Update(PermissionModel permission)
         {
-            const string sql = "UPDATE permission SET Code = @Code, Name = @Name, Description = @Description, MenuCode = @MenuCode, FormName = @FormName, IsActive = @IsActive, UpdatedAt = @UpdatedAt WHERE Id = @Id AND DeletedAt IS NULL";
+            const string sql = "UPDATE permission SET Code = @Code, Name = @Name, Description = @Description, MenuCode = @MenuCode, FormName = @FormName, IsActive = @IsActive, updated_at = @updated_at WHERE Id = @Id AND deleted_at IS NULL";
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
             {
@@ -129,7 +129,7 @@ namespace JtecFactory.Repositories
                 cmd.Parameters.AddWithValue("@MenuCode", (object)permission.MenuCode ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@FormName", (object)permission.FormName ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@IsActive", permission.IsActive);
-                cmd.Parameters.AddWithValue("@UpdatedAt", DateTime.UtcNow);
+                cmd.Parameters.AddWithValue("@updated_at", DateTime.UtcNow);
                 conn.Open();
                 return cmd.ExecuteNonQuery() > 0;
             }
@@ -137,7 +137,7 @@ namespace JtecFactory.Repositories
 
         public bool ExistsCode(string code, int? excludeId = null)
         {
-            const string sql = "SELECT COUNT(1) FROM permission WHERE Code = @Code AND (@ExcludeId IS NULL OR Id <> @ExcludeId) AND DeletedAt IS NULL";
+            const string sql = "SELECT COUNT(1) FROM permission WHERE Code = @Code AND (@ExcludeId IS NULL OR Id <> @ExcludeId) AND deleted_at IS NULL";
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
             {
@@ -157,9 +157,9 @@ namespace JtecFactory.Repositories
                 throw new ArgumentException("Permission Code is required.", nameof(permission));
 
             const string selectSql = "SELECT Id FROM permission WITH (UPDLOCK, HOLDLOCK) WHERE Code = @Code";
-            const string restoreSql = "UPDATE permission SET IsActive = 1, DeletedAt = NULL, UpdatedAt = @UpdatedAt WHERE Id = @Id";
-            const string insertSql = "INSERT INTO permission (Code, Name, Description, MenuCode, FormName, IsActive, CreatedAt, UpdatedAt) " +
-                                     "VALUES (@Code, @Name, @Description, @MenuCode, @FormName, 1, @CreatedAt, @UpdatedAt); " +
+            const string restoreSql = "UPDATE permission SET IsActive = 1, deleted_at = NULL, updated_at = @updated_at WHERE Id = @Id";
+            const string insertSql = "INSERT INTO permission (Code, Name, Description, MenuCode, FormName, IsActive, created_at, updated_at) " +
+                                     "VALUES (@Code, @Name, @Description, @MenuCode, @FormName, 1, @created_at, @updated_at); " +
                                      "SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
             using (var conn = CreateConnection())
@@ -182,7 +182,7 @@ namespace JtecFactory.Repositories
                         using (var restoreCommand = new SqlCommand(restoreSql, conn, transaction))
                         {
                             restoreCommand.Parameters.Add("@Id", SqlDbType.Int).Value = existingId.Value;
-                            restoreCommand.Parameters.Add("@UpdatedAt", SqlDbType.DateTime2).Value = DateTime.UtcNow;
+                            restoreCommand.Parameters.Add("@updated_at", SqlDbType.DateTime2).Value = DateTime.UtcNow;
                             restoreCommand.ExecuteNonQuery();
                         }
 
@@ -197,8 +197,8 @@ namespace JtecFactory.Repositories
                             insertCommand.Parameters.Add("@Description", SqlDbType.NVarChar, 500).Value = (object)permission.Description ?? DBNull.Value;
                             insertCommand.Parameters.Add("@MenuCode", SqlDbType.VarChar, 100).Value = (object)permission.MenuCode ?? DBNull.Value;
                             insertCommand.Parameters.Add("@FormName", SqlDbType.VarChar, 200).Value = (object)permission.FormName ?? DBNull.Value;
-                            insertCommand.Parameters.Add("@CreatedAt", SqlDbType.DateTime2).Value = DateTime.UtcNow;
-                            insertCommand.Parameters.Add("@UpdatedAt", SqlDbType.DateTime2).Value = DateTime.UtcNow;
+                            insertCommand.Parameters.Add("@created_at", SqlDbType.DateTime2).Value = DateTime.UtcNow;
+                            insertCommand.Parameters.Add("@updated_at", SqlDbType.DateTime2).Value = DateTime.UtcNow;
                             permissionId = Convert.ToInt32(insertCommand.ExecuteScalar());
                         }
                     }
@@ -225,9 +225,9 @@ namespace JtecFactory.Repositories
                 MenuCode = reader["MenuCode"] == DBNull.Value ? null : reader["MenuCode"].ToString(),
                 FormName = reader["FormName"] == DBNull.Value ? null : reader["FormName"].ToString(),
                 IsActive = Convert.ToBoolean(reader["IsActive"]),
-                CreatedAt = reader["CreatedAt"] == DBNull.Value ? DateTime.UtcNow : Convert.ToDateTime(reader["CreatedAt"]),
-                UpdatedAt = reader["UpdatedAt"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["UpdatedAt"]),
-                DeletedAt = reader["DeletedAt"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["DeletedAt"])
+                created_at = reader["created_at"] == DBNull.Value ? DateTime.UtcNow : Convert.ToDateTime(reader["created_at"]),
+                updated_at = reader["updated_at"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["updated_at"]),
+                deleted_at = reader["deleted_at"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["deleted_at"])
             };
         }
     }

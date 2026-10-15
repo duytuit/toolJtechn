@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
 using Tesseract;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -11,8 +9,7 @@ using System.Net.Http;
 using JtechnApi.Shares;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
-using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.Fonts;
+using SkiaSharp;
 
 namespace JtechnApi.Controllers
 {
@@ -37,8 +34,10 @@ namespace JtechnApi.Controllers
             if (file == null || file.Length == 0)
                 return BadRequest("No file uploaded.");
 
-            // Load image
-            using var image = Image.Load(file.OpenReadStream());
+            using var imageStream = file.OpenReadStream();
+            using var image = SKBitmap.Decode(imageStream);
+            if (image == null)
+                return BadRequest("Invalid image file.");
 
             // OCR setup
             using var engine = new TesseractEngine(@"./tessdata", "jpn", EngineMode.Default);
@@ -73,22 +72,26 @@ namespace JtechnApi.Controllers
             }
 
             // Draw overlay
-            var font = SystemFonts.CreateFont("Arial", 24);
-
-            foreach (var item in translatedResults)
+            using (var canvas = new SKCanvas(image))
+            using (var paint = new SKPaint { Color = SKColors.Red })
+            using (var typeface = SKTypeface.FromFamilyName("Arial"))
+            using (var font = new SKFont(typeface, 24))
             {
-                image.Mutate(ctx =>
-                {
-                    ctx.DrawText(item.text, font, Color.Red, new PointF(item.x, item.y));
-                });
+                foreach (var item in translatedResults)
+                    canvas.DrawText(item.text, item.x, item.y, SKTextAlign.Left, font, paint);
             }
 
-            // Return image result
             using var ms = new MemoryStream();
-            await image.SaveAsJpegAsync(ms);
-            ms.Position = 0;
+            using (var outputImage = SKImage.FromBitmap(image))
+            using (var encodedImage = outputImage.Encode(SKEncodedImageFormat.Jpeg, 100))
+            {
+                if (encodedImage == null)
+                    return StatusCode(StatusCodes.Status500InternalServerError, "Could not encode image.");
 
-            return File(ms, "image/jpeg");
+                encodedImage.SaveTo(ms);
+            }
+
+            return File(ms.ToArray(), "image/jpeg");
         }
 
         private async Task<string> TranslateDeepL(string text, string targetLang)

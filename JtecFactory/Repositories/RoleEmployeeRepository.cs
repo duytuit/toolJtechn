@@ -17,7 +17,7 @@ namespace JtecFactory.Repositories
         public List<RoleEmployeeModel> GetByEmployeeId(int employeeId)
         {
             var result = new List<RoleEmployeeModel>();
-            const string sql = "SELECT Id, RoleId, EmployeeId, CreatedAt FROM role_employee WHERE EmployeeId = @EmployeeId ORDER BY RoleId ASC";
+            const string sql = "SELECT Id, RoleId, EmployeeId, created_at FROM role_employee WHERE EmployeeId = @EmployeeId ORDER BY RoleId ASC";
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
             {
@@ -36,7 +36,7 @@ namespace JtecFactory.Repositories
         public List<RoleEmployeeModel> GetByRoleId(int roleId)
         {
             var result = new List<RoleEmployeeModel>();
-            const string sql = "SELECT Id, RoleId, EmployeeId, CreatedAt FROM role_employee WHERE RoleId = @RoleId ORDER BY EmployeeId ASC";
+            const string sql = "SELECT Id, RoleId, EmployeeId, created_at FROM role_employee WHERE RoleId = @RoleId ORDER BY EmployeeId ASC";
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
             {
@@ -54,13 +54,13 @@ namespace JtecFactory.Repositories
 
         public int Insert(int roleId, int employeeId)
         {
-            const string sql = "INSERT INTO role_employee (RoleId, EmployeeId, CreatedAt) VALUES (@RoleId, @EmployeeId, @CreatedAt); SELECT CAST(SCOPE_IDENTITY() AS INT);";
+            const string sql = "INSERT INTO role_employee (RoleId, EmployeeId, created_at) VALUES (@RoleId, @EmployeeId, @created_at); SELECT CAST(SCOPE_IDENTITY() AS INT);";
             using (var conn = CreateConnection())
             using (var cmd = new SqlCommand(sql, conn))
             {
                 cmd.Parameters.AddWithValue("@RoleId", roleId);
                 cmd.Parameters.AddWithValue("@EmployeeId", employeeId);
-                cmd.Parameters.AddWithValue("@CreatedAt", DateTime.UtcNow);
+                cmd.Parameters.AddWithValue("@created_at", DateTime.UtcNow);
                 conn.Open();
                 var result = cmd.ExecuteScalar();
                 return result == null || result == DBNull.Value ? 0 : Convert.ToInt32(result);
@@ -89,7 +89,7 @@ namespace JtecFactory.Repositories
                 Id = Convert.ToInt32(reader["Id"]),
                 RoleId = Convert.ToInt32(reader["RoleId"]),
                 EmployeeId = Convert.ToInt32(reader["EmployeeId"]),
-                CreatedAt = Convert.ToDateTime(reader["CreatedAt"])
+                created_at = Convert.ToDateTime(reader["created_at"])
             };
         }
     }

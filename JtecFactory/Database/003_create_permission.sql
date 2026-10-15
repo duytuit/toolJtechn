@@ -9,13 +9,13 @@ BEGIN
         MenuCode    VARCHAR(100) NULL,
         FormName    VARCHAR(200) NULL,
         IsActive    BIT NOT NULL DEFAULT 1,
-        CreatedAt   DATETIME2 NOT NULL DEFAULT GETDATE(),
-        UpdatedAt   DATETIME2 NULL,
-        DeletedAt   DATETIME2 NULL
+        created_at   DATETIME2 NOT NULL DEFAULT GETDATE(),
+        updated_at   DATETIME2 NULL,
+        deleted_at   DATETIME2 NULL
     );
 END;
 GO
 
-IF COL_LENGTH(N'dbo.permission', N'DeletedAt') IS NULL
-    ALTER TABLE [dbo].[permission] ADD DeletedAt DATETIME2 NULL;
+IF COL_LENGTH(N'dbo.permission', N'deleted_at') IS NULL
+    ALTER TABLE [dbo].[permission] ADD deleted_at DATETIME2 NULL;
 GO

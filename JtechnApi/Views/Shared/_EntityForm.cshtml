@@ -1,0 +1,86 @@
+@model JtechnApi.ViewModels.EntityFormModel
+<div id="@Model.PanelId" class="panel-card">
+    <div class="panel-head">
+        <h5 data-entity-form-title data-insert-title="@Model.InsertTitle" data-update-title="@Model.UpdateTitle">@Model.Title</h5>
+        @if (Model.ShowCancelButton)
+        {
+            <button class="btn btn-sm btn-light d-none"
+                    type="button"
+                    data-entity-form-cancel>@Model.CancelButtonText</button>
+        }
+    </div>
+    <form id="@Model.Id"
+          data-api-entity-form
+          data-endpoint="@Model.Endpoint"
+          data-id-field="@Model.IdFieldName"
+          data-entity-key-field="@Model.EntityKeyField"
+          data-insert-button-text="@Model.InsertButtonText"
+          data-update-button-text="@Model.UpdateButtonText"
+          novalidate>
+        <input type="hidden" name="@Model.IdFieldName" value="" />
+        @foreach (var field in Model.Fields)
+        {
+            if (field.Type == "select")
+            {
+                @await Html.PartialAsync("_CompactSelect", new JtechnApi.ViewModels.CompactSelectModel
+                {
+                    Id = field.Id,
+                    Name = field.Name,
+                    Label = field.Label,
+                    Value = field.Value,
+                    Required = field.Required,
+                    Options = field.Options
+                })
+            }
+            else if (field.Type == "date")
+            {
+                @await Html.PartialAsync("_DatePicker", new JtechnApi.ViewModels.CompactInputModel
+                {
+                    Id = field.Id,
+                    Name = field.Name,
+                    Label = field.Label,
+                    Value = field.Value,
+                    Placeholder = field.Placeholder,
+                    Required = field.Required
+                })
+            }
+            else if (field.Type == "api-select")
+            {
+                @await Html.PartialAsync("_ApiFilterDropdown", new JtechnApi.ViewModels.ApiFilterDropdownModel
+                {
+                    Id = field.Id,
+                    Name = field.Name,
+                    Label = field.Label,
+                    Endpoint = field.Endpoint,
+                    QueryParameter = field.QueryParameter,
+                    ValueField = field.ValueField,
+                    LabelField = field.LabelField,
+                    DataPath = field.DataPath,
+                    Placeholder = field.Placeholder,
+                    Required = field.Required
+                })
+            }
+            else
+            {
+                @await Html.PartialAsync("_CompactInput", new JtechnApi.ViewModels.CompactInputModel
+                {
+                    Id = field.Id,
+                    Name = field.Name,
+                    Label = field.Label,
+                    Type = field.Type,
+                    Value = field.Value,
+                    Placeholder = field.Placeholder,
+                    Required = field.Required
+                })
+            }
+        }
+        <button id="@(Model.Id)-submit"
+                class="btn btn-primary w-100"
+                type="submit"
+                data-entity-form-submit>@Model.InsertButtonText</button>
+        @if (!string.IsNullOrWhiteSpace(Model.MessageId))
+        {
+            <div id="@Model.MessageId" class="small mt-3" role="status"></div>
+        }
+    </form>
+</div>

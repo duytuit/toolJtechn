@@ -1,0 +1,34 @@
+@model JtechnApi.ViewModels.ApiFilterDropdownModel
+@{
+    var searchId = $"{Model.Id}-search";
+    var listId = $"{Model.Id}-options";
+    var validationId = $"{Model.Id}-validation";
+    var statusId = $"{Model.Id}-status";
+}
+<div class="compact-field filter-dropdown"
+     data-api-filter-dropdown
+     data-endpoint="@Model.Endpoint"
+     data-query-parameter="@Model.QueryParameter"
+     data-value-field="@Model.ValueField"
+     data-label-field="@Model.LabelField"
+     data-data-path="@Model.DataPath"
+     data-min-characters="@Model.MinCharacters"
+     data-debounce="@Model.DebounceMilliseconds">
+    <label class="form-label" for="@searchId">@Model.Label</label>
+    <input id="@searchId"
+           type="search"
+           class="form-control"
+           placeholder="@Model.Placeholder"
+           role="combobox"
+           aria-autocomplete="list"
+           aria-expanded="false"
+           aria-controls="@listId"
+           aria-describedby="@validationId @statusId"
+           data-filter-search
+           data-inline-validation
+           autocomplete="off" />
+    <input type="hidden" id="@Model.Id" name="@Model.Name" data-filter-value required="@Model.Required" />
+    <div id="@listId" class="filter-dropdown-options" role="listbox" hidden></div>
+    <span id="@validationId" class="field-validation-error" data-validation-message aria-live="polite"></span>
+    <span id="@statusId" class="filter-dropdown-status" role="status" aria-live="polite"></span>
+</div>

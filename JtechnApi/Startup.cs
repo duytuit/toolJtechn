@@ -64,6 +64,13 @@ namespace JtechnApi
             services.AddSingleton(con);
             services.Configure<ConnectionStrings>(Configuration.GetSection("ConnectionStrings"));
             services.AddScoped<AdoJtecDB_Khoa>();
+            if (string.IsNullOrWhiteSpace(con.JtecDB_Default))
+            {
+                throw new System.InvalidOperationException(
+                    "Thiếu cấu hình ConnectionStrings:JtecDB_Default cho DBJtecContext.");
+            }
+            services.AddDbContext<DBJtecContext>(options =>
+                options.UseSqlServer(con.JtecDB_Default));
             services.AddDbContext<DBContext>(o => o.UseMySql(
                 Configuration.GetConnectionString("DefaultConnection"),
                 ServerVersion.AutoDetect(Configuration.GetConnectionString("DefaultConnection")),

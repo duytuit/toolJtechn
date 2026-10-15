@@ -19,75 +19,122 @@
                     <h5 class="mb-1">Danh sách nhân viên</h5>
                     <small id="employeeCount" class="text-muted">Đang tải dữ liệu...</small>
                 </div>
-                <input id="employeeSearch" class="form-control table-filter" type="search" placeholder="Tìm mã, tên, email..." />
+                @await Html.PartialAsync("_CompactInput", new JtechnApi.ViewModels.CompactInputModel
+                {
+                    Id = "employeeSearch",
+                    Name = "employeeSearch",
+                    Label = "Tìm nhân viên",
+                    Type = "search",
+                    Placeholder = "Tìm mã, tên, email...",
+                    CssClass = "table-filter"
+                })
+                @await Html.PartialAsync("_FilterDropdown", new JtechnApi.ViewModels.FilterDropdownModel
+                {
+                    Id = "employeeDepartmentFilter",
+                    Name = "department",
+                    Label = "Lọc bộ phận",
+                    Placeholder = "Tất cả bộ phận",
+                    Options = new[]
+                    {
+                        new JtechnApi.ViewModels.CompactSelectOption { Value = "Sản xuất", Text = "Sản xuất" },
+                        new JtechnApi.ViewModels.CompactSelectOption { Value = "Lắp ráp", Text = "Lắp ráp" },
+                        new JtechnApi.ViewModels.CompactSelectOption { Value = "Kho vật tư", Text = "Kho vật tư" },
+                        new JtechnApi.ViewModels.CompactSelectOption { Value = "Kiểm tra chất lượng", Text = "Kiểm tra chất lượng" }
+                    }
+                })
+                @await Html.PartialAsync("_DateTimeRange", new JtechnApi.ViewModels.DateTimeRangeModel
+                {
+                    Id = "employeeCreatedAtRange",
+                    Label = "Lọc theo ngày ghi nhận",
+                    InputType = "date",
+                    StartLabel = "Từ ngày",
+                    EndLabel = "Đến ngày",
+                    StartName = "createdAtStart",
+                    EndName = "createdAtEnd"
+                })
             </div>
-            <div class="table-responsive">
-                <table class="table align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th>Mã</th>
-                            <th>Nhân viên</th>
-                            <th>Bộ phận</th>
-                            <th>Trạng thái</th>
-                            <th class="text-end">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="employeeTable"></tbody>
-                </table>
-            </div>
+            @await Html.PartialAsync("_DataTable", new JtechnApi.ViewModels.DataTableModel
+            {
+                Id = "employeeDataTable",
+                PageSize = 10,
+                EnableSearch = false,
+                EnableEdit = true,
+                EnableDelete = true,
+                EmptyMessage = "Không có nhân viên phù hợp.",
+                Columns = new[]
+                {
+                    new JtechnApi.ViewModels.DataTableColumnModel { Field = "code", Header = "Mã", Format = "strong" },
+                    new JtechnApi.ViewModels.DataTableColumnModel { Field = "name", SecondaryField = "email", Header = "Nhân viên" },
+                    new JtechnApi.ViewModels.DataTableColumnModel { Field = "department", Header = "Bộ phận" },
+                    new JtechnApi.ViewModels.DataTableColumnModel { Field = "status", Header = "Trạng thái", Format = "badge" },
+                    new JtechnApi.ViewModels.DataTableColumnModel { Field = "createdAt", Header = "Ngày ghi nhận", Format = "date" }
+                }
+            })
         </div>
     </div>
 
     <div class="col-xl-4">
-        <div class="panel-card" id="employeeFormPanel">
-            <div class="panel-head">
-                <h5 id="formTitle">Thêm nhân viên</h5>
-                <button id="cancelEditButton" class="btn btn-sm btn-light d-none" type="button">Hủy</button>
-            </div>
-            <form id="employeeForm">
-                <input id="employeeId" type="hidden" />
-                <div class="mb-3">
-                    <label class="form-label" for="employeeCode">Mã nhân viên</label>
-                    <input id="employeeCode" class="form-control" required placeholder="NV-004" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="employeeName">Họ và tên</label>
-                    <input id="employeeName" class="form-control" required placeholder="Nguyễn Văn A" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="employeeEmail">Email</label>
-                    <input id="employeeEmail" class="form-control" type="email" required placeholder="a@jtechn.vn" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="employeeDepartment">Bộ phận</label>
-                    <select id="employeeDepartment" class="form-select">
-                        <option>Sản xuất</option>
-                        <option>Lắp ráp</option>
-                        <option>Kho vật tư</option>
-                        <option>Kiểm tra chất lượng</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="employeeStatus">Trạng thái</label>
-                    <select id="employeeStatus" class="form-select">
-                        <option>Đang làm việc</option>
-                        <option>Tạm nghỉ</option>
-                        <option>Nghỉ việc</option>
-                    </select>
-                </div>
-                <button class="btn btn-primary w-100" type="submit" id="saveEmployeeButton">Lưu nhân viên</button>
-                <div id="employeeMessage" class="small mt-3" role="status"></div>
-            </form>
-        </div>
+        @await Html.PartialAsync("_EntityForm", new JtechnApi.ViewModels.EntityFormModel
+        {
+            Id = "employeeForm",
+            PanelId = "employeeFormPanel",
+            Title = "Thêm nhân viên",
+            Endpoint = "/api/demo/employees",
+            InsertTitle = "Thêm nhân viên",
+            UpdateTitle = "Sửa nhân viên",
+            InsertButtonText = "Lưu nhân viên",
+            UpdateButtonText = "Cập nhật nhân viên",
+            CancelButtonText = "Hủy",
+            MessageId = "employeeMessage",
+            ShowCancelButton = true,
+            Fields = new[]
+            {
+                new JtechnApi.ViewModels.EntityFormFieldModel { Id = "employeeCode", Name = "code", Label = "Mã nhân viên", Placeholder = "NV-004", Required = true },
+                new JtechnApi.ViewModels.EntityFormFieldModel { Id = "employeeName", Name = "name", Label = "Họ và tên", Placeholder = "Nguyễn Văn A", Required = true },
+                new JtechnApi.ViewModels.EntityFormFieldModel { Id = "employeeEmail", Name = "email", Label = "Email", Type = "email", Placeholder = "a@jtechn.vn", Required = true },
+                new JtechnApi.ViewModels.EntityFormFieldModel { Id = "employeeCreatedAt", Name = "createdAt", Label = "Ngày ghi nhận", Type = "date", Value = DateTime.Today.ToString("yyyy-MM-dd") },
+                new JtechnApi.ViewModels.EntityFormFieldModel
+                {
+                    Id = "employeeDepartment",
+                    Name = "department",
+                    Label = "Bộ phận",
+                    Type = "select",
+                    Options = new[]
+                    {
+                        new JtechnApi.ViewModels.CompactSelectOption { Value = "Sản xuất", Text = "Sản xuất" },
+                        new JtechnApi.ViewModels.CompactSelectOption { Value = "Lắp ráp", Text = "Lắp ráp" },
+                        new JtechnApi.ViewModels.CompactSelectOption { Value = "Kho vật tư", Text = "Kho vật tư" },
+                        new JtechnApi.ViewModels.CompactSelectOption { Value = "Kiểm tra chất lượng", Text = "Kiểm tra chất lượng" }
+                    }
+                },
+                new JtechnApi.ViewModels.EntityFormFieldModel
+                {
+                    Id = "employeeStatus",
+                    Name = "status",
+                    Label = "Trạng thái",
+                    Type = "select",
+                    Options = new[]
+                    {
+                        new JtechnApi.ViewModels.CompactSelectOption { Value = "Đang làm việc", Text = "Đang làm việc" },
+                        new JtechnApi.ViewModels.CompactSelectOption { Value = "Tạm nghỉ", Text = "Tạm nghỉ" },
+                        new JtechnApi.ViewModels.CompactSelectOption { Value = "Nghỉ việc", Text = "Nghỉ việc" }
+                    }
+                }
+            }
+        })
     </div>
 </div>
 
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const apiUrl = '/api/admin/employees';
-            const table = document.querySelector('#employeeTable');
+            const apiUrl = '/api/demo/employees';
+            const table = document.querySelector('#employeeDataTable');
             const search = document.querySelector('#employeeSearch');
+            const departmentFilter = document.querySelector('#employeeDepartmentFilter');
+            const dateRange = document.querySelector('#employeeCreatedAtRange');
+            const dateStart = dateRange.querySelector('[data-range-start]');
+            const dateEnd = dateRange.querySelector('[data-range-end]');
             const form = document.querySelector('#employeeForm');
             const message = document.querySelector('#employeeMessage');
             const count = document.querySelector('#employeeCount');
@@ -100,102 +147,69 @@
 
             const render = () => {
                 const keyword = search.value.trim().toLowerCase();
+                const toDateValue = value => {
+                    if (!value) return '';
+                    return String(value).slice(0, 10);
+                };
                 const visible = employees.filter(employee =>
-                    `${employee.code} ${employee.name} ${employee.email} ${employee.department}`.toLowerCase().includes(keyword));
+                    `${employee.code} ${employee.name} ${employee.email} ${employee.department}`.toLowerCase().includes(keyword)
+                    && (!departmentFilter.value || employee.department === departmentFilter.value)
+                    && (!dateStart.value || (employee.createdAt && toDateValue(employee.createdAt) >= dateStart.value))
+                    && (!dateEnd.value || (employee.createdAt && toDateValue(employee.createdAt) <= dateEnd.value)));
 
                 count.textContent = `${visible.length} nhân viên`;
-                table.innerHTML = visible.length
-                    ? visible.map(employee => `
-                        <tr>
-                            <td><strong>${employee.code}</strong></td>
-                            <td><div>${employee.name}</div><small class="text-muted">${employee.email}</small></td>
-                            <td>${employee.department}</td>
-                            <td><span class="status-pill">${employee.status}</span></td>
-                            <td class="text-end text-nowrap">
-                                <button class="btn btn-sm btn-outline-primary js-edit" type="button" data-id="${employee.id}">Sửa</button>
-                                <button class="btn btn-sm btn-outline-danger js-delete" type="button" data-id="${employee.id}">Xóa</button>
-                            </td>
-                        </tr>`).join('')
-                    : '<tr><td colspan="5" class="text-center text-muted py-4">Không có nhân viên phù hợp</td></tr>';
+                window.JtechnDataTable.setRows('employeeDataTable', visible);
             };
 
             const loadEmployees = async () => {
                 const response = await fetch(apiUrl);
                 if (!response.ok) throw new Error('Không tải được danh sách nhân viên.');
                 employees = await response.json();
+                if (!Array.isArray(employees)) throw new Error('API nhân viên không trả về danh sách hợp lệ.');
                 render();
             };
 
             const resetForm = () => {
-                form.reset();
-                document.querySelector('#employeeId').value = '';
-                document.querySelector('#formTitle').textContent = 'Thêm nhân viên';
-                document.querySelector('#saveEmployeeButton').textContent = 'Lưu nhân viên';
-                document.querySelector('#cancelEditButton').classList.add('d-none');
+                window.JtechnEntityForm.reset(form);
                 message.textContent = '';
             };
 
             const editEmployee = (employee) => {
-                document.querySelector('#employeeId').value = employee.id;
-                document.querySelector('#employeeCode').value = employee.code;
-                document.querySelector('#employeeName').value = employee.name;
-                document.querySelector('#employeeEmail').value = employee.email;
-                document.querySelector('#employeeDepartment').value = employee.department;
-                document.querySelector('#employeeStatus').value = employee.status;
-                document.querySelector('#formTitle').textContent = 'Sửa nhân viên';
-                document.querySelector('#saveEmployeeButton').textContent = 'Cập nhật nhân viên';
-                document.querySelector('#cancelEditButton').classList.remove('d-none');
+                window.JtechnEntityForm.setValues(form, employee);
                 document.querySelector('#employeeFormPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
             };
 
-            form.addEventListener('submit', async function (event) {
-                event.preventDefault();
-                const id = document.querySelector('#employeeId').value;
-                const payload = {
-                    code: document.querySelector('#employeeCode').value,
-                    name: document.querySelector('#employeeName').value,
-                    email: document.querySelector('#employeeEmail').value,
-                    department: document.querySelector('#employeeDepartment').value,
-                    status: document.querySelector('#employeeStatus').value
-                };
-
+            form.addEventListener('entity-form:saved', async function (event) {
                 try {
-                    const response = await fetch(id ? `${apiUrl}/${id}` : apiUrl, {
-                        method: id ? 'PUT' : 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    const result = response.status === 204 ? null : await response.json();
-                    if (!response.ok) throw new Error(result?.message || 'Không thể lưu nhân viên.');
                     await loadEmployees();
-                    resetForm();
-                    showMessage(id ? 'Đã cập nhật nhân viên.' : 'Đã thêm nhân viên.', false);
+                    showMessage(event.detail.method === 'PUT' ? 'Đã cập nhật nhân viên.' : 'Đã thêm nhân viên.', false);
                 } catch (error) {
                     showMessage(error.message, true);
                 }
             });
 
-            table.addEventListener('click', async function (event) {
-                const editButton = event.target.closest('.js-edit');
-                const deleteButton = event.target.closest('.js-delete');
-                if (editButton) {
-                    editEmployee(employees.find(employee => employee.id === Number(editButton.dataset.id)));
-                }
-                if (deleteButton && confirm('Bạn có chắc muốn xóa nhân viên này?')) {
-                    const response = await fetch(`${apiUrl}/${deleteButton.dataset.id}`, { method: 'DELETE' });
-                    if (response.ok) {
-                        await loadEmployees();
-                        showMessage('Đã xóa nhân viên.', false);
-                    } else {
-                        showMessage('Không thể xóa nhân viên.', true);
-                    }
+            form.addEventListener('entity-form:cancel', resetForm);
+            table.addEventListener('datatable:edit', event => editEmployee(event.detail.row));
+            table.addEventListener('datatable:delete', async function (event) {
+                if (!confirm('Bạn có chắc muốn xóa nhân viên này?')) return;
+                try {
+                    const response = await fetch(`${apiUrl}/${event.detail.row.id}`, { method: 'DELETE' });
+                    if (!response.ok) throw new Error('Không thể xóa nhân viên.');
+                    await loadEmployees();
+                    showMessage('Đã xóa nhân viên.', false);
+                } catch (error) {
+                    showMessage(error.message, true);
                 }
             });
 
             search.addEventListener('input', render);
+            departmentFilter.addEventListener('change', render);
+            dateRange.addEventListener('change', render);
             document.querySelector('#newEmployeeButton').addEventListener('click', resetForm);
-            document.querySelector('#cancelEditButton').addEventListener('click', resetForm);
-            loadEmployees().catch(error => showMessage(error.message, true));
+            loadEmployees().catch(error => {
+                window.JtechnDataTable.showMessage('employeeDataTable', error.message || 'Không thể tải danh sách nhân viên.', true);
+                showMessage(error.message || 'Không thể tải danh sách nhân viên.', true);
+            });
         });
     </script>
 }

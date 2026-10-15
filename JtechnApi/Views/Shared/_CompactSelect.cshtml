@@ -1,0 +1,27 @@
+@model JtechnApi.ViewModels.CompactSelectModel
+@{
+    var validationId = $"{Model.Id}-validation";
+}
+<div class="compact-field compact-floating-field" data-floating-field>
+    <select id="@Model.Id"
+            name="@Model.Name"
+            class="form-select @Model.CssClass"
+            aria-describedby="@validationId"
+            data-inline-validation
+            data-floating-input
+            required="@Model.Required">
+        @foreach (var option in Model.Options)
+        {
+            if (option.Value == Model.Value)
+            {
+                <option value="@option.Value" selected>@option.Text</option>
+            }
+            else
+            {
+                <option value="@option.Value">@option.Text</option>
+            }
+        }
+    </select>
+    <label class="form-label" for="@Model.Id">@Model.Label</label>
+    <span id="@validationId" class="field-validation-error" data-validation-message aria-live="polite"></span>
+</div>

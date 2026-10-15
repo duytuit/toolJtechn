@@ -1,10 +1,10 @@
 SET XACT_ABORT ON;
 BEGIN TRANSACTION;
 
-IF COL_LENGTH(N'dbo.role_employee', N'DeletedAt') IS NOT NULL
+IF COL_LENGTH(N'dbo.role_employee', N'deleted_at') IS NOT NULL
 BEGIN
     EXEC(N'
-        DELETE FROM [dbo].[role_employee] WHERE DeletedAt IS NOT NULL;
+        DELETE FROM [dbo].[role_employee] WHERE deleted_at IS NOT NULL;
 
         ;WITH RankedAssignments AS
         (
@@ -12,7 +12,7 @@ BEGIN
                    ROW_NUMBER() OVER
                    (
                        PARTITION BY RoleId, EmployeeId
-                       ORDER BY CreatedAt DESC,
+                       ORDER BY created_at DESC,
                                 Id DESC
                    ) AS RowNumber
             FROM [dbo].[role_employee]
@@ -29,8 +29,8 @@ IF EXISTS
 )
     DROP INDEX UX_RoleEmployee_Active ON [dbo].[role_employee];
 
-IF COL_LENGTH(N'dbo.role_employee', N'DeletedAt') IS NOT NULL
-    ALTER TABLE [dbo].[role_employee] DROP COLUMN DeletedAt;
+IF COL_LENGTH(N'dbo.role_employee', N'deleted_at') IS NOT NULL
+    ALTER TABLE [dbo].[role_employee] DROP COLUMN deleted_at;
 
 IF NOT EXISTS
 (
@@ -41,10 +41,10 @@ IF NOT EXISTS
     ALTER TABLE [dbo].[role_employee]
         ADD CONSTRAINT UQ_RoleEmployee UNIQUE (RoleId, EmployeeId);
 
-IF COL_LENGTH(N'dbo.role_permission', N'DeletedAt') IS NOT NULL
+IF COL_LENGTH(N'dbo.role_permission', N'deleted_at') IS NOT NULL
 BEGIN
     EXEC(N'
-        DELETE FROM [dbo].[role_permission] WHERE DeletedAt IS NOT NULL;
+        DELETE FROM [dbo].[role_permission] WHERE deleted_at IS NOT NULL;
 
         ;WITH RankedAssignments AS
         (
@@ -52,7 +52,7 @@ BEGIN
                    ROW_NUMBER() OVER
                    (
                        PARTITION BY RoleId, PermissionId
-                       ORDER BY CreatedAt DESC,
+                       ORDER BY created_at DESC,
                                 Id DESC
                    ) AS RowNumber
             FROM [dbo].[role_permission]
@@ -69,8 +69,8 @@ IF EXISTS
 )
     DROP INDEX UX_RolePermission_Active ON [dbo].[role_permission];
 
-IF COL_LENGTH(N'dbo.role_permission', N'DeletedAt') IS NOT NULL
-    ALTER TABLE [dbo].[role_permission] DROP COLUMN DeletedAt;
+IF COL_LENGTH(N'dbo.role_permission', N'deleted_at') IS NOT NULL
+    ALTER TABLE [dbo].[role_permission] DROP COLUMN deleted_at;
 
 IF NOT EXISTS
 (

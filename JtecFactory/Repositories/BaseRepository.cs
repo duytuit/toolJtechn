@@ -10,14 +10,14 @@ namespace JtecFactory.Repositories
     {
         private readonly string tableName;
         private readonly bool hasIsActive;
-        private readonly bool hasUpdatedAt;
-        private readonly bool hasDeletedAt;
+        private readonly bool hasupdated_at;
+        private readonly bool hasdeleted_at;
 
         protected BaseRepository(
             string tableName,
             bool hasIsActive = false,
-            bool hasUpdatedAt = false,
-            bool hasDeletedAt = false)
+            bool hasupdated_at = false,
+            bool hasdeleted_at = false)
         {
             if (string.IsNullOrWhiteSpace(tableName) ||
                 !Regex.IsMatch(tableName, @"^[A-Za-z_][A-Za-z0-9_]*$"))
@@ -27,8 +27,8 @@ namespace JtecFactory.Repositories
 
             this.tableName = "[" + tableName + "]";
             this.hasIsActive = hasIsActive;
-            this.hasUpdatedAt = hasUpdatedAt;
-            this.hasDeletedAt = hasDeletedAt;
+            this.hasupdated_at = hasupdated_at;
+            this.hasdeleted_at = hasdeleted_at;
         }
 
         protected string ConnectionString
@@ -67,10 +67,10 @@ namespace JtecFactory.Repositories
 
             var quotedColumn = "[" + columnName + "]";
             var sql = useSoftDelete
-                ? "UPDATE " + tableName + " SET DeletedAt = @DeletedAt" +
+                ? "UPDATE " + tableName + " SET deleted_at = @deleted_at" +
                   (hasIsActive ? ", IsActive = 0" : string.Empty) +
-                  (hasUpdatedAt ? ", UpdatedAt = @DeletedAt" : string.Empty) +
-                  " WHERE " + quotedColumn + " = @Value AND DeletedAt IS NULL"
+                  (hasupdated_at ? ", updated_at = @deleted_at" : string.Empty) +
+                  " WHERE " + quotedColumn + " = @Value AND deleted_at IS NULL"
                 : "DELETE FROM " + tableName + " WHERE " + quotedColumn + " = @Value";
 
             using (var connection = CreateConnection())
@@ -78,7 +78,7 @@ namespace JtecFactory.Repositories
             {
                 command.Parameters.Add("@Value", SqlDbType.Int).Value = value;
                 if (useSoftDelete)
-                    command.Parameters.Add("@DeletedAt", SqlDbType.DateTime2).Value = DateTime.UtcNow;
+                    command.Parameters.Add("@deleted_at", SqlDbType.DateTime2).Value = DateTime.UtcNow;
 
                 connection.Open();
                 return command.ExecuteNonQuery();
@@ -88,10 +88,10 @@ namespace JtecFactory.Repositories
         public bool RestoreById(int id)
         {
             EnsureSoftDeleteSupported(true);
-            var sql = "UPDATE " + tableName + " SET DeletedAt = NULL" +
+            var sql = "UPDATE " + tableName + " SET deleted_at = NULL" +
                       (hasIsActive ? ", IsActive = 1" : string.Empty) +
-                      (hasUpdatedAt ? ", UpdatedAt = SYSUTCDATETIME()" : string.Empty) +
-                      " WHERE Id = @Id AND DeletedAt IS NOT NULL";
+                      (hasupdated_at ? ", updated_at = SYSUTCDATETIME()" : string.Empty) +
+                      " WHERE Id = @Id AND deleted_at IS NOT NULL";
 
             using (var connection = CreateConnection())
             using (var command = new SqlCommand(sql, connection))
@@ -104,7 +104,7 @@ namespace JtecFactory.Repositories
 
         private void EnsureSoftDeleteSupported(bool useSoftDelete)
         {
-            if (useSoftDelete && !hasDeletedAt)
+            if (useSoftDelete && !hasdeleted_at)
             {
                 throw new InvalidOperationException(
                     "Soft delete is not enabled for this repository. Use a physical delete instead.");

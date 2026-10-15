@@ -31,7 +31,7 @@ VALUES
     ('DELETE', N'Xóa'),
     ('EXPORT', N'Xuất');
 
-INSERT INTO dbo.permission (Code, Name, Description, MenuCode, FormName, IsActive, CreatedAt, UpdatedAt)
+INSERT INTO dbo.permission (Code, Name, Description, MenuCode, FormName, IsActive, created_at, updated_at)
 SELECT UPPER(menu.ParentCode + '_' + REPLACE(menu.ChildCode, '-', '_') + '_' + action.ActionCode),
        menu.ChildName + N' (' + menu.ParentName + N') - ' + action.ActionName,
        action.ActionName + N' quyền cho ' + menu.ParentName + N' / ' + menu.ChildName,
@@ -50,14 +50,14 @@ WHERE NOT EXISTS
 
 UPDATE permission
 SET IsActive = 1,
-    DeletedAt = NULL,
+    deleted_at = NULL,
     MenuCode = menu.ParentCode + '.' + menu.ChildCode,
-    UpdatedAt = SYSUTCDATETIME()
+    updated_at = SYSUTCDATETIME()
 FROM dbo.permission AS permission
 INNER JOIN @Menus AS menu
     ON permission.Code LIKE UPPER(menu.ParentCode + '_' + REPLACE(menu.ChildCode, '-', '_') + '_%');
 
-INSERT INTO dbo.role_permission (RoleId, PermissionId, CreatedAt)
+INSERT INTO dbo.role_permission (RoleId, PermissionId, created_at)
 SELECT DISTINCT oldAssignment.RoleId, scopedPermission.Id, SYSUTCDATETIME()
 FROM @Actions AS action
 INNER JOIN dbo.permission AS oldPermission
@@ -81,7 +81,7 @@ WHERE permission.Code LIKE 'QUALITY_REPORT[_]%';
 
 UPDATE dbo.permission
 SET IsActive = 0,
-    DeletedAt = COALESCE(DeletedAt, SYSUTCDATETIME()),
-    UpdatedAt = SYSUTCDATETIME()
+    deleted_at = COALESCE(deleted_at, SYSUTCDATETIME()),
+    updated_at = SYSUTCDATETIME()
 WHERE Code LIKE 'QUALITY_REPORT[_]%';
 GO

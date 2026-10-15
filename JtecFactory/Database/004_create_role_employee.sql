@@ -5,7 +5,7 @@ BEGIN
         Id         INT IDENTITY(1,1) PRIMARY KEY,
         RoleId     INT NOT NULL,
         EmployeeId INT NOT NULL,
-        CreatedAt  DATETIME2 NOT NULL DEFAULT GETDATE(),
+        created_at  DATETIME2 NOT NULL DEFAULT GETDATE(),
         CONSTRAINT UQ_RoleEmployee UNIQUE (RoleId, EmployeeId),
         CONSTRAINT FK_RoleEmployee_Role FOREIGN KEY (RoleId) REFERENCES [dbo].[role](Id),
         CONSTRAINT FK_RoleEmployee_Employee FOREIGN KEY (EmployeeId) REFERENCES [dbo].[employee](Id)

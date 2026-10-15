@@ -1,6 +1,6 @@
 IF NOT EXISTS (SELECT 1 FROM [dbo].[role])
 BEGIN
-    INSERT INTO [dbo].[role] (Name, Code, Description, IsActive, CreatedAt)
+    INSERT INTO [dbo].[role] (Name, Code, Description, IsActive, created_at)
     VALUES
         (N'Administrator', 'ADMIN', N'Full system administrator', 1, GETDATE()),
         (N'Manager', 'MANAGER', N'Operational manager', 1, GETDATE()),

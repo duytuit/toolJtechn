@@ -23,7 +23,7 @@ VALUES
     ('ROLE_PERMISSION_DELETE', N'Xóa phân quyền nhóm', N'Thu hồi quyền thao tác của nhóm', 'role_permission', 'FrmRolePermission'),
     ('ROLE_PERMISSION_EXPORT', N'Xuất phân quyền nhóm', N'Xuất cấu hình phân quyền', 'role_permission', 'FrmRolePermission');
 
-INSERT INTO [dbo].[permission] (Code, Name, Description, MenuCode, FormName, IsActive, CreatedAt)
+INSERT INTO [dbo].[permission] (Code, Name, Description, MenuCode, FormName, IsActive, created_at)
 SELECT source.Code, source.Name, source.Description, source.MenuCode, source.FormName, 1, SYSUTCDATETIME()
 FROM @Permissions AS source
 WHERE NOT EXISTS
@@ -35,17 +35,17 @@ WHERE NOT EXISTS
 
 UPDATE target
 SET IsActive = 1,
-    DeletedAt = NULL,
-    UpdatedAt = SYSUTCDATETIME()
+    deleted_at = NULL,
+    updated_at = SYSUTCDATETIME()
 FROM [dbo].[permission] AS target
 INNER JOIN @Permissions AS source ON source.Code = target.Code;
 GO
 
-DECLARE @AdminRoleId INT = (SELECT Id FROM [dbo].[role] WHERE Code = 'ADMIN' AND DeletedAt IS NULL);
+DECLARE @AdminRoleId INT = (SELECT Id FROM [dbo].[role] WHERE Code = 'ADMIN' AND deleted_at IS NULL);
 
 IF @AdminRoleId IS NOT NULL
 BEGIN
-    INSERT INTO [dbo].[role_permission] (RoleId, PermissionId, CreatedAt)
+    INSERT INTO [dbo].[role_permission] (RoleId, PermissionId, created_at)
     SELECT @AdminRoleId, permission.Id, SYSUTCDATETIME()
     FROM [dbo].[permission] AS permission
     WHERE permission.Code IN
@@ -55,7 +55,7 @@ BEGIN
         'ROLE_PERMISSION_VIEW', 'ROLE_PERMISSION_ADD', 'ROLE_PERMISSION_EDIT',
         'ROLE_PERMISSION_DELETE', 'ROLE_PERMISSION_EXPORT'
     )
-      AND permission.DeletedAt IS NULL
+      AND permission.deleted_at IS NULL
       AND NOT EXISTS
       (
           SELECT 1

@@ -18,25 +18,29 @@ Layout = "_Layout";
 
                 <div id="message"></div>
 
-                <form id="supportForm">
+                <form id="supportForm" novalidate>
                     <div class="mb-3">
-                        <label class="form-label">Họ và tên</label>
-                        <input type="text" id="fullName" class="form-control" required>
+                        <label class="form-label" for="fullName">Họ và tên</label>
+                        <input type="text" id="fullName" name="fullName" class="form-control" data-inline-validation required>
+                        <span class="field-validation-error" data-validation-message aria-live="polite"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" id="email" class="form-control" required>
+                        <label class="form-label" for="email">Email</label>
+                        <input type="email" id="email" name="email" class="form-control" data-inline-validation required>
+                        <span class="field-validation-error" data-validation-message aria-live="polite"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Tiêu đề</label>
-                        <input type="text" id="subject" class="form-control" required>
+                        <label class="form-label" for="subject">Tiêu đề</label>
+                        <input type="text" id="subject" name="subject" class="form-control" data-inline-validation required>
+                        <span class="field-validation-error" data-validation-message aria-live="polite"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Nội dung hỗ trợ</label>
-                        <textarea id="content" class="form-control" rows="5" required></textarea>
+                        <label class="form-label" for="content">Nội dung hỗ trợ</label>
+                        <textarea id="content" name="content" class="form-control" rows="5" data-inline-validation required></textarea>
+                        <span class="field-validation-error" data-validation-message aria-live="polite"></span>
                     </div>
 
                     <button type="submit" class="btn btn-primary">
@@ -94,3 +98,4 @@ document.getElementById('supportForm').addEventListener('submit', async function
     }
 });
 </script>
+<script src="~/js/form-components.js" asp-append-version="true"></script>

@@ -8,7 +8,6 @@ namespace JtechnApi.Employees
     {
         public static IServiceCollection AddEmployeesModule(this IServiceCollection services)
         {
-            services.AddScoped<IEmployeeDepartmentRepository, EmployeeDepartmentRepository>();
             services.AddScoped<IEmployeeRepository, EmployeeRepository>();
             return services;
         }

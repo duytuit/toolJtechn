@@ -1,0 +1,25 @@
+<div id="appToastContainer"
+     class="toast-container position-fixed top-0 end-0 p-3"
+     aria-live="polite"
+     aria-atomic="true"></div>
+
+<div id="appConfirmModal"
+     class="modal fade"
+     tabindex="-1"
+     aria-labelledby="appConfirmTitle"
+     aria-describedby="appConfirmMessage"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="appConfirmTitle" class="modal-title">Xác nhận</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div id="appConfirmMessage" class="modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-confirm-cancel data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" data-confirm-accept>Xác nhận</button>
+            </div>
+        </div>
+    </div>
+</div>

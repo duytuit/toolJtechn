@@ -9,6 +9,7 @@ namespace JtechnApi.ViewModels
         public string Value { get; set; }
         public string Placeholder { get; set; }
         public string Autocomplete { get; set; }
+        public int? MaxLength { get; set; }
         public bool Required { get; set; }
         public string CssClass { get; set; }
     }

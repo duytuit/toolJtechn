@@ -1,0 +1,190 @@
+@{
+    ViewData["Title"] = "Gán vai trò nhân viên";
+    Layout = "_Layout";
+}
+
+<div class="page-header panel-card">
+    <div>
+        <p class="section-kicker">Quản trị hệ thống</p>
+        <h2 class="mb-0">Gán vai trò cho nhân viên</h2>
+    </div>
+    <a class="btn btn-outline-secondary" href="/admin/roles">Quay lại quản lý vai trò</a>
+</div>
+
+<section class="panel-card">
+    <div class="row align-items-end g-3">
+        <div class="col-lg-7">
+            <label class="form-label" for="employeeSelect">Nhân viên</label>
+            <select id="employeeSelect" class="form-select">
+                <option value="">Đang tải danh sách nhân viên...</option>
+            </select>
+        </div>
+        <div class="col-lg-5">
+            <div id="employeeSummary" class="text-muted small" role="status" aria-live="polite"></div>
+        </div>
+    </div>
+</section>
+
+<section class="panel-card mt-4">
+    <div class="panel-head flex-wrap gap-3">
+        <div>
+            <p class="section-kicker mb-1">Vai trò khả dụng</p>
+            <h5 class="mb-0">Chọn vai trò cần gán</h5>
+        </div>
+        <button class="btn btn-primary" type="button" id="saveEmployeeRoles" disabled>Lưu vai trò</button>
+    </div>
+    <div id="employeeRoleList" class="row g-3">
+        <div class="col-12 text-muted">Chọn nhân viên để tải vai trò.</div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const api = '/api/admin';
+            const employeeSelect = document.querySelector('#employeeSelect');
+            const employeeSummary = document.querySelector('#employeeSummary');
+            const roleList = document.querySelector('#employeeRoleList');
+            const saveButton = document.querySelector('#saveEmployeeRoles');
+            const requestedRole = new URLSearchParams(window.location.search).get('role');
+            let roles = [];
+            let employees = [];
+
+            const request = async (url, options = {}) => {
+                const response = await fetch(url, {
+                    ...options,
+                    headers: {
+                        Accept: 'application/json',
+                        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+                        ...options.headers
+                    }
+                });
+                if (!response.ok) {
+                    let message = `Yêu cầu thất bại (HTTP ${response.status}).`;
+                    try {
+                        const body = await response.json();
+                        message = body.message || body.detail ||
+                            (body.errors ? Object.values(body.errors).flat().join(' ') : message);
+                    } catch {
+                        // Keep the HTTP status message when the response is not JSON.
+                    }
+                    throw new Error(message);
+                }
+                return response.status === 204 ? null : response.json();
+            };
+
+            const renderRoles = (currentRoles = []) => {
+                roleList.replaceChildren();
+                if (!roles.length) {
+                    const empty = document.createElement('div');
+                    empty.className = 'col-12 text-muted';
+                    empty.textContent = 'Chưa có vai trò nào hoạt động.';
+                    roleList.append(empty);
+                    return;
+                }
+
+                const selectedCodes = new Set(currentRoles.map(role => role.code));
+                roles.forEach(role => {
+                    const column = document.createElement('div');
+                    column.className = 'col-md-6 col-xl-4';
+                    const card = document.createElement('label');
+                    card.className = 'border rounded-3 p-3 d-flex gap-3 h-100';
+                    card.htmlFor = `employee-role-${role.id}`;
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'form-check-input mt-1';
+                    checkbox.id = `employee-role-${role.id}`;
+                    checkbox.value = role.code;
+                    checkbox.checked = selectedCodes.has(role.code);
+                    const text = document.createElement('span');
+                    const name = document.createElement('strong');
+                    name.className = 'd-block';
+                    name.textContent = role.name;
+                    const code = document.createElement('small');
+                    code.className = 'text-muted';
+                    code.textContent = role.code;
+                    text.append(name, code);
+                    card.append(checkbox, text);
+                    column.append(card);
+                    roleList.append(column);
+                });
+            };
+
+            const loadEmployeeRoles = async (preselectRequestedRole = false) => {
+                const employeeId = employeeSelect.value;
+                saveButton.disabled = !employeeId;
+                if (!employeeId) {
+                    employeeSummary.textContent = '';
+                    renderRoles([]);
+                    return;
+                }
+
+                const [employee, assignedRoles] = await Promise.all([
+                    Promise.resolve(employees.find(item => String(item.id) === employeeId)),
+                    request(`${api}/employees/${employeeId}/roles`)
+                ]);
+                employeeSummary.textContent =
+                    `${employee.employeeCode} · ${employee.fullName} · ${employee.isActive ? 'Đang hoạt động' : 'Đã ngừng hoạt động'}`;
+                renderRoles(assignedRoles);
+                if (preselectRequestedRole && requestedRole) {
+                    const targetRole = roles.find(role => role.code === requestedRole);
+                    const checkbox = targetRole
+                        ? document.querySelector(`#employee-role-${targetRole.id}`)
+                        : null;
+                    if (checkbox) checkbox.checked = true;
+                }
+            };
+
+            const load = async () => {
+                [employees, roles] = await Promise.all([
+                    request(`${api}/assignable-employees`),
+                    request(`${api}/roles`)
+                ]);
+                employeeSelect.replaceChildren(new Option('Chọn nhân viên', ''));
+                employees.forEach(employee => {
+                    employeeSelect.add(new Option(
+                        `${employee.employeeCode} — ${employee.fullName}`,
+                        employee.id));
+                });
+
+                const requestedEmployeeId = new URLSearchParams(window.location.search).get('employeeId');
+                if (requestedEmployeeId && employees.some(employee => String(employee.id) === requestedEmployeeId)) {
+                    employeeSelect.value = requestedEmployeeId;
+                }
+
+                await loadEmployeeRoles(Boolean(requestedRole));
+            };
+
+            employeeSelect.addEventListener('change', () => {
+                loadEmployeeRoles(Boolean(requestedRole)).catch(error => window.JtechnUI.toast(error.message, 'error'));
+            });
+
+            saveButton.addEventListener('click', async () => {
+                const employeeId = employeeSelect.value;
+                if (!employeeId) return;
+                const roleCodes = [...roleList.querySelectorAll('input[type="checkbox"]:checked')]
+                    .map(input => input.value);
+                saveButton.disabled = true;
+                try {
+                    await request(`${api}/employees/${employeeId}/roles`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ roleCodes })
+                    });
+                    window.JtechnUI.toast('Đã cập nhật vai trò cho nhân viên.', 'success');
+                    await loadEmployeeRoles();
+                } catch (error) {
+                    window.JtechnUI.toast(error.message, 'error');
+                } finally {
+                    saveButton.disabled = !employeeSelect.value;
+                }
+            });
+
+            load().catch(error => {
+                employeeSelect.replaceChildren(new Option('Không tải được danh sách', ''));
+                employeeSummary.textContent = error.message;
+                employeeSummary.className = 'text-danger small';
+                window.JtechnUI.toast(error.message, 'error');
+            });
+        });
+    </script>
+}

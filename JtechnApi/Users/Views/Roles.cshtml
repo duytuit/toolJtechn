@@ -1,0 +1,390 @@
+@{
+    ViewData["Title"] = "Quản lý phân quyền";
+    Layout = "_Layout";
+}
+
+<div class="page-header panel-card">
+    <div>
+        <p class="section-kicker">Quản trị hệ thống</p>
+        <h2 class="mb-0">Vai trò và quyền</h2>
+    </div>
+    <a class="btn btn-outline-primary" href="/admin/employee-roles">Gán vai trò nhân viên</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-5">
+        <section class="panel-card h-100">
+            <div class="panel-head">
+                <div>
+                    <p class="section-kicker mb-1">Vai trò</p>
+                    <h5 class="mb-0" id="roleFormTitle">Tạo vai trò</h5>
+                </div>
+            </div>
+            <form id="roleForm" novalidate>
+                <input type="hidden" id="roleId" />
+                @await Html.PartialAsync("_CompactInput", new JtechnApi.ViewModels.CompactInputModel
+                {
+                    Id = "roleCode",
+                    Name = "code",
+                    Label = "Mã vai trò",
+                    Placeholder = "Ví dụ: HR_MANAGER",
+                    MaxLength = 50,
+                    Required = true
+                })
+                @await Html.PartialAsync("_CompactInput", new JtechnApi.ViewModels.CompactInputModel
+                {
+                    Id = "roleName",
+                    Name = "name",
+                    Label = "Tên vai trò",
+                    Placeholder = "Nhập tên vai trò",
+                    MaxLength = 100,
+                    Required = true
+                })
+                <div class="mb-3">
+                    <label class="form-label" for="roleDescription">Mô tả</label>
+                    <textarea id="roleDescription" class="form-control" rows="3" maxlength="500"
+                              placeholder="Mô tả nhiệm vụ của vai trò"></textarea>
+                </div>
+                <div class="form-check form-switch mb-3 d-none" id="roleActiveWrap">
+                    <input class="form-check-input" type="checkbox" id="roleIsActive" checked />
+                    <label class="form-check-label" for="roleIsActive">Đang hoạt động</label>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <button class="btn btn-outline-secondary d-none" type="button" id="cancelRoleEdit">Hủy sửa</button>
+                    <button class="btn btn-primary" type="submit" id="saveRoleButton">Tạo vai trò</button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <div class="col-xl-7">
+        <section class="panel-card">
+            <div class="panel-head">
+                <div>
+                    <p class="section-kicker mb-1">Danh sách</p>
+                    <h5 class="mb-0">Vai trò hiện có</h5>
+                </div>
+                <span class="badge-soft" id="roleCount">Đang tải...</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Vai trò</th>
+                            <th>Quyền</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="roleTableBody">
+                        <tr><td colspan="4" class="text-center text-muted py-4">Đang tải vai trò...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+
+<section class="panel-card mt-4">
+    <div class="panel-head flex-wrap gap-3">
+        <div>
+            <p class="section-kicker mb-1">Cấu hình quyền</p>
+            <h5 class="mb-0" id="permissionTitle">Chọn vai trò để cấu hình quyền</h5>
+        </div>
+        <button class="btn btn-primary" type="button" id="savePermissionsButton" disabled>Lưu quyền</button>
+    </div>
+    <div id="permissionList" class="row g-3">
+        <div class="col-12 text-muted">Đang tải danh sách quyền...</div>
+    </div>
+</section>
+
+<div id="rolePageMessage" class="small mt-3" role="status" aria-live="polite"></div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const api = '/api/admin';
+            const roleForm = document.querySelector('#roleForm');
+            const roleIdField = document.querySelector('#roleId');
+            const roleCode = document.querySelector('#roleCode');
+            const roleName = document.querySelector('#roleName');
+            const roleDescription = document.querySelector('#roleDescription');
+            const roleActive = document.querySelector('#roleIsActive');
+            const roleActiveWrap = document.querySelector('#roleActiveWrap');
+            const formTitle = document.querySelector('#roleFormTitle');
+            const saveRoleButton = document.querySelector('#saveRoleButton');
+            const cancelRoleEdit = document.querySelector('#cancelRoleEdit');
+            const roleCount = document.querySelector('#roleCount');
+            const roleTableBody = document.querySelector('#roleTableBody');
+            const permissionList = document.querySelector('#permissionList');
+            const permissionTitle = document.querySelector('#permissionTitle');
+            const savePermissionsButton = document.querySelector('#savePermissionsButton');
+            let roles = [];
+            let permissions = [];
+            let selectedRole = null;
+
+            const request = async (url, options = {}) => {
+                const response = await fetch(url, {
+                    ...options,
+                    headers: {
+                        Accept: 'application/json',
+                        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+                        ...options.headers
+                    }
+                });
+                if (!response.ok) {
+                    let message = `Yêu cầu thất bại (HTTP ${response.status}).`;
+                    try {
+                        const body = await response.json();
+                        message = body.message || body.detail ||
+                            (body.errors ? Object.values(body.errors).flat().join(' ') : message);
+                    } catch {
+                        // Keep the HTTP status message when the response is not JSON.
+                    }
+                    throw new Error(message);
+                }
+                return response.status === 204 ? null : response.json();
+            };
+
+            const showError = error => window.JtechnUI.toast(error.message, 'error');
+
+            const setRoleFormMode = role => {
+                selectedRole = role;
+                const isEditing = Boolean(role);
+                roleIdField.value = role?.id || '';
+                roleCode.value = role?.code || '';
+                roleCode.disabled = isEditing;
+                roleName.value = role?.name || '';
+                roleDescription.value = role?.description || '';
+                roleActive.checked = role?.isActive ?? true;
+                roleActiveWrap.classList.toggle('d-none', !isEditing);
+                formTitle.textContent = isEditing ? `Sửa vai trò: ${role.name}` : 'Tạo vai trò';
+                saveRoleButton.textContent = isEditing ? 'Lưu thay đổi' : 'Tạo vai trò';
+                cancelRoleEdit.classList.toggle('d-none', !isEditing);
+                roleForm.querySelectorAll('[data-floating-field]').forEach(wrapper => {
+                    wrapper.querySelector('[data-floating-input]')?.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+            };
+
+            const renderPermissions = role => {
+                permissionTitle.textContent = role
+                    ? `Quyền của ${role.name} (${role.code})`
+                    : 'Chọn vai trò để cấu hình quyền';
+                savePermissionsButton.disabled = !role;
+                permissionList.replaceChildren();
+
+                if (!permissions.length) {
+                    const empty = document.createElement('div');
+                    empty.className = 'col-12 text-muted';
+                    empty.textContent = 'Chưa có quyền nào được khởi tạo trong database.';
+                    permissionList.append(empty);
+                    return;
+                }
+
+                const selectedCodes = new Set(role?.permissionCodes || []);
+                const categories = [...new Set(permissions.map(permission => permission.category))];
+                categories.forEach(category => {
+                    const column = document.createElement('div');
+                    column.className = 'col-md-6 col-xxl-4';
+                    const card = document.createElement('div');
+                    card.className = 'border rounded-3 p-3 h-100';
+                    const heading = document.createElement('h6');
+                    heading.className = 'mb-3';
+                    heading.textContent = category;
+                    card.append(heading);
+
+                    permissions.filter(permission => permission.category === category)
+                        .forEach(permission => {
+                            const wrapper = document.createElement('div');
+                            wrapper.className = 'form-check mb-2';
+                            const checkbox = document.createElement('input');
+                            checkbox.className = 'form-check-input';
+                            checkbox.type = 'checkbox';
+                            checkbox.id = `permission-${permission.id}`;
+                            checkbox.value = permission.code;
+                            checkbox.checked = selectedCodes.has(permission.code);
+                            checkbox.disabled = !role;
+                            const label = document.createElement('label');
+                            label.className = 'form-check-label';
+                            label.htmlFor = checkbox.id;
+                            label.textContent = permission.name;
+                            const code = document.createElement('small');
+                            code.className = 'd-block text-muted';
+                            code.textContent = permission.code;
+                            wrapper.append(checkbox, label, code);
+                            card.append(wrapper);
+                        });
+
+                    column.append(card);
+                    permissionList.append(column);
+                });
+            };
+
+            const renderRoles = () => {
+                roleCount.textContent = `${roles.length} vai trò`;
+                roleTableBody.replaceChildren();
+                if (!roles.length) {
+                    const row = document.createElement('tr');
+                    const cell = document.createElement('td');
+                    cell.colSpan = 4;
+                    cell.className = 'text-center text-muted py-4';
+                    cell.textContent = 'Chưa có vai trò nào.';
+                    row.append(cell);
+                    roleTableBody.append(row);
+                    return;
+                }
+
+                roles.forEach(role => {
+                    const row = document.createElement('tr');
+                    const nameCell = document.createElement('td');
+                    const name = document.createElement('strong');
+                    name.textContent = role.name;
+                    const code = document.createElement('small');
+                    code.className = 'd-block text-muted';
+                    code.textContent = role.code;
+                    nameCell.append(name, code);
+
+                    const permissionCell = document.createElement('td');
+                    permissionCell.textContent = `${role.permissionCodes.length} quyền`;
+
+                    const statusCell = document.createElement('td');
+                    const status = document.createElement('span');
+                    status.className = `status-pill ${role.isActive ? '' : 'status-pill-muted'}`;
+                    status.textContent = role.isActive ? 'Hoạt động' : 'Đã tắt';
+                    statusCell.append(status);
+
+                    const actionCell = document.createElement('td');
+                    actionCell.className = 'text-end text-nowrap';
+                    const configure = document.createElement('button');
+                    configure.type = 'button';
+                    configure.className = 'btn btn-sm btn-outline-primary ms-1';
+                    configure.textContent = 'Quyền';
+                    configure.addEventListener('click', () => {
+                        selectedRole = role;
+                        renderPermissions(role);
+                        document.querySelector('#permissionTitle').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    });
+                    const edit = document.createElement('button');
+                    edit.type = 'button';
+                    edit.className = 'btn btn-sm btn-outline-secondary ms-1';
+                    edit.textContent = 'Sửa';
+                    edit.addEventListener('click', () => {
+                        setRoleFormMode(role);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                    const assign = document.createElement('a');
+                    assign.className = 'btn btn-sm btn-outline-info ms-1';
+                    assign.href = `/admin/employee-roles?role=${encodeURIComponent(role.code)}`;
+                    assign.textContent = 'Gán';
+                    actionCell.append(configure, edit, assign);
+
+                    if (!role.isSystem) {
+                        const remove = document.createElement('button');
+                        remove.type = 'button';
+                        remove.className = 'btn btn-sm btn-outline-danger ms-1';
+                        remove.textContent = 'Xóa';
+                        remove.addEventListener('click', () => deleteRole(role));
+                        actionCell.append(remove);
+                    }
+
+                    row.append(nameCell, permissionCell, statusCell, actionCell);
+                    roleTableBody.append(row);
+                });
+            };
+
+            const loadData = async () => {
+                [roles, permissions] = await Promise.all([
+                    request(`${api}/roles`),
+                    request(`${api}/permissions`)
+                ]);
+                renderRoles();
+                const current = selectedRole && roles.find(role => role.id === selectedRole.id);
+                if (current) selectedRole = current;
+                renderPermissions(selectedRole);
+            };
+
+            const deleteRole = async role => {
+                const confirmed = await window.JtechnUI.confirm({
+                    title: 'Xóa vai trò',
+                    message: `Bạn có chắc muốn xóa vai trò "${role.name}"?`,
+                    confirmText: 'Xóa vai trò',
+                    confirmVariant: 'danger'
+                });
+                if (!confirmed) return;
+
+                try {
+                    await request(`${api}/roles/${role.id}`, { method: 'DELETE' });
+                    if (selectedRole?.id === role.id) {
+                        selectedRole = null;
+                        setRoleFormMode(null);
+                    }
+                    await loadData();
+                    window.JtechnUI.toast('Đã xóa vai trò.', 'success');
+                } catch (error) {
+                    showError(error);
+                }
+            };
+
+            roleForm.addEventListener('submit', async event => {
+                event.preventDefault();
+                if (!roleForm.reportValidity()) return;
+
+                const editing = Boolean(roleIdField.value);
+                const payload = {
+                    name: roleName.value.trim(),
+                    description: roleDescription.value.trim() || null
+                };
+                if (editing) payload.isActive = roleActive.checked;
+                else payload.code = roleCode.value.trim();
+
+                saveRoleButton.disabled = true;
+                try {
+                    const role = await request(
+                        editing ? `${api}/roles/${roleIdField.value}` : `${api}/roles`,
+                        {
+                            method: editing ? 'PUT' : 'POST',
+                            body: JSON.stringify(payload)
+                        });
+                    await loadData();
+                    if (editing) {
+                        selectedRole = roles.find(item => item.id === role.id) || selectedRole;
+                        renderPermissions(selectedRole);
+                    } else {
+                        setRoleFormMode(null);
+                        renderPermissions(null);
+                        window.JtechnUI.toast('Đã tạo vai trò. Tiếp theo hãy gán các quyền cần thiết.', 'success');
+                    }
+                    renderRoles();
+                    if (editing) window.JtechnUI.toast('Đã cập nhật vai trò.', 'success');
+                } catch (error) {
+                    showError(error);
+                } finally {
+                    saveRoleButton.disabled = false;
+                }
+            });
+
+            cancelRoleEdit.addEventListener('click', () => setRoleFormMode(null));
+
+            savePermissionsButton.addEventListener('click', async () => {
+                if (!selectedRole) return;
+                const permissionCodes = [...permissionList.querySelectorAll('input[type="checkbox"]:checked')]
+                    .map(input => input.value);
+                savePermissionsButton.disabled = true;
+                try {
+                    await request(`${api}/roles/${selectedRole.id}/permissions`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ permissionCodes })
+                    });
+                    await loadData();
+                    window.JtechnUI.toast('Đã cập nhật quyền cho vai trò.', 'success');
+                } catch (error) {
+                    showError(error);
+                } finally {
+                    savePermissionsButton.disabled = !selectedRole;
+                }
+            });
+
+            loadData().catch(showError);
+        });
+    </script>
+}

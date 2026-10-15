@@ -1,37 +1,34 @@
-﻿
-using JtechnApi.Employees.Repositories;
-using JtechnApi.Shares.Connects;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 
-namespace JtechnApi.Controllers
+namespace JtechnApi.Employees.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class EmployeeController : ControllerBase
+    public class EmployeeController : Controller
     {
-
-        private readonly ConnectionStrings con;
-        private readonly IEmployeeRepository repo;
-        private readonly ILogger<EmployeeController> _logger;
-
-        public EmployeeController(ILogger<EmployeeController> logger, ConnectionStrings c, IEmployeeRepository r)
+        [HttpGet("admin/employees")]
+        [Authorize(Policy = "Permission:EMPLOYEES.VIEW")]
+        public IActionResult Index()
         {
-            _logger = logger;
-            con = c;
-            repo = r;
+            ViewData["Title"] = "Quản lý nhân viên";
+            return View("~/Employees/Views/Employees.cshtml");
         }
 
-        /// <summary>
-        /// List users
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 50)
+        [HttpGet("admin/employees/create")]
+        [Authorize(Policy = "Permission:EMPLOYEES.CREATE")]
+        public IActionResult Create()
         {
-            var result = await repo.GetPaginatedAsync(page, pageSize);
-            return Ok(result);
+            ViewData["Title"] = "Thêm nhân viên";
+            return View("~/Employees/Views/CreateUpdate.cshtml");
+        }
+
+        [HttpGet("admin/employees/{id:int}/edit")]
+        [Authorize(Policy = "Permission:EMPLOYEES.UPDATE")]
+        public IActionResult Edit(int id)
+        {
+            ViewData["Title"] = "Cập nhật nhân viên";
+            ViewData["EmployeeId"] = id;
+            return View("~/Employees/Views/CreateUpdate.cshtml");
         }
     }
 }

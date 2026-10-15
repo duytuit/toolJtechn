@@ -11,10 +11,10 @@ using System.Linq.Dynamic.Core;
 
 namespace JtechnApi.Employees.Repositories
 {
-    public class EmployeeRepository : BaseRepository<Employee>, IEmployeeRepository
+    public class EmployeeRepository : JtecBaseRepository<Employee>, IEmployeeRepository
     {
-        private readonly DBContext _context;
-        public EmployeeRepository(DBContext context) : base(context)
+        private readonly DBJtecContext _context;
+        public EmployeeRepository(DBJtecContext context) : base(context)
         {
             _context = context;
         }
@@ -37,55 +37,18 @@ namespace JtechnApi.Employees.Repositories
                 Items = items
             };
         }
-        public async Task<List<SelectEmployeeDto>> GetByListCode(List<string> codes)
-        {
-            List<SelectEmployeeDto> _emps = await _context.Employee.Where(e => codes.Contains(e.Code))
-                .Select(e => new SelectEmployeeDto
-                {
-                    Id = e.Id,
-                    Code = e.Code,
-                    Last_name = e.Last_name,
-                    First_name = e.First_name,
-                })
-                .AsNoTracking()
-                .ToListAsync();
-            if (_emps == null || _emps.Count == 0)
-            {
-                return new List<SelectEmployeeDto>();
-            }
-            var EmployeeDepartmentIds = _emps.Select(c => c.Id).ToList();
-            List<SelectEmployeeDepartmentDto> emp_depts = await _context.EmployeeDepartment.Where(p => EmployeeDepartmentIds.Contains(p.Employee_id)).Select(e => new SelectEmployeeDepartmentDto
-            {
-                Id = e.Id,
-                Employee_id = e.Employee_id,
-                Department_id = e.Department_id,
-                Permissions = e.Permissions,
-            }).AsNoTracking().ToListAsync();
-            var __result = new List<SelectEmployeeDto>();
-            foreach (SelectEmployeeDto item in _emps)
-            {
-                item.SelectEmployeeDepartmentDto = emp_depts.FirstOrDefault(p => p.Employee_id == item.Id);
-                __result.Add(item);
-            }
-            return __result;
-        }
 
         public Task<Employee> GetByCode(string code)
         {
             return _context.Employee
-                .Where(e => e.Code == code)
+                .Where(e => e.EmployeeCode == code)
                 .Select(e => new Employee
                 {
                     Id = e.Id,
-                    Code = e.Code,
-                    Last_name = e.Last_name,
-                    First_name = e.First_name,
+                    EmployeeCode = e.EmployeeCode,
+                    FullName = e.FullName,
                 })
                 .FirstOrDefaultAsync();
-        }
-        public async Task<object> GetAll()
-        {
-            return  await _context.Employee.AsNoTracking().Select("new (id, code, first_name,last_name, status)").ToDynamicListAsync();
         }
     }
 }

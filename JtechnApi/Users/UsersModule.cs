@@ -1,5 +1,6 @@
 
-using JtechnApi.Users.Repositories;
+using JtechnApi.Users.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace JtechnApi.Users
@@ -8,7 +9,8 @@ namespace JtechnApi.Users
     {
         public static IServiceCollection AddUsersModule(this IServiceCollection services)
         {
-            services.AddScoped<IAdminRepository, AdminRepository>();
+            services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+            services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
             return services;
         }
     }

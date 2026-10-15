@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
@@ -18,8 +19,6 @@ using Microsoft.AspNetCore.Http;
 using Serilog.Events;
 using System.IO;
 using System;
-using JtechnApi.UploadKTNQ.Dtos;
-using JtechnApi.UploadKTNQ.Models;
 using JtechnApi.Shares.Connects;
 
 namespace JtechnApi.Controllers
@@ -35,10 +34,9 @@ namespace JtechnApi.Controllers
         private readonly RedisService _redisService;
         private readonly IDepartmentRepository _dept;
         private readonly IEmployeeRepository _emp;
-        private readonly IEmployeeDepartmentRepository _emp_dept;
 
         [ActivatorUtilitiesConstructor]
-        public HomeController(ILogger<HomeController> logger,AdoJtecDB_Khoa db, OracleConnection conn_oracle, RedisService redisService, DBContext context, IDepartmentRepository dept, IEmployeeRepository emp, IEmployeeDepartmentRepository emp_dept)
+        public HomeController(ILogger<HomeController> logger,AdoJtecDB_Khoa db, OracleConnection conn_oracle, RedisService redisService, DBContext context, IDepartmentRepository dept, IEmployeeRepository emp)
         {
             _logger = logger;
             _conn_oracle = conn_oracle;
@@ -47,7 +45,6 @@ namespace JtechnApi.Controllers
             _context = context;
             _dept = dept;
             _emp = emp;
-            _emp_dept = emp_dept;
         }
 
         /// <summary>
@@ -61,33 +58,9 @@ namespace JtechnApi.Controllers
             return View();
         }
 
-        [HttpGet("login")]
-        public IActionResult Login()
-        {
-            ViewData["Title"] = "Đăng nhập";
-            return View();
-        }
-
-        [HttpPost("login")]
-        public IActionResult Login([FromForm] string username, [FromForm] string password)
-        {
-            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-            {
-                TempData["LoginError"] = "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.";
-                return RedirectToAction(nameof(Login));
-            }
-
-            return Redirect("/admin");
-        }
-
-        [HttpGet("logout")]
-        public IActionResult Logout()
-        {
-            return Redirect("/login");
-        }
-
         [HttpGet("admin")]
         [HttpGet("admin/dashboard")]
+        [Authorize(Policy = "Permission:DASHBOARD.VIEW")]
         public IActionResult AdminDashboard()
         {
             ViewData["Title"] = "Trang quản trị";
@@ -97,6 +70,7 @@ namespace JtechnApi.Controllers
         [HttpGet("api/admin/dashboard/data")]
         [HttpGet("admin/dashboard/data")]
         [HttpGet("dashboard/data")]
+        [Authorize(Policy = "Permission:DASHBOARD.VIEW")]
         public IActionResult DashboardData()
         {
             return Ok(new
@@ -138,26 +112,6 @@ namespace JtechnApi.Controllers
         //    var dt = ac.RunQuery(querry);
         //    return View();
         //}
-        [HttpGet("config/jtechn")]
-        public async Task<IActionResult> GetConfig([FromQuery] int type = 1, string emps = null)
-        {
-            var dept = await _dept.GetAllAsync();
-            var emp = await _emp.GetAll();
-            var numbers = new List<int>();
-            var emp_dept = new object();
-            if (emps != null && emps != "")
-            {
-                numbers = emps.Split(',').Select(int.Parse).ToList();
-                emp_dept = await _emp_dept.GetListByIdEmp(numbers);
-            }
-            return ApiResponseResult<object>(true, "Lấy dữ liệu ok", new { config = Helper.ConfigRequiredByType(1), department = dept, emp_dept = emp_dept, emp = emp });
-        }
-        [HttpGet("config/jtechn/workGroup")]
-        public async Task<IActionResult> GetWorkGroup([FromQuery] int type = 2, string emps = null)
-        {
-            var emp = await _emp.GetAll();
-            return ApiResponseResult<object>(true, "Lấy dữ liệu ok", new { config = Helper.ConfigRequiredByType(type), emp = emp });
-        }
         [HttpGet("jtechn/test")]
         public IActionResult TestData()
         {
@@ -201,39 +155,6 @@ namespace JtechnApi.Controllers
                 return Ok(success);
 
             return StatusCode(207, new { success, failed }); // Multi-Status
-        }
-        [HttpPost("upload/ktnq")]
-        public async Task<IActionResult> UploadKTNQ([FromForm] AddKTNQDto AddKTNQDto)
-        {
-            KTNQ check_ktnq = await _context.KTNQ.FirstOrDefaultAsync(x => x.Code == AddKTNQDto.Code);
-            if (check_ktnq != null)
-            {
-                return ApiResponseResult<object>(false, "Mã KTNQ đã tồn tại", null);
-            }
-            KTNQ kTNQ = new KTNQ
-            {
-                Code = AddKTNQDto.Code,
-                Content = AddKTNQDto.Content,
-                Created_at = DateTime.Now,
-                Updated_at = DateTime.Now
-            };
-            _context.KTNQ.Add(kTNQ);
-            await _context.SaveChangesAsync();  
-            return ApiResponseResult<object>(true, "Thêm KTNQ thành công", kTNQ);
-        }
-        [HttpGet("upload/ktnq/code")]
-        public async Task<IActionResult> GetKTNQ([FromQuery] string code)
-        {
-            if (string.IsNullOrWhiteSpace(code))
-            {
-                return ApiResponseResult<object>(false, "Mã KTNQ không được để trống", null);
-            }
-            var ktnq = await _context.KTNQ.FirstOrDefaultAsync(x => x.Code == code);
-            if (ktnq == null)
-            {
-                return ApiResponseResult<object>(false, "Không tìm thấy KTNQ với mã: " + code, null);
-            }
-            return ApiResponseResult<object>(true, "Lấy KTNQ thành công", ktnq);
         }
         /* ---------- helper ---------- */
 

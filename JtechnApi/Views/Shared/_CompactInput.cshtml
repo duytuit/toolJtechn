@@ -9,6 +9,7 @@
            value="@Model.Value"
            placeholder="@(string.IsNullOrWhiteSpace(Model.Placeholder) ? " " : Model.Placeholder)"
            autocomplete="@Model.Autocomplete"
+           maxlength="@Model.MaxLength"
            class="form-control @Model.CssClass"
            aria-describedby="@validationId"
            data-inline-validation

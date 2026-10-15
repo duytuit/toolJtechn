@@ -1,0 +1,171 @@
+@{
+    ViewData["Title"] = "Quản lý nhân viên";
+    Layout = "_Layout";
+}
+
+<div class="page-header panel-card">
+    <div>
+        <p class="section-kicker">Nhân sự</p>
+        <h2 class="mb-0">Quản lý nhân viên</h2>
+    </div>
+    <a class="btn btn-primary" href="/admin/employees/create">+ Thêm nhân viên</a>
+</div>
+
+<section class="panel-card">
+    <div class="panel-head flex-wrap gap-3">
+        <div>
+            <h5 class="mb-1">Danh sách nhân viên</h5>
+            <small id="employeeCount" class="text-muted">Đang tải dữ liệu từ cơ sở dữ liệu...</small>
+        </div>
+        <div class="employee-filters">
+            <div>
+                <label class="form-label" for="employeeSearch">Tìm nhân viên</label>
+                <input class="form-control" id="employeeSearch" type="search"
+                       placeholder="Mã, họ tên, email..." autocomplete="off" />
+            </div>
+            <div>
+                <label class="form-label" for="employeeDepartmentFilter">Bộ phận</label>
+                <select class="form-select" id="employeeDepartmentFilter">
+                    <option value="">Tất cả bộ phận</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    @await Html.PartialAsync("_DataTable", new JtechnApi.ViewModels.DataTableModel
+    {
+        Id = "employeeDataTable",
+        PageSize = 10,
+        EnableSearch = false,
+        EnableEdit = true,
+        EnableDelete = true,
+        EmptyMessage = "Không có nhân viên phù hợp.",
+        Columns = new[]
+        {
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "employeeCode", Header = "Mã", Format = "strong" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "fullName", SecondaryField = "email", Header = "Nhân viên" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "department", Header = "Bộ phận" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "status", Header = "Trạng thái", Format = "badge" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "createdAt", Header = "Ngày tạo", Format = "date" }
+        }
+    })
+    <div id="employeeListMessage" class="small mt-3" role="status" aria-live="polite"></div>
+</section>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const pageUrl = new URL(window.location.href);
+            const savedState = pageUrl.searchParams.get('saved');
+            const savedMessages = {
+                created: 'Đã thêm nhân viên.',
+                updated: 'Đã cập nhật nhân viên.'
+            };
+            if (savedState && savedMessages[savedState]) {
+                pageUrl.searchParams.delete('saved');
+                window.history.replaceState(null, '', pageUrl);
+                window.JtechnUI.toast(savedMessages[savedState], 'success');
+            }
+
+            const apiUrl = '/api/employees';
+            const table = document.querySelector('#employeeDataTable');
+            const search = document.querySelector('#employeeSearch');
+            const departmentFilter = document.querySelector('#employeeDepartmentFilter');
+            const count = document.querySelector('#employeeCount');
+            const listMessage = document.querySelector('#employeeListMessage');
+            let employees = [];
+
+            const getErrorMessage = async response => {
+                try {
+                    const body = await response.json();
+                    if (body.message) return body.message;
+                    if (body.detail) return body.detail;
+                    if (body.errors) return Object.values(body.errors).flat().join(' ');
+                } catch {
+                    return `Không thể tải danh sách nhân viên (HTTP ${response.status}).`;
+                }
+                return `Không thể tải danh sách nhân viên (HTTP ${response.status}).`;
+            };
+
+            const render = () => {
+                const keyword = search.value.trim().toLocaleLowerCase();
+                const department = departmentFilter.value;
+                const visible = employees.filter(employee => {
+                    const matchesKeyword = [
+                        employee.employeeCode,
+                        employee.fullName,
+                        employee.username,
+                        employee.email,
+                        employee.phone,
+                        employee.department
+                    ].some(value => String(value || '').toLocaleLowerCase().includes(keyword));
+                    return matchesKeyword && (!department || employee.department === department);
+                });
+
+                count.textContent = `${visible.length} / ${employees.length} nhân viên`;
+                listMessage.textContent = '';
+                window.JtechnDataTable.setRows('employeeDataTable', visible);
+            };
+
+            const loadEmployees = async () => {
+                const response = await fetch(apiUrl, { headers: { Accept: 'application/json' } });
+                if (!response.ok) throw new Error(await getErrorMessage(response));
+
+                const data = await response.json();
+                if (!Array.isArray(data)) {
+                    throw new Error('API nhân viên không trả về danh sách hợp lệ.');
+                }
+
+                employees = data;
+                const departments = [...new Set(employees
+                    .map(employee => employee.department)
+                    .filter(Boolean))]
+                    .sort((left, right) => left.localeCompare(right, 'vi'));
+                const selectedDepartment = departmentFilter.value;
+                departmentFilter.replaceChildren(new Option('Tất cả bộ phận', ''));
+                departments.forEach(department => departmentFilter.add(new Option(department, department)));
+                departmentFilter.value = departments.includes(selectedDepartment) ? selectedDepartment : '';
+                render();
+            };
+
+            table.addEventListener('datatable:edit', event => {
+                window.location.href = `/admin/employees/${event.detail.row.id}/edit`;
+            });
+
+            table.addEventListener('datatable:delete', async event => {
+                const employee = event.detail.row;
+                const confirmed = await window.JtechnUI.confirm({
+                    title: 'Xóa nhân viên',
+                    message: `Bạn có chắc muốn xóa nhân viên "${employee.fullName}"?`,
+                    confirmText: 'Xóa nhân viên',
+                    confirmVariant: 'danger'
+                });
+                if (!confirmed) return;
+
+                try {
+                    const response = await fetch(`${apiUrl}/${employee.id}`, { method: 'DELETE' });
+                    if (!response.ok) throw new Error(await getErrorMessage(response));
+                    window.JtechnUI.toast('Đã xóa nhân viên.', 'success');
+                } catch (error) {
+                    window.JtechnUI.toast(error.message, 'error');
+                    return;
+                }
+
+                try {
+                    await loadEmployees();
+                } catch (error) {
+                    window.JtechnUI.toast(`Đã xóa nhân viên nhưng không thể tải lại danh sách: ${error.message}`, 'warning');
+                }
+            });
+
+            search.addEventListener('input', render);
+            departmentFilter.addEventListener('change', render);
+
+            loadEmployees().catch(error => {
+                count.textContent = 'Không thể tải dữ liệu từ cơ sở dữ liệu.';
+                listMessage.className = 'small mt-3 text-danger';
+                listMessage.textContent = error.message;
+                window.JtechnDataTable.showMessage('employeeDataTable', error.message, true);
+            });
+        });
+    </script>
+}

@@ -1,19 +1,16 @@
 ﻿using JtechnApi.Accessorys;
-using JtechnApi.BorrowProducts;
 using JtechnApi.Departments;
 using JtechnApi.Employees;
 using JtechnApi.Exams;
 using JtechnApi.Infra;
-using JtechnApi.ProductionPlans;
-using JtechnApi.Requireds;
 using JtechnApi.Shares;
 using JtechnApi.Shares.BaseRepository;
 using JtechnApi.Shares.Connects;
-using JtechnApi.Umesens;
-using JtechnApi.UploadDatas;
 using JtechnApi.Users;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -23,6 +20,7 @@ using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using StackExchange.Redis;
+using System;
 
 namespace JtechnApi
 {
@@ -49,6 +47,40 @@ namespace JtechnApi
                             .AllowAnyHeader();
                     });
             });
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                    .AddCookie(options =>
+                    {
+                        options.LoginPath = "/login";
+                        options.LogoutPath = "/logout";
+                        options.AccessDeniedPath = "/access-denied";
+                        options.ExpireTimeSpan = System.TimeSpan.FromHours(8);
+                        options.SlidingExpiration = true;
+                        options.Cookie.HttpOnly = true;
+                        options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+                        options.Events.OnRedirectToLogin = context =>
+                        {
+                            if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
+                            {
+                                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                                return System.Threading.Tasks.Task.CompletedTask;
+                            }
+
+                            context.Response.Redirect(context.RedirectUri);
+                            return System.Threading.Tasks.Task.CompletedTask;
+                        };
+                        options.Events.OnRedirectToAccessDenied = context =>
+                        {
+                            if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
+                            {
+                                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                                return System.Threading.Tasks.Task.CompletedTask;
+                            }
+
+                            context.Response.Redirect(context.RedirectUri);
+                            return System.Threading.Tasks.Task.CompletedTask;
+                        };
+                    });
+            services.AddAuthorization();
             // cấu hình DeepLSettings
             services.Configure<DeepLSettings>(Configuration.GetSection("DeepL"));
             // kết nối redis
@@ -108,14 +140,9 @@ namespace JtechnApi
             services.AddControllersWithViews(); // 👈 hỗ trợ cả View + API
             services.AddAccessorysModule();
             services.AddDepartmentsModule();
-            services.AddUmesensModule();
-            services.AddProductionPlansModule();
             services.AddExamsModule();
-            services.AddRequiredsModule();
             services.AddUsersModule();
-            services.AddUploadDatasModule();
             services.AddEmployeesModule();
-            services.AddBorrowProductModule();
             services.AddHttpClient(); // Add HttpClient factory
             services.AddResponseCompression();
             //services.AddResponseCompression(options =>
@@ -142,9 +169,10 @@ namespace JtechnApi
             app.UseRouting();
 
             app.UseCors("AllowAll"); // Quan trọng: phải đặt trước UseAuthorization nếu có
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseMiddleware<ExceptionMiddleware>();
-            //app.UseAuthorization();
             app.UseStaticFiles(); // Cho phép truy cập các file tĩnh trong wwwroot
             app.UseResponseCompression();
             app.UseEndpoints(endpoints =>

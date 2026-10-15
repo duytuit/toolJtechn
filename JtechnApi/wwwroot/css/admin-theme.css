@@ -115,6 +115,15 @@ img {
     box-shadow: 0 12px 24px rgba(37, 99, 235, 0.45);
 }
 
+.sidebar-logo {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    object-fit: contain;
+    border-radius: 10px;
+    background: #fff;
+}
+
 .sidebar nav {
     display: flex;
     flex-direction: column;
@@ -335,7 +344,11 @@ img {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 0.5rem 1.2rem;
     gap: 1rem;
 }
 
@@ -353,7 +366,7 @@ img {
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 18px;
-    padding: 1.3rem 1.2rem;
+    padding: 0.5rem 1.2rem;
     box-shadow: var(--shadow);
 }
 
@@ -593,6 +606,20 @@ img {
 
 .text-muted {
     color: var(--muted) !important;
+}
+
+.reusable-data-table {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.reusable-data-table .table-responsive {
+    overflow-x: auto;
+}
+
+.reusable-data-table .table {
+    width: 100%;
+    white-space: nowrap;
 }
 
 .table-filter {

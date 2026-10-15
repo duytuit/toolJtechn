@@ -18,10 +18,10 @@ public class WarmUpService : IHostedService
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         using var scope = _serviceProvider.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<DBContext>();
+        var db = scope.ServiceProvider.GetRequiredService<DBJtecContext>();
 
         // Truy vấn "nhẹ" để EF mở kết nối, load model
-        await db.Admin.FirstOrDefaultAsync();
+        await db.Employee.AsNoTracking().FirstOrDefaultAsync();
 
         // Gọi các API ngoài hoặc preload cache nếu cần
     }

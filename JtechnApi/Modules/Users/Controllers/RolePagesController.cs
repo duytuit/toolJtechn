@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JtechnApi.Users.Controllers
@@ -10,7 +10,7 @@ namespace JtechnApi.Users.Controllers
         public IActionResult Index()
         {
             ViewData["Title"] = "Quản lý phân quyền";
-            return View("~/Users/Views/Roles.cshtml");
+            return View("~/Modules/Users/Views/Roles.cshtml");
         }
 
         [HttpGet("admin/employee-roles")]
@@ -18,7 +18,7 @@ namespace JtechnApi.Users.Controllers
         public IActionResult EmployeeRoles()
         {
             ViewData["Title"] = "Gán vai trò nhân viên";
-            return View("~/Users/Views/EmployeeRoles.cshtml");
+            return View("~/Modules/Users/Views/EmployeeRoles.cshtml");
         }
     }
 }

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +11,7 @@ namespace JtechnApi.Employees.Controllers
         public IActionResult Index()
         {
             ViewData["Title"] = "Quản lý nhân viên";
-            return View("~/Employees/Views/Employees.cshtml");
+            return View("~/Modules/Employees/Views/Employees.cshtml");
         }
 
         [HttpGet("admin/employees/create")]
@@ -19,7 +19,7 @@ namespace JtechnApi.Employees.Controllers
         public IActionResult Create()
         {
             ViewData["Title"] = "Thêm nhân viên";
-            return View("~/Employees/Views/CreateUpdate.cshtml");
+            return View("~/Modules/Employees/Views/CreateUpdate.cshtml");
         }
 
         [HttpGet("admin/employees/{id:int}/edit")]
@@ -28,7 +28,7 @@ namespace JtechnApi.Employees.Controllers
         {
             ViewData["Title"] = "Cập nhật nhân viên";
             ViewData["EmployeeId"] = id;
-            return View("~/Employees/Views/CreateUpdate.cshtml");
+            return View("~/Modules/Employees/Views/CreateUpdate.cshtml");
         }
     }
 }

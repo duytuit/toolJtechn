@@ -61,7 +61,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="UploadKTNQ\Repositories\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

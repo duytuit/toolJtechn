@@ -2,6 +2,14 @@
 
 Hướng dẫn dành cho AI agent: [AGENTS.md](AGENTS.md).
 
+Quản lý bài thi theo bộ phận tại `/admin/department-exams`: [SQL và hướng dẫn](Modules/Exams/DEPARTMENT_EXAMS.md).
+
+Gán bộ phận nhân viên tại `/admin/employee-departments`: [SQL và hướng dẫn](Modules/Employees/README.md).
+
+Quản lý bộ phận SQL Server tại `/admin/departments`: [script SQL và hướng dẫn cài đặt](Modules/Departments/README.md).
+
+Chức năng thi online tại `/admin/exams`: [hướng dẫn cấu hình đề, hình ảnh và lưu kết quả](Modules/Exams/README.md).
+
 Ứng dụng ASP.NET Core MVC + API, tổ chức theo module nghiệp vụ trong một project.
 
 ```text
@@ -37,6 +45,8 @@ JtechnApi/
 ```
 
 ## Quy ước phát triển
+
+- Logic nghiệp vụ và truy cập dữ liệu của mọi module nằm trong `Repositories/`. Controller nhận request, gọi repository và trả response; không truy vấn EF trực tiếp. Các repository quản trị dùng scoped lifetime; `OnlineExamRepository` giữ singleton để đồng bộ ghi file bài thi.
 
 - Mỗi module chứa `Controllers`, `Dtos`, `Models`, `Repositories`, `Views` theo nhu cầu; đăng ký dependency trong `<Module>Module.cs`.
 - Khi thêm module, gọi phương thức đăng ký tại `Configuration/ModuleServiceExtensions.cs`.

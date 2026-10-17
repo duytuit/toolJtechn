@@ -1,4 +1,4 @@
-
+﻿
 using JtechnApi.Departments.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -8,7 +8,7 @@ namespace JtechnApi.Departments
     {
         public static IServiceCollection AddDepartmentsModule(this IServiceCollection services)
         {
-            services.AddScoped<IDepartmentRepository, Repository>();
+            services.AddScoped<IDepartmentRepository, DepartmentRepository>();
             return services;
         }
     }

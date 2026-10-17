@@ -1,9 +1,7 @@
 ﻿
-using JtechnApi.Shares.BaseRepository;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,57 +14,35 @@ namespace JtechnApi.Users.Controllers
     [Route("api/admin")]
     public class AuthController : Controller
     {
-        private readonly DBJtecContext _employeeContext;
+        private readonly JtechnApi.Users.Repositories.IAuthenticationRepository repository;
 
-        public AuthController(DBJtecContext employeeContext)
+        public AuthController(JtechnApi.Users.Repositories.IAuthenticationRepository repository)
         {
-            _employeeContext = employeeContext;
+            this.repository = repository;
         }
 
-        [HttpGet("/login")]
+        [HttpGet("/admin/login")]
         public IActionResult Login()
         {
             ViewData["Title"] = "Đăng nhập";
             return View("~/Views/Home/Login.cshtml");
         }
 
-        [HttpPost("/login")]
+        [HttpPost("/admin/login")]
         public async Task<IActionResult> Login([FromForm] string username)
         {
             if (string.IsNullOrWhiteSpace(username))
             {
                 TempData["LoginError"] = "Vui lòng nhập tên đăng nhập.";
-                return Redirect("/login");
+                return Redirect("/admin/login");
             }
 
-            var normalizedUsername = username.Trim();
-            var employee = await _employeeContext.Employee
-                .AsNoTracking()
-                .FirstOrDefaultAsync(item =>
-                    item.Username == normalizedUsername && item.IsActive);
-
-            if (employee == null)
+            var claims = await repository.GetLoginClaims(username);
+            if (claims == null)
             {
                 TempData["LoginError"] = "Tên đăng nhập không hợp lệ hoặc tài khoản đã bị vô hiệu hóa.";
-                return Redirect("/login");
+                return Redirect("/admin/login");
             }
-
-            var roles = await (
-                from assignment in _employeeContext.RoleEmployees.AsNoTracking()
-                join role in _employeeContext.Roles.AsNoTracking()
-                    on assignment.RoleId equals role.Id
-                where assignment.EmployeeId == employee.Id && role.IsActive
-                select role.Code)
-                .Distinct()
-                .ToListAsync();
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, employee.Id.ToString()),
-                new Claim(ClaimTypes.Name, employee.Username),
-                new Claim("FullName", employee.FullName ?? employee.Username)
-            };
-            claims.AddRange(roles.Select(roleCode => new Claim(ClaimTypes.Role, roleCode)));
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
@@ -83,14 +59,14 @@ namespace JtechnApi.Users.Controllers
             return Redirect("/admin");
         }
 
-        [HttpGet("/logout")]
+        [HttpGet("/admin/logout")]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return Redirect("/login");
+            return Redirect("/admin/login");
         }
 
-        [HttpGet("/access-denied")]
+        [HttpGet("/admin/access-denied")]
         public IActionResult AccessDenied()
         {
             ViewData["Title"] = "Không có quyền truy cập";

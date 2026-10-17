@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     'use strict';
 
     const tables = new Map();
@@ -49,7 +49,8 @@
         const cell = document.createElement('td');
         cell.className = 'text-end text-nowrap';
 
-        [['edit', state.enableEdit, 'Sửa', 'btn-outline-primary'],
+        [['view', state.enableView, 'Xem nhân viên', 'btn-outline-secondary'],
+            ['edit', state.enableEdit, 'Sửa', 'btn-outline-primary'],
             ['delete', state.enableDelete, 'Xóa', 'btn-outline-danger']]
             .filter(action => action[1])
             .forEach(([action, , label, style]) => {
@@ -85,7 +86,7 @@
         if (pageRows.length === 0) {
             const row = document.createElement('tr');
             const cell = document.createElement('td');
-            cell.colSpan = state.columns.length + (state.enableEdit || state.enableDelete ? 1 : 0);
+            cell.colSpan = state.columns.length + (state.enableView || state.enableEdit || state.enableDelete ? 1 : 0);
             cell.className = 'text-center text-muted py-4';
             cell.textContent = state.emptyMessage;
             row.append(cell);
@@ -94,7 +95,7 @@
             pageRows.forEach(item => {
                 const row = document.createElement('tr');
                 state.columns.forEach(column => row.append(createCell(item, column)));
-                if (state.enableEdit || state.enableDelete) row.append(createActionCell(item, state));
+                if (state.enableView || state.enableEdit || state.enableDelete) row.append(createActionCell(item, state));
                 state.body.append(row);
             });
         }
@@ -127,6 +128,7 @@
                 page: 1,
                 emptyMessage: element.dataset.emptyMessage || 'Không có dữ liệu phù hợp.',
                 enablePagination: element.dataset.enablePagination === 'true',
+                enableView: element.dataset.enableView === 'true',
                 enableEdit: element.dataset.enableEdit === 'true',
                 enableDelete: element.dataset.enableDelete === 'true'
             };
@@ -178,7 +180,7 @@
             if (!state) throw new Error(`Không tìm thấy datatable "${id}".`);
             const row = document.createElement('tr');
             const cell = document.createElement('td');
-            cell.colSpan = state.columns.length + (state.enableEdit || state.enableDelete ? 1 : 0);
+            cell.colSpan = state.columns.length + (state.enableView || state.enableEdit || state.enableDelete ? 1 : 0);
             cell.className = `text-center py-4 ${isError ? 'text-danger' : 'text-muted'}`;
             cell.textContent = message;
             row.append(cell);

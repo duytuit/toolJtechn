@@ -1,0 +1,29 @@
+@{
+    ViewData["Title"] = "Nhân viên trong bộ phận";
+    Layout = "_Layout";
+    var canUpdate = ViewData["CanUpdate"] is bool allowed && allowed;
+}
+@Html.AntiForgeryToken()
+<div class="page-header panel-card">
+    <div><p class="section-kicker">Nhân sự</p><h2 class="mb-0">Nhân viên trong bộ phận</h2></div>
+    <a class="btn btn-outline-secondary" href="/admin/departments">Quay lại danh sách bộ phận</a>
+</div>
+<section id="departmentEmployeesPanel" class="panel-card" data-department-id="@ViewData["DepartmentId"]">
+    <div class="panel-head"><div><h5 id="departmentEmployeesTitle" class="mb-1">Đang tải bộ phận...</h5><small id="departmentEmployeesCount" class="text-muted"></small></div></div>
+    @await Html.PartialAsync("_DataTable", new JtechnApi.ViewModels.DataTableModel
+    {
+        Id = "departmentEmployeesTable", PageSize = 10, EnableSearch = true, EnableDelete = canUpdate,
+        EmptyMessage = "Chưa có nhân viên được gán vào bộ phận này.",
+        Columns = new[]
+        {
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "employeeCode", Header = "Mã nhân viên", Format = "strong" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "fullName", SecondaryField = "email", Header = "Nhân viên" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "phone", Header = "Điện thoại" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "status", Header = "Trạng thái", Format = "badge" }
+        }
+    })
+    <div id="departmentEmployeesMessage" class="small mt-3" role="status" aria-live="polite"></div>
+</section>
+@section Scripts {
+    <script src="/js/departments.js"></script>
+}

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using System.Security.Claims;
 using JtechnApi.Shares.BaseRepository;
@@ -65,11 +65,11 @@ namespace JtechnApi.Users.Authorization
 
     public sealed class PermissionAuthorizationHandler : AuthorizationHandler<PermissionRequirement>
     {
-        private readonly DBJtecContext _context;
+        private readonly JtechnApi.Users.Repositories.IPermissionRepository repository;
 
-        public PermissionAuthorizationHandler(DBJtecContext context)
+        public PermissionAuthorizationHandler(JtechnApi.Users.Repositories.IPermissionRepository repository)
         {
-            _context = context;
+            this.repository = repository;
         }
 
         protected override async Task HandleRequirementAsync(
@@ -83,37 +83,7 @@ namespace JtechnApi.Users.Authorization
                 return;
             }
 
-            var activeEmployee = await _context.Employee
-                .AsNoTracking()
-                .AnyAsync(employee => employee.Id == employeeId && employee.IsActive);
-            if (!activeEmployee)
-            {
-                return;
-            }
-
-            var activeRoleIds = _context.RoleEmployees
-                .Where(assignment => assignment.EmployeeId == employeeId)
-                .Join(
-                    _context.Roles.Where(role => role.IsActive),
-                    assignment => assignment.RoleId,
-                    role => role.Id,
-                    (assignment, role) => new { role.Id, role.Code });
-
-            var isSystemAdministrator = await activeRoleIds
-                .AnyAsync(role => role.Code == "ADMIN");
-            var hasPermission = isSystemAdministrator || await _context.RolePermissions
-                .Where(assignment => activeRoleIds
-                    .Select(role => role.Id)
-                    .Contains(assignment.RoleId))
-                .Join(
-                    _context.Permissions.Where(permission =>
-                        permission.IsActive && permission.Code == requirement.PermissionCode),
-                    assignment => assignment.PermissionId,
-                    permission => permission.Id,
-                    (assignment, permission) => assignment.Id)
-                .AnyAsync();
-
-            if (isSystemAdministrator || hasPermission)
+            if (await repository.HasPermission(employeeId, requirement.PermissionCode))
             {
                 context.Succeed(requirement);
             }

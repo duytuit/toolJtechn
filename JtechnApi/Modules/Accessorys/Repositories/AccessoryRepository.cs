@@ -35,9 +35,6 @@ namespace JtechnApi.Accessorys.Repositories
             };
         }
 
-        Task<PaginatedResult<Accessory>> IAccessoryRepository.GetPaginatedAsync(int page, int pageSize)
-        {
-            throw new NotImplementedException();
-        }
+
     }
 }

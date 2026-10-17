@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <Compile Include="../../JtechnApi/Modules/Exams/Models/OnlineExam.cs" Link="OnlineExam.cs" />
+    <Compile Include="../../JtechnApi/Modules/Exams/Repositories/IOnlineExamRepository.cs" Link="IOnlineExamRepository.cs" />
+    <Compile Include="../../JtechnApi/Modules/Exams/Repositories/OnlineExamRepository.cs" Link="OnlineExamRepository.cs" />
+    <Content Include="../../JtechnApi/Modules/Exams/Data/stamping-new.json" Link="Modules/Exams/Data/stamping-new.json" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Include="../../JtechnApi/Modules/Exams/Repositories/IDepartmentExamRepository.cs" Link="IDepartmentExamRepository.cs" />
+    <Compile Include="../../JtechnApi/Modules/Exams/Dtos/DepartmentExamInput.cs" Link="DepartmentExamInput.cs" />
+    <Compile Include="../../JtechnApi/Common/RepositoryResult.cs" Link="RepositoryResult.cs" />
+    <Compile Include="../../JtechnApi/Modules/Exams/Repositories/ExamDefinitionValidator.cs" Link="ExamDefinitionValidator.cs" />
+  </ItemGroup>
+</Project>

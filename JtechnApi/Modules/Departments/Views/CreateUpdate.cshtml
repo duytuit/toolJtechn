@@ -1,0 +1,49 @@
+@{
+    ViewData["Title"] = ViewData["DepartmentId"] == null ? "Thêm bộ phận" : "Cập nhật bộ phận";
+    Layout = "_Layout";
+}
+<div class="page-header panel-card">
+    <div><p class="section-kicker">Nhân sự</p><h2 class="mb-0">@ViewData["Title"]</h2></div>
+    <a class="btn btn-outline-secondary" href="/admin/departments">Quay lại danh sách</a>
+</div>
+<div class="row justify-content-center"><div class="col-xl-8 col-lg-10">
+    <section id="departmentFormPanel" class="panel-card" data-department-id="@(ViewData["DepartmentId"] ?? "")">
+        <div class="panel-head"><div><p class="section-kicker mb-1">Thông tin bộ phận</p><h5 class="mb-0">@ViewData["Title"]</h5></div></div>
+        <div id="departmentLoadMessage" class="small mb-3" role="status" aria-live="polite"></div>
+        <form id="departmentForm">
+            @Html.AntiForgeryToken()
+            <fieldset id="departmentFields">
+                <div class="border-top pt-3 mt-2">
+                    <p class="section-kicker mb-3">Thông tin cơ bản</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            @await Html.PartialAsync("_CompactInput", new JtechnApi.ViewModels.CompactInputModel
+                            {
+                                Id = "departmentCode", Name = "code", Label = "Mã bộ phận", Placeholder = "Ví dụ: DAP, LR01",
+                                Autocomplete = "off", MaxLength = 50, Required = true
+                            })
+                            <small class="text-muted">Chữ không dấu, số, gạch ngang hoặc gạch dưới; mã được lưu in hoa.</small>
+                        </div>
+                        <div class="col-md-6">
+                            @await Html.PartialAsync("_CompactInput", new JtechnApi.ViewModels.CompactInputModel
+                            {
+                                Id = "departmentName", Name = "name", Label = "Tên bộ phận", Placeholder = "Nhập tên bộ phận", MaxLength = 150, Required = true
+                            })
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="departmentDescription">Mô tả</label>
+                            <textarea class="form-control" id="departmentDescription" name="description" rows="3" maxlength="1000" placeholder="Nhập mô tả bộ phận"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            <div class="border-top pt-3 mt-4">
+                <div id="departmentMessage" class="small mb-3" role="status" aria-live="polite"></div>
+                <div class="d-flex justify-content-end gap-2"><a class="btn btn-outline-secondary" href="/admin/departments">Hủy</a><button class="btn btn-primary" type="submit">Lưu bộ phận</button></div>
+            </div>
+        </form>
+    </section>
+</div></div>
+@section Scripts {
+    <script src="/js/departments.js"></script>
+}

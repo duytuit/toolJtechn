@@ -8,7 +8,6 @@ namespace JtechnApi.Shares.BaseRepository
     public class DBContext : DbContext
     {
         public DbSet<Exam> Exam { get; set; }
-        public DbSet<Department> Department { get; set; }
         public DbSet<Accessory> Accessory { get; set; }
         public DBContext(DbContextOptions<DBContext> options) : base(options)
         {

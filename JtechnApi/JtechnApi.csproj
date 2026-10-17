@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);App_Data\**</DefaultItemExcludes>
     <TargetFramework>net6.0</TargetFramework>
     <!-- <CheckEolTargetFramework>false</CheckEolTargetFramework> -->
     <PublishReadyToRun>false</PublishReadyToRun>
@@ -58,6 +59,12 @@
     <Content Update="web.config">
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </Content>
+    <Content Update="Modules\Exams\Data\*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="Modules\Departments\Views\departments.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="Modules\Employees\Views\employee-departments.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="Modules\Exams\Views\online-exams.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="Modules\Exams\Views\department-exams.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="Modules\Exams\Views\exam-question-editor.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

@@ -35,9 +35,6 @@ namespace JtechnApi.Exams.Repositories
             };
         }
 
-        Task<PaginatedResult<Exam>> IExamRepository.GetPaginatedAsync(int page, int pageSize)
-        {
-            throw new NotImplementedException();
-        }
+
     }
 }

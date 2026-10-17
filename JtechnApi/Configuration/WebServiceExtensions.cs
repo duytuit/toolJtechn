@@ -25,9 +25,9 @@ namespace JtechnApi.Configuration
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                     .AddCookie(options =>
                     {
-                        options.LoginPath = "/login";
-                        options.LogoutPath = "/logout";
-                        options.AccessDeniedPath = "/access-denied";
+                        options.LoginPath = "/admin/login";
+                        options.LogoutPath = "/admin/logout";
+                        options.AccessDeniedPath = "/admin/access-denied";
                         options.ExpireTimeSpan = System.TimeSpan.FromHours(8);
                         options.SlidingExpiration = true;
                         options.Cookie.HttpOnly = true;

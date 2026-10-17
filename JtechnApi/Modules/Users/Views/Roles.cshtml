@@ -1,7 +1,10 @@
+@inject Microsoft.AspNetCore.Authorization.IAuthorizationService Authorization
 @{
     ViewData["Title"] = "Quản lý phân quyền";
     Layout = "_Layout";
+    var canSyncPermissions = (await Authorization.AuthorizeAsync(User, null, "Permission:PERMISSIONS.ASSIGN")).Succeeded;
 }
+@Html.AntiForgeryToken()
 
 <div class="page-header panel-card">
     <div>
@@ -91,7 +94,13 @@
             <p class="section-kicker mb-1">Cấu hình quyền</p>
             <h5 class="mb-0" id="permissionTitle">Chọn vai trò để cấu hình quyền</h5>
         </div>
-        <button class="btn btn-primary" type="button" id="savePermissionsButton" disabled>Lưu quyền</button>
+        <div class="d-flex flex-wrap gap-2">
+            @if (canSyncPermissions)
+            {
+                <button class="btn btn-outline-primary" type="button" id="syncPermissionsButton">Đồng bộ quyền</button>
+            }
+            <button class="btn btn-primary" type="button" id="savePermissionsButton" disabled>Lưu quyền</button>
+        </div>
     </div>
     <div id="permissionList" class="row g-3">
         <div class="col-12 text-muted">Đang tải danh sách quyền...</div>
@@ -382,6 +391,26 @@
                 } finally {
                     savePermissionsButton.disabled = !selectedRole;
                 }
+            });
+
+            document.querySelector('#syncPermissionsButton')?.addEventListener('click', async event => {
+                const button = event.currentTarget;
+                if (button.disabled) return;
+                button.disabled = true;
+                const roleId = selectedRole?.id;
+                const pendingCodes = new Set([...permissionList.querySelectorAll('input[type="checkbox"]:checked')].map(input => input.value));
+                try {
+                    const result = await request(`${api}/permissions/sync`, {
+                        method: 'POST',
+                        headers: { RequestVerificationToken: document.querySelector('[name="__RequestVerificationToken"]').value }
+                    });
+                    await loadData();
+                    if (roleId && selectedRole?.id === roleId) {
+                        permissionList.querySelectorAll('input[type="checkbox"]').forEach(input => input.checked = pendingCodes.has(input.value));
+                    }
+                    window.JtechnUI.toast(`Đã đồng bộ quyền. Thêm mới ${result.added} quyền.`, 'success');
+                } catch (error) { showError(error); }
+                finally { button.disabled = false; }
             });
 
             loadData().catch(showError);

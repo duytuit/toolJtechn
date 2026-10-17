@@ -1,30 +1,47 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using JtechnApi.Shares.BaseRepository;
 using JtechnApi.Users.Dtos;
 using JtechnApi.Users.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+
 using Microsoft.EntityFrameworkCore;
 
-namespace JtechnApi.Users.Controllers
+using JtechnApi.Shares;
+using static JtechnApi.Shares.RepositoryResult;
+
+namespace JtechnApi.Users.Repositories
 {
-    [ApiController]
-    [Route("api/admin")]
-    [Authorize]
-    public class RoleManagementController : ControllerBase
+    public class RoleRepository : IRoleRepository
     {
         private readonly DBJtecContext _context;
 
-        public RoleManagementController(DBJtecContext context)
+        public RoleRepository(DBJtecContext context)
         {
             _context = context;
         }
 
-        [HttpGet("roles")]
-        [Authorize(Policy = "Permission:ROLES.VIEW")]
-        public async Task<IActionResult> GetRoles()
+        public async Task<RepositoryResult> SynchronizePermissions()
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+            var existing = (await _context.Permissions.Select(p => p.Code).ToListAsync()).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var added = new List<string>();
+            foreach (var permission in JtechnApi.Configuration.SidebarMenu.RequiredPermissions())
+            {
+                if (!existing.Add(permission.Code)) continue;
+                _context.Permissions.Add(new JtechnApi.Users.Models.Permission
+                {
+                    Code = permission.Code, Name = permission.Name, Category = permission.Category,
+                    Description = permission.Name, IsActive = true, CreatedAt = DateTime.UtcNow
+                });
+                added.Add(permission.Code);
+            }
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return Ok(new { added = added.Count, codes = added });
+        }
+
+        public async Task<RepositoryResult> GetRoles()
         {
             var roles = await _context.Roles
                 .AsNoTracking()
@@ -74,9 +91,7 @@ namespace JtechnApi.Users.Controllers
             }));
         }
 
-        [HttpGet("roles/{id:int}")]
-        [Authorize(Policy = "Permission:ROLES.VIEW")]
-        public async Task<IActionResult> GetRole(int id)
+        public async Task<RepositoryResult> GetRole(int id)
         {
             var role = await _context.Roles
                 .AsNoTracking()
@@ -118,9 +133,7 @@ namespace JtechnApi.Users.Controllers
             });
         }
 
-        [HttpGet("permissions")]
-        [Authorize(Policy = "Permission:PERMISSIONS.VIEW")]
-        public async Task<IActionResult> GetPermissions()
+        public async Task<RepositoryResult> GetPermissions()
         {
             var permissions = await _context.Permissions
                 .AsNoTracking()
@@ -140,28 +153,32 @@ namespace JtechnApi.Users.Controllers
             return Ok(permissions);
         }
 
-        [HttpGet("assignable-employees")]
-        [Authorize(Policy = "Permission:EMPLOYEES.VIEW")]
-        public async Task<IActionResult> GetAssignableEmployees()
+        public async Task<RepositoryResult> GetAssignableEmployees(string q = null)
         {
-            var employees = await _context.Employee
-                .AsNoTracking()
-                .Where(employee => employee.IsActive)
+            if (q?.Length > 150) return BadRequest(new { message = "Từ khóa tối đa 150 ký tự." });
+            var query = _context.Employee.AsNoTracking().Where(employee => employee.IsActive);
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var term = q.Trim();
+                query = query.Where(employee => employee.EmployeeCode.Contains(term) || employee.FullName.Contains(term));
+            }
+            if (q != null) query = query.OrderBy(employee => employee.EmployeeCode).Take(50);
+            var employees = await query
                 .OrderBy(employee => employee.EmployeeCode)
                 .Select(employee => new
                 {
                     employee.Id,
                     employee.EmployeeCode,
-                    employee.FullName
+                    employee.FullName,
+                    employee.IsActive,
+                    Label = employee.EmployeeCode + " - " + employee.FullName
                 })
                 .ToListAsync();
 
             return Ok(employees);
         }
 
-        [HttpPost("roles")]
-        [Authorize(Policy = "Permission:ROLES.CREATE")]
-        public async Task<IActionResult> CreateRole([FromBody] CreateRoleDto input)
+        public async Task<RepositoryResult> CreateRole(CreateRoleDto input)
         {
             if (input == null)
             {
@@ -198,9 +215,7 @@ namespace JtechnApi.Users.Controllers
             });
         }
 
-        [HttpPut("roles/{id:int}")]
-        [Authorize(Policy = "Permission:ROLES.UPDATE")]
-        public async Task<IActionResult> UpdateRole(int id, [FromBody] UpdateRoleDto input)
+        public async Task<RepositoryResult> UpdateRole(int id, UpdateRoleDto input)
         {
             if (input == null)
             {
@@ -236,9 +251,7 @@ namespace JtechnApi.Users.Controllers
             });
         }
 
-        [HttpDelete("roles/{id:int}")]
-        [Authorize(Policy = "Permission:ROLES.DELETE")]
-        public async Task<IActionResult> DeleteRole(int id)
+        public async Task<RepositoryResult> DeleteRole(int id)
         {
             var role = await _context.Roles.FirstOrDefaultAsync(item => item.Id == id);
             if (role == null)
@@ -266,11 +279,9 @@ namespace JtechnApi.Users.Controllers
             return NoContent();
         }
 
-        [HttpPut("roles/{id:int}/permissions")]
-        [Authorize(Policy = "Permission:PERMISSIONS.ASSIGN")]
-        public async Task<IActionResult> SetRolePermissions(
+        public async Task<RepositoryResult> SetRolePermissions(
             int id,
-            [FromBody] AssignRolePermissionsDto input)
+            AssignRolePermissionsDto input)
         {
             if (input?.PermissionCodes == null)
             {
@@ -323,9 +334,7 @@ namespace JtechnApi.Users.Controllers
             return Ok(new { roleId = id, permissionCodes });
         }
 
-        [HttpGet("employees/{employeeId:int}/roles")]
-        [Authorize(Policy = "Permission:ROLES.VIEW")]
-        public async Task<IActionResult> GetEmployeeRoles(int employeeId)
+        public async Task<RepositoryResult> GetEmployeeRoles(int employeeId)
         {
             if (!await _context.Employee.AnyAsync(employee => employee.Id == employeeId))
             {
@@ -350,11 +359,9 @@ namespace JtechnApi.Users.Controllers
             return Ok(roles);
         }
 
-        [HttpPut("employees/{employeeId:int}/roles")]
-        [Authorize(Policy = "Permission:PERMISSIONS.ASSIGN")]
-        public async Task<IActionResult> SetEmployeeRoles(
+        public async Task<RepositoryResult> SetEmployeeRoles(
             int employeeId,
-            [FromBody] AssignEmployeeRolesDto input)
+            AssignEmployeeRolesDto input)
         {
             if (input?.RoleCodes == null)
             {

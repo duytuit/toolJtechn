@@ -31,6 +31,16 @@ Namespace cũ được giữ sau khi sắp xếp thư mục. Ví dụ, code tron
 
 ## Thay đổi module và giao diện
 
+- Khai báo menu mới trong `Configuration/SidebarMenu.cs`, không hard-code thêm link nghiệp vụ vào layout. Sidebar dùng `<Resource>.VIEW`; nút Đồng bộ quyền đọc danh mục này để bổ sung VIEW/CREATE/UPDATE/DELETE. Việc tạo quyền không tự gán quyền cho vai trò hoặc thay thế kiểm tra authorization ở controller.
+
+- Mỗi repository phải có interface `I<TênRepository>` trong cùng thư mục. Controller, authorization handler và các thành phần tiêu thụ nhận interface qua constructor; đăng ký DI bằng `AddScoped<IRepository, Repository>()` hoặc lifetime phù hợp. Không inject trực tiếp class repository. `IOnlineExamRepository` dùng `AddSingleton<IOnlineExamRepository, OnlineExamRepository>()` để giữ khóa ghi file chung.
+
+- Mọi module đặt logic nghiệp vụ và truy cập dữ liệu trong `Repositories/`. Controller chỉ điều phối HTTP, binding/ModelState, view, cookie đăng nhập và chuyển kết quả repository thành response. Authorization handler chỉ lấy danh tính và gọi repository kiểm tra quyền; không truy vấn database trực tiếp trong controller hoặc handler.
+- CRUD quản trị nhân viên dùng `EmployeeRepository`, bộ phận dùng `DepartmentRepository`, vai trò dùng `RoleRepository`; đăng nhập và quyền dùng `AuthenticationRepository`, `PermissionRepository`. Thi online dùng `OnlineExamRepository` (singleton để giữ khóa lưu file), không dùng thư mục `Exams/Services`.
+- Repository trả DTO hoặc `RepositoryResult`; không trả `IActionResult` hoặc phụ thuộc MVC. Chuyển kết quả thành HTTP tại controller qua `RepositoryResultExtensions`. Repository dùng EF phải đăng ký scoped; không đổi singleton của repository thi online sang scoped vì sẽ mất đồng bộ khóa giữa các request.
+
+- Trang chủ Home dùng đường dẫn `/`. Các route view quản trị dùng tiền tố `/admin`, ví dụ `/admin/employees`, `/admin/departments`, `/admin/exams`, `/admin/login`. Khi đổi route, cập nhật liên kết, form action và cookie authentication paths tương ứng. Route API và tài nguyên tĩnh giữ quy ước riêng.
+
 - Tìm luồng hiện có từ route/controller tới DTO, repository hoặc DbContext, rồi tới view/JavaScript gọi API trước khi sửa.
 - Đặt tính năng riêng trong module tương ứng. Không tạo repository/service trung gian chỉ để bọc lại một lời gọi nếu không có nhu cầu cụ thể.
 - Đăng ký dependency của module tại `<Module>Module.cs`; thêm module mới vào `Configuration/ModuleServiceExtensions.cs`. Repository và DbContext thường dùng scoped lifetime; không inject trực tiếp chúng vào singleton.
@@ -40,6 +50,8 @@ Namespace cũ được giữ sau khi sắp xếp thư mục. Ví dụ, code tron
 - Không giả định module tự kế thừa `_ViewImports.cshtml` hoặc `_ViewStart.cshtml` trong `Views/`: kiểm tra vị trí và phạm vi kế thừa Razor thực tế.
 
 ## Dữ liệu, cấu hình và quyền truy cập
+
+- Không tạo ràng buộc `FOREIGN KEY` trong SQL hoặc cấu hình quan hệ EF cho chức năng mới. Lưu ID liên kết và kiểm tra dữ liệu tham chiếu trong repository theo quy ước của người dùng.
 
 - `DBJtecContext` dùng SQL Server; `DBContext` dùng MySQL. Oracle sử dụng `OracleConnectionFactory`. Xác định đúng nguồn dữ liệu từ mã hiện có trước khi thay đổi truy vấn.
 - MySQL dùng `ServerVersion.AutoDetect`, có thể kết nối server trong lúc khởi tạo. Redis và các thao tác nghiệp vụ cũng có thể cần dịch vụ thật. Build thành công không chứng minh ứng dụng chạy thành công.

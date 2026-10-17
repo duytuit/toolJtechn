@@ -1,0 +1,1474 @@
+{
+  "id": 6,
+  "title": "Bài kiểm tra kiến thức công nhân Dập (mới)",
+  "minutes": 30,
+  "groups": [
+    {
+      "title": "I. AN TOÀN LAO ĐỘNG ( 3 điểm ) \n                                     Theo bạn thao tác an toàn lao động là thao tác nào? (Tích vào đáp án đúng)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 1,
+          "text": "Theo bạn thao tác an toàn lao động là thao tác nào?",
+          "points": 3,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Tuyệt đối không được điều chỉnh khi chưa tắt máy"
+            },
+            {
+              "id": "1",
+              "text": "Khoảng cách tay cầm dây đến máy ≥ 15mm"
+            },
+            {
+              "id": "2",
+              "text": "Khi đang chuẩn bị không để chân lên công tắc chân"
+            },
+            {
+              "id": "3",
+              "text": "Không có mặt nạ bảo vệ vẫn có thể dập"
+            },
+            {
+              "id": "4",
+              "text": "Tanshi bị kẹt trong máy có thể dùng tay để lấy ra"
+            }
+          ],
+          "correct": [
+            "0",
+            "1",
+            "2"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "II. KIỂM TRA NĂNG LỰC NHẬN BIẾT MÀU DÂY ( 6 điểm )  \n                                   Bạn hãy chọn đáp án đúng bằng cách tích vào đáp án màu dây tương ứng với màu dây trong ảnh",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 2,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "RV"
+            },
+            {
+              "id": "1",
+              "text": "RW"
+            },
+            {
+              "id": "2",
+              "text": "RY"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 3,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "GY"
+            },
+            {
+              "id": "1",
+              "text": "GW"
+            },
+            {
+              "id": "2",
+              "text": "GBr"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 4,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Br"
+            },
+            {
+              "id": "1",
+              "text": "BR"
+            },
+            {
+              "id": "2",
+              "text": "B"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 5,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Br"
+            },
+            {
+              "id": "1",
+              "text": "BR"
+            },
+            {
+              "id": "2",
+              "text": "BG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 6,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "V"
+            },
+            {
+              "id": "1",
+              "text": "O"
+            },
+            {
+              "id": "2",
+              "text": "G"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 7,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_6.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Lg"
+            },
+            {
+              "id": "1",
+              "text": "LgR"
+            },
+            {
+              "id": "2",
+              "text": "GW"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 8,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_7.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "PV"
+            },
+            {
+              "id": "1",
+              "text": "OR"
+            },
+            {
+              "id": "2",
+              "text": "PB"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 9,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_8.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LW"
+            },
+            {
+              "id": "1",
+              "text": "LY"
+            },
+            {
+              "id": "2",
+              "text": "GY"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 10,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_9.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LR"
+            },
+            {
+              "id": "1",
+              "text": "LW"
+            },
+            {
+              "id": "2",
+              "text": "GL"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 11,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_10.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "YL"
+            },
+            {
+              "id": "1",
+              "text": "LgR"
+            },
+            {
+              "id": "2",
+              "text": "GW"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 12,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_11.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "PO"
+            },
+            {
+              "id": "1",
+              "text": "LG"
+            },
+            {
+              "id": "2",
+              "text": "PV"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 13,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_12.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "O"
+            },
+            {
+              "id": "1",
+              "text": "Y"
+            },
+            {
+              "id": "2",
+              "text": "W"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "III. KIỂM TRA THÔNG TIN TRÊN EDP ( 5 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 14,
+          "text": "Giải thích các thông số trên EDP ?",
+          "points": 5,
+          "image": "/img/congdoandap2/group3_1.png",
+          "kind": "matching",
+          "options": [
+            {
+              "id": "0",
+              "text": "Kích thước dây"
+            },
+            {
+              "id": "1",
+              "text": "Mã sản phẩm"
+            },
+            {
+              "id": "2",
+              "text": "Số dây"
+            },
+            {
+              "id": "3",
+              "text": "Chủng loại, kích cỡ, màu sắc dây"
+            },
+            {
+              "id": "4",
+              "text": "Vị trí để tanshi"
+            },
+            {
+              "id": "5",
+              "text": "Số lot"
+            },
+            {
+              "id": "6",
+              "text": "Tanshi A"
+            },
+            {
+              "id": "7",
+              "text": "Đầu chuốt Tanshi A"
+            },
+            {
+              "id": "8",
+              "text": "Tanshi B"
+            },
+            {
+              "id": "9",
+              "text": "Đầu chuốt Tanshi B"
+            },
+            {
+              "id": "10",
+              "text": "Nội dung cần chú ý"
+            },
+            {
+              "id": "11",
+              "text": "Số lượng"
+            },
+            {
+              "id": "12",
+              "text": "Kí hiệu của lót hàng"
+            },
+            {
+              "id": "13",
+              "text": "Tên mối nối"
+            },
+            {
+              "id": "14",
+              "text": "Kích thước dây sau xoắn"
+            },
+            {
+              "id": "15",
+              "text": "Mã QR"
+            },
+            {
+              "id": "16",
+              "text": "Maku dây"
+            },
+            {
+              "id": "17",
+              "text": "Kí hiệu dập chồng"
+            },
+            {
+              "id": "18",
+              "text": "Sỏ ống, gomusen... đầu A/B"
+            },
+            {
+              "id": "19",
+              "text": "Dập xong hàn"
+            }
+          ],
+          "correct": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "IV. QUY TRÌNH THAO TÁC DẬP \n                                     Theo bạn thao tác an toàn lao động là thao tác nào? (Tích vào đáp án đúng)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 15,
+          "text": "Tình tự thao tác dập gồm những bước nào (chọn phương án đúng) (5 điểm)?",
+          "points": 5,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Phương án 1:<br>\n                                                       <div style=\"margin-left: 35px;\">1. Bật nguồn điện</div>\n                                                       <div style=\"margin-left: 35px;\">2. Kiểm tra EDP và tiến hành thiết lập khuôn dập và tanshi</div>\n                                                       <div style=\"margin-left: 35px;\">3. Kiểm tra hình dạng tanshi đã dập, đo chiều cao của tanshi bằng panme đến khi ok.</div>\n                                                       <div style=\"margin-left: 35px;\">4. Kiểm tra máy hằng ngày, mỗi ngày 1 lần trước khi dập</div>\n                                                       <div style=\"margin-left: 35px;\">5. Sử dụng chương trình so sánh tanshi bằng máy để kiểm tra tanshi trước khi dập.</div>\n                                                       <div style=\"margin-left: 35px;\">6. Tắt nguồn điện</div>\n                                                       <div style=\"margin-left: 35px;\">7. Thả hàng vào đúng vị trí quy định</div>\n                                                       <div style=\"margin-left: 35px;\">8. Thiết lập khuôn dập.</div>\n                                                       <div style=\"margin-left: 35px;\">9. Thiết lập Tanshi.</div>\n                                                       <div style=\"margin-left: 35px;\">10. Tiến hành cất dọn khuôn dập</div>"
+            },
+            {
+              "id": "1",
+              "text": "Phương án 2:<br><div style=\"margin-left: 35px;\">1. Kiểm tra máy hằng ngày, mỗi ngày 1 lần trước khi dập</div><div style=\"margin-left: 35px;\">2. Kiểm tra EDP và tiến hành oder khuôn dập và tanshi</div><div style=\"margin-left: 35px;\">3. Thiết lập khuôn dập.</div><div style=\"margin-left: 35px;\">4. Thiết lập Tanshi</div><div style=\"margin-left: 35px;\">5. Sử dụng chương trình so sánh tanshi bằng máy để kiểm tra tanshi trước khi dập.</div><div style=\"margin-left: 35px;\">6. Bật nguồn điện</div><div style=\"margin-left: 35px;\">7. Dập vào dây thử để lấy chiều cao, đo chiều cao của tanshi bằng panme. Ok thì dập vào dây thật, NG thì thiết lập lại đến khi ok</div><div style=\"margin-left: 35px;\">8. Kiểm tra đầu đồng xem có bị thừa sợi đồng không, ok thì tiến hành dập.</div><div style=\"margin-left: 35px;\">9. Kiểm tra ngoại quan rồi thả hàng vào đúng vị trí quy định.</div><div style=\"margin-left: 35px;\">10. Tắt nguồn điện</div><div style=\"margin-left: 35px;\">11. Tiến hành cất dọn khuôn dập</div>"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 16,
+          "text": "Những điểm lưu ý khi đứng máy dập (Hãy chọn đáp án đúng) ( 7 điểm )",
+          "points": 7,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Không được điều chỉnh khi chưa tắt máy"
+            },
+            {
+              "id": "1",
+              "text": "Khoảng cách tay cầm dây đến máy ≥ 15mm"
+            },
+            {
+              "id": "2",
+              "text": "Khi đang chuẩn bị không để chân lên công tắc chân"
+            },
+            {
+              "id": "3",
+              "text": "Khi xử lý sự cố máy móc phải tắt nguồn điện bỏ chân ra khỏi công tắc chân"
+            },
+            {
+              "id": "4",
+              "text": "Khi máy báo đỏ \"pip pip\" phải kiểm tra ngoại quan →Nếu NG thì cắt đi dập lại"
+            },
+            {
+              "id": "5",
+              "text": "Bê máy bằng 2 tay"
+            },
+            {
+              "id": "6",
+              "text": "Khi có bất thường thực hiện: Dừng→ Gọi→ Đợi"
+            },
+            {
+              "id": "7",
+              "text": "Có thể dập mà không cần mặt nạ bảo vệ"
+            },
+            {
+              "id": "8",
+              "text": "Khi điều chỉnh chiều cao không cần tắt máy"
+            },
+            {
+              "id": "9",
+              "text": "Có thể tự lấy tanshi và khuôn dập"
+            },
+            {
+              "id": "10",
+              "text": "Khi có bất thường tự xử lý, không cần báo cáo cấp trên"
+            },
+            {
+              "id": "11",
+              "text": "Tất cả những đáp án trên"
+            }
+          ],
+          "correct": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ]
+        },
+        {
+          "id": 17,
+          "text": "Trình tự thao tác lắp khuôn dập.(Bạn hãy chọn phương án đúng)  ( 5 điểm )?",
+          "points": 5,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Phương án 1:<br><div style=\"margin-left: 35px;\">1. Kiểm tra bàn gá với đế máy xem có dính dị vật không, nếu có dùng chổi quét sạch rồi mới lắp máy</div><div style=\"margin-left: 35px;\">2. So sánh tên khuôn dập thực tế với trên phần mềm xem có đúng không </div><div style=\"margin-left: 35px;\">3. Đặt khuôn dập lên bàn gá, đẩy cổ khuôn dập lên cài vào trục máy, sau đó lắp khuôn dập khớp với bàn gá rồi khóa chốt lại</div><div style=\"margin-left: 35px;\">4. Đối với khuôn Doitsu kiểm tra vai máy xem có bằng nhau không rồi quay tay 1 vòng cảm nhận lực xem có nhẹ không, có bị mắc không, khuôn Yazaki kiểm tra vai máy xem có bằng nhau không</div><div style=\"margin-left: 35px;\">5. Lắp tanshi lên tay đỡ và khóa chốt</div><div style=\"margin-left: 35px;\">6. Lắp tanshi vào khuôn dập</div>"
+            },
+            {
+              "id": "1",
+              "text": "Phương án 2:<br>\n                                    <div style=\"margin-left: 35px;\">1. Đặt khuôn dập lên bàn gá, đẩy cổ khuôn dập lên cài vào trục máy, sau đó lắp khuôn dập khớp với bàn gá rồi khóa chốt lại</div>\n                                    <div style=\"margin-left: 35px;\">2. Đối với khuôn Doitsu kiểm tra vai máy xem có bằng nhau không rồi quay tay 1 vòng cảm nhận lực xem có nhẹ không, có bị mắc không, khuôn Yazaki kiểm tra vai máy xem có bằng nhau không</div>\n                                    <div style=\"margin-left: 35px;\">3. Kiểm tra bàn gá với đế máy xem có dính dị vật không, nếu có dùng chổi quét sạch rồi mới lắp máy</div>\n                                    <div style=\"margin-left: 35px;\">4. Lắp tanshi lên tay đỡ và khóa chốt</div>\n                                    <div style=\"margin-left: 35px;\">5. Lắp tanshi vào khuôn dập</div>\n                                    <div style=\"margin-left: 35px;\">6. So sánh tên khuôn dập thực tế với trên phần mềm xem có đúng không </div>"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 18,
+          "text": "Dựa vào đâu để thiết lập chiều cao ( 4 điểm )",
+          "points": 4,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bảng tiêu chuẩn chiều cao và dây thực tế chuẩn bị dập"
+            },
+            {
+              "id": "1",
+              "text": "Bảng tiêu chuẩn chiều cao, dây và tanshi thực tế chuẩn bị dập"
+            },
+            {
+              "id": "2",
+              "text": "Thiết lập chiều cao dựa vào trí nhớ"
+            },
+            {
+              "id": "3",
+              "text": "Tanshi giống nhau thì chiều cao giống nhau"
+            },
+            {
+              "id": "4",
+              "text": "Tất cả những phương án trên"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 19,
+          "text": "Trình tự sử dụng panme đo chiều cao tanshi.(Bạn hãy chọn phương án đúng) ( 5 điểm )?",
+          "points": 5,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Phương án 1:<br><div style=\"margin-left: 35px;\">1. Vặn núm to cách hàm cố định khoảng 0.5mm thì dùng núm vặn nhỏ vặn vào đến khi tạch tạch 3 tiếng, reset về \"0\" sau đó xoáy ra</div><div style=\"margin-left: 35px;\">2. Đặt phần bụng tanshi chạm vào hàm cố định và vuông góc với hàm cố định sao cho điểm tiếp xúc với panme chính giữa thân tanshi</div><div style=\"margin-left: 35px;\">3. Vặn núm to trước đến khi hàm di động gần chạm vào hàm cố định (cách khoảng 0.5mm) thì dùng núm nhỏ vặn tạch tạch 2 tiếng là ok</div>"
+            },
+            {
+              "id": "1",
+              "text": "Phương án 2:<br>\n                                                       <div style=\"margin-left: 35px;\">1. Đặt phần bụng tanshi chạm vào hàm cố định và vuông góc với hàm cố định sao cho điểm tiếp xúc chính giữa thân tanshi</div>\n                                                       <div style=\"margin-left: 35px;\">2. Vặn núm to trước đến khi hàm di động gần chạm vào hàm cố định (cách khoảng 0.5mm) thì dùng núm nhỏ vặn tạch tạch 2 tiếng là ok</div>\n                                                       <div style=\"margin-left: 35px;\">3. Vặn hàm di động chạm vào hàm cố định, reset về \"0\" sau đó xoáy ra</div>"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 20,
+          "text": "Điểm chú ý khi sử dụng panme. (Bạn hãy chọn đáp án đúng) ( 5 điểm )",
+          "points": 5,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Thao tác vặn nhẹ nhàng"
+            },
+            {
+              "id": "1",
+              "text": "Đo ở điểm chính giữa trên lưng tanshi"
+            },
+            {
+              "id": "2",
+              "text": "Không cần reset panme về \"0\" trước khi đo"
+            },
+            {
+              "id": "3",
+              "text": "Đo ở điểm nào trên lưng tanshi cũng được"
+            },
+            {
+              "id": "4",
+              "text": "Thao tác vặn nhanh, dứt khoát"
+            }
+          ],
+          "correct": [
+            "0",
+            "1"
+          ]
+        },
+        {
+          "id": 21,
+          "text": "Nhận biết khuôn Doitsu và khuôn Yazaki ( Bạn hãy điền số thích hợp vào ô trống) ( 2 điểm )?",
+          "points": 2,
+          "image": "/img/congdoandap2/group4_6.png",
+          "kind": "matching",
+          "options": [
+            {
+              "id": "0",
+              "text": "Khuôn Yazaki"
+            },
+            {
+              "id": "1",
+              "text": "Khuôn Doitsu"
+            },
+            {
+              "id": "2",
+              "text": "Bàn gá Doitsu"
+            },
+            {
+              "id": "3",
+              "text": "Bàn gá Yazaki"
+            }
+          ],
+          "correct": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ]
+        },
+        {
+          "id": 22,
+          "text": "Tanshi tròn sỏ ống nào sẽ phải chuyển lên nhúng (Bạn hãy chọn đáp án đúng nhất) ( 3 điểm )",
+          "points": 3,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Sỏ ống sumi"
+            },
+            {
+              "id": "1",
+              "text": "Sỏ ống bini"
+            },
+            {
+              "id": "2",
+              "text": "Sỏ ống ES"
+            },
+            {
+              "id": "3",
+              "text": "Sỏ ống sumi, bini, ES mà EDP ghi chú nhúng tất, nhúng tâm hoặc không ghi chú gì"
+            },
+            {
+              "id": "4",
+              "text": "Tất cả những loại ống trên"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 23,
+          "text": "Tanshi nào sẽ phải chuyển lên hàn (Bạn hãy chọn đáp án đúng) ( 3 điểm )",
+          "points": 3,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Tanshi ****"
+            },
+            {
+              "id": "1",
+              "text": "Có ghi chú dập hàn hoặc Dập nhỏ keo"
+            },
+            {
+              "id": "2",
+              "text": "Không có tiêu chuẩn, được chi thị bóp hàn"
+            },
+            {
+              "id": "3",
+              "text": "Có tiêu chuẩn nhưng được hiển thị hàn"
+            },
+            {
+              "id": "4",
+              "text": "Có ghi chú tiếng nhật はんだ"
+            },
+            {
+              "id": "5",
+              "text": "Có ghi chú tiếng nhật ハンダ"
+            },
+            {
+              "id": "6",
+              "text": "Tất cả các phương án"
+            }
+          ],
+          "correct": [
+            "6"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "V. CÁCH SỬ DỤNG PHẦN MỀM DẬP",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 24,
+          "text": "Mục đích của việc sử dụng phần mềm so sánh tanshi (Bạn hãy chọn đáp án đúng) ( 3 điểm )",
+          "points": 3,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Lưu dữ liệu đã dập lên phần mềm"
+            },
+            {
+              "id": "1",
+              "text": "So sánh và lưu dữ liệu chiều cao"
+            },
+            {
+              "id": "2",
+              "text": "So sánh tanshi, phòng tránh lỗi dập nhầm"
+            },
+            {
+              "id": "3",
+              "text": "Điều tra dữ liệu dễ dàng"
+            },
+            {
+              "id": "4",
+              "text": "Tất cả các phương án"
+            }
+          ],
+          "correct": [
+            "4"
+          ]
+        },
+        {
+          "id": 25,
+          "text": "Cách sử dụng phần mềm dập (Bạn hãy chọn phương án đúng) ( 5 điểm )?",
+          "points": 5,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Phương án 1:<br>\n                                                       <div style=\"margin-left: 35px;\">1. Mở phần mềm dập</div>\n                                                       <div style=\"margin-left: 35px;\">2. Nhấn vào công đoạn Dập</div>\n                                                       <div style=\"margin-left: 35px;\">3. Nhập mã nhân viên 2 lần</div>\n                                                       <div style=\"margin-left: 35px;\">4. Ở Phần mềm Dập nhấn \"Truy cập\"</div>\n                                                       <div style=\"margin-left: 35px;\">5. Scan mã QR trên EDP cần dập vào dòng đầu tiên</div>\n                                                       <div style=\"margin-left: 35px;\">6. Màn hình hiên thị thông số : Mã sản phẩm, số lót, số dây,cỡ dây, đầu tanshi A-B</div>\n                                                       <div style=\"margin-left: 35px;\">7. Thiết lập chiều cao, dập thử, đo ok thì nhập lên máy, NG thì thiết lập lại đến khi ok</div>\n                                                       <div style=\"margin-left: 35px;\">8. Máy tính sẽ đọc + hiển thị số dây +  đầu tanshi cần dập, tiêu chuẩn chiều cao và thông số để thiết lập</div>\n                                                       <div style=\"margin-left: 35px;\">9. Scan tên tanshi so sánh trên cuộn tanshi</div>"
+            },
+            {
+              "id": "1",
+              "text": "Phương án 2:<br><div style=\"margin-left: 35px;\">1. Mở phần mềm dập</div><div style=\"margin-left: 35px;\">2. Nhập mã nhân viên 2 lần</div><div style=\"margin-left: 35px;\">3. Nhấn vào công đoạn Dập</div><div style=\"margin-left: 35px;\">4. Ở Phần mềm Dập nhấn \"Truy cập\"</div><div style=\"margin-left: 35px;\">5. Scan mã QR trên EDP cần dập vào dòng đầu tiên</div><div style=\"margin-left: 35px;\">6. Màn hình hiên thị thông số : Mã sản phẩm, số lót, số dây,cỡ dây, đầu tanshi A-B</div><div style=\"margin-left: 35px;\">7. Scan tên tanshi so sánh trên cuộn tanshi</div><div style=\"margin-left: 35px;\">8. Máy tính sẽ đọc + hiển thị số dây +  đầu tanshi cần dập, tiêu chuẩn chiều cao và thông số để thiết lập</div><div style=\"margin-left: 35px;\">9. Thiết lập chiều cao, dập thử, đo ok thì nhập lên máy, NG thì thiết lập lại đến khi ok</div>"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VI.DÂY DẬP CHỒNG",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 26,
+          "text": "Đâu là kí hiệu dập chồng (bạn hãy chọn đáp án đúng) ( 5 điểm )?",
+          "points": 5,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "はんだ"
+            },
+            {
+              "id": "1",
+              "text": "ﾀﾞﾌﾞﾙ"
+            },
+            {
+              "id": "2",
+              "text": "ﾂｲｽﾄ"
+            },
+            {
+              "id": "3",
+              "text": "圧着後ハンダ"
+            },
+            {
+              "id": "4",
+              "text": "マーク No"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 27,
+          "text": "Trình tự thao tác dập chồng (Bạn hãy chọn phương án đúng) ( 5 điểm )?",
+          "points": 5,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Phương án 1:<br><div style=\"margin-left: 35px;\">1. Chọn dây dập chồng cùng mã sản phẩm, cùng tên tanshi, Chọn số dây dập chồng tương ứng</div><div style=\"margin-left: 35px;\">2. Trên phần mềm nhấn \"Dập chồng\" sau đó Scan EDP lên.  Đối với dập chồng 3 dây trở lên nhấn \"Dập Thêm\" trên phần mềm dập đến khi scan hết EDP bộ dập chồng</div><div style=\"margin-left: 35px;\">3. Nhặt dây của từng số dây đến khi đủ bộ dập chồng (Ví dụ dập chồng 5 dây phải nhặt mỗi số dây 1 pcs) Dây sỏ chồng phải lấy dây theo ống, maku, ghibushi đã sỏ sẵn để dập.</div><div style=\"margin-left: 35px;\">4. Xếp đầu dây bằng nhau, không dây nào bị tụt xuống thấp hơn hay đồng cao hơn, rồi tiến hành dập</div>"
+            },
+            {
+              "id": "1",
+              "text": "Phương án 2:<br>\n                                                <div style=\"margin-left: 35px;\">1. Chọn dây dập chồng cùng mã sản phẩm, cùng tên tanshi, Chọn số dây dập chồng tương ứng</div>\n                                                <div style=\"margin-left: 35px;\">2. Xếp đầu dây bằng nhau, không dây nào bị tụt xuống thấp hơn hay đồng cao hơn, rồi tiến hành dập</div>\n                                                <div style=\"margin-left: 35px;\">3. Nhặt dây của từng số dây đến khi đủ bộ dập chồng (Ví dụ dập chồng 5 dây phải nhặt mỗi số dây 1 pcs) Dây sỏ chồng phải lấy dây theo ống, maku, ghibushi đã sỏ sẵn để dập</div>\n                                                <div style=\"margin-left: 35px;\">4. Trên phần mềm nhấn \"Dập chồng\" sau đó Scan EDP lên.  Đối với dập chồng 3 dây trở lên nhấn \"Dập Thêm\" trên phần mềm dập đến khi scan hết EDP bộ dập chồng</div>"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 28,
+          "text": "Thao tác dập chồng (Bạn hãy chọn câu trả lời đúng) ( 2 điểm )?",
+          "points": 2,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Không được dập chồng dây cùng 1 bó dây với nhau (trừ trường hợp EDP hiển thị dập chồng với chính nó)"
+            },
+            {
+              "id": "1",
+              "text": "Dây sỏ chồng phải lấy dây từ ống, maku, ghibushi để dập và kiểm tra"
+            },
+            {
+              "id": "2",
+              "text": "Dập xong không cần nhặt từng pcs tanshi lên kiểm tra xem đã nhặt đúng dây chưa"
+            },
+            {
+              "id": "3",
+              "text": "Có thể lấy nhiều dây trong cùng 1 số dây để dập chồng vào nhau"
+            }
+          ],
+          "correct": [
+            "0",
+            "1"
+          ]
+        },
+        {
+          "id": 29,
+          "text": "Tiêu chuẩn dập chồng đối với tanshi LA, BA ( 3điểm )?",
+          "points": 3,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Dây nhỏ để trên"
+            },
+            {
+              "id": "1",
+              "text": "Dây to và nhỏ để ngang nhau"
+            },
+            {
+              "id": "2",
+              "text": "Dây nhỏ để dưới"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VII.Dây SRD",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 30,
+          "text": "Chú ý khi dập dây SRD (Bạn hãy chọn đáp án đúng)  ( 4 điểm )?",
+          "points": 4,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Người chia hàng cho dập phần tanshi trong phần ghi chú trước"
+            },
+            {
+              "id": "1",
+              "text": "Nếu có tanshi trong phần ghi chú, báo quản lý để liên lạc tách EDP"
+            },
+            {
+              "id": "2",
+              "text": "Khi dập NG phải nhờ bên gia công SRD họ kiểm tra xem cắt đi có ok không và nhờ họ sửa hộ"
+            },
+            {
+              "id": "3",
+              "text": "Trên phần mềm tích vào \"dây SRD\" để dập SRD và nhập số lõi tương ứng để phần mềm nhận đủ sản lượng"
+            },
+            {
+              "id": "4",
+              "text": "SRD có tanshi trong phần ghi chú và tanshi ngoài thì dập tanshi nào trước cũng được"
+            },
+            {
+              "id": "5",
+              "text": "Khi dập NG có thể cắt đi dập lại"
+            }
+          ],
+          "correct": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ]
+        },
+        {
+          "id": 31,
+          "text": "Dây SRD thả hàng dựa vào đâu ( 5 điểm )?",
+          "points": 5,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Tất cả đầu tanshi đã được dập ok"
+            },
+            {
+              "id": "1",
+              "text": "Ami 0-10 thả vào hoàn thiện"
+            },
+            {
+              "id": "2",
+              "text": "Ami 15 trở lên thả nối"
+            },
+            {
+              "id": "3",
+              "text": "Ami **** chuyển lên hàn (nếu không có ghi chú \"Không hàn\")"
+            },
+            {
+              "id": "4",
+              "text": "Có lõi dây hiển thị \"J\" thả nối"
+            },
+            {
+              "id": "5",
+              "text": "Tất cả các phương án"
+            }
+          ],
+          "correct": [
+            "5"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VIII.Phân loại hàng Hoàn thiện, xoắn, nối (6 điểm )",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 32,
+          "text": "Hàng xoắn (Bạn hãy chọn đáp án đúng) ( 2 điểm )?",
+          "points": 2,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hàng đã được dập hết tất cả đầu tanshi,Hiển thị  số  ở phần thông số xoắn"
+            },
+            {
+              "id": "1",
+              "text": "Đã dập 1 đầu tanshi, đầu còn lại là J nối, Hiển thị  số  ở phần thông số xoắn"
+            },
+            {
+              "id": "2",
+              "text": "Đã dập 1 đầu tanshi, đầu còn lại là J nối, Phần thông số xoắn không có số,Không có ghi chú xoắn cùng với số dây nào ở phần ghi chú"
+            },
+            {
+              "id": "3",
+              "text": "Hàng đã được dập tất cả các đầu tanshi & Không hiển thị xoắn, nối"
+            }
+          ],
+          "correct": [
+            "0",
+            "1"
+          ]
+        },
+        {
+          "id": 33,
+          "text": "Hàng nối (Bạn hãy chọn đáp án đúng) ( 2 điểm )?",
+          "points": 2,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đã dập 1 đầu tanshi, đầu còn lại là J nối, Phần thông số xoắn không có số,Không có ghi chú xoắn cùng với số dây nào ở phần ghi chú"
+            },
+            {
+              "id": "1",
+              "text": "Dây SRD đã dập hết đầu tanshi ,Có lõi dây J nối (ở phần tanshi hoặc ghi chú),Có ami L=20mm trở lên (ami không ghi chú gì)"
+            },
+            {
+              "id": "2",
+              "text": "Đã dập 1 đầu tanshi, đầu còn lại là J nối, Hiển thị  số  ở phần thông số xoắn"
+            }
+          ],
+          "correct": [
+            "0",
+            "1"
+          ]
+        },
+        {
+          "id": 34,
+          "text": "Hàng 1 đầu  (Bạn hãy chọn đáp án đúng) ( 1 điểm )?",
+          "points": 1,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đã dập 1 đầu tanshi, đầu còn lại là J nối, Phần thông số xoắn không có số,Không có ghi chú xoắn cùng với số dây nào ở phần ghi chú"
+            },
+            {
+              "id": "1",
+              "text": "Đối với dây đơn: đã được dập 1 đầu,  đầu còn  lại chưa được dập,  Dây dập chồng, SRD, sỏ ống * hoặc conector: Còn bất kì 1 đầu nào chưa dập"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 35,
+          "text": "Hàng hoàn thiện  (Bạn hãy chọn đáp án đúng) ( 1 điểm)?",
+          "points": 1,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hàng đã được dập hết tất cả đầu tanshi,Hiển thị  số  ở phần thông số xoắn"
+            },
+            {
+              "id": "1",
+              "text": "Hàng đã được dập tất cả các đầu tanshi & Không hiển thị xoắn, nối"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "IV.Kiểm tra ngoại quan tanshi ( 9 điểm )",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 36,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap2/group9_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 37,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap2/group9_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 38,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap2/group9_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 39,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap2/group9_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 40,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap2/group9_5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 41,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap2/group9_6.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 42,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap2/group9_7.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 43,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap2/group9_8.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 44,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap2/group9_9.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 45,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap2/group9_10.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 46,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap2/group9_11.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 47,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap2/group9_12.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 48,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap2/group9_13.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 49,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap2/group9_14.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 50,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap2/group9_15.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 51,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap2/group9_16.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 52,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap2/group9_17.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 53,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap2/group9_18.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        }
+      ]
+    }
+  ]
+}

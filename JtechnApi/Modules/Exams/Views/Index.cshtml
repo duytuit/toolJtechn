@@ -1,0 +1,82 @@
+@{
+    ViewData["Title"] = "Thi trực tuyến";
+    Layout = "_Layout";
+}
+@section Styles {
+    <link rel="stylesheet" href="/css/online-exams.css" />
+}
+@Html.AntiForgeryToken()
+<div class="exam-shell">
+    <div class="page-header panel-card">
+        <div>
+            <p class="section-kicker">Đào tạo và đánh giá</p>
+            <h2 class="mb-0">Thi trực tuyến</h2>
+        </div>
+        <a href="/admin/exams" class="btn btn-outline-secondary">Danh sách bài thi</a>
+    </div>
+    <div id="examMessage" class="small mb-3" role="status" aria-live="polite"></div>
+    <div id="examLoading" class="panel-card small text-muted" role="status">Đang tải dữ liệu bài thi...</div>
+    <section id="examSelection" class="panel-card" hidden>
+        <div class="panel-head"><div><h5 class="mb-1">Chọn bài thi</h5><small class="text-muted">Các bài đang mở thuộc bộ phận được gán cho bạn.</small></div></div>
+        <div id="availableExams" class="row g-3"></div>
+        <p id="availableExamsEmpty" class="text-muted small" hidden>Chưa có bài thi phù hợp. Vui lòng liên hệ quản lý để kiểm tra bộ phận và đề thi.</p>
+    </section>
+    <div id="examCatalog" hidden>
+        <section class="panel-card">
+            <div class="panel-head">
+                <div><p class="section-kicker mb-1">Thông tin bài thi</p><h5 id="examTitle" class="mb-0"></h5></div>
+            </div>
+            <div id="examMeta" class="exam-meta text-muted"></div>
+            <div class="border-top pt-3 mt-3">
+                <h6>Hướng dẫn làm bài</h6>
+                <p class="text-muted">Câu chọn nhiều và câu ghép số: phải đúng toàn bộ mới được điểm của câu. Bài làm được lưu tự động; thời gian tiếp tục chạy khi đóng trang.</p>
+                <ul class="small text-muted mb-3">
+                    <li>Từ 80 điểm: đạt.</li>
+                    <li>Trên 60 đến dưới 80 điểm: kiểm tra lại.</li>
+                    <li>Từ 50 đến 60 điểm: đào tạo lại.</li>
+                    <li>Dưới 50 điểm: không đạt.</li>
+                </ul>
+                <div id="imageWarning" class="alert alert-warning" hidden role="status"></div>
+                <form id="examStartForm">
+                    <fieldset id="examStartFields">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6"><label class="form-label" for="examDate">Ngày thi *</label><input id="examDate" type="date" class="form-control" required min="1900-01-01" max="2100-12-31" /><small class="text-muted">Ngày thi được ghi nhận riêng với thời điểm tạo lượt thi.</small></div>
+                            <div class="col-md-6 d-flex align-items-center"><div class="form-check"><input id="examNewEmployee" class="form-check-input" type="checkbox" /><label for="examNewEmployee" class="form-check-label">Nhân viên mới</label></div></div>
+                        </div>
+                    </fieldset>
+                    <div class="d-flex justify-content-end"><button id="startExam" type="submit" class="btn btn-primary">Bắt đầu làm bài</button></div>
+                </form>
+            </div>
+        </section>
+        <section class="panel-card">
+            <div class="panel-head"><div><h5 class="mb-1">Lịch sử bài thi</h5><small id="examHistoryCount" class="text-muted"></small></div></div>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead><tr><th>Ngày thi</th><th>Ngày tạo lượt</th><th>Nhân viên mới</th><th>Điểm</th><th>Kết quả</th><th class="text-end">Thao tác</th></tr></thead>
+                    <tbody id="examHistory"></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+    <div id="examWorkspace" class="exam-workspace" hidden>
+        <div>
+            <section id="attemptInfo" class="panel-card small text-muted"></section>
+            <section id="examResult" class="panel-card" hidden role="status"></section>
+            <form id="examForm">
+                <div id="examQuestions"></div>
+                <div class="panel-card d-flex justify-content-end"><button type="submit" class="btn btn-primary exam-submit">Nộp bài</button></div>
+            </form>
+        </div>
+        <aside class="panel-card exam-sidebar">
+            <p class="section-kicker mb-1">Thời gian còn lại</p>
+            <strong id="examTimer" role="timer">30:00</strong>
+            <div id="examProgress" class="small text-muted"></div>
+            <nav id="examMap" class="exam-map" aria-label="Danh sách câu hỏi"></nav>
+            <p id="saveStatus" class="small text-muted" aria-live="polite"></p>
+            <button type="button" id="submitExam" class="btn btn-primary w-100">Nộp bài</button>
+        </aside>
+    </div>
+</div>
+@section Scripts {
+    <script src="/js/online-exams.js"></script>
+}

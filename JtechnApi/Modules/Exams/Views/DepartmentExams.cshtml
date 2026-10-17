@@ -1,0 +1,77 @@
+@inject Microsoft.AspNetCore.Authorization.IAuthorizationService Authorization
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Bài thi theo bộ phận";
+    var canCreate = (await Authorization.AuthorizeAsync(User, null, "Permission:DEPARTMENT_EXAMS.CREATE")).Succeeded;
+    var canUpdate = (await Authorization.AuthorizeAsync(User, null, "Permission:DEPARTMENT_EXAMS.UPDATE")).Succeeded;
+    var canDelete = (await Authorization.AuthorizeAsync(User, null, "Permission:DEPARTMENT_EXAMS.DELETE")).Succeeded;
+}
+@Html.AntiForgeryToken()
+<div class="page-header panel-card">
+    <div><p class="section-kicker">Đào tạo và đánh giá</p><h2 class="mb-0">Bài thi theo bộ phận</h2></div>
+    @if (canCreate)
+    {
+        <button id="examNew" type="button" class="btn btn-primary">+ Thêm bài thi</button>
+    }
+</div>
+<section id="examEditor" class="panel-card mb-4" hidden>
+    <div class="panel-head"><h5 id="examEditorTitle" class="mb-0">Thêm bài thi</h5></div>
+    <form id="departmentExamForm">
+        <fieldset id="departmentExamFields">
+            <div class="row g-3">
+                <div class="col-md-4"><label class="form-label" for="examDepartment">Bộ phận *</label><select id="examDepartment" name="departmentId" class="form-select" required><option value="">Chọn bộ phận</option></select></div>
+                <div class="col-md-4">@await Html.PartialAsync("_CompactInput", new JtechnApi.ViewModels.CompactInputModel { Id = "examCode", Name = "code", Label = "Mã bài thi", Required = true, MaxLength = 50 })</div>
+                <div class="col-md-4">@await Html.PartialAsync("_CompactInput", new JtechnApi.ViewModels.CompactInputModel { Id = "examName", Name = "name", Label = "Tên bài thi", Required = true, MaxLength = 200 })</div>
+                <div class="col-md-4"><label class="form-label" for="examMinutes">Thời gian (phút) *</label><input id="examMinutes" name="minutes" type="number" min="1" max="480" class="form-control" value="30" required /></div>
+                <div class="col-md-8"><label class="form-label" for="examDescription">Mô tả</label><textarea id="examDescription" name="description" rows="2" maxlength="1000" class="form-control"></textarea></div>
+                <div class="col-12 border-top pt-3">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                        <div><h5 class="mb-1">Câu hỏi bài thi</h5><small id="examQuestionSummary" class="text-muted" aria-live="polite"></small></div>
+                        <button id="examAddGroup" type="button" class="btn btn-outline-primary">+ Thêm nhóm câu hỏi</button>
+                    </div>
+                    <p class="small text-muted">Thêm nhóm, câu hỏi và các lựa chọn bên dưới. Đánh dấu đáp án đúng; tổng điểm của đề phải bằng 100. Nội dung đáp án hỗ trợ HTML định dạng.</p>
+                    <div id="examQuestionGroups"></div>
+                </div>
+                <div class="col-12 border-top pt-3">
+                    <label class="form-label" for="examJsonFile">Hoặc import đề thi từ file JSON</label>
+                    <input id="examJsonFile" type="file" accept=".json,application/json" class="form-control" />
+                    <small class="text-muted">File tối đa 1 MB. Nội dung nhập sẽ hiển thị trong form câu hỏi để chỉnh sửa trước khi lưu.</small>
+                </div>
+                <div class="col-12">
+                    <details><summary class="mb-2">Nội dung JSON nâng cao</summary>
+                        <label class="form-label" for="examDefinition">Dán nội dung JSON</label>
+                        <textarea id="examDefinition" name="definitionJson" rows="10" maxlength="1000000" class="form-control font-monospace" spellcheck="false"></textarea>
+                        <div class="d-flex gap-2 mt-2"><button id="examApplyJson" type="button" class="btn btn-outline-primary">Áp dụng JSON vào form</button><button id="examRefreshJson" type="button" class="btn btn-outline-secondary">Lấy JSON từ form</button></div>
+                    </details>
+                </div>
+                <div class="col-12"><div class="form-check form-switch"><input id="examActive" name="isActive" type="checkbox" class="form-check-input" checked /><label for="examActive" class="form-check-label">Mở thi</label></div></div>
+            </div>
+        </fieldset>
+        <div id="examEditorMessage" class="small text-danger mt-3" role="status" aria-live="polite"></div>
+        <div class="d-flex justify-content-end gap-2 mt-3"><button type="button" id="examCancel" class="btn btn-outline-secondary">Hủy</button><button type="submit" id="examSave" class="btn btn-primary">Lưu bài thi</button></div>
+    </form>
+</section>
+<section class="panel-card">
+    <div class="panel-head flex-wrap gap-3">
+        <div><h5 class="mb-1">Danh sách bài thi</h5><small id="examCount" class="text-muted">Đang tải...</small></div>
+        <div><label class="form-label" for="examDepartmentFilter">Bộ phận</label><select id="examDepartmentFilter" class="form-select"><option value="">Tất cả bộ phận</option></select></div>
+    </div>
+    @await Html.PartialAsync("_DataTable", new JtechnApi.ViewModels.DataTableModel
+    {
+        Id = "departmentExamTable", PageSize = 10, EnableSearch = true, EnableEdit = canUpdate, EnableDelete = canDelete,
+        EmptyMessage = "Chưa có bài thi trong bộ phận này.",
+        Columns = new[] {
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "code", Header = "Mã", Format = "strong" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "name", Header = "Bài thi" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "departmentName", Header = "Bộ phận" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "minutes", Header = "Phút" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "status", Header = "Trạng thái", Format = "badge" }
+        }
+    })
+    <div id="examListMessage" class="small mt-3" role="status" aria-live="polite"></div>
+    <div id="examLaunchLinks" class="d-flex flex-wrap gap-2 mt-3" aria-label="Mở làm bài thi"></div>
+</section>
+@section Scripts {
+    <script src="/js/exam-question-editor.js"></script>
+    <script src="/js/department-exams.js"></script>
+}

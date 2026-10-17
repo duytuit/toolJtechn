@@ -14,10 +14,15 @@
 <section class="panel-card">
     <div class="row align-items-end g-3">
         <div class="col-lg-7">
-            <label class="form-label" for="employeeSelect">Nhân viên</label>
-            <select id="employeeSelect" class="form-select">
-                <option value="">Đang tải danh sách nhân viên...</option>
-            </select>
+            <fieldset id="roleEmployeePicker" disabled>
+                @await Html.PartialAsync("_ApiFilterDropdown", new JtechnApi.ViewModels.ApiFilterDropdownModel
+                {
+                    Id = "employeeSelect", Name = "employeeId", Label = "Nhân viên",
+                    Endpoint = "/api/admin/assignable-employees", QueryParameter = "q",
+                    ValueField = "id", LabelField = "label", Required = true,
+                    Placeholder = "Nhập mã hoặc tên nhân viên...", MinCharacters = 1, DebounceMilliseconds = 250
+                })
+            </fieldset>
         </div>
         <div class="col-lg-5">
             <div id="employeeSummary" class="text-muted small" role="status" aria-live="polite"></div>
@@ -43,12 +48,15 @@
         document.addEventListener('DOMContentLoaded', function () {
             const api = '/api/admin';
             const employeeSelect = document.querySelector('#employeeSelect');
+            const employeeSearch = document.querySelector('#employeeSelect-search');
+            const picker = document.querySelector('#roleEmployeePicker');
             const employeeSummary = document.querySelector('#employeeSummary');
             const roleList = document.querySelector('#employeeRoleList');
             const saveButton = document.querySelector('#saveEmployeeRoles');
             const requestedRole = new URLSearchParams(window.location.search).get('role');
             let roles = [];
             let employees = [];
+            let generation = 0, loadedEmployeeId = '', saving = false;
 
             const request = async (url, options = {}) => {
                 const response = await fetch(url, {
@@ -112,10 +120,14 @@
 
             const loadEmployeeRoles = async (preselectRequestedRole = false) => {
                 const employeeId = employeeSelect.value;
-                saveButton.disabled = !employeeId;
+                const current = ++generation;
+                loadedEmployeeId = '';
+                saveButton.disabled = true;
+                roleList.querySelectorAll('input').forEach(input => input.disabled = true);
                 if (!employeeId) {
                     employeeSummary.textContent = '';
                     renderRoles([]);
+                    roleList.querySelectorAll('input').forEach(input => input.disabled = true);
                     return;
                 }
 
@@ -123,8 +135,9 @@
                     Promise.resolve(employees.find(item => String(item.id) === employeeId)),
                     request(`${api}/employees/${employeeId}/roles`)
                 ]);
+                if (current !== generation || employeeSelect.value !== employeeId) return;
                 employeeSummary.textContent =
-                    `${employee.employeeCode} · ${employee.fullName} · ${employee.isActive ? 'Đang hoạt động' : 'Đã ngừng hoạt động'}`;
+                    employee ? `${employee.employeeCode} · ${employee.fullName} · Đang hoạt động` : employeeSearch.value;
                 renderRoles(assignedRoles);
                 if (preselectRequestedRole && requestedRole) {
                     const targetRole = roles.find(role => role.code === requestedRole);
@@ -133,6 +146,8 @@
                         : null;
                     if (checkbox) checkbox.checked = true;
                 }
+                loadedEmployeeId = employeeId;
+                saveButton.disabled = saving;
             };
 
             const load = async () => {
@@ -140,16 +155,12 @@
                     request(`${api}/assignable-employees`),
                     request(`${api}/roles`)
                 ]);
-                employeeSelect.replaceChildren(new Option('Chọn nhân viên', ''));
-                employees.forEach(employee => {
-                    employeeSelect.add(new Option(
-                        `${employee.employeeCode} — ${employee.fullName}`,
-                        employee.id));
-                });
+                picker.disabled = false;
 
                 const requestedEmployeeId = new URLSearchParams(window.location.search).get('employeeId');
                 if (requestedEmployeeId && employees.some(employee => String(employee.id) === requestedEmployeeId)) {
                     employeeSelect.value = requestedEmployeeId;
+                    employeeSearch.value = employees.find(employee => String(employee.id) === requestedEmployeeId).label;
                 }
 
                 await loadEmployeeRoles(Boolean(requestedRole));
@@ -158,13 +169,21 @@
             employeeSelect.addEventListener('change', () => {
                 loadEmployeeRoles(Boolean(requestedRole)).catch(error => window.JtechnUI.toast(error.message, 'error'));
             });
+            employeeSearch.addEventListener('input', () => {
+                generation++;
+                loadedEmployeeId = '';
+                saveButton.disabled = true;
+                roleList.querySelectorAll('input').forEach(input => input.disabled = true);
+            });
 
             saveButton.addEventListener('click', async () => {
                 const employeeId = employeeSelect.value;
-                if (!employeeId) return;
+                if (saving || !employeeId || loadedEmployeeId !== employeeId) return;
                 const roleCodes = [...roleList.querySelectorAll('input[type="checkbox"]:checked')]
                     .map(input => input.value);
                 saveButton.disabled = true;
+                saving = true;
+                picker.disabled = true;
                 try {
                     await request(`${api}/employees/${employeeId}/roles`, {
                         method: 'PUT',
@@ -175,12 +194,14 @@
                 } catch (error) {
                     window.JtechnUI.toast(error.message, 'error');
                 } finally {
-                    saveButton.disabled = !employeeSelect.value;
+                    saving = false;
+                    picker.disabled = false;
+                    saveButton.disabled = !employeeSelect.value || loadedEmployeeId !== employeeSelect.value;
                 }
             });
 
             load().catch(error => {
-                employeeSelect.replaceChildren(new Option('Không tải được danh sách', ''));
+                picker.disabled = true;
                 employeeSummary.textContent = error.message;
                 employeeSummary.className = 'text-danger small';
                 window.JtechnUI.toast(error.message, 'error');

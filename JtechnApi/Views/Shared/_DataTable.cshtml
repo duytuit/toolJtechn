@@ -1,4 +1,4 @@
-@model JtechnApi.ViewModels.DataTableModel
+﻿@model JtechnApi.ViewModels.DataTableModel
 @{
     var searchId = $"{Model.Id}-search";
 }
@@ -10,6 +10,7 @@
      data-enable-search="@Model.EnableSearch.ToString().ToLowerInvariant()"
      data-enable-pagination="@Model.EnablePagination.ToString().ToLowerInvariant()"
      data-enable-edit="@Model.EnableEdit.ToString().ToLowerInvariant()"
+     data-enable-view="@Model.EnableView.ToString().ToLowerInvariant()"
      data-enable-delete="@Model.EnableDelete.ToString().ToLowerInvariant()">
     @if (!string.IsNullOrWhiteSpace(Model.Title) || !string.IsNullOrWhiteSpace(Model.Caption) || Model.EnableSearch)
     {
@@ -44,14 +45,14 @@
                     {
                         <th class="@column.CssClass">@column.Header</th>
                     }
-                    @if (Model.EnableEdit || Model.EnableDelete)
+                    @if (Model.EnableView || Model.EnableEdit || Model.EnableDelete)
                     {
                         <th class="text-end">Thao tác</th>
                     }
                 </tr>
             </thead>
             <tbody data-table-body>
-                <tr><td colspan="@(Model.Columns.Count() + (Model.EnableEdit || Model.EnableDelete ? 1 : 0))" class="text-center text-muted py-4">Đang tải dữ liệu...</td></tr>
+                <tr><td colspan="@(Model.Columns.Count() + (Model.EnableView || Model.EnableEdit || Model.EnableDelete ? 1 : 0))" class="text-center text-muted py-4">Đang tải dữ liệu...</td></tr>
             </tbody>
         </table>
     </div>

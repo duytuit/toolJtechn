@@ -1,5 +1,15 @@
+﻿@inject JtechnApi.Users.Repositories.IPermissionRepository SidebarPermissions
 @{
     Layout = null;
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var username = User.Identity?.Name;
+    var fullName = User.FindFirst("FullName")?.Value;
+    var displayName = string.IsNullOrWhiteSpace(fullName) ? username : fullName;
+    var sidebarCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    if (isAuthenticated && int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var sidebarEmployeeId))
+        sidebarCodes = await SidebarPermissions.GetGrantedCodes(sidebarEmployeeId);
+    var sidebarItems = JtechnApi.Configuration.SidebarMenu.Items.Where(item => sidebarCodes.Contains(item.ViewPermission)).ToList();
+    var sidebarGroups = new HashSet<string>();
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -26,43 +36,33 @@
             </div>
 
             <nav>
-                <a class="active" href="/admin">
-                    <span aria-hidden="true">▣</span><span class="nav-label">Dashboard</span>
-                </a>
-                <a asp-controller="Home" asp-action="Index">
-                    <span aria-hidden="true">◫</span><span class="nav-label">Trang chủ</span>
-                </a>
-                <div class="nav-item">
-                    <button class="nav-parent" type="button" aria-expanded="false">
-                        <span aria-hidden="true">◍</span><span class="nav-label">Nhân sự</span><span class="nav-chevron" aria-hidden="true">›</span>
-                    </button>
-                    <div class="sidebar-menu" role="menu">
-                        <a href="/admin/employees" role="menuitem">Danh sách nhân viên</a>
-                        <a href="/admin/roles" role="menuitem">Vai trò và quyền</a>
-                        <a href="/admin/employee-roles" role="menuitem">Gán vai trò nhân viên</a>
-                    </div>
-                </div>
-                <div class="nav-item">
-                    <button class="nav-parent" type="button" aria-expanded="false">
-                        <span aria-hidden="true">◌</span><span class="nav-label">Sản xuất</span><span class="nav-chevron" aria-hidden="true">›</span>
-                    </button>
-                    <div class="sidebar-menu" role="menu">
-                        <a href="#" role="menuitem">Kế hoạch sản xuất</a>
-                        <a href="#" role="menuitem">Tiến độ thực hiện</a>
-                    </div>
-                </div>
-                <div class="nav-item">
-                    <button class="nav-parent" type="button" aria-expanded="false">
-                        <span aria-hidden="true">◎</span><span class="nav-label">Báo cáo</span><span class="nav-chevron" aria-hidden="true">›</span>
-                    </button>
-                    <div class="sidebar-menu" role="menu">
-                        <a href="#" role="menuitem">Báo cáo ngày</a>
-                        <a href="#" role="menuitem">Báo cáo sự cố</a>
-                    </div>
-                </div>
-                <a href="/login">
-                    <span aria-hidden="true">⇄</span><span class="nav-label">Đăng nhập</span>
-                </a>
+                @foreach (var item in sidebarItems)
+                {
+                    if (string.IsNullOrEmpty(item.Group))
+                    {
+                        <a href="@item.Url" data-view-permission="@item.ViewPermission">
+                            <span aria-hidden="true">@item.Icon</span><span class="nav-label">@item.Title</span>
+                        </a>
+                    }
+                    else if (sidebarGroups.Add(item.Group))
+                    {
+                        <div class="nav-item">
+                            <button class="nav-parent" type="button" aria-expanded="false">
+                                <span aria-hidden="true">@item.Icon</span><span class="nav-label">@item.Group</span><span class="nav-chevron" aria-hidden="true">&rsaquo;</span>
+                            </button>
+                            <div class="sidebar-menu" role="menu">
+                                @foreach (var child in sidebarItems.Where(child => child.Group == item.Group))
+                                {
+                                    <a href="@child.Url" role="menuitem" data-view-permission="@child.ViewPermission">@child.Title</a>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+                @if (!isAuthenticated)
+                {
+                    <a href="/admin/login"><span aria-hidden="true">&rarr;</span><span class="nav-label">Đăng nhập</span></a>
+                }
             </nav>
         </aside>
         <div class="sidebar-backdrop" aria-hidden="true"></div>
@@ -82,8 +82,21 @@
                             <button id="fontIncrease" class="appearance-button" type="button" title="Tăng cỡ chữ" aria-label="Tăng cỡ chữ">A+</button>
                             <button id="themeToggle" class="appearance-button" type="button" title="Bật giao diện tối" aria-label="Bật giao diện tối">☾</button>
                         </div>
-                        <span class="text-muted">Xin chào, Admin</span>
-                        <a href="/logout" class="btn btn-outline-danger rounded-pill">Đăng xuất</a>
+                        @if (isAuthenticated)
+                        {
+                            <div class="text-end">
+                                <span class="d-block">Xin chào, <strong>@displayName</strong></span>
+                                @if (!string.IsNullOrWhiteSpace(username) && username != displayName)
+                                {
+                                    <small class="text-muted">@username</small>
+                                }
+                            </div>
+                            <a href="/admin/logout" class="btn btn-outline-danger rounded-pill">Đăng xuất</a>
+                        }
+                        else
+                        {
+                            <a href="/admin/login" class="btn btn-outline-primary rounded-pill">Đăng nhập</a>
+                        }
                     </div>
                 </div>
             </nav>
@@ -161,11 +174,24 @@
                 setTheme(!document.body.classList.contains('theme-dark'));
             });
 
+            const positionSidebarMenus = () => {
+                if (mobileQuery.matches || !pageWrap.classList.contains('sidebar-collapsed')) return;
+                pageWrap.querySelectorAll('.nav-item.menu-popover-open').forEach(item => {
+                    const menu = item.querySelector('.sidebar-menu');
+                    const parent = item.querySelector('.nav-parent');
+                    if (!menu || !parent) return;
+                    const top = Math.max(16, Math.min(parent.getBoundingClientRect().top, window.innerHeight - menu.offsetHeight - 16));
+                    menu.style.setProperty('--sidebar-menu-top', `${top}px`);
+                });
+            };
+            pageWrap.querySelector('.sidebar nav')?.addEventListener('scroll', positionSidebarMenus, { passive: true });
+            window.addEventListener('resize', positionSidebarMenus);
             const setSidebarState = (collapsed) => {
                 pageWrap.classList.toggle('sidebar-collapsed', collapsed);
                 toggle.setAttribute('aria-expanded', String(!collapsed));
                 toggle.setAttribute('aria-label', collapsed ? 'Mở thanh bên' : 'Thu gọn thanh bên');
                 toggle.title = collapsed ? 'Mở thanh bên' : 'Thu gọn thanh bên';
+                positionSidebarMenus();
             };
 
             setSidebarState(localStorage.getItem('jtechn-sidebar-collapsed') === 'true');
@@ -197,6 +223,7 @@
 
                     if (!isOpen) {
                         item.classList.add('menu-popover-open');
+                        positionSidebarMenus();
                         parent.setAttribute('aria-expanded', 'true');
                     }
                 });

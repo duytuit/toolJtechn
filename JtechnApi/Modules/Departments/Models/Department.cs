@@ -1,38 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JtechnApi.Departments.Models
 {
-    [Table("departments")]
+    [Table("department", Schema = "dbo")]
     public class Department
     {
-        [Key]
-        [Column("id")]
+        [Key, Column("id")]
         public int Id { get; set; }
 
-        [Column("code")]
-        public int? Code { get; set; }
-        [Column("name")]
+        [Required, MaxLength(50), Column("code", TypeName = "varchar(50)")]
+        public string Code { get; set; }
+
+        [Required, MaxLength(150), Column("name", TypeName = "nvarchar(150)")]
         public string Name { get; set; }
-        [Column("parent_id")]
-        public int? Parent_id { get; set; }
-        [Column("status")]
-        public int? Status { get; set; }
-        [Column("permissions")]
-        public string Permissions { get; set; }
-        [Column("created_by")]
-        public int? Created_by { get; set; }
-        [Column("updated_by")]
-        public int? Updated_by { get; set; }
-        [Column("deleted_by")]
-        public int? Deleted_by { get; set; }
-        [Column("created_at")]
-        public DateTime? Created_at { get; set; }
-        [Column("updated_at")]
-        public DateTime? Updated_at { get; set; }
-        [Column("deleted_at")]
-        public DateTime? Deleted_at { get; set; }
+
+        [MaxLength(1000), Column("description", TypeName = "nvarchar(1000)")]
+        public string Description { get; set; }
+
+        [Column("created_at", TypeName = "datetime2")]
+        public DateTime CreatedAt { get; set; }
+
+        [Column("updated_at", TypeName = "datetime2")]
+        public DateTime? UpdatedAt { get; set; }
+
+        [Column("deleted_at", TypeName = "datetime2")]
+        public DateTime? DeletedAt { get; set; }
+
     }
 }

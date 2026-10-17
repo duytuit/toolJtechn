@@ -1,0 +1,46 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Bộ phận nhân viên";
+    var canUpdate = ViewData["CanUpdate"] is bool allowed && allowed;
+}
+<div class="page-header panel-card">
+    <div><p class="section-kicker">Nhân sự</p><h2 class="mb-0">Bộ phận nhân viên</h2></div>
+    <a class="btn btn-outline-secondary" href="/admin/employees">Quay lại danh sách nhân viên</a>
+</div>
+<section id="employeeDepartmentPanel" class="panel-card" data-can-update="@canUpdate.ToString().ToLowerInvariant()">
+    <div class="panel-head"><div><h5 class="mb-1">Gán bộ phận</h5><small class="text-muted">Chọn nhân viên và các bộ phận trực thuộc. Một nhân viên có thể thuộc nhiều bộ phận.</small></div></div>
+    <div id="assignmentLoadMessage" class="small mb-3" role="status" aria-live="polite">Đang tải dữ liệu...</div>
+    <form id="employeeDepartmentForm">
+        @Html.AntiForgeryToken()
+        <div class="row g-3 mb-4"><div class="col-lg-6">
+            <fieldset id="assignmentEmployeePicker" disabled>
+                @await Html.PartialAsync("_ApiFilterDropdown", new JtechnApi.ViewModels.ApiFilterDropdownModel
+                {
+                    Id = "assignmentEmployee", Name = "employeeId", Label = "Nhân viên",
+                    Endpoint = "/api/employees/department-search", QueryParameter = "q",
+                    ValueField = "id", LabelField = "label", Placeholder = "Nhập mã hoặc tên nhân viên...",
+                    MinCharacters = 1, DebounceMilliseconds = 250, Required = true
+                })
+            </fieldset>
+        </div></div>
+        <fieldset id="assignmentFields" disabled>
+            <div class="border-top pt-3">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+                    <div><p class="section-kicker mb-1">Danh sách bộ phận</p><small id="assignmentCount" class="text-muted"></small></div>
+                    <div><label for="assignmentSearch" class="visually-hidden">Tìm bộ phận</label><input id="assignmentSearch" class="form-control" type="search" placeholder="Tìm theo mã hoặc tên..." /></div>
+                </div>
+                <div id="assignmentDepartments" class="row g-3"></div>
+                <div id="assignmentEmpty" class="small text-muted" hidden>Không có bộ phận phù hợp.</div>
+            </div>
+        </fieldset>
+        <div class="border-top pt-3 mt-4">
+            <div id="assignmentMessage" class="small mb-3" role="status" aria-live="polite"></div>
+            <div class="d-flex justify-content-end gap-2">
+                @if (canUpdate) { <button id="assignmentSave" type="submit" class="btn btn-primary" disabled>Lưu bộ phận</button> }
+            </div>
+        </div>
+    </form>
+</section>
+@section Scripts {
+    <script src="/js/employee-departments.js"></script>
+}

@@ -51,6 +51,9 @@ namespace JtechnApi.Controllers
         /// List users
         /// </summary>
         /// <returns></returns>
+        [HttpGet("/admin/home")]
+        public IActionResult Root() => Redirect("/");
+
         [HttpGet("/")]
         public IActionResult Index()
         {

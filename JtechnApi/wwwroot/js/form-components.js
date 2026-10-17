@@ -234,6 +234,9 @@
                     option.textContent = String(item.label ?? '');
                     option.dataset.value = String(item.value ?? '');
                     option.addEventListener('click', function () {
+                        window.clearTimeout(timer);
+                        requestNumber++;
+                        if (controller) controller.abort();
                         value.value = option.dataset.value;
                         search.value = option.textContent;
                         status.textContent = '';
@@ -249,7 +252,6 @@
 
             const searchApi = async () => {
                 const query = search.value.trim();
-                value.value = '';
                 list.replaceChildren();
                 closeList();
                 status.textContent = '';
@@ -300,6 +302,8 @@
 
             search.addEventListener('input', function () {
                 value.value = '';
+                requestNumber++;
+                if (controller) controller.abort();
                 window.clearTimeout(timer);
                 timer = window.setTimeout(searchApi, debounce);
             });

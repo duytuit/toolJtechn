@@ -1,0 +1,49 @@
+@inject Microsoft.AspNetCore.Authorization.IAuthorizationService Authorization
+@{
+    ViewData["Title"] = "Quản lý bộ phận";
+    Layout = "_Layout";
+    var canSync = (await Authorization.AuthorizeAsync(User, null, "Permission:EMPLOYEES.UPDATE")).Succeeded
+        && (await Authorization.AuthorizeAsync(User, null, "Permission:EMPLOYEES.VIEW")).Succeeded;
+}
+@Html.AntiForgeryToken()
+<div class="page-header panel-card">
+    <div><p class="section-kicker">Nhân sự</p><h2 class="mb-0">Quản lý bộ phận</h2></div>
+    <div class="d-flex flex-wrap gap-2">
+        @if (canSync)
+        {
+            <button id="departmentSync" class="btn btn-outline-primary" type="button">Đồng bộ nhân viên</button>
+        }
+        <a class="btn btn-primary" href="/admin/departments/create">+ Thêm bộ phận</a>
+    </div>
+</div>
+<section class="panel-card">
+    <div class="panel-head flex-wrap gap-3">
+        <div><h5 class="mb-1">Danh sách bộ phận</h5><small id="departmentCount" class="text-muted">Đang tải dữ liệu từ cơ sở dữ liệu...</small></div>
+        <div class="employee-filters"><div>
+            <label class="form-label" for="departmentSearch">Tìm bộ phận</label>
+            <input class="form-control" id="departmentSearch" type="search" placeholder="Mã, tên bộ phận..." autocomplete="off" />
+        </div></div>
+    </div>
+    @await Html.PartialAsync("_DataTable", new JtechnApi.ViewModels.DataTableModel
+    {
+        Id = "departmentDataTable", PageSize = 10, EnableSearch = false, EnableView = true, EnableEdit = true, EnableDelete = true,
+        EmptyMessage = "Không có bộ phận phù hợp.",
+        Columns = new[]
+        {
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "code", Header = "Mã bộ phận", Format = "strong" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "name", Header = "Tên bộ phận" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "employeeCount", Header = "Tổng nhân viên", CssClass = "text-end", Format = "strong" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "description", Header = "Mô tả" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "createdAt", Header = "Ngày tạo", Format = "date" }
+        }
+    })
+    <div id="departmentListMessage" class="small mt-3" role="status" aria-live="polite"></div>
+</section>
+<section id="departmentSyncPanel" class="panel-card" hidden>
+    <div class="panel-head"><h5 class="mb-0">Kết quả đồng bộ nhân viên</h5></div>
+    <p id="departmentSyncSummary" class="small" role="status" aria-live="polite"></p>
+    <div id="departmentSyncSkipped" class="small text-muted"></div>
+</section>
+@section Scripts {
+    <script src="/js/departments.js"></script>
+}

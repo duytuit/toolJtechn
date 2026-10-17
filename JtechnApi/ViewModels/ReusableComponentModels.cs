@@ -13,6 +13,7 @@ namespace JtechnApi.ViewModels
         public bool EnableSearch { get; set; } = true;
         public bool EnablePagination { get; set; } = true;
         public bool EnableEdit { get; set; }
+        public bool EnableView { get; set; }
         public bool EnableDelete { get; set; }
         public IEnumerable<DataTableColumnModel> Columns { get; set; } = new List<DataTableColumnModel>();
     }

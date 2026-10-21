@@ -1,0 +1,591 @@
+{
+  "id": 15,
+  "title": "Bài kiểm tra kiến thức công nhân",
+  "minutes": 15,
+  "scores": [
+    80,
+    60
+  ],
+  "groups": [
+    {
+      "title": "I,Nhận biết tên các khách hàng,connector ,tanhsi ,gibushi (45 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 1,
+          "text": "Khách hàng KOMATSU thuộc đáp án nào?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đầu chữ : LQ,LP,YN"
+            },
+            {
+              "id": "1",
+              "text": "Đầu số và chữ : 1,2,3,4…..,YT,PX…."
+            },
+            {
+              "id": "2",
+              "text": "Đầu chữ : G ,J,GH…."
+            },
+            {
+              "id": "3",
+              "text": "Đầu số : 561,569,621,625…."
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 2,
+          "text": "Khách hàng KUREN thuộc đáp án nào?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đầu chữ : LQ,LP,YN"
+            },
+            {
+              "id": "1",
+              "text": "Đầu số và chữ : 1,2,3,4…..,YT,PX…."
+            },
+            {
+              "id": "2",
+              "text": "Đầu chữ : G ,J,GH…."
+            },
+            {
+              "id": "3",
+              "text": "Đầu số : 561,569,621,625…."
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 3,
+          "text": "Khách hàng KOBELECO thuộc đáp án nào?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đầu chữ : LQ,LP,YN"
+            },
+            {
+              "id": "1",
+              "text": "Đầu số và chữ : 1,2,3,4…..,YT,PX…."
+            },
+            {
+              "id": "2",
+              "text": "Đầu chữ : G ,J,GH…."
+            },
+            {
+              "id": "3",
+              "text": "Đầu số : 561,569,621,625…."
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 4,
+          "text": "Khách hàng KOMATSU ẤN  thuộc đáp án nào?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đầu chữ : LQ,LP,YN"
+            },
+            {
+              "id": "1",
+              "text": "Đầu số và chữ : 1,2,3,4…..,YT,PX…."
+            },
+            {
+              "id": "2",
+              "text": "Đầu chữ : G ,J,GH…."
+            },
+            {
+              "id": "3",
+              "text": "Đầu số : 561,569,621,625…."
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Nhận biết connector,tanhsi ,gibushi",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 5,
+          "text": "Connector Dotsu đực ?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "public\\assets\\frontend\\images\\connector\\dotsuduc.jpg"
+            },
+            {
+              "id": "1",
+              "text": "public\\assets\\frontend\\images\\connector\\dotsucai.jpg"
+            },
+            {
+              "id": "2",
+              "text": "public\\assets\\frontend\\images\\connector\\yazakicai.jpg"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 6,
+          "text": "Connector Yazaki cái ?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "public\\assets\\frontend\\images\\connector\\tanshi.jpg"
+            },
+            {
+              "id": "1",
+              "text": "public\\assets\\frontend\\images\\connector\\sampleA.jpg"
+            },
+            {
+              "id": "2",
+              "text": "public\\assets\\frontend\\images\\connector\\yazakicai.jpg"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 7,
+          "text": "Tanshi  ?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "public\\assets\\frontend\\images\\connector\\yazakiduc.jpg"
+            },
+            {
+              "id": "1",
+              "text": "public\\assets\\frontend\\images\\connector\\tanshi.jpg"
+            },
+            {
+              "id": "2",
+              "text": "public\\assets\\frontend\\images\\connector\\sampleB.jpg"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 8,
+          "text": "Connector Dotsu cái ?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "public\\assets\\frontend\\images\\connector\\dotsuduc.jpg"
+            },
+            {
+              "id": "1",
+              "text": "public\\assets\\frontend\\images\\connector\\dotsucai.jpg"
+            },
+            {
+              "id": "2",
+              "text": "public\\assets\\frontend\\images\\connector\\yazakicai.jpg"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 9,
+          "text": "Connector Yazaki đực?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "public\\assets\\frontend\\images\\connector\\yazakiduc.jpg"
+            },
+            {
+              "id": "1",
+              "text": "public\\assets\\frontend\\images\\connector\\dotsucai.jpg"
+            },
+            {
+              "id": "2",
+              "text": "public\\assets\\frontend\\images\\connector\\yazakicai.jpg"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "II,Sắp xếp các bước tiến hành lấy dữ liệu để lắp đồ gá ,kiểm tra máy Drac,hàng OK xử lý như nào (5 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 10,
+          "text": "1. Đọc ghi chú trên dữ liệu và cắm đồ gá theo ghi chú </br> 2. Xác nhận mã sản phẩm,số lần sửa đổi </br>\n                                3. Lấy đồ gá thông mạch đúng với sản phẩm </br> 4. Kết nối đồ gá với hàng từ trái qua phải </br>\n                                 5. Lấy dữ liệu kiểm tra thông mạch từ sever </br> 6. Sau khi kiểm tra sản phẩm đầu tiên OK  tiến hành thử máy </br>\n                                 7. Hàng thông mạch OK cho vào thùng vàng chuyển sang công đoạn sau </br> 8. Sản phẩm OK tiến hành nhập kết quả vào JTF-QC-021 </br> 9. Sản phẩm OK đóng dấu màu đỏ vào bên có logo công ty.",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "5→1→4→2→6→8→9→7→5"
+            },
+            {
+              "id": "1",
+              "text": "2→3→5→1→4→6→9→8→7"
+            },
+            {
+              "id": "2",
+              "text": "3→2→1→4→8→5→7→6→9"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "III,Nhận biết các hạng mục khi kết nối đồ gá với hàng (32 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 11,
+          "text": "Kết nối hàng với đồ gá cần ",
+          "points": 4.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Nhìn maku"
+            },
+            {
+              "id": "1",
+              "text": "Theo chùm theo nhánh"
+            },
+            {
+              "id": "2",
+              "text": "Tất cả"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 12,
+          "text": "Quy trình lắp hàng",
+          "points": 4.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Từ trái qua phải"
+            },
+            {
+              "id": "1",
+              "text": "Từ phải qua trái"
+            },
+            {
+              "id": "2",
+              "text": "Tất cả"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 13,
+          "text": "Khi làm hàng cần lấy đúng đầu nối,ve sầu,nho….không?",
+          "points": 4.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Có"
+            },
+            {
+              "id": "1",
+              "text": "Không"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 14,
+          "text": "Các củ chân kim cần check như nào trước và sau thông mạch",
+          "points": 4.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Cong"
+            },
+            {
+              "id": "1",
+              "text": "Biến dạng"
+            },
+            {
+              "id": "2",
+              "text": "Gãy"
+            },
+            {
+              "id": "3",
+              "text": "Tất cả"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 15,
+          "text": "Maku mờ mất cần phải làm gì?",
+          "points": 4.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Treo thẻ lỗi tại vị trí mờ,mất"
+            },
+            {
+              "id": "1",
+              "text": "Báo cáo quản lý"
+            },
+            {
+              "id": "2",
+              "text": "Tất cả"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 16,
+          "text": "Đồ gá đứt cần xử lý gì",
+          "points": 4.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Treo thẻ lỗi tại vị trí đứt"
+            },
+            {
+              "id": "1",
+              "text": "Báo cáo quản lý"
+            },
+            {
+              "id": "2",
+              "text": "Mang đồ gá xuống khu vực đồ gá để sửa chữa"
+            },
+            {
+              "id": "3",
+              "text": "Tất cả"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 17,
+          "text": "Củ DRC khi dùng cần check gì",
+          "points": 4.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Check xem có jig chống tụt chốt chưa"
+            },
+            {
+              "id": "1",
+              "text": "Không cần jig chống tụt chốt"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 18,
+          "text": "Conncetor khi cắm ngược xuôi đều vào được cần làm gì",
+          "points": 4.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Làm bảng chống ngược"
+            },
+            {
+              "id": "1",
+              "text": "Không cần báp cáo"
+            },
+            {
+              "id": "2",
+              "text": "Cứ thế làm"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "IV,Cách phân biệt lỗi hiển thị trên máy KTTM (12 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 19,
+          "text": "Lỗi cắm nhầm chọn đáp án nào sau đây?",
+          "points": 4.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "public\\assets\\frontend\\images\\connector\\camnham.jpg"
+            },
+            {
+              "id": "1",
+              "text": "public\\assets\\frontend\\images\\connector\\loichap.jpg"
+            },
+            {
+              "id": "2",
+              "text": "public\\assets\\frontend\\images\\connector\\loiho.jpg"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 20,
+          "text": "Lỗi hở chọn đáp án nào sau đây?",
+          "points": 4.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "public\\assets\\frontend\\images\\connector\\camnham.jpg"
+            },
+            {
+              "id": "1",
+              "text": "public\\assets\\frontend\\images\\connector\\loichap.jpg"
+            },
+            {
+              "id": "2",
+              "text": "public\\assets\\frontend\\images\\connector\\loiho.jpg"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 21,
+          "text": "Lỗi chập chọn đáp án nào sau đây?",
+          "points": 4.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "public\\assets\\frontend\\images\\connector\\camnham.jpg"
+            },
+            {
+              "id": "1",
+              "text": "public\\assets\\frontend\\images\\connector\\loichap.jpg"
+            },
+            {
+              "id": "2",
+              "text": "public\\assets\\frontend\\images\\connector\\loiho.jpg"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "V, Quy trình xử lý lỗi (6 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 22,
+          "text": "1. Treo thẻ lỗi vào vị trí lỗi </br> 2. Tìm lỗi 2 đầu,so sánh với bản vẽ </br>\n                                3. Gọi quản lý xác nhận lỗi </br> 4. Lấy form lỗi viết nội dung lỗi vào tờ lỗi </br>\n                                 5. Lỗi dễ sửa luôn trên bàn sửa xong kiểm tra lại hàng OK  </br> 6. Lỗi khó không sửa được chuyển hàng ra thùng đỏ </br>",
+          "points": 6.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "2→1→3→4→5→6"
+            },
+            {
+              "id": "1",
+              "text": "3→2→4→5→1→6"
+            },
+            {
+              "id": "2",
+              "text": "5→3→2→1→6→4"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    }
+  ]
+}

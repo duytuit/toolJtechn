@@ -27,6 +27,21 @@ Check(OnlineExamRepository.Grade(definition, new() { [multiple.Id] = multiple.Co
 var matching = questions.First(q => q.Kind == "matching");
 Check(OnlineExamRepository.Grade(definition, new() { [matching.Id] = matching.Correct.Reverse().ToArray() }) == 0, "Matching must preserve numeric positions");
 Check(OnlineExamRepository.Classification(80) == "Đạt" && OnlineExamRepository.Classification(79.5m) == "Kiểm tra lại" && OnlineExamRepository.Classification(60) == "Đào tạo lại" && OnlineExamRepository.Classification(49.5m) == "Không đạt", "Classification boundaries");
+var colorDefinition = JsonSerializer.Deserialize<OnlineExamDefinition>("{\"scores\":[96,90]}", new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+Check(OnlineExamRepository.Classification(96, colorDefinition) == "Đạt" &&
+    OnlineExamRepository.Classification(95.999m, colorDefinition) == "Kiểm tra lại" &&
+    OnlineExamRepository.Classification(90, colorDefinition) == "Kiểm tra lại" &&
+    OnlineExamRepository.Classification(89.999m, colorDefinition) == "Không đạt (Đào tạo lại)", "Configured threshold boundaries include decimal scores");
+Check(OnlineExamRepository.Classification(60, new OnlineExamDefinition()) == "Đào tạo lại", "Legacy definitions preserve classification");
+foreach (var invalidScores in new[] { "[90]", "[90,96]", "[90,90]", "[101,90]", "[90,-1]" })
+{
+    var invalidDefinition = JsonSerializer.Serialize(definition);
+    using var document = JsonDocument.Parse(invalidDefinition);
+    var values = document.RootElement.EnumerateObject().ToDictionary(p => p.Name, p => p.Value.Clone());
+    values["Scores"] = JsonDocument.Parse(invalidScores).RootElement.Clone();
+    try { ExamDefinitionValidator.Parse(JsonSerializer.Serialize(values)); throw new Exception("Invalid thresholds accepted"); }
+    catch (ArgumentException) { Check(true, "Invalid thresholds rejected: " + invalidScores); }
+}
 try { await service.Start("employee-a", "Test"); throw new Exception("Missing images allowed"); }
 catch (InvalidOperationException) { Check(true, "Missing assets prevent opening incomplete exam"); }
 // Placeholder files exist only in the temporary test environment, never in the real question bank.

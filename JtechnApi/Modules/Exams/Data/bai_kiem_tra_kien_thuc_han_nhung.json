@@ -1,0 +1,1310 @@
+{
+  "id": 9,
+  "title": "Bài kiểm tra kiến thức hàn nhúng",
+  "minutes": 30,
+  "scores": [
+    80,
+    60
+  ],
+  "groups": [
+    {
+      "title": "I. AN TOÀN LAO ĐỘNG ( 10 điểm )\n                                    Theo bạn thao tác an toàn lao động là thao tác nào? (Tích vào đáp án đúng)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 1,
+          "text": "Theo bạn thao tác an toàn lao động là thao tác nào?",
+          "points": 10.0,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đeo kính bảo hộ khi thao tác hàn, nhúng"
+            },
+            {
+              "id": "1",
+              "text": "Khoảng cách tay cầm dây đến máy ≥ 30mm"
+            },
+            {
+              "id": "2",
+              "text": "Đeo găng tay, khẩu trang khi thao tác hàn, nhúng"
+            },
+            {
+              "id": "3",
+              "text": "Khi vừa hàn, nhúng xong không được chạm tay vào"
+            },
+            {
+              "id": "4",
+              "text": "Hàn, nhúng xong có thể dùng tay không để gạt thiếc dư"
+            }
+          ],
+          "correct": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "II. KIỂM TRA NĂNG LỰC NHẬN BIẾT MÀU DÂY ( 6 điểm )\n                                  Bạn hãy chọn đáp án đúng bằng cách tích vào đáp án màu dây tương ứng với màu dây trong ảnh",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 2,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "RV"
+            },
+            {
+              "id": "1",
+              "text": "RW"
+            },
+            {
+              "id": "2",
+              "text": "RY"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 3,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "GY"
+            },
+            {
+              "id": "1",
+              "text": "GW"
+            },
+            {
+              "id": "2",
+              "text": "GBr"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 4,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Br"
+            },
+            {
+              "id": "1",
+              "text": "BR"
+            },
+            {
+              "id": "2",
+              "text": "B"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 5,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Br"
+            },
+            {
+              "id": "1",
+              "text": "BR"
+            },
+            {
+              "id": "2",
+              "text": "BG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 6,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "V"
+            },
+            {
+              "id": "1",
+              "text": "O"
+            },
+            {
+              "id": "2",
+              "text": "G"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 7,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_6.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Lg"
+            },
+            {
+              "id": "1",
+              "text": "LgR"
+            },
+            {
+              "id": "2",
+              "text": "GW"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 8,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_7.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "PV"
+            },
+            {
+              "id": "1",
+              "text": "OR"
+            },
+            {
+              "id": "2",
+              "text": "PB"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 9,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_8.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LW"
+            },
+            {
+              "id": "1",
+              "text": "LY"
+            },
+            {
+              "id": "2",
+              "text": "GY"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 10,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_9.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LR"
+            },
+            {
+              "id": "1",
+              "text": "LW"
+            },
+            {
+              "id": "2",
+              "text": "GL"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 11,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_10.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "YL"
+            },
+            {
+              "id": "1",
+              "text": "LgR"
+            },
+            {
+              "id": "2",
+              "text": "GW"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 12,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_11.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "PO"
+            },
+            {
+              "id": "1",
+              "text": "LG"
+            },
+            {
+              "id": "2",
+              "text": "PV"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 13,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_12.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "O"
+            },
+            {
+              "id": "1",
+              "text": "Y"
+            },
+            {
+              "id": "2",
+              "text": "W"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "III. KIỂM TRA THÔNG TIN TRÊN EDP ( 10 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 14,
+          "text": "Giải thích các thông số trên EDP ?",
+          "points": 10.0,
+          "image": "/img/congdoandap2/group3_1.png",
+          "kind": "matching",
+          "options": [
+            {
+              "id": "0",
+              "text": "Kích thước dây"
+            },
+            {
+              "id": "1",
+              "text": "Mã sản phẩm"
+            },
+            {
+              "id": "2",
+              "text": "Số dây"
+            },
+            {
+              "id": "3",
+              "text": "Chủng loại, kích cỡ, màu sắc dây"
+            },
+            {
+              "id": "4",
+              "text": "Vị trí để tanshi"
+            },
+            {
+              "id": "5",
+              "text": "Số lot"
+            },
+            {
+              "id": "6",
+              "text": "Tanshi A"
+            },
+            {
+              "id": "7",
+              "text": "Đầu chuốt Tanshi A"
+            },
+            {
+              "id": "8",
+              "text": "Tanshi B"
+            },
+            {
+              "id": "9",
+              "text": "Đầu chuốt Tanshi B"
+            },
+            {
+              "id": "10",
+              "text": "Nội dung cần chú ý"
+            },
+            {
+              "id": "11",
+              "text": "Số lượng"
+            },
+            {
+              "id": "12",
+              "text": "Kí hiệu của lót hàng"
+            },
+            {
+              "id": "13",
+              "text": "Tên mối nối"
+            },
+            {
+              "id": "14",
+              "text": "Kích thước dây sau xoắn"
+            },
+            {
+              "id": "15",
+              "text": "Mã QR"
+            },
+            {
+              "id": "16",
+              "text": "Maku dây"
+            },
+            {
+              "id": "17",
+              "text": "Kí hiệu dập chồng"
+            },
+            {
+              "id": "18",
+              "text": "Sỏ ống, gomusen... đầu A/B"
+            },
+            {
+              "id": "19",
+              "text": "Dập xong hàn"
+            }
+          ],
+          "correct": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "IV. QUY TRÌNH THAO TÁC NHÚNG",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 15,
+          "text": "Trình tự  thao tác Nhúng gồm những bước nào (chọn phương án đúng) 5 điểm?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Phương án 1:<br><div style=\"margin-left: 35px;\">1. Bật nguồn điện</div> <div style=\"margin-left: 35px;\">2. Cài đặt nhiệt độ 300℃±20℃</div> <div style=\"margin-left: 35px;\">3. Kiểm tra bảng hiển thị nhiệt độ bể nhúng không nhấp nháy</div> <div style=\"margin-left: 35px;\">4. Tiến hành đo nhiệt độ bể nhúng</div> <div style=\"margin-left: 35px;\">5. Nhiệt độ OK nhập vào bảng kiểm tra nhiệt độ bể hàn</div> <div style=\"margin-left: 35px;\">6. Tiến hành nhúng tanshi, B cụt theo yêu cầu</div>"
+            },
+            {
+              "id": "1",
+              "text": "Phương án 2:<br><div style=\"margin-left: 35px;\">1. Bật nguồn điện</div>\n                                                       <div style=\"margin-left: 35px;\">2. Tiến hành đo nhiệt độ bể nhúng</div>\n                                                       <div style=\"margin-left: 35px;\">3. Nhiệt độ OK nhập vào bảng kiểm tra nhiệt độ bể hàn</div>\n                                                       <div style=\"margin-left: 35px;\">4. Tiến hành nhúng tanshi, B cụt theo yêu cầu.</div>\n                                                       <div style=\"margin-left: 35px;\">5. Kiểm tra bảng hiển thị nhiệt độ bể nhúng không nhấp nháy</div>\n                                                       <div style=\"margin-left: 35px;\">6. Cài đặt nhiệt độ 300℃±20℃</div>"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 16,
+          "text": "Dụng cụ đo nhiệt độ bể nhúng (Bạn hãy tích vào hình ảnh đúng) 4 điểm",
+          "points": 4.0,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK <br><img src=\"/img/nhung/group4_11.png\" alt=\"OK \" />"
+            },
+            {
+              "id": "1",
+              "text": "OK<br><img src=\"/img/nhung/group4_22.png\" alt=\"OK\" />"
+            },
+            {
+              "id": "2",
+              "text": "NG<br><img src=\"/img/nhung/group4_33.png\" alt=\"NG\" />"
+            }
+          ],
+          "correct": [
+            "0",
+            "1"
+          ]
+        },
+        {
+          "id": 17,
+          "text": "Trình tự thao tác đo nhiệt độ bể nhúng (5 điểm)",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Phương án 1:<br> <div style=\"margin-left: 35px;\">1. Bật nguồn điện</div> <div style=\"margin-left: 35px;\">2. Cài đặt nhiệt độ 300℃±20℃</div> <div style=\"margin-left: 35px;\">3. Nhúng đầu kiểm tra nhiệt của máy nhiệt điện tử vào dung dịch Flux</div> <div style=\"margin-left: 35px;\">4. Đưa đầu kiểm tra nhiệt của máy nhiệt điện tử vào giữa bể thiếc để kiểm tra nhiệt độ</div> <div style=\"margin-left: 35px;\">5. Kiểm tra nếu nhiệt độ nằm trong khoảng 280～320℃thì OK</div> <div style=\"margin-left: 35px;\">6. Nhập số liệu vừa đo được vào bảng kiểm tra nhiệt độ bể hàn</div>"
+            },
+            {
+              "id": "1",
+              "text": "Phương án 2:<br>\n                                    <div style=\"margin-left: 35px;\">1. Bật nguồn điện</div>\n                                    <div style=\"margin-left: 35px;\">3. Đưa đầu kiểm tra nhiệt của máy nhiệt điện tử vào giữa bể thiếc để kiểm tra nhiệt độ</div>\n                                    <div style=\"margin-left: 35px;\">2. Cài đặt nhiệt độ 300℃±20℃</div>\n                                    <div style=\"margin-left: 35px;\">4. Nhúng đầu kiểm tra nhiệt của máy nhiệt điện tử vào dung dịch Flux</div>\n                                    <div style=\"margin-left: 35px;\">5. Kiểm tra nếu nhiệt độ nằm trong khoảng 280～320℃thì OK</div>\n                                    <div style=\"margin-left: 35px;\">6. Nhập số liệu vừa đo được vào bảng kiểm tra nhiệt độ bể hàn</div>"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "V. CHUẨN BỊ HÀN NHÚNG(9 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 18,
+          "text": "Phân loại hàng (Bạn hãy chọn đáp án đúng) ( 3 điểm )",
+          "points": 3.0,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Kiểm tra trên EDP hoặc phần mềm, file hỏi nhúng để biết hàng Nhúng tâm, Nhúng tất hay không nhúng."
+            },
+            {
+              "id": "1",
+              "text": "Hàng nhúng tâm, nhúng tất để riêng"
+            },
+            {
+              "id": "2",
+              "text": "Hàng không nhúng chuyển đi"
+            },
+            {
+              "id": "3",
+              "text": "Dựa vào kinh nghiệm, trí nhớ để phân loại hàng Nhúng tâm, Nhúng tất hay không nhúng."
+            },
+            {
+              "id": "4",
+              "text": "Để chung hàng nhúng tâm, nhúng tất với nhau, khi làm thì phân loại"
+            }
+          ],
+          "correct": [
+            "0",
+            "1",
+            "2"
+          ]
+        },
+        {
+          "id": 19,
+          "text": "Tanshi vàng sử dụng dung dịch Flux nào (Bạn hãy chọn đáp án đúng) 2 điểm?",
+          "points": 2.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Dùng dung dịch Flux nhật"
+            },
+            {
+              "id": "1",
+              "text": "Dùng dung dịch Flux Việt Nam"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 20,
+          "text": "Tanshi trắng, B cụt sử dụng dung dịch Flux nào (Bạn hãy chọn đáp án đúng) 2 điểm?",
+          "points": 2.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Dùng dung dịch Flux nhật"
+            },
+            {
+              "id": "1",
+              "text": "Dùng dung dịch Flux Việt Nam"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 21,
+          "text": "Cuốn băng dính NO244.30 vào tanshi trước khi nhúng đối với hàng nhúng gì (Bạn hãy chọn đáp án đúng) 2 điểm?",
+          "points": 2.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hàng nhúng tất"
+            },
+            {
+              "id": "1",
+              "text": "Hàng nhúng tâm"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VI. THAO TÁC NHÚNG TẤT",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 22,
+          "text": "Thao tác nhúng tất (Bạn hãy chọn đáp án đúng) 8 điểm?",
+          "points": 8.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Phương án 1:<br> <div style=\"margin-left: 35px;\">1. Nhúng tanshi qua dung dịch Flux</div> <div style=\"margin-left: 35px;\">2. Nhúng tanshi vào bể nhúng theo phương thẳng đứng</div> <div style=\"margin-left: 35px;\">3. Ngâm tanshi trong bể nhúng 3-5 giây</div> <div style=\"margin-left: 35px;\">4. Không được nhúng ngập lên vỏ dây điện</div> <div style=\"margin-left: 35px;\">5. Rút tanshi ra khỏi bể nhúng từ từ</div> <div style=\"margin-left: 35px;\">6. Nhúng xong kiểm tra xem thiếc có bám đều lên bề mặt tanshi không và cắt bỏ sạch sẽ phần thiếc thừa</div> <div style=\"margin-left: 35px;\">7. Đo phi tanshi tròn bằng dưỡng đo phi.</div> <div style=\"margin-left: 35px;\">8. Tít dây vào phần mềm rồi chuyển hàng.</div>"
+            },
+            {
+              "id": "1",
+              "text": "Phương án 2:<br>\n                                                <div style=\"margin-left: 35px;\">1. Nhúng tanshi qua dung dịch Flux</div>\n                                                <div style=\"margin-left: 35px;\">2. Nhúng tanshi vào bể nhúng theo chiều nào cũng được</div>\n                                                <div style=\"margin-left: 35px;\">3. Nhúng tanshi vào bể nhúng xong rút ra ngay, không cần ngâm 3-5 giây.</div>\n                                                <div style=\"margin-left: 35px;\">4. Không được nhúng ngập lên vỏ dây điện</div>\n                                                <div style=\"margin-left: 35px;\">5. Rút tanshi ra khỏi bể nhúng nhanh chóng, dứt khoát</div>\n                                                <div style=\"margin-left: 35px;\">6. Nhúng xong kiểm tra xem thiếc có bám đều lên bề mặt tanshi không và cắt bỏ phần thiếc thừa sau đó tít vào phần mềm rồi chuyển hàng</div>\n                                                <div style=\"margin-left: 35px;\">7. Thiếc thừa bám trên phần tanshi và vỏ dây điện không cần cắt bỏ</div>\n                                                <div style=\"margin-left: 35px;\">8. Đo phi tanshi tròn bằng dưỡng đo phi.</div>"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VII. THAO TÁC NHÚNG TÂM",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 23,
+          "text": "Thao tác nhúng tâm (Bạn hãy chọn đáp án đúng) 7 điểm?",
+          "points": 7.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Phương án 1:<br> <div style=\"margin-left: 35px;\">1. Nhúng tanshi qua dung dịch Flux</div> <div style=\"margin-left: 35px;\">2. Nhúng tanshi vào bể nhúng theo chiều nghiêng</div> <div style=\"margin-left: 35px;\">3. Nhúng tanshi vào bể nhúng xong rút ra ngay, không cần ngâm 3-5 giây.</div> <div style=\"margin-left: 35px;\">4. Rút tanshi ra khỏi bể nhúng nhanh chóng, dứt khoát</div> <div style=\"margin-left: 35px;\">5. Nhúng xong kiểm tra xem thiếc có bám đều lên bề mặt tanshi không và cắt bỏ sạch sẽ phần thiếc thừa</div> <div style=\"margin-left: 35px;\">6. Tít dây vào phần mềm rồi chuyển hàng</div>"
+            },
+            {
+              "id": "1",
+              "text": "Phương án 2:<br>\n                                    <div style=\"margin-left: 35px;\">1. Nhúng tanshi qua dung dịch Flux</div>\n                                    <div style=\"margin-left: 35px;\">2. Nhúng tanshi vào bể nhúng theo chiều nào cũng được</div>\n                                    <div style=\"margin-left: 35px;\">3. Ngâm tanshi trong bể nhúng 3-5 giây</div>\n                                    <div style=\"margin-left: 35px;\">4. Rút tanshi ra khỏi bể nhúng từ từ</div>\n                                    <div style=\"margin-left: 35px;\">5. Nhúng xong kiểm tra xem thiếc có bám đều lên bề mặt tanshi không và cắt bỏ sạch sẽ phần thiếc thừa </div>\n                                    <div style=\"margin-left: 35px;\">6. Tít dây vào phần mềm rồi chuyển hàng</div>"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VIII.Thao tác nhúng B cụt (5 điểm )",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 24,
+          "text": "Thao tác nhúng B cụt (5 điểm )?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Phương án 1:<br> <div style=\"margin-left: 35px;\">1. Tùy vào số lượng sản xuất, cầm 2-3 pcs B cụt để nhúng 1 lần</div> <div style=\"margin-left: 35px;\">2. Nhúng B vào dung dịch Flux</div> <div style=\"margin-left: 35px;\">3. Đưa B vào bể hàn theo chiều nghiêng</div> <div style=\"margin-left: 35px;\">4. Rút B ra khỏi bể, dùng tay đeo găng tay vuốt thiếc chảy ở đầu B lên</div> <div style=\"margin-left: 35px;\">5. Kiểm tra ngoại quan B xem thiếc có bám đều không, có bị hở đồng, cháy vỏ dây điện không</div> <div style=\"margin-left: 35px;\">6. OK thì tít vào phần mềm rồi chuyển hàng</div>"
+            },
+            {
+              "id": "1",
+              "text": "Phương án 2:<br>\n                                    <div style=\"margin-left: 35px;\">1. Tùy vào số lượng sản xuất, cầm 2-3 pcs B cụt để nhúng 1 lần</div>\n                                    <div style=\"margin-left: 35px;\">2. Không cần nhúng B vào dung dịch Flux</div>\n                                    <div style=\"margin-left: 35px;\">3. Đưa B vào bể hàn theo chiều thẳng đứng</div>\n                                    <div style=\"margin-left: 35px;\">4. Rút B ra khỏi bể, dùng tay đeo găng tay vuốt thiếc chảy ở đầu B lên</div>\n                                    <div style=\"margin-left: 35px;\">5. Kiểm tra ngoại quan B xem thiếc có bám đều không, có bị hở đồng, cháy vỏ dây điện không,</div>\n                                    <div style=\"margin-left: 35px;\">6. OK thì tít vào phần mềm rồi chuyển hàng</div>"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "IX.Chú ý khi nhúng tất-nhúng tâm tanshi vàng (Bạn hãy chọn đáp án đúng) 2 điểm",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 25,
+          "text": "(Bạn hãy chọn đáp án đúng) 2 điểm?",
+          "points": 2.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Chỉ cần nhúng vào bể hàn 1 lần"
+            },
+            {
+              "id": "1",
+              "text": "Cần nhúng vào bể hàn 2-3 lần đến khi thiếc bám đều lên bề mặt tanshi"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "X. Phân loại hàng Hoàn thiện, xoắn, nối (6 điểm )",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 26,
+          "text": "Hàng xoắn (Bạn hãy chọn đáp án đúng) (2 điểm )?",
+          "points": 2.0,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hàng đã được dập hết tất cả đầu tanshi,Hiển thị số ở phần thông số xoắn"
+            },
+            {
+              "id": "1",
+              "text": "Đã dập 1 đầu tanshi, đầu còn lại là J nối, Hiển thị số ở phần thông số xoắn"
+            },
+            {
+              "id": "2",
+              "text": "Đã dập 1 đầu tanshi, đầu còn lại là J nối, Phần thông số xoắn không có số,Không có ghi chú xoắn cùng với số dây nào ở phần ghi chú"
+            },
+            {
+              "id": "3",
+              "text": "Hàng đã được dập tất cả các đầu tanshi & Không hiển thị xoắn, nối"
+            }
+          ],
+          "correct": [
+            "0",
+            "1"
+          ]
+        },
+        {
+          "id": 27,
+          "text": "Hàng nối (Bạn hãy chọn đáp án đúng) (2 điểm)?",
+          "points": 2.0,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Dây SRD đã dập hết đầu tanshi ,Có lõi dây J nối (ở phần tanshi hoặc ghi chú),Có ami L=20mm trở lên (ami không ghi chú gì)"
+            },
+            {
+              "id": "1",
+              "text": "Đã dập 1 đầu tanshi, đầu còn lại là J nối, Phần thông số xoắn không có số,Không có ghi chú xoắn cùng với số dây nào ở phần ghi chú"
+            },
+            {
+              "id": "2",
+              "text": "Đã dập 1 đầu tanshi, đầu còn lại là J nối, Hiển thị  số  ở phần thông số xoắn"
+            }
+          ],
+          "correct": [
+            "0",
+            "1"
+          ]
+        },
+        {
+          "id": 28,
+          "text": "Hàng 1 đầu  (Bạn hãy chọn đáp án đúng) (1 điểm)?",
+          "points": 1.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đã dập 1 đầu tanshi, đầu còn lại là J nối, Phần thông số xoắn không có số,Không có ghi chú xoắn cùng với số dây nào ở phần ghi chú"
+            },
+            {
+              "id": "1",
+              "text": "Đối với dây đơn: đã được dập 1 đầu,  đầu còn  lại chưa được dập,  Dây dập chồng, SRD, sỏ ống * hoặc conector: Còn bất kì 1 đầu nào chưa dập"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 29,
+          "text": "Hàng hoàn thiện  (Bạn hãy chọn đáp án đúng) (1 điểm)?",
+          "points": 1.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hàng đã được dập hết tất cả đầu tanshi,Hiển thị  số  ở phần thông số xoắn"
+            },
+            {
+              "id": "1",
+              "text": "Hàng đã được dập tất cả các đầu tanshi & Không hiển thị xoắn, nối"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "XI. Thao tác nhúng tanshi, B cụt. Bạn hãy quan sát hình ảnh và lựa chọn đáp án chính xác (8 điểm)",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 30,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group11_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 31,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group11_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 32,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group11_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 33,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group11_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 34,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group11_5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 35,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group11_6.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 36,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group11_7.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 37,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group11_8.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "XII. Kiểm tra ngoại quan (15điểm)",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 38,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group12_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 39,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group12_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 40,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group12_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 41,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group12_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 42,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group12_5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 43,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group12_6.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 44,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group12_7.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 45,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group12_8.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 46,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group12_9.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 47,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group12_10.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 48,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group12_11.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 49,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group12_12.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 50,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group12_13.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 51,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group12_14.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 52,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/nhung/group12_15.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        }
+      ]
+    }
+  ]
+}

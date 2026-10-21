@@ -26,6 +26,7 @@ namespace JtechnApi.Configuration
             services.AddSingleton(con);
             services.Configure<ConnectionStrings>(configuration.GetSection("ConnectionStrings"));
             services.AddScoped<AdoJtecDB_Khoa>();
+            services.AddScoped<AdoJtecDB_KhoaB>();
             if (string.IsNullOrWhiteSpace(con.JtecDB_Default))
             {
                 throw new System.InvalidOperationException(

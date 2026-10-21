@@ -5,6 +5,7 @@
         public int Id { get; set; }
         public string Title { get; set; }
         public int Minutes { get; set; }
+        public decimal[] Scores { get; set; }
         public List<OnlineExamGroup> Groups { get; set; } = new();
     }
 

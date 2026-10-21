@@ -1,0 +1,1126 @@
+@{
+    ViewData["Title"] = "Bảng theo dõi sản lượng lắp ráp";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #F5F8FC;
+            --panel: #ffffff;
+            --card: #ffffff;
+            --card-light: #f8fafc;
+            --surface-muted: #f3f7f9;
+            --surface-row: #f8fafd;
+            --line: #DCE5EF;
+            --blue: #2563EB;
+            --cyan: #06B6D4;
+            --yellow: #F59E0B;
+            --green: #16A34A;
+            --red: #EF4444;
+            --white: #172B4D;
+            --muted: #65758B;
+            --font: Manrope, "Segoe UI", sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; margin: 0; }
+        body {
+            overflow: hidden;
+            background: radial-gradient(ellipse at 50% -28%, #ffffff 0, #F5F8FC 70%);
+            color: var(--white);
+            font-family: var(--font);
+            font-size: clamp(13px, .78vw, 16px);
+        }
+        button, input, select { font: inherit; }
+        button { color: inherit; }
+        .app { height: 100dvh; min-height: 650px; padding: 12px 20px; display: flex; flex-direction: column; gap: 9px; }
+        .topbar {
+            min-height: 62px; display: grid; grid-template-columns: minmax(390px, 1fr) auto;
+            align-items: center; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 7px;
+        }
+        .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .brand img { width: 44px; height: 44px; object-fit: contain; border-radius: 9px; background: #fff; padding: 3px; }
+        .brand-mark { width: 44px; height: 44px; display: none; place-items: center; border: 1px solid #c6e0e4; border-radius: 9px; color: var(--cyan); background: #eef7f8; font-weight: 800; font-size: 23px; }
+        .eyebrow { color: var(--cyan); text-transform: uppercase; font-size: 10px; letter-spacing: .19em; font-weight: 800; margin-bottom: 4px; }
+        h1 { font-size: clamp(19px, 1.45vw, 29px); line-height: 1.12; letter-spacing: .035em; margin: 0; font-weight: 800; }
+        .toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .control { height: 34px; min-width: 100px; border: 1px solid var(--line); border-radius: 8px; color: var(--white); background: #fff; padding: 0 8px; outline: none; box-shadow: 0 1px 2px rgba(28,51,68,.03); }
+        .control:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+        .search-control { width: 170px; }
+        .icon-btn { height: 34px; min-width: 38px; padding: 0 9px; border: 1px solid var(--line); background: #fff; border-radius: 8px; cursor: pointer; box-shadow: 0 1px 2px rgba(28,51,68,.04); transition: .15s ease; }
+        .icon-btn:hover { border-color: #b9cdf5; color: var(--blue); background: #f3f7ff; }
+        .screen-nav { display: inline-flex; align-items: center; gap: 4px; }
+        .auto-cycle-button[aria-pressed="true"] { color: var(--blue); background: #eaf1ff; border-color: #b9cdf5; }
+        .theme-switch { display: inline-flex; padding: 3px; gap: 2px; border: 1px solid var(--line); border-radius: 8px; background: #f7f9fc; }
+        .theme-switch button { min-width: 46px; height: 30px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font-size: 10px; font-weight: 800; cursor: pointer; }
+        .theme-switch button[aria-pressed="true"] { color: var(--blue); background: #eaf1ff; box-shadow: 0 1px 3px rgba(37,99,235,.12); }
+        .clock { min-width: 78px; color: var(--cyan); font-size: 18px; font-variant-numeric: tabular-nums; font-weight: 800; text-align: center; }
+        .refresh-state { display: flex; gap: 6px; align-items: center; white-space: nowrap; font-size: 11px; color: var(--muted); }
+        .live-dot { width: 8px; height: 8px; display: inline-block; border-radius: 50%; background: #2a9b70; box-shadow: 0 0 0 3px rgba(42,155,112,.12); }
+        .filter-label { color: var(--muted); text-transform: uppercase; font-size: 12px; letter-spacing: .08em; font-weight: 700; }
+        .main { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+        .screen { display: none; flex: 1; min-height: 0; }
+        .screen.active { display: flex; flex-direction: column; gap: 9px; }
+        .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; flex: 0 0 auto; }
+        .kpi, .panel, .employee-card {
+            background: linear-gradient(145deg, #ffffff, #fbfcfe);
+            border: 1px solid #dce5ec; border-radius: 14px; box-shadow: 0 2px 5px rgba(31,56,74,.035), 0 9px 24px rgba(31,56,74,.055);
+        }
+        .kpi { min-height: 60px; padding: 11px 13px; position: relative; overflow: hidden; border-top: 3px solid #dce5ec; }
+        .kpi:nth-child(1) { border-top-color: var(--yellow); }
+        .kpi:nth-child(2) { border-top-color: var(--cyan); }
+        .kpi:nth-child(3) { border-top-color: var(--green); }
+        .kpi:nth-child(4) { border-top-color: var(--red); }
+        .kpi::after { content: ""; position: absolute; right: -25px; bottom: -48px; width: 96px; height: 96px; border: 1px solid rgba(41,91,117,.07); border-radius: 50%; }
+        .kpi-label { color: #526a79; text-transform: uppercase; font-size: 12px; letter-spacing: .09em; font-weight: 700; }
+        .kpi-value { margin-top: 6px; font-size: 40px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+        .kpi-note { color: var(--muted); font-size: 12px; margin-top: 7px; }
+        .kpi-progress { height: 4px; margin-top: 8px; background: #e8eef5; border-radius: 9px; overflow: hidden; }
+        .kpi-progress span { display: block; height: 100%; border-radius: inherit; background: var(--green); transition: width .35s ease; }
+        .c-yellow { color: #F59E0B; } .c-cyan { color: #06B6D4; } .c-green { color: #16A34A; } .c-red { color: #EF4444; }
+        .overview { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(340px, 1fr); grid-template-rows: minmax(0, 1fr); gap: 10px; }
+        .panel { min-height: 0; padding: 12px 14px; border-radius: 14px; }
+        .panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
+        .panel-title { margin: 0; font-size: 20px; letter-spacing: .055em; font-weight: 800; color: #203b4d; }
+        .panel-subtitle { margin-top: 4px; color: var(--muted); font-size: 12px; }
+        .legend { display: flex; gap: 13px; color: #526a79; font-size: 12px; white-space: nowrap; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-dot { width: 9px; height: 9px; border-radius: 2px; }
+        .chart-host { min-height: 0; height: calc(100% - 38px); }
+        .chart-host svg { display: block; width: 100%; height: 100%; overflow: visible; }
+        .donut-wrap { height: calc(100% - 55px); min-height: 235px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .donut { width: min(82%, 340px); height: auto; max-height: 310px; overflow: visible; }
+        .donut-stats { width: 100%; display: grid; grid-template-columns: repeat(3,1fr); border-top: 1px solid var(--line); padding-top: 12px; margin-top: 8px; text-align: center; }
+        .donut-stats span { display: block; color: var(--muted); font-size: 10px; }
+        .donut-stats strong { display: block; margin-top: 4px; font-size: 17px; font-variant-numeric: tabular-nums; }
+        .callout { color: var(--muted); font-size: 10px; border-top: 1px solid var(--line); margin-top: 8px; padding-top: 7px; }
+        .table-wrap { overflow: auto; max-height: 190px; border: 1px solid var(--line); border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 8px 11px; border-bottom: 1px solid #e8eef2; font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        th { color: #5e7483; font-size: 11px; letter-spacing: .09em; text-transform: uppercase; background: #f3f7f9; position: sticky; top: 0; z-index: 1; }
+        tr:last-child td { border-bottom: 0; }
+        tr.current-row td { background: #eaf4f5; color: var(--white); }
+        tr.future-row td { color: #8193a0; }
+        .badge { display: inline-flex; padding: 4px 7px; border-radius: 99px; font-size: 10px; font-weight: 800; letter-spacing: .03em; }
+        .badge-green { background: #e8f4ed; color: #216b4d; }
+        .badge-yellow { background: #fbf1dc; color: #805900; }
+        .badge-red { background: #faeaec; color: #a43d4b; }
+        .badge-cyan { background: #e8f2f4; color: #086b79; }
+        .employee-screen { gap: 10px !important; }
+        .employee-summary { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; }
+        .employee-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); grid-auto-rows: minmax(0,1fr); gap: 10px; overflow: auto; padding: 1px 3px 2px 1px; }
+        .employee-card { min-height: 0; padding: 11px 12px; cursor: pointer; transition: border-color .15s, transform .15s; overflow: hidden; display: flex; flex-direction: column; }
+        .employee-card:hover { border-color: #9bc8ce; transform: translateY(-1px); box-shadow: 0 8px 22px rgba(31,86,103,.1); }
+        .employee-card.selected { border-color: var(--cyan); box-shadow: 0 0 0 2px rgba(8,127,140,.12), 0 8px 22px rgba(31,86,103,.1); }
+        .employee-top { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+        .employee-name { font-size: 18px; line-height: 1.15; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .employee-code { color: var(--muted); font-size: 12px; margin-top: 4px; }
+        .employee-tags { display: flex; gap: 5px; margin-top: 7px; }
+        .tag { color: #526a79; background: #f2f6f8; border: 1px solid #e1e9ee; border-radius: 5px; padding: 3px 6px; font-size: 11px; }
+        .employee-values { display: flex; justify-content: space-between; margin-top: 10px; gap: 8px; }
+        .employee-values span { display: block; color: var(--muted); font-size: 12px; text-transform: uppercase; }
+        .employee-values strong { display: block; margin-top: 2px; font-size: 21px; font-variant-numeric: tabular-nums; }
+        .progress-track { height: 5px; margin-top: 8px; background: #e5ebef; overflow: hidden; border-radius: 9px; }
+        .progress-fill { height: 100%; border-radius: inherit; background: var(--cyan); }
+        .mini-chart { height: 68px; margin-top: auto; padding-top: 6px; display: flex; justify-content: space-around; align-items: flex-end; gap: 5px; }
+        .mini-point { height: 100%; min-width: 25px; flex: 1; display: flex; align-items: center; flex-direction: column; justify-content: flex-end; position: relative; }
+        .mini-bars { flex: 1; width: 100%; display: flex; gap: 2px; align-items: flex-end; justify-content: center; }
+        .mini-column { width: 44%; min-width: 0; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+        .mini-value { max-width: 100%; color: #687d8d; font-size: 8px; line-height: 10px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .mini-bar { width: 100%; min-height: 1px; flex: 0 0 auto; border-radius: 2px 2px 0 0; }
+        .mini-label { color: #687d8d; font-size: 12px; margin-top: 3px; }
+        .group-screen { gap: 11px !important; }
+        .group-summary { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 11px; }
+        .group-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 12px; overflow: auto; padding: 1px 3px 2px 1px; }
+        .group-card { min-height: 190px; padding: 15px 16px; display: flex; flex-direction: column; background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 3px 8px rgba(23,43,77,.045), 0 10px 24px rgba(23,43,77,.04); }
+        .group-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+        .group-name { font-size: 15px; font-weight: 800; color: var(--white); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .group-count { margin-top: 3px; font-size: 10px; color: var(--muted); }
+        .group-rate { color: var(--blue); font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .group-values { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+        .group-values span { display: block; color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .06em; }
+        .group-values strong { display: block; margin-top: 3px; font-size: 19px; font-variant-numeric: tabular-nums; }
+        .group-card .mini-chart { height: 61px; margin-top: 8px; }
+        .group-card .mini-label { font-size: 9px; }
+        .comparison-list { overflow: auto; padding: 2px 2px 0 0; }
+        .comparison-row { display: grid; grid-template-columns: minmax(60px, .72fr) minmax(100px, 1.7fr) 52px; align-items: center; gap: 10px; margin: 7px 0; }
+        .comparison-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; font-weight: 700; }
+        .comparison-bars { display: grid; gap: 3px; }
+        .comparison-track { height: 6px; background: #edf2f7; border-radius: 8px; overflow: hidden; }
+        .comparison-fill { height: 100%; border-radius: inherit; }
+        .comparison-rate { text-align: right; font-size: 10px; font-weight: 800; font-variant-numeric: tabular-nums; }
+        .comparison-legend { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 9px; }
+        .status-screen { gap: 6px !important; }
+        .status-kpis { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; flex: 0 0 auto; }
+        .status-kpi { min-height: 76px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #fff; border: 1px solid #E2E8F0; border-radius: 11px; box-shadow: 0 3px 12px rgba(23,43,77,.045); }
+        .status-kpi-label { color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+        .status-kpi-value { margin-top: 4px; font-size: 34px; line-height: 1; font-weight: 800; font-variant-numeric: tabular-nums; }
+        .status-kpi-mark { width: 34px; height: 34px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 9px; background: var(--status-soft); color: var(--status-color); font-size: 15px; font-weight: 800; }
+        .status-toolbar { display: flex; align-items: end; flex-wrap: wrap; gap: 8px; padding: 10px 12px; background: #fff; border: 1px solid #E2E8F0; border-radius: 11px; }
+        .status-filter { display: grid; gap: 4px; }
+        .status-filter label { color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+        .status-filter select, .status-filter input { height: 34px; min-width: 128px; padding: 0 9px; color: var(--white); background: #fff; border: 1px solid #E2E8F0; border-radius: 7px; outline: none; }
+        .status-filter input { min-width: 168px; }
+        .status-filter select:focus, .status-filter input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+        .status-mode { display: inline-flex; padding: 3px; margin-left: auto; gap: 2px; border: 1px solid #E2E8F0; border-radius: 8px; background: #f7f9fc; }
+        .status-mode button { height: 28px; padding: 0 11px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font-size: 10px; font-weight: 800; cursor: pointer; }
+        .status-mode button.active { color: var(--blue); background: #eaf1ff; box-shadow: 0 1px 3px rgba(37,99,235,.12); }
+        .status-screen-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 10px; }
+        .sample-indicator { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border: 1px solid #f4d7a0; border-radius: 99px; color: #8a5a00; background: #fff8e8; font-weight: 800; }
+        .sample-indicator::before { width: 6px; height: 6px; content: ""; border-radius: 50%; background: var(--yellow); }
+        .status-tv, .status-management { flex: 1; min-height: 0; }
+        .status-tv { display: flex; flex-direction: column; }
+        .status-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); grid-auto-rows: minmax(60px, auto); align-content: start; gap: 6px; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; padding: 1px 3px 3px 1px; }
+        .status-grid::-webkit-scrollbar { display: none; }
+        .status-card { --status-color: var(--cyan); min-width: 0; padding: 6px 8px; display: flex; flex-direction: column; gap: 3px; overflow: hidden; cursor: pointer; background: #fff; border: 1px solid #E2E8F0; border-left: 4px solid var(--status-color); border-radius: 10px; box-shadow: 0 3px 10px rgba(23,43,77,.045); transition: transform .14s ease, box-shadow .14s ease; }
+        .status-card:hover { transform: translateY(-2px); box-shadow: 0 9px 20px rgba(23,43,77,.1); }
+        .status-card.status-completed { --status-color: #16A34A; }
+        .status-card.status-progress { --status-color: #06B6D4; }
+        .status-card.status-waiting { --status-color: #F59E0B; }
+        .status-card.status-paused { --status-color: #64748B; }
+        .status-card.status-delayed { --status-color: #EF4444; }
+        .status-card.recently-completed { box-shadow: 0 0 0 1px rgba(22,163,74,.12), 0 4px 14px rgba(22,163,74,.09); }
+        .status-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+        .status-product { min-width: 0; overflow: hidden; color: #172B4D; font-size: 22px; line-height: 1.1; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+        .status-badge { flex: 0 0 auto; padding: 4px 7px; color: var(--status-color); background: color-mix(in srgb, var(--status-color) 11%, white); border: 1px solid color-mix(in srgb, var(--status-color) 22%, white); border-radius: 99px; font-size: 10px; line-height: 1; font-weight: 800; white-space: nowrap; }
+        .status-card-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 8px; min-width: 0; }
+        .status-meta-item { min-width: 0; }
+        .status-meta-item span { display: block; color: #8290a3; font-size: 10px; line-height: 1.1; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+        .status-meta-item strong { display: block; margin-top: 2px; overflow: hidden; color: #354763; font-size: 12px; line-height: 1.2; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+        .status-quantity { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
+        .status-quantity strong { color: #172B4D; font-size: 21px; line-height: 1; font-weight: 800; font-variant-numeric: tabular-nums; }
+        .status-quantity strong span { color: #94A3B8; font-size: 15px; font-weight: 600; }
+        .status-percent { color: var(--status-color); font-size: 21px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .status-progress-track { height: 6px; flex: 0 0 6px; overflow: hidden; background: #edf1f6; border-radius: 8px; }
+        .status-progress-fill { height: 100%; border-radius: inherit; background: var(--status-color); }
+        .status-quantity-remain { display: flex; justify-content: space-between; gap: 6px; color: var(--muted); font-size: 11px; }
+        .status-times { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; padding-top: 4px; border-top: 1px solid #eef2f7; }
+        .status-times strong { display: block; margin-top: 2px; overflow: hidden; color: #52647c; font-size: 11px; font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; }
+        .status-card-warning { color: #B42318; font-size: 9px; font-weight: 800; }
+        .status-drawer-layer { display: none; position: fixed; inset: 0; z-index: 20; }
+        .status-drawer-layer.open { display: block; }
+        .status-drawer-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: rgba(23,43,77,.24); cursor: pointer; }
+        .status-drawer { position: absolute; top: 0; right: 0; bottom: 0; width: min(540px, 94vw); display: flex; flex-direction: column; overflow: auto; background: #fff; border-left: 1px solid #E2E8F0; box-shadow: -16px 0 36px rgba(23,43,77,.14); animation: drawer-in .18s ease-out; }
+        @@keyframes drawer-in { from { transform: translateX(18px); opacity: .6; } to { transform: translateX(0); opacity: 1; } }
+        .status-drawer-head { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 19px 21px 14px; background: #fff; border-bottom: 1px solid #E2E8F0; }
+        .status-drawer-title { margin: 0; color: #172B4D; font-size: 25px; line-height: 1.15; font-weight: 800; }
+        .status-drawer-subtitle { margin-top: 5px; color: var(--muted); font-size: 13px; }
+        .status-drawer-close { width: 34px; height: 34px; flex: 0 0 auto; border: 1px solid #E2E8F0; border-radius: 8px; background: #fff; cursor: pointer; font-size: 18px; }
+        .status-drawer-close:hover { color: var(--blue); border-color: #b9cdf5; }
+        .status-drawer-content { display: grid; gap: 13px; padding: 15px 21px 24px; }
+        .status-detail-section { padding: 12px; border: 1px solid #E2E8F0; border-radius: 9px; }
+        .status-detail-section h3 { margin: 0 0 9px; color: #31435f; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+        .status-detail-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px 13px; }
+        .status-detail-item { min-width: 0; }
+        .status-detail-item span { display: block; color: #8290a3; font-size: 11px; font-weight: 700; }
+        .status-detail-item strong { display: block; margin-top: 2px; overflow-wrap: anywhere; color: #263954; font-size: 14px; font-weight: 700; }
+        .employee-table-screen { gap: 10px !important; }
+        .employee-table-panel { flex: 1; display: flex; flex-direction: column; }
+        .employee-table-panel .table-wrap { flex: 1; max-height: none; }
+        .employee-table { border-spacing: 0; }
+        .employee-table th, .employee-table td { padding: 9px 10px; font-size: 13px; }
+        .employee-table tbody tr:nth-child(even) td { background: #f8fafd; }
+        .employee-table tbody tr[data-employee] { cursor: pointer; }
+        .employee-table tbody tr[data-employee]:hover td { background: #eef5ff; }
+        .employee-table .employee-progress { min-width: 90px; }
+        .employee-table .progress-track { margin-top: 0; height: 6px; }
+        .employee-cell-name { font-weight: 800; color: var(--white); }
+        .detail-screen { gap: 10px !important; }
+        .detail-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .back-btn { border: 1px solid var(--line); border-radius: 6px; background: transparent; padding: 7px 11px; cursor: pointer; color: var(--cyan); font-weight: 700; }
+        .detail-title { font-size: 26px; font-weight: 800; margin: 0; }
+        .detail-meta { color: var(--muted); margin-top: 4px; font-size: 13px; }
+        .detail-kpis { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; }
+        .detail-kpi { border: 1px solid var(--line); border-radius: 8px; background: #fff; box-shadow: 0 2px 5px rgba(31,56,74,.035); padding: 9px 12px; }
+        .detail-kpi span { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; }
+        .detail-kpi strong { display: block; margin-top: 4px; font-size: 21px; }
+        .detail-main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0,1.8fr) minmax(270px,.8fr); gap: 10px; }
+        .detail-table { display: flex; flex-direction: column; gap: 8px; }
+        .detail-table .table-wrap { flex: 1; max-height: none; }
+        .detail-donut .donut-wrap { height: calc(100% - 40px); min-height: 180px; }
+        .detail-donut .donut { width: min(72%, 205px); }
+        .empty, .error-box, .loading { padding: 24px; text-align: center; color: var(--muted); }
+        .error-box { color: var(--red); border: 1px solid rgba(255,100,120,.35); background: rgba(255,100,120,.08); border-radius: 8px; }
+        .alert-strip { min-height: 18px; color: var(--muted); font-size: 10px; display: flex; justify-content: space-between; gap: 10px; }
+        .app.tv-mode { padding: 12px 24px; gap: 10px; }
+        .tv-mode .kpi { min-height: 96px; padding: 12px 15px; }
+        .tv-mode .employee-grid { grid-template-columns: repeat(5, minmax(0,1fr)); }
+        .tv-mode .employee-name { font-size: 16px; }
+        .tv-mode .employee-values strong { font-size: 19px; }
+        .tv-mode .status-grid { grid-template-columns: repeat(5, minmax(0,1fr)); gap: 6px; }
+        @@media (max-width: 1250px) {
+            body { overflow: auto; }
+            .app { height: auto; min-height: 100dvh; }
+            .topbar { grid-template-columns: 1fr; gap: 8px; padding-bottom: 7px; }
+            .toolbar { justify-content: flex-start; }
+            .overview { min-height: 420px; }
+            .employee-grid { grid-template-columns: repeat(3, minmax(0,1fr)); grid-auto-rows: 170px; }
+            .group-grid { grid-template-columns: repeat(3, minmax(0,1fr)); grid-auto-rows: 220px; }
+            .status-grid { grid-template-columns: repeat(4, minmax(0,1fr)); grid-auto-rows: minmax(60px,auto); }
+        }
+        @@media (max-width: 820px) {
+            .app { padding: 8px; gap: 8px; }
+            .topbar { gap: 7px; }
+            .brand { gap: 8px; }
+            .toolbar { display: grid; width: 100%; grid-template-columns: minmax(50px,1fr) minmax(50px,1fr) auto auto auto auto; gap: 5px; }
+            .toolbar .filter-label { display: none; }
+            #productionDate { grid-column: 1 / 3; width: 100%; min-width: 0; }
+            #groupFilter { grid-column: 3 / 7; width: 100%; min-width: 0; }
+            .clock { grid-column: 1; min-width: 0; font-size: 15px; }
+            .refresh-state { grid-column: 2; justify-content: center; }
+            #refreshLabel { display: none; }
+            .theme-switch { grid-column: 3; justify-self: center; }
+            .screen-nav { grid-column: 4; }
+            #refreshButton { grid-column: 5; }
+            #fullscreenButton { grid-column: 6; }
+            .control { height: 33px; min-width: 0; }
+            .icon-btn { width: 34px; min-width: 34px; height: 34px; padding: 0; }
+            .kpis { grid-template-columns: repeat(2, minmax(0,1fr)); }
+            .overview, .detail-main { grid-template-columns: 1fr; }
+            .overview { display: flex; flex-direction: column; }
+            .overview .panel { min-height: 390px; }
+            .overview .chart-host { flex: 0 0 auto; height: 320px; }
+            .overview .donut-wrap { flex: 0 0 auto; height: 290px; min-height: 270px; }
+            .kpis { gap: 7px; }
+            .kpi { min-height: 76px; padding: 9px 10px; }
+            .kpi-value { margin-top: 4px; font-size: 25px; }
+            .kpi-note { margin-top: 4px; }
+            .employee-grid { grid-template-columns: repeat(2, minmax(0,1fr)); grid-auto-rows: 180px; }
+            .group-grid { grid-template-columns: repeat(2, minmax(0,1fr)); grid-auto-rows: 220px; }
+            .status-grid { grid-template-columns: repeat(2, minmax(0,1fr)); grid-auto-rows: minmax(60px,auto); }
+            .status-kpis { grid-template-columns: repeat(3,minmax(0,1fr)); }
+            .status-mode { margin-left: 0; }
+            .detail-kpis { grid-template-columns: repeat(2,1fr); }
+            .screen.active { min-height: 75vh; }
+        }
+        @@media (max-width: 480px) {
+            .brand img, .brand-mark { width: 35px; height: 35px; }
+            .eyebrow { display: none; }
+            h1 { font-size: 17px; line-height: 1.15; }
+            .employee-grid { grid-template-columns: 1fr; }
+            .group-grid { grid-template-columns: 1fr; }
+            .status-grid { grid-template-columns: 1fr; grid-auto-rows: minmax(60px,auto); }
+            .status-kpis { grid-template-columns: repeat(2,minmax(0,1fr)); }
+            .status-filter, .status-filter select, .status-filter input { width: 100%; }
+            .status-toolbar { align-items: stretch; }
+            .status-mode { width: 100%; }
+            .status-mode button { flex: 1; }
+            .status-drawer-content { padding: 12px; }
+            .search-control { width: 145px; }
+        }
+        @@media (max-width: 360px) {
+            .toolbar { grid-template-columns: repeat(4, minmax(0,1fr)); grid-auto-rows: 34px; }
+            #productionDate { grid-column: 1 / 3; }
+            #groupFilter { grid-column: 3 / 5; }
+            .clock { grid-column: 1; }
+            .refresh-state { grid-column: 2; }
+            .theme-switch { grid-column: 3 / 5; justify-self: stretch; justify-content: center; }
+            .screen-nav { grid-column: 1 / 3; justify-self: center; }
+            #refreshButton { grid-column: 3; }
+            #fullscreenButton { grid-column: 4; }
+            .toolbar .icon-btn { justify-self: center; }
+        }
+        :root[data-theme="dark"] {
+            color-scheme: dark;
+            --bg: #0F172A;
+            --panel: #182438;
+            --card: #1B293D;
+            --card-light: #202F45;
+            --surface-muted: #202D40;
+            --surface-row: #1D2A3E;
+            --line: #34445B;
+            --white: #E7EEF8;
+            --muted: #A5B3C7;
+        }
+        :root[data-theme="dark"] body { background: #0F172A; color: var(--white); }
+        :root[data-theme="dark"] .topbar { border-color: var(--line); }
+        :root[data-theme="dark"] .brand img { background: var(--card); }
+        :root[data-theme="dark"] .brand-mark { color: #67D8E8; background: #173444; border-color: #2D5665; }
+        :root[data-theme="dark"] .control,
+        :root[data-theme="dark"] .icon-btn,
+        :root[data-theme="dark"] .theme-switch,
+        :root[data-theme="dark"] .status-toolbar,
+        :root[data-theme="dark"] .status-kpi,
+        :root[data-theme="dark"] .status-management-panel,
+        :root[data-theme="dark"] .status-filter select,
+        :root[data-theme="dark"] .status-filter input,
+        :root[data-theme="dark"] .detail-kpi,
+        :root[data-theme="dark"] .status-detail-section,
+        :root[data-theme="dark"] .status-drawer,
+        :root[data-theme="dark"] .status-drawer-head,
+        :root[data-theme="dark"] .status-card,
+        :root[data-theme="dark"] .group-card,
+        :root[data-theme="dark"] .kpi,
+        :root[data-theme="dark"] .panel,
+        :root[data-theme="dark"] .employee-card { background: var(--panel); border-color: var(--line); }
+        :root[data-theme="dark"] .kpi,
+        :root[data-theme="dark"] .panel,
+        :root[data-theme="dark"] .employee-card { box-shadow: 0 4px 14px rgba(0,0,0,.2); }
+        :root[data-theme="dark"] .icon-btn:hover,
+        :root[data-theme="dark"] .theme-switch button:hover { color: #BBD0FF; border-color: #48638D; background: #1A2A43; }
+        :root[data-theme="dark"] .auto-cycle-button[aria-pressed="true"] { color: #BBD0FF; background: #263B5C; }
+        :root[data-theme="dark"] .theme-switch button[aria-pressed="true"] { color: #BBD0FF; background: #263B5C; }
+        :root[data-theme="dark"] .kpi-label,
+        :root[data-theme="dark"] .panel-title,
+        :root[data-theme="dark"] .group-name,
+        :root[data-theme="dark"] .employee-name,
+        :root[data-theme="dark"] .employee-cell-name,
+        :root[data-theme="dark"] .detail-title,
+        :root[data-theme="dark"] .status-product,
+        :root[data-theme="dark"] .status-quantity strong,
+        :root[data-theme="dark"] .status-drawer-title { color: var(--white); }
+        :root[data-theme="dark"] .panel-subtitle,
+        :root[data-theme="dark"] .legend,
+        :root[data-theme="dark"] .group-summary,
+        :root[data-theme="dark"] .employee-summary,
+        :root[data-theme="dark"] .detail-meta,
+        :root[data-theme="dark"] .status-meta-item strong,
+        :root[data-theme="dark"] .status-times strong,
+        :root[data-theme="dark"] .status-detail-item strong { color: #BDCADB; }
+        :root[data-theme="dark"] .kpi-progress,
+        :root[data-theme="dark"] .progress-track,
+        :root[data-theme="dark"] .comparison-track,
+        :root[data-theme="dark"] .status-progress-track { background: #334258; }
+        :root[data-theme="dark"] .table-wrap,
+        :root[data-theme="dark"] .status-table-wrap,
+        :root[data-theme="dark"] .status-detail-section,
+        :root[data-theme="dark"] .status-drawer-head,
+        :root[data-theme="dark"] .status-times { border-color: var(--line); }
+        :root[data-theme="dark"] th,
+        :root[data-theme="dark"] th,
+        :root[data-theme="dark"] td { border-color: #334258; }
+        :root[data-theme="dark"] tr.current-row td { color: var(--white); background: #1A3544; }
+        :root[data-theme="dark"] tr.future-row td { color: #8494AA; }
+        :root[data-theme="dark"] .employee-table tbody tr:nth-child(even) td { background: var(--surface-row); }
+        :root[data-theme="dark"] .employee-table tbody tr:hover td { background: #263750; }
+        :root[data-theme="dark"] .status-badge { background: color-mix(in srgb, var(--status-color) 18%, #182438); border-color: color-mix(in srgb, var(--status-color) 38%, #182438); }
+        :root[data-theme="dark"] .tag { color: #C5D1E0; background: #24334A; border-color: #3A4B64; }
+        :root[data-theme="dark"] .badge-green { color: #8BE0A5; background: #153B2A; }
+        :root[data-theme="dark"] .badge-yellow { color: #FFD17A; background: #443316; }
+        :root[data-theme="dark"] .badge-red { color: #FF9A9A; background: #472226; }
+        :root[data-theme="dark"] .badge-cyan { color: #7DE2EE; background: #153943; }
+        :root[data-theme="dark"] .status-drawer-close { color: var(--white); background: var(--card); border-color: var(--line); }
+        :root[data-theme="dark"] .status-drawer-backdrop { background: rgba(0,0,0,.52); }
+        :root[data-theme="dark"] .status-drawer-subtitle,
+        :root[data-theme="dark"] .status-detail-item span { color: var(--muted); }
+        :root[data-theme="dark"] #overviewChart svg text,
+        :root[data-theme="dark"] #detailChart svg text,
+        :root[data-theme="dark"] #overviewDonut svg text,
+        :root[data-theme="dark"] #detailDonut svg text { fill: #C4D0E0 !important; }
+        :root[data-theme="dark"] #overviewChart svg line,
+        :root[data-theme="dark"] #detailChart svg line { stroke: #42536B !important; }
+        :root[data-theme="dark"] #overviewDonut .donut circle:first-child,
+        :root[data-theme="dark"] #detailDonut .donut circle:first-child { stroke: #334258; }
+        :root[data-theme="dark"] .error-box { background: #3B2027; border-color: #6B353D; }
+        :root[data-theme="dark"] .sample-indicator { color: #FFD17A; background: #443316; border-color: #6B5021; }
+    </style>
+</head>
+<body>
+<div class="app" id="app">
+    <header class="topbar">
+        <div class="brand">
+            <img src="~/img/logo.jpg" alt="Biểu trưng nhà máy" onerror="this.hidden=true;this.nextElementSibling.style.display='grid';" />
+            <span class="brand-mark" aria-hidden="true">J</span>
+            <div>
+                <div class="eyebrow">JTECHN · ĐIỀU HÀNH SẢN XUẤT</div>
+                <h1 id="dashboardTitle">BẢNG THEO DÕI SẢN LƯỢNG LẮP RÁP</h1>
+            </div>
+        </div>
+        <div class="toolbar">
+            <label class="filter-label" for="productionDate">Ngày</label>
+            <input id="productionDate" class="control" type="date" aria-label="Ngày sản xuất" />
+            <label class="filter-label" for="groupFilter">Nhóm</label>
+            <select id="groupFilter" class="control" aria-label="Lọc nhóm sản xuất"><option value="all">Tất cả nhóm</option></select>
+            <span class="clock" id="clock">--:--:--</span>
+            <span class="refresh-state"><i class="live-dot"></i><span id="refreshLabel">Đổi tab 20 giây · tải lại 60 giây</span></span>
+            <div class="screen-nav" role="group" aria-label="Điều hướng màn hình">
+                <button class="icon-btn" id="previousScreenButton" type="button" title="Màn hình trước" aria-label="Màn hình trước">‹</button>
+                <button class="icon-btn" id="nextScreenButton" type="button" title="Màn hình tiếp theo" aria-label="Màn hình tiếp theo">›</button>
+                <button class="icon-btn auto-cycle-button" id="autoCycleButton" type="button" title="Tạm dừng tự động chuyển màn" aria-label="Tạm dừng tự động chuyển màn" aria-pressed="false">Ⅱ</button>
+            </div>
+            <div class="theme-switch" role="group" aria-label="Chọn giao diện">
+                <button type="button" data-theme-choice="light" aria-pressed="true">Sáng</button>
+                <button type="button" data-theme-choice="dark" aria-pressed="false">Tối</button>
+            </div>
+            <button class="icon-btn" id="refreshButton" type="button" title="Làm mới ngay" aria-label="Làm mới ngay">⟳</button>
+            <button class="icon-btn" id="fullscreenButton" type="button" title="Toàn màn hình" aria-label="Bật toàn màn hình">⛶</button>
+        </div>
+    </header>
+
+    <main class="main">
+        <div id="loadingState" class="loading">Đang tải dữ liệu sản xuất...</div>
+        <div id="errorState" class="error-box" hidden></div>
+        <section id="overviewScreen" class="screen active">
+            <div class="kpis">
+                <article class="kpi"><div class="kpi-label">Tổng mục tiêu</div><div class="kpi-value c-yellow" id="kpiTarget">—</div><div class="kpi-note">Mục tiêu trong ngày</div></article>
+                <article class="kpi"><div class="kpi-label">Tổng thực tế</div><div class="kpi-value c-cyan" id="kpiActual">—</div><div class="kpi-note">Sản lượng đã ghi nhận</div></article>
+                <article class="kpi"><div class="kpi-label">Tỷ lệ hoàn thành (%)</div><div class="kpi-value c-green" id="kpiRate">—</div><div class="kpi-progress"><span id="kpiRateProgress" style="width:0%"></span></div></article>
+                <article class="kpi"><div class="kpi-label">Sản lượng còn thiếu</div><div class="kpi-value c-red" id="kpiMissing">—</div><div class="kpi-note">Đến khi đạt Target</div></article>
+            </div>
+            <div class="overview">
+                <article class="panel timeline-panel">
+                    <div class="panel-head">
+                        <div><h2 class="panel-title">TIẾN ĐỘ SẢN XUẤT THEO THỜI GIAN</h2><div class="panel-subtitle">Target và Actual lũy kế từ 08:00 đến từng mốc</div></div>
+                        <div class="legend"><span class="legend-item"><i class="legend-dot" style="background:var(--yellow)"></i>Target</span><span class="legend-item"><i class="legend-dot" style="background:var(--cyan)"></i>Actual</span></div>
+                    </div>
+                    <div class="chart-host" id="overviewChart"></div>
+                </article>
+                <article class="panel">
+                    <div class="panel-head"><div><h2 class="panel-title">TỔNG QUAN HOÀN THÀNH</h2><div class="panel-subtitle">Tổng hợp từ nhân viên trong bộ lọc</div></div></div>
+                    <div class="donut-wrap" id="overviewDonut"></div>
+                </article>
+            </div>
+        </section>
+
+        <section id="employeesScreen" class="screen employee-table-screen" hidden>
+            <div class="employee-summary"><span id="employeeSummary">Danh sách nhân viên</span><span>Chọn nhân viên để xem biểu đồ chi tiết</span></div>
+            <div class="employee-grid" id="employeeGrid"></div>
+        </section>
+
+        <section id="statusScreen" class="screen status-screen" hidden>
+            <div class="status-kpis">
+                <article class="status-kpi"><div><div class="status-kpi-label">Tổng số công đoạn</div><div class="status-kpi-value" id="statusKpiTotal">0</div></div><span class="status-kpi-mark" style="--status-color:var(--blue);--status-soft:#edf3ff">Σ</span></article>
+                <article class="status-kpi"><div><div class="status-kpi-label">Đang sản xuất</div><div class="status-kpi-value" id="statusKpiRunning" style="color:var(--cyan)">0</div></div><span class="status-kpi-mark" style="--status-color:var(--cyan);--status-soft:#e8fbff">▶</span></article>
+                <article class="status-kpi"><div><div class="status-kpi-label">Đã hoàn thành</div><div class="status-kpi-value" id="statusKpiCompleted" style="color:var(--green)">0</div></div><span class="status-kpi-mark" style="--status-color:var(--green);--status-soft:#eaf8ef">✓</span></article>
+                <article class="status-kpi"><div><div class="status-kpi-label">Đang chờ / Tạm dừng</div><div class="status-kpi-value" id="statusKpiWaiting" style="color:var(--yellow)">0</div></div><span class="status-kpi-mark" style="--status-color:var(--yellow);--status-soft:#fff6e5">Ⅱ</span></article>
+                <article class="status-kpi"><div><div class="status-kpi-label">Chậm tiến độ</div><div class="status-kpi-value" id="statusKpiDelayed" style="color:var(--red)">0</div></div><span class="status-kpi-mark" style="--status-color:var(--red);--status-soft:#fff0ef">!</span></article>
+            </div>
+            <div class="status-tv" id="statusTvMode"><div class="status-grid" id="statusGrid"></div></div>
+        </section>
+
+        <section id="detailScreen" class="screen detail-screen" hidden>
+            <div class="detail-heading">
+                <div><h2 class="detail-title" id="detailName">Chi tiết nhân viên</h2><div class="detail-meta" id="detailMeta"></div></div>
+                <button class="back-btn" id="backToEmployees" type="button">← Danh sách nhân viên</button>
+            </div>
+            <div class="detail-kpis" id="detailKpis"></div>
+            <div class="detail-main">
+                <article class="panel detail-table">
+                    <div class="panel-head"><div><h2 class="panel-title">TARGET VÀ ACTUAL THEO MỐC</h2><div class="panel-subtitle">Thực tế lấy từ lịch sử TimeInput đã ghi nhận</div></div></div>
+                    <div class="chart-host" id="detailChart"></div>
+                    <div class="table-wrap"><table><thead><tr><th>Thời gian</th><th>Target ngày</th><th>Actual ghi nhận</th><th>Chênh lệch</th><th>Hoàn thành</th></tr></thead><tbody id="detailTable"></tbody></table></div>
+                </article>
+                <article class="panel detail-donut">
+                    <div class="panel-head"><div><h2 class="panel-title">HIỆU SUẤT SẢN XUẤT</h2></div></div>
+                    <div class="donut-wrap" id="detailDonut"></div>
+                </article>
+            </div>
+        </section>
+    </main>
+    <div class="status-drawer-layer" id="statusDrawerLayer" aria-hidden="true">
+        <button class="status-drawer-backdrop" type="button" aria-label="Đóng chi tiết"></button>
+        <aside class="status-drawer" role="dialog" aria-modal="true" aria-labelledby="statusDrawerTitle">
+            <div class="status-drawer-head"><div><h2 class="status-drawer-title" id="statusDrawerTitle">Chi tiết công đoạn</h2><div class="status-drawer-subtitle" id="statusDrawerSubtitle"></div></div><button class="status-drawer-close" type="button" aria-label="Đóng chi tiết">×</button></div>
+            <div class="status-drawer-content" id="statusDrawerContent"></div>
+        </aside>
+    </div>
+    <footer class="alert-strip"><span id="dataNote">Dữ liệu từ Control_Assembled_Combine_Target · JtecDB_KhoaB</span><span id="lastUpdated">Chưa cập nhật</span></footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const checkpoints = [10, 12, 15, 17, 20];
+    const checkpointLabels = checkpoints.map(hour => `${hour}h`);
+    const checkpointTimeLabels = checkpoints.map(hour => `${String(hour).padStart(2, '0')}:00`);
+    const productionStartHour = 8;
+    const productionSlotLabels = checkpointLabels;
+    const productionHours = checkpoints[checkpoints.length - 1] - productionStartHour;
+    const $ = selector => document.querySelector(selector);
+    const state = { raw: [], employees: [], selected: null, totalRows: 0, truncated: false, screen: 'overview', filterGroup: 'all', autoCyclePaused: false, statusTotalRows: 0, statusTruncated: false, statusCounts: [] };
+    const themeStorageKey = 'jtechn-production-dashboard-theme';
+    function applyTheme(theme) {
+        const selectedTheme = theme === 'dark' ? 'dark' : 'light';
+        document.documentElement.dataset.theme = selectedTheme;
+        document.querySelectorAll('[data-theme-choice]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.themeChoice === selectedTheme)));
+    }
+    let savedTheme = 'light';
+    try { savedTheme = localStorage.getItem(themeStorageKey) || 'light'; } catch { }
+    applyTheme(savedTheme);
+    document.querySelectorAll('[data-theme-choice]').forEach(button => button.addEventListener('click', () => {
+        const theme = button.dataset.themeChoice;
+        applyTheme(theme);
+        try { localStorage.setItem(themeStorageKey, theme); } catch { }
+    }));
+    const tabScreens = ['overview', 'employees', 'status'];
+    let autoTabIndex = 0;
+    let statusRecords = [];
+    const numberFormat = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 1 });
+    const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+    const asNumber = value => {
+        if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+        const parsed = Number(String(value ?? '').replace(',', '.'));
+        return Number.isFinite(parsed) ? parsed : 0;
+    };
+    const formatNumber = value => numberFormat.format(asNumber(value));
+    const get = (row, name) => {
+        const key = Object.keys(row || {}).find(candidate => candidate.toLowerCase() === name.toLowerCase());
+        return key ? row[key] : null;
+    };
+    const text = (row, key) => String(get(row, key) ?? '').trim();
+    const timeOf = row => {
+        const value = get(row, 'TimeInput');
+        if (!value) return null;
+        const parsed = new Date(value);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+    };
+    const localDateString = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const dateInput = $('#productionDate');
+    dateInput.value = localDateString(new Date());
+
+    function setClock() {
+        $('#clock').textContent = new Date().toLocaleTimeString('vi-VN', { hour12: false });
+    }
+    setClock();
+    setInterval(setClock, 1000);
+
+    function updateRefreshState() {
+        const hasError = !$('#errorState').hidden;
+        $('#refreshLabel').textContent = state.screen === 'status' ? 'Trạng thái hôm nay · tải lại 60 giây' : state.autoCyclePaused ? 'Đã tạm dừng chuyển màn · tải lại 60 giây' : 'Đổi tab 20 giây · tải lại 60 giây';
+        $('.live-dot').style.background = hasError ? 'var(--red)' : '#2a9b70';
+        $('.live-dot').style.boxShadow = hasError ? '0 0 0 3px rgba(239,68,68,.14)' : '0 0 0 3px rgba(42,155,112,.12)';
+    }
+
+    function employeeKey(row) {
+        return text(row, 'CodeSub') || `${text(row, 'FirstNameSub')}|${text(row, 'LastNameSub')}|${text(row, 'GroupSub')}|${text(row, 'TypeSub')}`;
+    }
+
+    function latestRow(rows, before = null) {
+        return rows.filter(row => {
+            const time = timeOf(row);
+            return time && (before === null || time <= before);
+        }).at(-1) || null;
+    }
+
+    function checkpointsFor(employee) {
+        return checkpoints.map(hour => {
+            const cutoff = new Date(`${dateInput.value}T${String(hour).padStart(2, '0')}:59:59`);
+            return { hour, row: latestRow(employee.history, cutoff) };
+        });
+    }
+
+    function buildEmployees(rows) {
+        const map = new Map();
+        rows.forEach(row => {
+            const key = employeeKey(row);
+            if (!map.has(key)) map.set(key, { key, history: [] });
+            map.get(key).history.push(row);
+        });
+        return [...map.values()].map(employee => {
+            employee.history.sort((a, b) => timeOf(a) - timeOf(b));
+            employee.current = employee.history[employee.history.length - 1];
+            employee.target = asNumber(get(employee.current, 'QtyTarget'));
+            employee.actual = asNumber(get(employee.current, 'QtyActual'));
+            employee.checkpoints = checkpointsFor(employee);
+            employee.name = [text(employee.current, 'FirstNameSub'), text(employee.current, 'LastNameSub')].filter(Boolean).join(' ') || 'Chưa có tên';
+            employee.code = text(employee.current, 'CodeSub') || '—';
+            employee.type = text(employee.current, 'TypeSub') || 'Chưa phân loại';
+            employee.group = text(employee.current, 'GroupSub') || 'Chưa phân nhóm';
+            employee.totalHour = get(employee.current, 'TotalHour');
+            return employee;
+        }).sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+    }
+
+    function updateEmployees() {
+        state.employees = buildEmployees(state.raw);
+        render();
+    }
+
+    function totals(employees) {
+        const target = employees.reduce((sum, item) => sum + item.target, 0);
+        const actual = employees.reduce((sum, item) => sum + item.actual, 0);
+        return { target, actual, missing: Math.max(target - actual, 0), over: Math.max(actual - target, 0), rate: target ? actual / target * 100 : 0, achieved: employees.filter(item => item.target > 0 && item.actual >= item.target).length };
+    }
+
+    function filteredEmployees() {
+        return state.filterGroup === 'all' ? state.employees : state.employees.filter(employee => employee.group === state.filterGroup);
+    }
+
+    function renderGroupFilter() {
+        const filter = $('#groupFilter');
+        const groups = [...new Set(state.employees.map(employee => employee.group))].sort((a, b) => a.localeCompare(b, 'vi'));
+        if (!groups.includes(state.filterGroup)) state.filterGroup = 'all';
+        filter.innerHTML = '<option value="all">Tất cả nhóm</option>' + groups.map(group => `<option value="${safe(group)}">${safe(group)}</option>`).join('');
+        filter.value = state.filterGroup;
+    }
+
+    function groupAggregates(employees) {
+        const groups = new Map();
+        employees.forEach(employee => {
+            if (!groups.has(employee.group)) groups.set(employee.group, { name: employee.group, employees: [], target: 0, actual: 0, checkpoints: checkpoints.map(() => ({ actual: 0, samples: 0 })) });
+            const group = groups.get(employee.group);
+            group.employees.push(employee);
+            group.target += employee.target;
+            group.actual += employee.actual;
+            employee.checkpoints.forEach((point, index) => {
+                if (!point.row) return;
+                group.checkpoints[index].actual += asNumber(get(point.row, 'QtyActual'));
+                group.checkpoints[index].samples++;
+            });
+        });
+        return [...groups.values()].map(group => ({
+            ...group,
+            rate: group.target ? group.actual / group.target * 100 : 0,
+            checkpoints: group.checkpoints.map(point => ({ ...point, actual: point.samples ? point.actual : null }))
+        })).sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+    }
+
+    function activeCheckpointIndex() {
+        const now = new Date();
+        if (dateInput.value !== localDateString(now)) return -1;
+        let index = -1;
+        checkpoints.forEach((hour, i) => { if (now.getHours() >= hour) index = i; });
+        return index;
+    }
+
+    function employeeProductionProgress(employee, hour) {
+        const start = new Date(`${dateInput.value}T${String(productionStartHour).padStart(2, '0')}:00:00`);
+        const end = new Date(`${dateInput.value}T${String(hour).padStart(2, '0')}:00:00`);
+        const startRow = latestRow(employee.history, start);
+        const endRow = latestRow(employee.history, end);
+        const actual = endRow
+            ? Math.max(asNumber(get(endRow, 'QtyActual')) - (startRow ? asNumber(get(startRow, 'QtyActual')) : 0), 0)
+            : null;
+        return {
+            target: employee.target * (hour - productionStartHour) / productionHours,
+            actual
+        };
+    }
+
+    function productionSlotTotals(employees) {
+        return checkpoints.map(hour => {
+            const points = employees.map(employee => employeeProductionProgress(employee, hour));
+            const samples = points.filter(point => point.actual != null);
+            return {
+                target: points.reduce((sum, point) => sum + point.target, 0),
+                actual: samples.length ? samples.reduce((sum, point) => sum + point.actual, 0) : null,
+                samples: samples.length
+            };
+        });
+    }
+
+    function activeProductionSlotIndex() {
+        const now = new Date();
+        if (dateInput.value !== localDateString(now)) return -1;
+        let index = -1;
+        checkpoints.forEach((hour, i) => { if (now.getHours() >= hour) index = i; });
+        return index;
+    }
+
+    function renderBarChart(host, data, options = {}) {
+        const width = options.width || 1000;
+        const height = options.height || 390;
+        const labels = options.labels || checkpointLabels;
+        const left = 65, right = width - 20, top = 30, bottom = height - 50;
+        const maxValue = Math.max(1, ...data.flatMap(point => [point.target || 0, point.actual || 0]));
+        const niceMax = maxValue * 1.18;
+        const y = value => bottom - (value / niceMax) * (bottom - top);
+        const chartLines = Array.from({ length: 5 }, (_, i) => {
+            const value = niceMax * i / 4;
+            const yy = y(value);
+            return `<line x1="${left}" y1="${yy}" x2="${right}" y2="${yy}" stroke="rgba(69,100,119,.16)" stroke-width="1"/><text x="${left - 10}" y="${yy + 4}" text-anchor="end" fill="#607787" font-size="14">${formatNumber(value)}</text>`;
+        }).join('');
+        const groupW = (right - left) / data.length;
+        const active = options.activeIndex == null ? activeCheckpointIndex() : options.activeIndex;
+        const bars = data.map((point, index) => {
+            const center = left + groupW * (index + .5);
+            const barW = Math.min(54, groupW * .3);
+            const targetY = y(point.target || 0);
+            const actualY = point.actual == null ? bottom : y(point.actual);
+            const actualHeight = point.actual == null ? 0 : Math.max(2, bottom - actualY);
+            const shortfall = point.actual != null && point.target > point.actual ? point.target - point.actual : 0;
+            const pct = point.actual == null ? 'Chưa ghi nhận' : `${point.target ? formatNumber(point.actual / point.target * 100) : '—'}%`;
+            const selected = index === active;
+            const actualValue = point.actual == null ? '—' : formatNumber(point.actual);
+            return `<g>
+                <rect x="${center - barW - 3}" y="${targetY}" width="${barW}" height="${Math.max(2, bottom - targetY)}" rx="3" fill="#F59E0B" opacity=".94"/>
+                <text x="${center - barW / 2 - 3}" y="${Math.max(15, targetY - 7)}" text-anchor="middle" fill="#9A5B00" font-size="16" font-weight="700">${formatNumber(point.target)}</text>
+                ${point.actual == null ? '' : `<rect x="${center + 3}" y="${actualY}" width="${barW}" height="${actualHeight}" rx="3" fill="#06B6D4" opacity=".96"/><text x="${center + barW / 2 + 3}" y="${Math.max(15, actualY - 7)}" text-anchor="middle" fill="#087E96" font-size="16" font-weight="700">${actualValue}</text>`}
+                ${shortfall > 0 ? `<text x="${center}" y="${bottom + 17}" text-anchor="middle" fill="#EF4444" font-size="12">Thiếu ${formatNumber(shortfall)}</text>` : ''}
+                <text x="${center}" y="${bottom + 33}" text-anchor="middle" fill="${selected ? '#2563EB' : '#52647C'}" font-size="15" font-weight="${selected ? 800 : 500}">${labels[index]}</text>
+                <text x="${center}" y="${bottom + 47}" text-anchor="middle" fill="#65758B" font-size="12">${pct}</text>
+            </g>`;
+        }).join('');
+        host.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Biểu đồ target và actual">${chartLines}<line x1="${left}" y1="${bottom}" x2="${right}" y2="${bottom}" stroke="rgba(69,100,119,.38)"/>${bars}</svg>`;
+    }
+
+    function renderDonut(host, target, actual, details = true) {
+        const pct = target > 0 ? actual / target * 100 : 0;
+        const remaining = Math.max(target - actual, 0);
+        const radius = 86, circumference = 2 * Math.PI * radius;
+        const progress = Math.min(Math.max(actual / (target || 1), 0), 1);
+        const color = pct >= 100 ? '#16A34A' : '#2563EB';
+        const stats = details ? `<div class="donut-stats"><div><span>Target</span><strong class="c-yellow">${formatNumber(target)}</strong></div><div><span>Actual</span><strong class="c-cyan">${formatNumber(actual)}</strong></div><div><span>Còn thiếu</span><strong class="c-red">${formatNumber(remaining)}</strong></div></div>` : '';
+        host.innerHTML = `<svg class="donut" viewBox="0 0 220 220" role="img" aria-label="Hoàn thành ${formatNumber(pct)} phần trăm">
+            <circle cx="110" cy="110" r="${radius}" fill="none" stroke="#e6edf5" stroke-width="17"/>
+            <circle cx="110" cy="110" r="${radius}" fill="none" stroke="${color}" stroke-width="17" stroke-linecap="round" stroke-dasharray="${circumference * progress} ${circumference}" transform="rotate(-90 110 110)" style="filter:drop-shadow(0 0 7px ${color}66)"/>
+            <text x="110" y="105" fill="#172B4D" text-anchor="middle" font-size="36" font-weight="800">${formatNumber(pct)}%</text>
+            <text x="110" y="130" fill="#65758B" text-anchor="middle" font-size="12">HOÀN THÀNH</text>
+        </svg>${stats}`;
+    }
+
+    function statusFor(employee) {
+        if (employee.target > 0 && employee.actual >= employee.target) return { label: 'ĐẠT MỤC TIÊU', cls: 'badge-green', color: 'var(--green)' };
+        const last = timeOf(employee.current);
+        if (last && dateInput.value === localDateString(new Date()) && new Date() >= new Date(`${dateInput.value}T20:00:00`)) return { label: 'CHƯA ĐẠT CUỐI CA', cls: 'badge-red', color: 'var(--red)' };
+        if (!last) return { label: 'CHƯA CÓ MỐC GIỜ', cls: 'badge-cyan', color: 'var(--cyan)' };
+        return { label: 'ĐANG THỰC HIỆN', cls: 'badge-yellow', color: 'var(--yellow)' };
+    }
+
+    function renderGroupCards(employees) {
+        const groups = groupAggregates(employees);
+        const host = $('#groupGrid');
+        $('#groupSummary').textContent = `${groups.length.toLocaleString('vi-VN')} nhóm · ${employees.length.toLocaleString('vi-VN')} nhân viên`;
+        if (!groups.length) {
+            host.innerHTML = '<div class="empty">Không có dữ liệu nhóm phù hợp với bộ lọc.</div>';
+            return;
+        }
+        host.innerHTML = groups.map(group => {
+            const max = Math.max(1, group.target, ...group.checkpoints.map(point => point.actual || 0));
+            const color = group.rate >= 100 ? 'var(--green)' : 'var(--blue)';
+            const mini = group.checkpoints.map((point, index) => {
+                const targetH = Math.max(2, group.target / max * 42);
+                const actualH = point.actual == null ? 0 : Math.max(2, point.actual / max * 42);
+                return `<div class="mini-point" title="${checkpointLabels[index]} · Target ${formatNumber(group.target)} · Actual ${point.actual == null ? 'Chưa ghi nhận' : formatNumber(point.actual)}">
+                    <div class="mini-bars"><i class="mini-bar" style="height:${targetH}px;background:var(--yellow);opacity:.85"></i><i class="mini-bar" style="height:${actualH}px;background:var(--cyan)"></i></div>
+                    <span class="mini-label">${checkpointLabels[index]}</span>
+                </div>`;
+            }).join('');
+            return `<article class="group-card">
+                <div class="group-card-head"><div style="min-width:0"><div class="group-name" title="${safe(group.name)}">${safe(group.name)}</div><div class="group-count">${group.employees.length.toLocaleString('vi-VN')} nhân viên</div></div><div class="group-rate" style="color:${color}">${formatNumber(group.rate)}%</div></div>
+                <div class="group-values"><div><span>Tổng Target</span><strong class="c-yellow">${formatNumber(group.target)}</strong></div><div><span>Tổng Actual</span><strong class="c-cyan">${formatNumber(group.actual)}</strong></div></div>
+                <div class="progress-track"><div class="progress-fill" style="width:${Math.min(group.rate, 100)}%;background:${color}"></div></div>
+                <div class="mini-chart">${mini}</div>
+            </article>`;
+        }).join('');
+    }
+
+    function renderEmployeeCharts(employees) {
+        const host = $('#employeeGrid');
+        if (!employees.length) {
+            host.innerHTML = '<div class="empty">Không có dữ liệu nhân viên phù hợp với bộ lọc.</div>';
+            return;
+        }
+        host.innerHTML = employees.map(employee => {
+            const status = statusFor(employee);
+            const pct = employee.target ? employee.actual / employee.target * 100 : 0;
+            const progress = checkpoints.map(hour => employeeProductionProgress(employee, hour));
+            const chartMax = Math.max(1, ...progress.flatMap(point => [point.target, point.actual || 0]));
+            const bars = progress.map((point, index) => {
+                const targetHeight = Math.max(2, point.target / chartMax * 34);
+                const actualHeight = point.actual == null ? 0 : Math.max(2, point.actual / chartMax * 34);
+                return `<div class="mini-point" title="08:00–${checkpointTimeLabels[index]} · Target ${formatNumber(point.target)} · Actual ${point.actual == null ? 'Chưa ghi nhận' : formatNumber(point.actual)}">
+                    <div class="mini-bars">
+                        <div class="mini-column"><span class="mini-value">${formatNumber(point.target)}</span><i class="mini-bar" style="height:${targetHeight}px;background:var(--yellow);opacity:.85"></i></div>
+                        <div class="mini-column"><span class="mini-value">${point.actual == null ? '—' : formatNumber(point.actual)}</span><i class="mini-bar" style="height:${actualHeight}px;background:var(--cyan)"></i></div>
+                    </div>
+                    <span class="mini-label">${checkpointLabels[index]}</span>
+                </div>`;
+            }).join('');
+            return `<article class="employee-card" tabindex="0" role="button" data-employee="${safe(employee.key)}" aria-label="Xem biểu đồ chi tiết ${safe(employee.name)}">
+                <div class="employee-top"><div style="min-width:0"><div class="employee-name">${safe(employee.name)}</div><div class="employee-code">Mã: ${safe(employee.code)}</div></div><span class="badge ${status.cls}">${status.label}</span></div>
+                <div class="employee-tags"><span class="tag">${safe(employee.type)}</span><span class="tag">${safe(employee.group)}</span></div>
+                <div class="employee-values"><div><span>Target</span><strong class="c-yellow">${formatNumber(employee.target)}</strong></div><div><span>Actual</span><strong class="c-cyan">${formatNumber(employee.actual)}</strong></div><div><span>Hoàn thành</span><strong style="color:${status.color}">${formatNumber(pct)}%</strong></div></div>
+                <div class="progress-track"><div class="progress-fill" style="width:${Math.min(pct, 100)}%;background:${status.color}"></div></div>
+                <div class="mini-chart">${bars}</div>
+            </article>`;
+        }).join('');
+        host.querySelectorAll('[data-employee]').forEach(row => {
+            const open = () => showDetail(employees.find(employee => employee.key === row.dataset.employee));
+            row.addEventListener('click', open);
+            row.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); } });
+        });
+    }
+
+    function normalizeStatusRecord(row, index) {
+        const record = {};
+        ['ID', 'Location', 'CodeLD', 'NameLD', 'NumberLot', 'CodeProduct', 'GroupInput', 'QtyRequest', 'QtyActual', 'QtyRemain', 'TotalCable', 'TimeInput', 'TimeEstimate', 'TimeFinish', 'TimePause', 'TimeResumed', 'TimeDelay', 'CheckWaitTime', 'TotalMinute', 'TotalWaitTime', 'WaitTimeLate', 'StageHour', 'FastestHour', 'ActualHour', 'TotalMember', 'Status'].forEach(field => {
+            record[field] = get(row, field);
+        });
+        record.ID ??= get(row, 'ID') ?? index;
+        record.CodeProduct ??= '';
+        record.CodeLD ??= '';
+        record.GroupInput ??= 'Chưa phân nhóm';
+        record.Location ??= 'Chưa có vị trí';
+        record.QtyRequest = asNumber(record.QtyRequest);
+        record.QtyActual = asNumber(record.QtyActual);
+        record.QtyRemain = record.QtyRemain == null ? Math.max(record.QtyRequest - record.QtyActual, 0) : asNumber(record.QtyRemain);
+        record.Status = String(record.Status ?? 'Chưa xác định').trim();
+        return record;
+    }
+
+    function statusClass(record) {
+        const status = String(record.Status ?? '').toLocaleLowerCase('vi');
+        if (status.includes('hoàn thành') || status.includes('completed') || status.includes('complete') || status.includes('finish')) return 'status-completed';
+        if (status.includes('chậm') || status.includes('trễ') || status.includes('delayed') || status.includes('late')) return 'status-delayed';
+        if (asNumber(record.TimeDelay) > 0) return 'status-delayed';
+        if (status.includes('tạm dừng') || status.includes('paused') || status.includes('pause')) return 'status-paused';
+        if (status.includes('chờ') || status.includes('waiting') || status.includes('wait') || status.includes('pending')) return 'status-waiting';
+        if (status.includes('đang sản xuất') || status.includes('in progress') || status.includes('processing') || status.includes('resumed') || status.includes('running')) {
+            const estimate = new Date(record.TimeEstimate).getTime();
+            if (Number.isFinite(estimate) && estimate < Date.now() && record.QtyRemain > 0) return 'status-delayed';
+            return 'status-progress';
+        }
+        return 'status-paused';
+    }
+
+    function statusLabel(record) {
+        return {
+            'status-completed': 'Đã hoàn thành',
+            'status-progress': 'Đang sản xuất',
+            'status-waiting': 'Đang chờ',
+            'status-paused': 'Tạm dừng',
+            'status-delayed': 'Chậm tiến độ'
+        }[statusClass(record)];
+    }
+
+    function statusSummaryCounts() {
+        const counts = { 'status-completed': 0, 'status-progress': 0, 'status-waiting': 0, 'status-paused': 0, 'status-delayed': 0 };
+        state.statusCounts.forEach(row => {
+            const status = String(get(row, 'Status') ?? '');
+            const statusStyle = statusClass({ Status: status });
+            counts[statusStyle] += asNumber(get(row, 'TotalRows'));
+        });
+        return counts;
+    }
+
+    function statusCompletion(record) {
+        const request = asNumber(record.QtyRequest);
+        return request > 0 ? asNumber(record.QtyActual) / request * 100 : 0;
+    }
+
+    function statusTime(value) {
+        if (!value) return '—';
+        const date = new Date(value);
+        return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+
+    function renderStatusCard(record) {
+        const completion = statusCompletion(record);
+        const finishTime = new Date(record.TimeFinish).getTime();
+        const completedRecently = statusClass(record) === 'status-completed' && Number.isFinite(finishTime) && Date.now() - finishTime < 60 * 60 * 1000;
+        const statusStyle = statusClass(record);
+        return `<article class="status-card ${statusStyle}${completedRecently ? ' recently-completed' : ''}" tabindex="0" role="button" data-status-id="${record.ID}" aria-label="${safe(record.CodeProduct)}, ${safe(statusLabel(record))}, ${formatNumber(completion)} phần trăm">
+            <div class="status-card-top"><div style="min-width:0"><div class="status-product" title="${safe(record.CodeProduct)}">${safe(record.CodeProduct)}</div></div><span class="status-badge">${safe(statusLabel(record))}</span></div>
+            ${statusClass(record) === 'status-delayed' ? '<div class="status-card-warning">CẦN ƯU TIÊN XỬ LÝ</div>' : ''}
+            <div class="status-quantity"><strong>${formatNumber(record.QtyActual)} <span>/ ${formatNumber(record.QtyRequest)}</span></strong><span class="status-percent">${formatNumber(completion)}%</span></div>
+        </article>`;
+    }
+
+    function renderStatusMonitor() {
+        const records = statusRecords;
+        const counts = statusSummaryCounts();
+        $('#statusKpiTotal').textContent = formatNumber(state.statusTotalRows);
+        $('#statusKpiRunning').textContent = formatNumber(counts['status-progress']);
+        $('#statusKpiCompleted').textContent = formatNumber(counts['status-completed']);
+        $('#statusKpiWaiting').textContent = formatNumber(counts['status-waiting'] + counts['status-paused']);
+        $('#statusKpiDelayed').textContent = formatNumber(counts['status-delayed']);
+        $('#statusGrid').innerHTML = records.length ? records.map(renderStatusCard).join('') : '<div class="empty">Chưa có dữ liệu công đoạn.</div>';
+        document.querySelectorAll('[data-status-id]').forEach(item => {
+            const open = () => openStatusDetail(statusRecords.find(record => record.ID === Number(item.dataset.statusId)));
+            item.addEventListener('click', open);
+            item.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); } });
+        });
+    }
+
+    function renderStatusDetail(record) {
+        const completion = statusCompletion(record);
+        $('#statusDrawerTitle').textContent = record.CodeProduct;
+        $('#statusDrawerSubtitle').textContent = `${record.CodeLD} · ${record.GroupInput} · ${statusLabel(record)}`;
+        const sections = [
+            ['Thông tin công đoạn', [['ID', record.ID], ['Vị trí', record.Location], ['Mã Sub', record.CodeLD], ['Tên Sub', record.NameLD], ['Số Lot', record.NumberLot], ['Mã sản phẩm', record.CodeProduct], ['Nhóm', record.GroupInput]]],
+            ['Sản lượng', [['Số lượng yêu cầu', formatNumber(record.QtyRequest)], ['Số lượng thực tế', formatNumber(record.QtyActual)], ['Số lượng còn lại', formatNumber(record.QtyRemain)], ['Tổng cáp', formatNumber(record.TotalCable)], ['Hoàn thành', `${formatNumber(completion)}%`]]],
+            ['Theo dõi thời gian', [['Thời gian nhập', statusTime(record.TimeInput)], ['Dự kiến hoàn thành', statusTime(record.TimeEstimate)], ['Thời gian kết thúc', statusTime(record.TimeFinish)], ['Thời gian tạm dừng', statusTime(record.TimePause)], ['Thời gian chạy lại', statusTime(record.TimeResumed)], ['Thời gian trễ', statusTime(record.TimeDelay)], ['Kiểm tra chờ', record.CheckWaitTime], ['Tổng phút', formatNumber(record.TotalMinute)], ['Tổng thời gian chờ', formatNumber(record.TotalWaitTime)], ['Thời gian chờ trễ', formatNumber(record.WaitTimeLate)]]],
+            ['Hiệu suất sản xuất', [['Giờ công đoạn', formatNumber(record.StageHour)], ['Giờ nhanh nhất', formatNumber(record.FastestHour)], ['Giờ thực tế', formatNumber(record.ActualHour)], ['Tổng nhân sự', formatNumber(record.TotalMember)], ['Trạng thái', statusLabel(record)]]]
+        ];
+        $('#statusDrawerContent').innerHTML = sections.map(([title, fields]) => `<section class="status-detail-section"><h3>${title}</h3><div class="status-detail-grid">${fields.map(([label, value]) => `<div class="status-detail-item"><span>${label}</span><strong>${safe(value ?? '—')}</strong></div>`).join('')}</div></section>`).join('');
+    }
+
+    function openStatusDetail(record) {
+        if (!record) return;
+        renderStatusDetail(record);
+        const layer = $('#statusDrawerLayer');
+        layer.classList.add('open');
+        layer.setAttribute('aria-hidden', 'false');
+        layer.querySelector('.status-drawer-close').focus();
+    }
+
+    function closeStatusDetail() {
+        const layer = $('#statusDrawerLayer');
+        layer.classList.remove('open');
+        layer.setAttribute('aria-hidden', 'true');
+    }
+
+    function renderDetail(employee) {
+        $('#detailName').textContent = employee.name;
+        $('#detailMeta').textContent = `Mã ${employee.code} · ${employee.type} · ${employee.group}`;
+        const pct = employee.target ? employee.actual / employee.target * 100 : 0;
+        $('#detailKpis').innerHTML = [
+            ['Target', formatNumber(employee.target), 'c-yellow'],
+            ['Actual', formatNumber(employee.actual), 'c-cyan'],
+            ['Tổng giờ', employee.totalHour == null ? '—' : formatNumber(employee.totalHour), ''],
+            ['Hoàn thành', `${formatNumber(pct)}%`, pct >= 100 ? 'c-green' : 'c-cyan'],
+            ['Bản ghi giờ', employee.history.filter(row => timeOf(row)).length.toLocaleString('vi-VN'), '']
+        ].map(item => `<div class="detail-kpi"><span>${item[0]}</span><strong class="${item[2]}">${item[1]}</strong></div>`).join('');
+        const points = employee.checkpoints.map(point => ({
+            target: employee.target,
+            actual: point.row ? asNumber(get(point.row, 'QtyActual')) : null
+        }));
+        renderBarChart($('#detailChart'), points, { width: 900, height: 290 });
+        const current = currentCheckpoint();
+        $('#detailTable').innerHTML = employee.checkpoints.map((point, index) => {
+            const actual = point.row ? asNumber(get(point.row, 'QtyActual')) : null;
+            const diff = actual == null ? null : actual - employee.target;
+            const rate = actual == null || !employee.target ? null : actual / employee.target * 100;
+            return `<tr class="${index === current ? 'current-row' : current >= 0 && index > current ? 'future-row' : ''}">
+                <td>${checkpointLabels[index]}</td><td class="c-yellow">${formatNumber(employee.target)}</td>
+                <td class="${actual == null ? '' : 'c-cyan'}">${actual == null ? '—' : formatNumber(actual)}</td>
+                <td class="${diff == null ? '' : diff >= 0 ? 'c-green' : 'c-red'}">${diff == null ? '—' : formatNumber(diff)}</td>
+                <td>${rate == null ? '—' : `${formatNumber(rate)}%`}</td></tr>`;
+        }).join('');
+        renderDonut($('#detailDonut'), employee.target, employee.actual);
+    }
+
+    function showDetail(employee) {
+        if (!employee) return;
+        state.selected = employee;
+        switchScreen('detail');
+        renderDetail(employee);
+    }
+
+    function currentCheckpoint() {
+        if (dateInput.value !== localDateString(new Date())) return -1;
+        let index = -1;
+        checkpoints.forEach((hour, i) => { if (new Date().getHours() >= hour) index = i; });
+        return index;
+    }
+
+    function switchScreen(name) {
+        state.screen = name;
+        const tabIndex = tabScreens.indexOf(name);
+        if (tabIndex >= 0) autoTabIndex = tabIndex;
+        document.querySelectorAll('.screen').forEach(screen => {
+            const active = screen.id === `${name}Screen`;
+            screen.hidden = !active;
+            screen.classList.toggle('active', active);
+        });
+        $('#dashboardTitle').textContent = name === 'status' ? 'BẢNG THEO DÕI TRẠNG THÁI LẮP RÁP' : 'BẢNG THEO DÕI SẢN LƯỢNG LẮP RÁP';
+        updateRefreshState();
+        $('#app').classList.toggle('tv-mode', document.fullscreenElement != null);
+    }
+
+    function render() {
+        renderGroupFilter();
+        const employees = filteredEmployees();
+        const summary = totals(employees);
+        $('#kpiTarget').textContent = formatNumber(summary.target);
+        $('#kpiActual').textContent = formatNumber(summary.actual);
+        $('#kpiRate').textContent = `${formatNumber(summary.rate)}%`;
+        $('#kpiRateProgress').style.width = `${Math.min(summary.rate, 100)}%`;
+        $('#kpiMissing').textContent = formatNumber(summary.missing);
+        const progress = productionSlotTotals(employees);
+        renderBarChart($('#overviewChart'), progress, { labels: productionSlotLabels, activeIndex: activeProductionSlotIndex() });
+        renderDonut($('#overviewDonut'), summary.target, summary.actual);
+        renderEmployeeCharts(employees);
+        renderStatusMonitor();
+        $('#employeeSummary').textContent = `${employees.length.toLocaleString('vi-VN')} nhân viên · Tổng Actual ${formatNumber(summary.actual)}`;
+        if (state.selected) {
+            const updated = state.employees.find(employee => employee.key === state.selected.key);
+            if (updated) { state.selected = updated; renderDetail(updated); }
+        }
+        if (state.truncated || state.statusTruncated) $('#dataNote').textContent = 'Đang hiển thị tối đa 5.000 bản ghi mỗi bảng · Control_Assembled_Combine_Target · Control_Assembled_Status';
+        else $('#dataNote').textContent = 'Dữ liệu từ Control_Assembled_Combine_Target · Control_Assembled_Status · JtecDB_KhoaB';
+    }
+
+    async function loadData() {
+        const refreshButton = $('#refreshButton');
+        refreshButton.disabled = true;
+        if (state.screen !== 'status') $('#refreshLabel').textContent = 'Đang cập nhật...';
+        $('#errorState').hidden = true;
+        if (!state.raw.length) $('#loadingState').hidden = false;
+        try {
+            const response = await fetch(`/api/assembled-combine-target/statistics?date=${encodeURIComponent(dateInput.value)}`, { cache: 'no-store' });
+            if (!response.ok) throw new Error(response.status === 401 || response.status === 403 ? 'Không thể tải dữ liệu thống kê.' : 'Không tải được dữ liệu sản xuất. Vui lòng thử lại.');
+            const snapshot = await response.json();
+            state.raw = Array.isArray(snapshot.rows) ? snapshot.rows : [];
+            statusRecords = Array.isArray(snapshot.statusRows) ? snapshot.statusRows.map(normalizeStatusRecord) : [];
+            state.statusCounts = Array.isArray(snapshot.statusCounts) ? snapshot.statusCounts : [];
+            state.statusTotalRows = Number(snapshot.statusTotalRows) || statusRecords.length;
+            state.statusTruncated = Boolean(snapshot.statusIsTruncated);
+            state.totalRows = Number(snapshot.totalRows) || 0;
+            state.truncated = Boolean(snapshot.isTruncated);
+            updateEmployees();
+            $('#lastUpdated').textContent = `Cập nhật lúc ${new Date().toLocaleTimeString('vi-VN', { hour12: false })}`;
+        } catch (error) {
+            $('#errorState').textContent = error.message;
+            $('#errorState').hidden = false;
+        } finally {
+            $('#loadingState').hidden = true;
+            refreshButton.disabled = false;
+            updateRefreshState();
+        }
+    }
+
+    $('#backToEmployees').addEventListener('click', () => switchScreen('employees'));
+    $('#groupFilter').addEventListener('change', () => { state.filterGroup = $('#groupFilter').value; render(); });
+    function moveScreen(direction) {
+        const currentName = state.screen === 'detail' ? 'employees' : state.screen;
+        const currentIndex = tabScreens.indexOf(currentName);
+        const nextIndex = (Math.max(currentIndex, 0) + direction + tabScreens.length) % tabScreens.length;
+        switchScreen(tabScreens[nextIndex]);
+    }
+    $('#previousScreenButton').addEventListener('click', () => moveScreen(-1));
+    $('#nextScreenButton').addEventListener('click', () => moveScreen(1));
+    $('#autoCycleButton').addEventListener('click', () => {
+        state.autoCyclePaused = !state.autoCyclePaused;
+        const button = $('#autoCycleButton');
+        const label = state.autoCyclePaused ? 'Tiếp tục tự động chuyển màn' : 'Tạm dừng tự động chuyển màn';
+        button.textContent = state.autoCyclePaused ? '▶' : 'Ⅱ';
+        button.title = label;
+        button.setAttribute('aria-label', label);
+        button.setAttribute('aria-pressed', String(state.autoCyclePaused));
+        updateRefreshState();
+    });
+    renderStatusMonitor();
+    $('#statusDrawerLayer .status-drawer-close').addEventListener('click', closeStatusDetail);
+    $('#statusDrawerLayer .status-drawer-backdrop').addEventListener('click', closeStatusDetail);
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') closeStatusDetail(); });
+    dateInput.addEventListener('change', loadData);
+    $('#refreshButton').addEventListener('click', loadData);
+    async function enterFullscreen(showError = false) {
+        if (document.fullscreenElement) return;
+        try {
+            await document.documentElement.requestFullscreen();
+            $('#errorState').hidden = true;
+        } catch {
+            if (!showError) return;
+            $('#errorState').textContent = 'Trình duyệt đã chặn tự động toàn màn hình. Nhấn nút ⛶ để bật thủ công.';
+            $('#errorState').hidden = false;
+        }
+    }
+    $('#fullscreenButton').addEventListener('click', async () => {
+        if (document.fullscreenElement) {
+            await document.exitFullscreen();
+            return;
+        }
+        await enterFullscreen(true);
+    });
+    document.addEventListener('fullscreenchange', () => $('#app').classList.toggle('tv-mode', document.fullscreenElement != null));
+    setTimeout(enterFullscreen, 10000);
+    setInterval(loadData, 60000);
+    setInterval(() => {
+        if (state.autoCyclePaused || state.screen === 'detail') return;
+        autoTabIndex = (autoTabIndex + 1) % tabScreens.length;
+        switchScreen(tabScreens[autoTabIndex]);
+    }, 20000);
+    loadData();
+});
+</script>
+</body>
+</html>

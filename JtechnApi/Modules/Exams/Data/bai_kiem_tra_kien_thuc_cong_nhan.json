@@ -1,0 +1,777 @@
+{
+  "id": 13,
+  "title": "Bài kiểm tra kiến thức công nhân",
+  "minutes": 30,
+  "scores": [
+    80,
+    60
+  ],
+  "groups": [
+    {
+      "title": "I. AN TOÀN LAO ĐỘNG ( 5 điểm )\n                                    Theo bạn thao tác an toàn lao động là thao tác nào? (Khoanh vào câu trả lời đúng)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 1,
+          "text": "Theo bạn thao tác an toàn lao động là thao tác nào?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Phải quấn tóc gọn gàng khi thao tác máy."
+            },
+            {
+              "id": "1",
+              "text": "Khi ra ngoài phải treo thẻ thao tác"
+            },
+            {
+              "id": "2",
+              "text": "Khi thao tác phải sử dụng găng tay bảo hộ"
+            },
+            {
+              "id": "3",
+              "text": "Khi xử lý sự cố máy móc tại khu vực ống  phải tắt nguồn điện"
+            },
+            {
+              "id": "4",
+              "text": "Tất cả phương án trên"
+            }
+          ],
+          "correct": [
+            "4"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "II. Kiểm tra năng lực nhận biết băng dính (15 điểm)\n                                  Bạn hãy chọn đáp án đúng bằng cách tích vào đáp án màu dây tương ứng với màu dây trong ảnh",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 2,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/laprap/group2_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đen thường"
+            },
+            {
+              "id": "1",
+              "text": "Đen chịu nhiệt"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 3,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/laprap/group2_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Trắng chịu nhiệt"
+            },
+            {
+              "id": "1",
+              "text": "Trắng thường"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 4,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/laprap/group2_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Cam Thường"
+            },
+            {
+              "id": "1",
+              "text": "Đỏ thường"
+            },
+            {
+              "id": "2",
+              "text": "Đỏ chịu nhiệt"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 5,
+          "text": "",
+          "points": 2.0,
+          "image": "/img/laprap/group2_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "SUPPER"
+            },
+            {
+              "id": "1",
+              "text": "Đen thường"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 6,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/laprap/group2_5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Xanh thường"
+            },
+            {
+              "id": "1",
+              "text": "Xanh chịu nhiệt"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 7,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/laprap/group2_6.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Xám thường"
+            },
+            {
+              "id": "1",
+              "text": "Xám chịu nhiệt"
+            },
+            {
+              "id": "2",
+              "text": "Cả 2 đều không phải"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 8,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/laprap/group2_7.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Cam thường"
+            },
+            {
+              "id": "1",
+              "text": "Đỏ thường"
+            },
+            {
+              "id": "2",
+              "text": "No660"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 9,
+          "text": "",
+          "points": 2.0,
+          "image": "/img/laprap/group2_8.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Thủy tinh"
+            },
+            {
+              "id": "1",
+              "text": "Clophats835"
+            },
+            {
+              "id": "2",
+              "text": "Xám thường"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 10,
+          "text": "",
+          "points": 2.0,
+          "image": "/img/laprap/group2_9.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Clophats 835"
+            },
+            {
+              "id": "1",
+              "text": "Tesa"
+            },
+            {
+              "id": "2",
+              "text": "Đen thường"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 11,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/laprap/group2_10.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Xám thường"
+            },
+            {
+              "id": "1",
+              "text": "Xám chịu nhiệt"
+            },
+            {
+              "id": "2",
+              "text": "Xám đặc biệt"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 12,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/laprap/group2_11.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Xanh chịu nhệt"
+            },
+            {
+              "id": "1",
+              "text": "Xanh thường"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 13,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/laprap/group2_12.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Vàng chịu nhiệt"
+            },
+            {
+              "id": "1",
+              "text": "Vàng thường"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "III. Kiểm tra nhận biết các loại ống (10 điểm)",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 14,
+          "text": "",
+          "points": 2.0,
+          "image": "/img/laprap/group3_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Ống đen thường"
+            },
+            {
+              "id": "1",
+              "text": "Ống chịu nhiệt"
+            },
+            {
+              "id": "2",
+              "text": "Ống xám chịu nhiệt"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 15,
+          "text": "",
+          "points": 2.0,
+          "image": "/img/laprap/group3_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Ống đen thường"
+            },
+            {
+              "id": "1",
+              "text": "Ống chịu nhiệt"
+            },
+            {
+              "id": "2",
+              "text": "Ống xám chịu nhiệt"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 16,
+          "text": "",
+          "points": 2.0,
+          "image": "/img/laprap/group3_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Ống Vải"
+            },
+            {
+              "id": "1",
+              "text": "Ống spai"
+            },
+            {
+              "id": "2",
+              "text": "Ống xám chịu nhiệt"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 17,
+          "text": "",
+          "points": 2.0,
+          "image": "/img/laprap/group3_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Ống Vải"
+            },
+            {
+              "id": "1",
+              "text": "Ống chịu nhiệt"
+            },
+            {
+              "id": "2",
+              "text": "Ống xám chịu nhiệt"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 18,
+          "text": "",
+          "points": 2.0,
+          "image": "/img/laprap/group3_5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Ống cam"
+            },
+            {
+              "id": "1",
+              "text": "Ống chịu nhiệt"
+            },
+            {
+              "id": "2",
+              "text": "Ống xám chịu nhiệt"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "IV. Tiêu chuẩn thao tác công đoạn LR (10 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 19,
+          "text": "",
+          "points": 10.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Phương án 2:<br><div style=\"margin-left: 35px;\">Bước 1: Trước khi làm phải tiến hành kiểm tra tất cả các số sửa đổi và tất cả các điểm chú ý trên bàn gá</div>\n                                     <div style=\"margin-left: 35px;\">Bước 2: Trước khi mắc dây lên bàn gá nhất định phải kiểm tra tất cả maku conecter và maku que gá</div>\n                                     <div style=\"margin-left: 35px;\">Bước 3: Những phần khó quấn bên ngoài que gá, sau khi quấn xong phải kiển tra vị trí của nhánh và mắc trở lại que gá.Tại vị trí có hình thù phức tạp làm bảng tiêu chuẩn kiểm tra bên ngoài</div>"
+            },
+            {
+              "id": "1",
+              "text": "Phương án 1:<br>Bước 1: Trước khi làm phải tiến hành kiểm tra tất cả các số sửa đổi và tất cả các điểm chú ý trên bàn gá <br>  Bước 2: Trước khi mắc dây lên bàn gá nhất định phải kiểm tra tất cả maku conecter và maku que gá <br>  Bước 3: Những phần khó quấn bên ngoài que gá, sau khi quấn xong phải kiển tra vị trí của nhánh và mắc trở lại que gá.Tại vị trí có hình thù phức tạp làm bảng tiêu chuẩn kiểm tra bên ngoài. <br> Bước 4 : Làm xong check nht và xuất hàng"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "V. Thao tác quấn băng dính  (10 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 20,
+          "text": "Nhìn vào hình dưới thì phải quấn ntn? 2đ",
+          "points": 2.0,
+          "image": "/img/laprap/group4_5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Quấn điểm"
+            },
+            {
+              "id": "1",
+              "text": "Quấn Thô"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 21,
+          "text": "Nhìn vào hình dưới thì phải quấn ntn? 3đ",
+          "points": 3.0,
+          "image": "/img/laprap/group4_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Quấn điểm"
+            },
+            {
+              "id": "1",
+              "text": "Quấn Thô"
+            },
+            {
+              "id": "2",
+              "text": "Quấn kín"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 22,
+          "text": "Nhìn vào hình dưới thì hình nào quấn đúng tiêu chuẩn 5đ",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hình a<br><img src=\"/img/laprap/group4_3.png\" alt=\"Hình a\" />"
+            },
+            {
+              "id": "1",
+              "text": "Hình b<br><img src=\"/img/laprap/group4_4.png\" alt=\"Hình b\" />"
+            },
+            {
+              "id": "2",
+              "text": "Cả 2 hình"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VI. Nhận biết được các ghi chú hiển thị trên bàn gá ( 20 điểm )",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 23,
+          "text": "Theo bạn hình ảnh về hướng đổ que gá nào đúng ? 5đ",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hình a <br><img src=\"/img/laprap/group5_1.png\" alt=\"Hình a \" />"
+            },
+            {
+              "id": "1",
+              "text": "Hình b<br><img src=\"/img/laprap/group5_2.png\" alt=\"Hình b\" />"
+            },
+            {
+              "id": "2",
+              "text": "Cả 2 hình<br><img src=\"/img/laprap/group5_3.png\" alt=\"Cả 2 hình\" />"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 24,
+          "text": "Hình ảnh dưới hiển thị ghi chú gì? 5đ",
+          "points": 5.0,
+          "image": "/img/laprap/group5_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Dụng cụ cần thiết trước khi làm"
+            },
+            {
+              "id": "1",
+              "text": "Chú ý các chủng loại băng dính,linh kiện,số lượng băng dính trắng trên mã hàng"
+            },
+            {
+              "id": "2",
+              "text": "Cả 2 đáp án trên"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 25,
+          "text": "Hình ảnh dưới hiển thị ghi chú gì? 5đ",
+          "points": 5.0,
+          "image": "/img/laprap/group5_5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hướng nhánh khi làm"
+            },
+            {
+              "id": "1",
+              "text": "Góc độ cần làm của nhánh"
+            },
+            {
+              "id": "2",
+              "text": "Cả 2 đáp án trên"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 26,
+          "text": "Hình ảnh dưới hiển thị ghi chú gì? 5đ",
+          "points": 5.0,
+          "image": "/img/laprap/group5_6.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Chú ý hướng nhánh"
+            },
+            {
+              "id": "1",
+              "text": "Chú ý cách quấn băng dính"
+            },
+            {
+              "id": "2",
+              "text": "Quấn băng dính nhánh và đầu ống"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VII. Nhận biết và thao tác khi lắp linh kiện (10 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 27,
+          "text": "Khi nào phải lắp linh kiện? 5đ",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bàn gá hiển thị "
+            },
+            {
+              "id": "1",
+              "text": "Quản lý hướng dẫn lắp"
+            },
+            {
+              "id": "2",
+              "text": "Cả 2 đáp án trên"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 28,
+          "text": "Dựa vào đâu để lắp? 5đ",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bàn gá hiển thị"
+            },
+            {
+              "id": "1",
+              "text": "Dựa vào linh kiện có trong cấu thành"
+            },
+            {
+              "id": "2",
+              "text": "Cả 2 đáp án trên"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VIII.Dung sai kích thước bộ dây truyền dẫn điện (10 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 29,
+          "text": "Dung sai của hàng KOMATSU ?5đ",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "public\\assets\\frontend\\images\\laprap\\group7_1.png"
+            },
+            {
+              "id": "1",
+              "text": "public\\assets\\frontend\\images\\laprap\\group7_2.png"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 30,
+          "text": "Dung sai của hàng KOBLELCO ? 5đ",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "public\\assets\\frontend\\images\\laprap\\group7_3.png"
+            },
+            {
+              "id": "1",
+              "text": "public\\assets\\frontend\\images\\laprap\\group7_4.png"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "IV. Câu hỏi trắc nghiệm (10 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 31,
+          "text": "Bạn hãy chọn hình ảnh đúng trong những hình dưới đây",
+          "points": 10.0,
+          "image": "/img/laprap/group8_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hình B,E,F,H,M,N"
+            },
+            {
+              "id": "1",
+              "text": "Hình A,D,E,G,K,N,M"
+            },
+            {
+              "id": "2",
+              "text": "Tất cả các hình đều đúng"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    }
+  ]
+}

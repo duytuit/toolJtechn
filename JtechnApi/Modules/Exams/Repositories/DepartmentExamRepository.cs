@@ -12,7 +12,11 @@ namespace JtechnApi.Exams.Repositories
     public class DepartmentExamRepository : IDepartmentExamRepository
     {
         private readonly DBJtecContext context;
-        private static readonly JsonSerializerOptions Json = new() { PropertyNameCaseInsensitive = true };
+        private static readonly JsonSerializerOptions Json = new()
+        {
+            PropertyNameCaseInsensitive = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
         public DepartmentExamRepository(DBJtecContext context) => this.context = context;
 
         public async Task<object> Available(int employeeId)

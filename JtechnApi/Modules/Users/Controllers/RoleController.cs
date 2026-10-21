@@ -93,6 +93,15 @@ namespace JtechnApi.Users.Controllers
             return (await repository.GetEmployeeRoles(employeeId)).ToActionResult(this);
         }
 
+        [HttpPut("departments/{departmentId:int}/roles")]
+        [Authorize(Policy = "Permission:PERMISSIONS.ASSIGN")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddDepartmentRoles(int departmentId, [FromBody] AssignEmployeeRolesDto input)
+        {
+            if (!ModelState.IsValid) return ValidationProblem(ModelState);
+            return (await repository.AddDepartmentRoles(departmentId, input)).ToActionResult(this);
+        }
+
         [HttpPut("employees/{employeeId:int}/roles")]
         [Authorize(Policy = "Permission:PERMISSIONS.ASSIGN")]
         public async Task<IActionResult> SetEmployeeRoles(

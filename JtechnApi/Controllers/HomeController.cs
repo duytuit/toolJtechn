@@ -132,9 +132,22 @@ namespace JtechnApi.Controllers
         }
         // POST api/upload/single
         [HttpPost("upload/single")]
-        public async Task<IActionResult> UploadSingle(IFormFile file, [FromForm] string folder)
+        public async Task<IActionResult> UploadSingle([FromForm] IFormFile file, [FromForm] string folder,
+            [FromServices] IWebHostEnvironment environment, [FromServices] IAuthorizationService authorization)
         {
-             var result = await Helper.ProcessFileAsync(file, folder);
+            if (folder == "exams")
+            {
+                if (User.Identity?.IsAuthenticated != true) return Unauthorized();
+                var canCreate = await authorization.AuthorizeAsync(User, "Permission:DEPARTMENT_EXAMS.CREATE");
+                var canUpdate = await authorization.AuthorizeAsync(User, "Permission:DEPARTMENT_EXAMS.UPDATE");
+                if (!canCreate.Succeeded && !canUpdate.Succeeded) return Forbid();
+                var antiforgery = HttpContext.RequestServices.GetRequiredService<Microsoft.AspNetCore.Antiforgery.IAntiforgery>();
+                if (!await antiforgery.IsRequestValidAsync(HttpContext))
+                    return BadRequest(new UploadResult(false, "Phiên làm việc không hợp lệ. Vui lòng tải lại trang."));
+                var image = await Helper.ProcessExamImageAsync(file, environment.WebRootPath);
+                return image.Success ? Ok(image) : BadRequest(image);
+            }
+            var result = await Helper.ProcessFileAsync(file, folder, environment.WebRootPath);
             if (result.Success)
                 return Ok(result);
             else
@@ -143,12 +156,13 @@ namespace JtechnApi.Controllers
 
         // POST api/upload/multiple
         [HttpPost("upload/multiple")]
-        public async Task<IActionResult> UploadMultiple([FromForm] IFormFile[] files, [FromForm] string folder)
+        public async Task<IActionResult> UploadMultiple([FromForm] IFormFile[] files, [FromForm] string folder,
+            [FromServices] IWebHostEnvironment environment)
         {
            if (files == null || files.Length == 0)
             return BadRequest(new { success = false, message = "Không có file nào." });
 
-            var tasks = files.Select(file => Helper.ProcessFileAsync(file, folder));
+            var tasks = files.Select(file => Helper.ProcessFileAsync(file, folder, environment.WebRootPath));
             var results = await Task.WhenAll(tasks);
 
             var success = results.Where(r => r.Success).ToList();

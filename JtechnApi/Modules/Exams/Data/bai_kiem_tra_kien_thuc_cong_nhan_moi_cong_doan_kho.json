@@ -1,0 +1,285 @@
+{
+  "id": 14,
+  "title": "Bài kiểm tra kiến thức công nhân mới công đoạn kho",
+  "minutes": 10,
+  "scores": [
+    100,
+    80
+  ],
+  "groups": [
+    {
+      "title": "",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 1,
+          "text": "Khi vào làm việc tại công đoạn Kho, bạn phải tuân thủ những quy định gì về ATLĐ ? ( 10đ )",
+          "points": 10.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đi giầy bảo hộ"
+            },
+            {
+              "id": "1",
+              "text": "Khi xe nâng đang hoạt động đứng cách xa 2m"
+            },
+            {
+              "id": "2",
+              "text": "Sử dụng xe thang xuất linh kiện để lấy hàng trên tầng cao"
+            },
+            {
+              "id": "3",
+              "text": "Cả 3 phương án trên"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 2,
+          "text": "Hãy xắp xếp các bước xuất linh kiện theo đúng trình tự ? ( 10đ )",
+          "points": 10.0,
+          "image": "/img/kho/kho_2_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "d=>b=>c=>a"
+            },
+            {
+              "id": "1",
+              "text": "d=>c=>b=>a"
+            },
+            {
+              "id": "2",
+              "text": "b=>d=>c=>a"
+            },
+            {
+              "id": "3",
+              "text": "d=>b=>a=>c"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 3,
+          "text": "Khi đang xuất linh kiện, gặp trường hợp mã linh kiện bị hết hoặc thiếu thì bạn làm thế nào ? ( 10 đ )",
+          "points": 10.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Dừng lại không xuất"
+            },
+            {
+              "id": "1",
+              "text": "Bỏ qua mã linh kiện đó và tiếp tục xuất"
+            },
+            {
+              "id": "2",
+              "text": "Dừng lại xem cột tồn kho còn hàng không, nếu hết thì điền số \"0\" ; nếu không đủ số lượng cần lấy thì điền số lượng lấy được vào ô số lượng và bấm nút báo thiếu"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 4,
+          "text": "Trong quy trình xuất linh kiện, bước nào sau đây là quan trọng nhất ? ( 5 đ )",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Xác định đúng mã linh kiện và đúng số giá"
+            },
+            {
+              "id": "1",
+              "text": "Đếm đúng số lượng"
+            },
+            {
+              "id": "2",
+              "text": "So sánh số lượng trên mác nhỏ với phần mềm xuất kho"
+            },
+            {
+              "id": "3",
+              "text": "Cả 3 phương án trên"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 5,
+          "text": "Khi xuất linh kiện gặp tình huống trên hệ thống phần mềm còn hàng mà trong thùng hết hàng bạn sẽ làm gì?(10đ)",
+          "points": 10.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Báo linh kiện thiếu"
+            },
+            {
+              "id": "1",
+              "text": "Tìm hàng khắp các giá"
+            },
+            {
+              "id": "2",
+              "text": "Hỏi đồng nghiệp khác"
+            },
+            {
+              "id": "3",
+              "text": "Mở phần mềm gửi hàng và nhập QR-code mã linh kiện vào xem có hàng gửi không để lấy hàng. Nếu không có ra báo quản lí kiểm tra xem hàng mới về ở invoice nào và ra lấy"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 6,
+          "text": "Khi nhận hàng về, phát hiện Invoice về thiếu hoặc thừa bạn hãy chọn phương án đúng nhất:  ( 5 đ )",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bôi phủ dòng linh kiện thiếu ( thừa ) và ghi chú lại là có linh kiện thiếu ( thừa ), báo lại với cấp trên"
+            },
+            {
+              "id": "1",
+              "text": "Đánh dấu vào và báo lại cấp trên"
+            },
+            {
+              "id": "2",
+              "text": "Tiếp tục lên hàng bình thường"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 7,
+          "text": "Hãy nêu quy trình đếm linh kiện trong khi xuất linh kiện trong kho ? ( 15 đ ) ",
+          "points": 15.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Lấy linh kiện ra đếm bất kỳ cách nào"
+            },
+            {
+              "id": "1",
+              "text": "Đếm theo trình tự 1,2,3,4,5,6…"
+            },
+            {
+              "id": "2",
+              "text": "Lấy linh kiện để lên mặt bàn và đếm theo cách 2,4,6,8"
+            },
+            {
+              "id": "3",
+              "text": "Cầm tay đếm từng cái thả vào túi"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 8,
+          "text": "Theo quy định để bảo quản tanshi khỏi bị oxi hóa bạn làm cách nào ? ( 5 đ )",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Dùng túi nilon bọc kín lại"
+            },
+            {
+              "id": "1",
+              "text": "Để ở 1 phòng riêng có điều kiện phù hợp"
+            },
+            {
+              "id": "2",
+              "text": "Đóng vào thùng carton"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 9,
+          "text": "Khi xuất linh kiện, căn cứ vào đâu để lấy theo nhập trước - xuất trước ? ( 10 đ )",
+          "points": 10.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Dấu được đóng  trên nhãn"
+            },
+            {
+              "id": "1",
+              "text": "Tem tháng và dấu trên nhãn"
+            },
+            {
+              "id": "2",
+              "text": "Ngày sản xuất"
+            },
+            {
+              "id": "3",
+              "text": "Mã linh kiện"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 10,
+          "text": "Có mấy màu ItemSlip ( 20 đ )",
+          "points": 20.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "8 màu"
+            },
+            {
+              "id": "1",
+              "text": "9 màu"
+            },
+            {
+              "id": "2",
+              "text": "7 màu"
+            },
+            {
+              "id": "3",
+              "text": "6 màu"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,549 @@
+{
+  "id": 3,
+  "title": "Bài kiểm tra năng lực nhìn bản vẽ",
+  "minutes": 10,
+  "scores": [
+    90,
+    80
+  ],
+  "groups": [
+    {
+      "title": "",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 1,
+          "text": "Maku được in mấy lần ?",
+          "points": 4.54,
+          "image": "/img/ktnq/1_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Maku in 1 lần"
+            },
+            {
+              "id": "1",
+              "text": "Maku in 2 lần"
+            },
+            {
+              "id": "2",
+              "text": "Không có maku"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 2,
+          "text": "Kích thước 10mm thể hiện điều gi?",
+          "points": 4.54,
+          "image": "/img/ktnq/2_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Khoảng cách thắt macku 10mm"
+            },
+            {
+              "id": "1",
+              "text": "Khoảng cách quấn băng dính 10mm"
+            },
+            {
+              "id": "2",
+              "text": "Cả 2 phương án trên"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 3,
+          "text": "Quy cách quấn U bằng băng dính là bao nhiêu ?",
+          "points": 4.54,
+          "image": "/img/ktnq/3_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Quấn U từ 0.8~0.85"
+            },
+            {
+              "id": "1",
+              "text": "Quấn U từ 8~8.5"
+            },
+            {
+              "id": "2",
+              "text": "Quấn U từ 0.8~8.5"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 4,
+          "text": "Khoảng cách quấn nhánh là bao nhiêu ?",
+          "points": 4.54,
+          "image": "/img/ktnq/4_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Quấn băng dính nhánh khoảng cách là 50 mm"
+            },
+            {
+              "id": "1",
+              "text": "Quấn băng dính nhánh khoảng cách ~ 50 mm"
+            },
+            {
+              "id": "2",
+              "text": "Quấn băng dính nhánh khoảng cách không quá 50 mm"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 5,
+          "text": "Điểm bó cố định như thế nào?",
+          "points": 4.54,
+          "image": "/img/ktnq/5_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Quấn băng dính lên connerter kín macku"
+            },
+            {
+              "id": "1",
+              "text": "Quấn băng dính lên đầu chụp kín macku"
+            },
+            {
+              "id": "2",
+              "text": "Quấn băng dính lên connerter và đầu chụp hở macku"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 6,
+          "text": "Loa có yêu cầu gì ?",
+          "points": 4.54,
+          "image": "/img/ktnq/6_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Quấn kín băng dính kín loa"
+            },
+            {
+              "id": "1",
+              "text": "Quấn kín băng dính hở loa"
+            },
+            {
+              "id": "2",
+              "text": "Không quấn băng dính lên loa"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 7,
+          "text": "Cách quấn băng dính đầu ống là bao nhiêu?",
+          "points": 4.54,
+          "image": "/img/ktnq/7_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Kích Thước ra 30 mm vào 30 mm"
+            },
+            {
+              "id": "1",
+              "text": "Kích Thước 30 mm"
+            },
+            {
+              "id": "2",
+              "text": "Kích Thước 90 mm"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 8,
+          "text": "Tanshi yêu cầu gì ?",
+          "points": 4.54,
+          "image": "/img/ktnq/8_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Tanshi nhúng tâm"
+            },
+            {
+              "id": "1",
+              "text": "Tanshi nhúng toàn phần"
+            },
+            {
+              "id": "2",
+              "text": "Tanshi không nhúng"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 9,
+          "text": "Yêu cầu quấn băng dính ống và chân nhánh là bao nhiêu ?",
+          "points": 4.54,
+          "image": "/img/ktnq/9_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Quấn nhánh là 30mm,lên ống là 10mm"
+            },
+            {
+              "id": "1",
+              "text": "Quấn nhánh là 10mm,lên ống là 30mm"
+            },
+            {
+              "id": "2",
+              "text": "Quấn nhánh là 30mm,lên ống là 30mm"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 10,
+          "text": "Kí hiệu 1-2-3 nghĩa là gì?",
+          "points": 4.54,
+          "image": "/img/ktnq/10_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Vị trí số 1đầu ống,2 bó cố định,3 ống xoắn"
+            },
+            {
+              "id": "1",
+              "text": "Vị trí số 2 đầu ống,1 bó cố định, 3 ống xoắn"
+            },
+            {
+              "id": "2",
+              "text": "Vị trí số 1 đầu ống,3 bó cố định, 2 ống xoắn"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 11,
+          "text": "Tanshi yêu cầu gì ?",
+          "points": 4.54,
+          "image": "/img/ktnq/11_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Tanshi nhúng tâm"
+            },
+            {
+              "id": "1",
+              "text": "Tanshi nhúng toàn phần"
+            },
+            {
+              "id": "2",
+              "text": "Tanshi không nhúng"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 12,
+          "text": "Kích thước 240 mm được hiểu như thế nào?",
+          "points": 4.54,
+          "image": "/img/ktnq/12_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đo từ giữa nhánh đến đầu connerter"
+            },
+            {
+              "id": "1",
+              "text": "Đo từ giữa nhánh đến chân connerter"
+            },
+            {
+              "id": "2",
+              "text": "Đo từ giữa nhánh đến đầu ống"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 13,
+          "text": "Tanshi yêu cầu hướng như thế nào ?",
+          "points": 4.54,
+          "image": "/img/ktnq/13_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Tanshi ngửa"
+            },
+            {
+              "id": "1",
+              "text": "Tanshi úp"
+            },
+            {
+              "id": "2",
+              "text": "Tanshi nghiêng"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 14,
+          "text": "Điểm bó này được bó như thế nào?",
+          "points": 4.54,
+          "image": "/img/ktnq/14_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bó vào ống"
+            },
+            {
+              "id": "1",
+              "text": "Bó vào connerter"
+            },
+            {
+              "id": "2",
+              "text": "Bó vào dây điện"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 15,
+          "text": "Cách đo băng dính trắng hàng KOBELCO như thế nào?",
+          "points": 4.54,
+          "image": "/img/ktnq/15_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đo từ đầu băng dính đến đầu băng dính"
+            },
+            {
+              "id": "1",
+              "text": "Đo từ cuối băng dính đến cuối băng dính"
+            },
+            {
+              "id": "2",
+              "text": "Đo từ giữa băng dính đến giữa băng dính"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 16,
+          "text": "Cách đo tanshi hàng takeuchi?",
+          "points": 4.54,
+          "image": "/img/ktnq/16_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đo từ đầu tanshi"
+            },
+            {
+              "id": "1",
+              "text": "Đo từ giữa tanshi"
+            },
+            {
+              "id": "2",
+              "text": "Đo từ chân tanshi"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 17,
+          "text": "Cách đo connerter hàng takeuchi?",
+          "points": 4.54,
+          "image": "/img/ktnq/17_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đo từ đầu conneter"
+            },
+            {
+              "id": "1",
+              "text": "Đo từ giữa conneter"
+            },
+            {
+              "id": "2",
+              "text": "Đo từ chân conneter"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 18,
+          "text": "Cách quấn băng dính nhánh hàng takeuchi?",
+          "points": 4.54,
+          "image": "/img/ktnq/18_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Quấn chụm"
+            },
+            {
+              "id": "1",
+              "text": "Quấn tách nhánh"
+            },
+            {
+              "id": "2",
+              "text": "Quấn cách chân(tụt ống)"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 19,
+          "text": "Cách quấn băng dính nhánh hàng takeuchi?",
+          "points": 4.54,
+          "image": "/img/ktnq/19_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Quấn chụm"
+            },
+            {
+              "id": "1",
+              "text": "Quấn tách nhánh"
+            },
+            {
+              "id": "2",
+              "text": "Quấn cách chân"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 20,
+          "text": "Chọn đáp án đúng cho hình ảnh bên dưới?",
+          "points": 4.54,
+          "image": "/img/ktnq/20_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Quấn 20mm-30mm"
+            },
+            {
+              "id": "1",
+              "text": "Quấn cách chân 0mm-30mm"
+            },
+            {
+              "id": "2",
+              "text": "Cả 2 phương án trên"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 21,
+          "text": "Kích thước quấn chụm là bao nhiêu ?",
+          "points": 4.54,
+          "image": "/img/ktnq/21_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Quấn 20mm"
+            },
+            {
+              "id": "1",
+              "text": "Quấn dưới 20 mm"
+            },
+            {
+              "id": "2",
+              "text": "Quấn trên  20 mm"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 22,
+          "text": "Kiểm tra cắm kết nối connector như thế nào?",
+          "points": 4.54,
+          "image": "/img/ktnq/22_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Kiểm tra đã vào lẫy và lẫy đã nảy lên chưa"
+            },
+            {
+              "id": "1",
+              "text": "Kiểm tra bằng cách kéo thử 1 lực"
+            },
+            {
+              "id": "2",
+              "text": "Dùng tay ấn kiểm tra"
+            },
+            {
+              "id": "3",
+              "text": "Thực hiện cả 3 nội dung trên"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        }
+      ]
+    }
+  ]
+}

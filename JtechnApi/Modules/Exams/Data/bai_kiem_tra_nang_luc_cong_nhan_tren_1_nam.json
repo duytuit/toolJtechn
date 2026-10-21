@@ -1,0 +1,545 @@
+{
+  "id": 8,
+  "title": "Bài kiểm tra năng lực công nhân trên 1 năm",
+  "minutes": 10,
+  "scores": [
+    90,
+    80
+  ],
+  "groups": [
+    {
+      "title": "",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 1,
+          "text": "Maku được in mấy lần ?",
+          "points": 4.54,
+          "image": "/img/ktnq2/group1_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Maku in 1 lần"
+            },
+            {
+              "id": "1",
+              "text": "Maku in 2 lần"
+            },
+            {
+              "id": "2",
+              "text": "Không có maku"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 2,
+          "text": "Quy trình kiểm tra NQ gồm có bao nhiêu bước?",
+          "points": 4.54,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Gồm 14 bước"
+            },
+            {
+              "id": "1",
+              "text": "Gồm 12 bước"
+            },
+            {
+              "id": "2",
+              "text": "Gồm 15 bước"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 3,
+          "text": "Vị trí nào sau đây được đóng dấu thông mạch ?",
+          "points": 4.54,
+          "image": "/img/ktnq2/group1_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đầu mác sản phẩm"
+            },
+            {
+              "id": "1",
+              "text": " Cuối mác sản phẩm"
+            },
+            {
+              "id": "2",
+              "text": "Chỗ nào cũng được"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 4,
+          "text": "Khoảng cách quấn nhánh là bao nhiêu ?",
+          "points": 4.54,
+          "image": "/img/ktnq2/group1_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Quấn băng dính nhánh khoảng cách là 50 mm"
+            },
+            {
+              "id": "1",
+              "text": "Quấn băng dính nhánh khoảng cách ~ 50 mm"
+            },
+            {
+              "id": "2",
+              "text": "Quấn băng dính nhánh khoảng cách không quá 50 mm"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 5,
+          "text": "Rải hàng theo hướng nào là đúng ?",
+          "points": 4.54,
+          "image": "/img/ktnq2/group1_5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Rải hàng theo bản vẽ từ trái qua phải"
+            },
+            {
+              "id": "1",
+              "text": "Rải hàng theo bản vẽ phải qua trái"
+            },
+            {
+              "id": "2",
+              "text": "Rải hàng theo như thế nào mình cảm thấy thuận tiện là được"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 6,
+          "text": "Hãy nêu thứ tự các hạng mục KTNQ theo các bước?<br>\n                                           <div>1. Đọc ghi chú của bản vẽ và hình ảnh chú ý treo trên mẫu</div>\n                                           <div>2. Xác nhận mã sản phẩm và số lần sửa đổi của mẫu , hàng , bản vẽ xem có trùng khớp nhau không</div>\n                                           <div>3.Rải mẫu và hàng theo chiều của bản vẽ</div>",
+          "points": 4.54,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bước 1.bước 2.bước 3"
+            },
+            {
+              "id": "1",
+              "text": "Bước 1.bước 3.bước 2"
+            },
+            {
+              "id": "2",
+              "text": "Bước 2.bước 1.bước 3"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 7,
+          "text": "Nêu trình tự các bước kiểm tra CLIP ?<br>\n                                           <div>1. Vạch bút sơn</div>\n                                           <div>2. Kiểm tra đúng chủng loại, màu sắc</div>\n                                           <div>3. Kiểm tra hướng clip</div>",
+          "points": 4.54,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bước 3.bước 1.bước 3"
+            },
+            {
+              "id": "1",
+              "text": "Bước 2.bước 1.bước 3"
+            },
+            {
+              "id": "2",
+              "text": "Bước 2.bước 3.bước 1"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 8,
+          "text": "Nêu trình tự các bước kiểm tra điểm bó cố định?<br>\n                                           <div>1. Kiểm tra màu băng dính</div>\n                                           <div>2. Kiểm tra hướng bó</div>\n                                           <div>3. Kiểm tra điểm bó chặt chưa ?</div>\n                                           <div>4. Đếm điểm bó</div>",
+          "points": 4.54,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bước 3.bước 1.bước 4 .bước 3"
+            },
+            {
+              "id": "1",
+              "text": "Bước 1.bước 2.bước 3.bước 4"
+            },
+            {
+              "id": "2",
+              "text": "Bước 2.bước 3.bước 1.bước 4"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 9,
+          "text": "Nêu trình tự các bước kiểm tra điểm bó cố định?<br>\n                                           <div>1. Kiểm tra màu băng dính</div>\n                                           <div>2. Kiểm tra hướng bó</div>\n                                           <div>3. Kiểm tra điểm bó chặt chưa ?</div>\n                                           <div>4. Đếm điểm bó</div>",
+          "points": 4.54,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bước 3.bước 1.bước 4 .bước 3"
+            },
+            {
+              "id": "1",
+              "text": "Bước 1.bước 2.bước 3.bước 4"
+            },
+            {
+              "id": "2",
+              "text": "Bước 2.bước 3.bước 1.bước 4"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 10,
+          "text": "\"Nêu trình tự các bước kiểm tra cầu chì?<br>\n                                           <div>1. Dùng JIG để kiểm tra cầu chì</div>\n                                           <div>2. KT chủng loại ,màu sắc, ampe</div>\n                                           <div>3. Kiểm tra hướng cầu chì</div>\n                                           <div>4. KT dấu bút sơn trắng, đỏ trên thân cầu chì</div>",
+          "points": 4.54,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bước 4.bước 1.bước 2 .bước 3"
+            },
+            {
+              "id": "1",
+              "text": "Bước 1.bước 2.bước 3.bước 4"
+            },
+            {
+              "id": "2",
+              "text": "Bước 2.bước 3.bước 1.bước 4"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 11,
+          "text": "Cách phân biệt mấy loại ống bảo vệ tanshi ?<br>\n                                           <div>1. ống ES sấy chảy nhựa,ống sumi không sấy,ống bini sấy không chảy nhựa</div>\n                                           <div>2.Ông ES sấy chảy nhựa,ống sumi sấy không chảy nhựa,ống bini không sấy</div>\n                                           <div>3.ống ES không sấy ,ống sumi sấy không chảy nhựa,ống bini sấy chảy nhựa</div>",
+          "points": 4.54,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bước 3"
+            },
+            {
+              "id": "1",
+              "text": "Bước 1"
+            },
+            {
+              "id": "2",
+              "text": "Bước 2"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 12,
+          "text": "Quy cách quấn U bằng băng dính là bao nhiêu?",
+          "points": 4.54,
+          "image": "/img/ktnq2/group1_12.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Quấn U từ 0.8~0.85"
+            },
+            {
+              "id": "1",
+              "text": "Quấn U từ 8~8.5"
+            },
+            {
+              "id": "2",
+              "text": "Quấn U từ 0.8~8.5"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 13,
+          "text": "Cách quấn băng dính đầu ống là bao nhiêu?",
+          "points": 4.54,
+          "image": "/img/ktnq2/group1_13.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Kích Thước ra 30 mm vào 30 mm"
+            },
+            {
+              "id": "1",
+              "text": "Kích Thước 30 mm"
+            },
+            {
+              "id": "2",
+              "text": "Kích Thước 90 mm"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 14,
+          "text": "Kí hiệu 1-2-3 nghĩa là gì ?",
+          "points": 4.54,
+          "image": "/img/ktnq2/group1_14.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Vị trí số 1đầu ống,2 bó cố định,3 ống xoắn"
+            },
+            {
+              "id": "1",
+              "text": "Vị trí số 2 đầu ống,1 bó cố định, 3 ống xoắn"
+            },
+            {
+              "id": "2",
+              "text": "Vị trí số 1 đầu ống,3 bó cố định, 2 ống xoắn"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 15,
+          "text": "\"Kích thước 240 mm được hiểu như thế nào?",
+          "points": 4.54,
+          "image": "/img/ktnq2/group1_15.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đo từ giữa nhánh đến đầu connerter"
+            },
+            {
+              "id": "1",
+              "text": "Đo từ giữa nhánh đến chân connerter"
+            },
+            {
+              "id": "2",
+              "text": "Đo từ giữa nhánh đến đầu ống"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 16,
+          "text": "Tanshi yêu cầu hướng như thế nào ?",
+          "points": 4.54,
+          "image": "/img/ktnq2/group1_16.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Tanshi ngửa"
+            },
+            {
+              "id": "1",
+              "text": "Tanshi úp"
+            },
+            {
+              "id": "2",
+              "text": "Tanshi nghiêng"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 17,
+          "text": "Điểm bó này được bó như thế nào?",
+          "points": 4.54,
+          "image": "/img/ktnq2/group1_17.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bó vào ống"
+            },
+            {
+              "id": "1",
+              "text": "Bó vào connerter"
+            },
+            {
+              "id": "2",
+              "text": "Bó vào dây điện"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 18,
+          "text": "Cách đo băng dính trắng hàng KOBELCO như thế nào?",
+          "points": 4.54,
+          "image": "/img/ktnq2/group1_18.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đo từ đầu băng dính đến đầu băng dính"
+            },
+            {
+              "id": "1",
+              "text": "Đo từ cuối băng dính đến cuối băng dính"
+            },
+            {
+              "id": "2",
+              "text": "Đo từ giữa băng dính đến giữa băng dính"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 19,
+          "text": "Cách đo tanshi hàng takeuchi ?",
+          "points": 4.54,
+          "image": "/img/ktnq2/group1_19.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đo từ đầu tanshi"
+            },
+            {
+              "id": "1",
+              "text": "Đo từ giữa tanshi"
+            },
+            {
+              "id": "2",
+              "text": "Đo từ chân tanshi"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 20,
+          "text": "Cách quấn băng dính nhánh hàng takeuchi ?",
+          "points": 4.54,
+          "image": "/img/ktnq2/group1_20.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Quấn chụm"
+            },
+            {
+              "id": "1",
+              "text": "Quấn tách nhánh"
+            },
+            {
+              "id": "2",
+              "text": "Quấn cách chân hoặc quấn tụt ống"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 21,
+          "text": "Cách quấn băng dính nhánh hàng takeuchi?",
+          "points": 4.54,
+          "image": "/img/ktnq2/group1_21.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Quấn chụm"
+            },
+            {
+              "id": "1",
+              "text": "Quấn tách nhánh"
+            },
+            {
+              "id": "2",
+              "text": "Quấn cách chân"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 22,
+          "text": "Kích thước quấn chụm là bao nhiêu ?",
+          "points": 4.54,
+          "image": "/img/ktnq2/group1_22.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Quấn 20mm"
+            },
+            {
+              "id": "1",
+              "text": "Quấn dưới 20 mm"
+            },
+            {
+              "id": "2",
+              "text": "Quấn trên  20 mm"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    }
+  ]
+}

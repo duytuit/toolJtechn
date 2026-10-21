@@ -1,3 +1,5 @@
 # Candidate answers and results belong to the deployment's persistent storage.
 /App_Data/
 !/Modules/Exams/Data/*.json
+/wwwroot/img/
+/wwwroot/files/

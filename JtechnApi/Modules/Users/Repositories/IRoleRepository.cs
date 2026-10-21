@@ -17,6 +17,7 @@ namespace JtechnApi.Users.Repositories
             int id,
             AssignRolePermissionsDto input);
         Task<RepositoryResult> GetEmployeeRoles(int employeeId);
+        Task<RepositoryResult> AddDepartmentRoles(int departmentId, AssignEmployeeRolesDto input);
         Task<RepositoryResult> SetEmployeeRoles(
             int employeeId,
             AssignEmployeeRolesDto input);

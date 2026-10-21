@@ -1,5 +1,11 @@
 # Sidebar và đồng bộ quyền
 
+## Gán vai trò theo bộ phận
+
+Trang `/admin/employee-roles` có mục **Gán vai trò theo bộ phận**. Chọn bộ phận và các vai trò, rồi bấm **Lưu vai trò cho bộ phận**. Hệ thống bổ sung các vai trò cho nhân viên đang hoạt động có liên kết trong `employee_department`; giữ nguyên vai trò hiện có và bỏ qua vai trò đã gán. Nhân viên mới được đưa vào bộ phận sau đó không tự nhận vai trò; cần thực hiện lại thao tác gán.
+
+API `PUT /api/admin/departments/{departmentId}/roles` nhận `{"roleCodes":["STAFF"]}`, yêu cầu quyền `PERMISSIONS.ASSIGN` và antiforgery token. Toàn bộ lượt gán được lưu trong một transaction vào `role_employee_web`; không thay đổi schema database.
+
 Danh mục menu dùng chung tại `Configuration/SidebarMenu.cs`. Mỗi mục khai báo `Resource`, tiêu đề, URL, biểu tượng và nhóm. Sidebar kiểm tra quyền `<Resource>.VIEW` từ database; tài khoản/nhân viên và vai trò phải đang hoạt động. Vai trò `ADMIN` được xem tất cả menu theo cơ chế hiện có. Nhóm không có mục được phép xem sẽ không hiển thị.
 
 Để thêm menu, khai báo một `SidebarMenuItem` mới, ví dụ:

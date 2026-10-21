@@ -682,6 +682,47 @@ img {
     padding: 0.1rem 0.35rem;
 }
 
+.exam-image-upload {
+    background: var(--panel-soft);
+    color: var(--text);
+    border: 1px solid var(--line);
+}
+
+.exam-image-upload .exam-image-upload-help {
+    color: var(--muted);
+}
+
+.exam-image-upload .form-control[type="file"] {
+    background: var(--panel);
+    color: var(--text);
+    border-color: var(--line);
+    height: auto;
+    min-height: 38px;
+}
+
+.exam-image-upload .form-control[type="file"]::file-selector-button {
+    background: var(--primary-soft);
+    color: var(--text);
+    border-color: var(--line);
+    cursor: pointer;
+}
+
+.exam-image-upload .form-control[type="file"]:hover:not(:disabled)::file-selector-button {
+    background: var(--bg-strong);
+}
+
+.exam-image-upload img {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: none;
+    object-fit: contain;
+}
+
+.exam-image-upload img[hidden] {
+    display: none !important;
+}
+
 textarea.form-control {
     height: auto;
     min-height: 72px;

@@ -22,6 +22,8 @@ Trang hiển thị bài thi SQL Server đang mở thuộc các bộ phận đã 
 
 ## Bổ sung hình ảnh trước khi mở thi
 
+Trong phần thêm/sửa bài thi tại `/admin/department-exams`, chọn file ảnh ngay dưới câu hỏi để tải và xem trước. API `POST /upload/single` nhận multipart `file`, `folder=exams` và token chống giả mạo; yêu cầu đăng nhập cùng quyền tạo hoặc sửa bài thi. Hỗ trợ JPG, JPEG, PNG, GIF, WEBP tối đa 10 MB, kiểm tra chữ ký định dạng. Ảnh lưu tại `wwwroot/img/exams/` với tên ngẫu nhiên; đường dẫn `/img/exams/...` được gán vào `questions[].image` và lưu trong `definitionJson` khi nhấn **Lưu bài thi**. Cần cấp quyền ghi thư mục này khi triển khai. Bỏ ảnh chỉ xóa đường dẫn khỏi câu hỏi; file đã tải vẫn được giữ.
+
 Tệp đính kèm chỉ chứa đường dẫn ảnh, không chứa file ảnh. Sao chép ảnh gốc vào các vị trí tương ứng bên dưới `wwwroot/img/`, giữ nguyên tên và chữ hoa/thường:
 
 ```text
@@ -66,3 +68,11 @@ node --check JtechnApi/Modules/Exams/Views/online-exams.js
 ```
 
 Bộ kiểm tra dùng dữ liệu tạm, không kết nối database hoặc sửa bài thi thật. Bao gồm tính đầy đủ của đề, chấm điểm, mốc phân loại, quyền sở hữu, lưu qua lần khởi tạo service, bắt đầu đồng thời, nộp lặp và đáp án đến trễ. Cần kiểm thử thêm trên trình duyệt với đăng nhập và ảnh thật trước khi đưa vào sử dụng.
+
+## Mốc điểm theo đề
+
+JSON hỗ trợ `"scores": [96, 90]`: từ 96 đạt, từ 90 đến dưới 96 kiểm tra lại, dưới 90 không đạt (đào tạo lại). Hai mốc dùng điểm thực tế, kể cả phần thập phân; phải thỏa `0 ≤ mốc kiểm tra lại < mốc đạt ≤ 100`.
+
+Trong form quản lý bài thi theo bộ phận, mục **Mốc điểm phân loại** cho phép sửa hai giá trị này. Import JSON, lấy JSON từ form và lưu đề đều giữ cấu hình. Bỏ chọn cấu hình riêng để dùng quy tắc cũ (80 / trên 60 / 50). Đề cũ thiếu `scores` tiếp tục dùng quy tắc cũ. Kết quả và lịch sử lấy cấu hình từ bản đề được lưu trong từng lượt thi.
+
+Hai file mẫu: `stamping-new.json` dùng `[80, 60]`, `cong_nhan_moi_vao_cam.json` dùng `[96, 90]`. File mẫu không tự cập nhật đề đã import vào SQL Server; cần import và lưu lại từ giao diện. Đề Cắm gốc có tổng 99.825 điểm; cần điều chỉnh điểm câu hỏi thành tổng 100 trước khi lưu.

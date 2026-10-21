@@ -1,0 +1,918 @@
+{
+  "id": 5,
+  "title": "Bài kiểm tra kiến thức công nhân nhóm Xoắn",
+  "minutes": 30,
+  "scores": [
+    80,
+    60
+  ],
+  "groups": [
+    {
+      "title": "I. AN TOÀN LAO ĐỘNG ( 4 điểm )",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 1,
+          "text": "Theo bạn thao tác an toàn lao động là thao tác nào?",
+          "points": 4.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Khi thay mỏ, dừng thao tác, đi ra ngoài phải tắt nguồn điện"
+            },
+            {
+              "id": "1",
+              "text": "Khi thao tác nối  mỏ nối phải có cover bảo vệ"
+            },
+            {
+              "id": "2",
+              "text": "Khi đang chuẩn bị không để chân lên công tắc chân"
+            },
+            {
+              "id": "3",
+              "text": "Khi thao tác phải sử dụng găng tay bảo hộ"
+            },
+            {
+              "id": "4",
+              "text": "Khi xử lý sự cố máy mọc phải tắt nguồn điện"
+            },
+            {
+              "id": "5",
+              "text": "Tất cả phương án trên"
+            }
+          ],
+          "correct": [
+            "5"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "II. KIỂM TRA NĂNG LỰC NHẬN BIẾT MÀU DÂY ( 12 điểm )\n                                              Bạn hãy chọn đáp án đúng bằng cách tích vào đáp án màu dây tương ứng với màu dây trong ảnh",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 2,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "RV"
+            },
+            {
+              "id": "1",
+              "text": "RW"
+            },
+            {
+              "id": "2",
+              "text": "RY"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 3,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "GY"
+            },
+            {
+              "id": "1",
+              "text": "GW"
+            },
+            {
+              "id": "2",
+              "text": "GBr"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 4,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Br"
+            },
+            {
+              "id": "1",
+              "text": "BR"
+            },
+            {
+              "id": "2",
+              "text": "B"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 5,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Br"
+            },
+            {
+              "id": "1",
+              "text": "BR"
+            },
+            {
+              "id": "2",
+              "text": "BG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 6,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "V"
+            },
+            {
+              "id": "1",
+              "text": "O"
+            },
+            {
+              "id": "2",
+              "text": "G"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 7,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_6.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Lg"
+            },
+            {
+              "id": "1",
+              "text": "LgR"
+            },
+            {
+              "id": "2",
+              "text": "GW"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 8,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_7.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "PV"
+            },
+            {
+              "id": "1",
+              "text": "OR"
+            },
+            {
+              "id": "2",
+              "text": "PB"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 9,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_8.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LW"
+            },
+            {
+              "id": "1",
+              "text": "LY"
+            },
+            {
+              "id": "2",
+              "text": "GY"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 10,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_9.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LR"
+            },
+            {
+              "id": "1",
+              "text": "LW"
+            },
+            {
+              "id": "2",
+              "text": "GL"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 11,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_10.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "YL"
+            },
+            {
+              "id": "1",
+              "text": "LgR"
+            },
+            {
+              "id": "2",
+              "text": "GW"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 12,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_11.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "PO"
+            },
+            {
+              "id": "1",
+              "text": "LG"
+            },
+            {
+              "id": "2",
+              "text": "PV"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 13,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_12.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "O"
+            },
+            {
+              "id": "1",
+              "text": "Y"
+            },
+            {
+              "id": "2",
+              "text": "W"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "III. KIỂM TRA THÔNG TIN TRÊN EDP ( 5 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 14,
+          "text": "Giải thích các thông số trên EDP ?",
+          "points": 5.0,
+          "image": "/img/congdoandap/group3_1.png",
+          "kind": "matching",
+          "options": [
+            {
+              "id": "0",
+              "text": "Kích thước dây"
+            },
+            {
+              "id": "1",
+              "text": "Mã sản phẩm"
+            },
+            {
+              "id": "2",
+              "text": "Số dây"
+            },
+            {
+              "id": "3",
+              "text": "Chủng loại dây"
+            },
+            {
+              "id": "4",
+              "text": "Giá để tanshi"
+            },
+            {
+              "id": "5",
+              "text": "Tên lot"
+            },
+            {
+              "id": "6",
+              "text": "Tanshi A"
+            },
+            {
+              "id": "7",
+              "text": "Đầu chuốt Tanshi A"
+            },
+            {
+              "id": "8",
+              "text": "Tanshi B"
+            },
+            {
+              "id": "9",
+              "text": "Đầu chuốt Tanshi B"
+            },
+            {
+              "id": "10",
+              "text": "Nội dung cần chú ý"
+            },
+            {
+              "id": "11",
+              "text": "Số lượng dây cắt"
+            },
+            {
+              "id": "12",
+              "text": "Kí hiệu của lót hàng"
+            },
+            {
+              "id": "13",
+              "text": "Tên mối nối"
+            },
+            {
+              "id": "14",
+              "text": "Kích thước dây sau xoắn"
+            },
+            {
+              "id": "15",
+              "text": "Cost QR"
+            },
+            {
+              "id": "16",
+              "text": "Maku dây"
+            }
+          ],
+          "correct": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "IV. QUY TRÌNH THAO TÁC XOẮN ( 24 điểm )\n                                    Hãy nhập SỐ vào ô trống từ B1-> B12 để đúng trình tự thao tác các bước xoắn",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 15,
+          "text": "Hãy nhập <strong>SỐ</strong> vào ô trống từ B1-> B12 để đúng trình tự thao tác các bước xoắn?",
+          "points": 24.0,
+          "image": "",
+          "kind": "matching",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bật công tắc nguồn cây máy tính"
+            },
+            {
+              "id": "1",
+              "text": "Bật máy xoắn"
+            },
+            {
+              "id": "2",
+              "text": "Bật chương trình điều khiển và phần mềm xoắn trên máy tính"
+            },
+            {
+              "id": "3",
+              "text": "Quét mã QR ở chương trình xoắn. Dữ liệu sẽ được nạp tự động xuống bộ điều khiển"
+            },
+            {
+              "id": "4",
+              "text": "Nhấn nút \"Về gốc\" để xe xoắn trở về gốc (vị trí xoắn)"
+            },
+            {
+              "id": "5",
+              "text": "Dải dây vào khay tách dây và kẹp dây vào 2 đầu kẹp của xe xoắn"
+            },
+            {
+              "id": "6",
+              "text": "Nhấn nút \"Chạy\" để xe kẹp dây xoắn chạy về vị trí khớp với kích thước của dây vừa scan edp"
+            },
+            {
+              "id": "7",
+              "text": "Kẹp đầu dây còn lại vào kẹp máy xoắn"
+            },
+            {
+              "id": "8",
+              "text": "Nhấn nút \"Bật máy xoắn\" để máy xoắn bắt đầu xoắn"
+            },
+            {
+              "id": "9",
+              "text": "Khi xoắn xong xi lanh tự động nhả dây đã xoắn đồng thời người làm tháo luôn đầu dây đang kẹp ở máy xoắn ra"
+            },
+            {
+              "id": "10",
+              "text": "Đo kích thước dây xoắn và mắt xoắn, nếu đo ok thì nhập mắt xoắn đo được vào phần mền xoắn và nhấn enter để lưu dữ liệu và lưu sản lượng"
+            },
+            {
+              "id": "11",
+              "text": "Thực hiện B8,B9,B10. Làm như vậy đến khi hết dây"
+            }
+          ],
+          "correct": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "V. CÁC DẠNG LỐI CÓ THỂ XẢY RA KHI THAO TÁC XOẮN ( 15 điểm )\n                                    Hãy chọn đáp án đúng",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 27,
+          "text": "Lỗi xoắn nhầm thừa thiếu dây?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Xoắn nhầm số dây"
+            },
+            {
+              "id": "1",
+              "text": "Xoắn thiếu dây"
+            },
+            {
+              "id": "2",
+              "text": "Xoắn thừa dây"
+            },
+            {
+              "id": "3",
+              "text": "Cả 3 đáp án trên"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 28,
+          "text": "Lỗi âm dương kích thước?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Xoắn dương kích thước"
+            },
+            {
+              "id": "1",
+              "text": "Xoắn âm kích thước"
+            },
+            {
+              "id": "2",
+              "text": "Xoắn sai kích thước đầu chừa"
+            },
+            {
+              "id": "3",
+              "text": "Cả 3 đáp án trên"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 29,
+          "text": "Lỗi biến dạng dây, sai đầu xoắn?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Xoắn sai đầu tanshi A,B"
+            },
+            {
+              "id": "1",
+              "text": "Xoắn đồng bị cuộn cồng lên"
+            },
+            {
+              "id": "2",
+              "text": "Xoắn dây bị biến dạng màu dây"
+            },
+            {
+              "id": "3",
+              "text": "Cả 3 đáp án trên"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VI. KIỂM TRA HÀNG KHI THAO TÁC ( 18 điểm )",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 30,
+          "text": "Sau khi scan EDP lên phần mềm xoắn xong thì phải kiểm tra thông tin gì giữa EDP và phần mềm xoắn?",
+          "points": 3.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Kiểm tra tên số dây, màu dây"
+            },
+            {
+              "id": "1",
+              "text": "Kiểm tra thứ tự lần xoắn xác định đầu chừa A,B"
+            },
+            {
+              "id": "2",
+              "text": "Đánh dấu chừa nếu cần"
+            },
+            {
+              "id": "3",
+              "text": "Tất cả đáp án trên"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 31,
+          "text": "Sau khi làm xong thì phải kiểm tra những gì?",
+          "points": 3.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Kiểm tra tên số dây, màu dây"
+            },
+            {
+              "id": "1",
+              "text": "Kiểm tra tanshi A và B, Chỉnh đầu dây bằng nhau"
+            },
+            {
+              "id": "2",
+              "text": "Đo kích thước đầu chừa, đoạn xoắn, kích thước cả dây của 1pcs cuối"
+            },
+            {
+              "id": "3",
+              "text": "Tất cả đáp án trên"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 32,
+          "text": "Trong quá trình xoắn 1 bộ thì phải đo kích thước dây sau xoắn mấy lần?",
+          "points": 3.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đo 2 lần dây đầu và dây cuối"
+            },
+            {
+              "id": "1",
+              "text": "Đo 3 lần : dây đầu, dây giữa và dây cuối"
+            },
+            {
+              "id": "2",
+              "text": "Đo 1 lần : dây đầu"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 33,
+          "text": "Khi đo dây đầu mà không đạt kích thước dây thì phải làm gì?",
+          "points": 3.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Sửa luôn lại kích thước dây đó cho ok rồi kẹp dây thứ 2 vào máy và chỉnh lại thông số và đo lại dây nếu kích thước ok thì làm nốt các dây còn lại. Nếu kích thước chưa ok thì tiếp tục chỉnh lại thông số cho đến khi ok kích thước dây rồi mới làm tiếp các dây còn lại"
+            },
+            {
+              "id": "1",
+              "text": "Để riêng dây đó ra và treo thẻ lỗi rồi kẹp dây thứ 2 vào máy và chỉnh lại thông số và đo lại dây nếu kích thước ok thì làm nốt các dây còn lại. Nếu kích thước chưa ok thì tiếp tục chỉnh lại thông số cho đến khi ok kích thước dây rồi mới làm tiếp các dây còn lại"
+            },
+            {
+              "id": "2",
+              "text": "Tất cả phương án trên"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 34,
+          "text": "Khi nào thì nhập mắt xoắn?",
+          "points": 3.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Xoắn dây đầu xong đo mắt xoắn nhập vào phần mềm"
+            },
+            {
+              "id": "1",
+              "text": "Sau khi chỉnh kích thước dây sau xoắn ok thì lúc đó đo kích thước mắt xoắn và nhập vào phần mềm"
+            },
+            {
+              "id": "2",
+              "text": "Làm xong cả bộ xoắn thì đo mắt xoắn nhập vào phần mềm"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 35,
+          "text": "Tiêu chuẩn kích thước mắt xoắn của bộ dây là: 20~30?",
+          "points": 3.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Kích thước mắt xoắn đo được : 17"
+            },
+            {
+              "id": "1",
+              "text": "Kích thước mắt xoắn đo được : 26"
+            },
+            {
+              "id": "2",
+              "text": "Kích thước mắt xoắn đo được : 32"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VII. NHỮNG CHÚ Ý KHI THAO TÁC TRÊN PHẦN MỀM XOẮN ( 10 điểm )",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 36,
+          "text": "Khi scan EDP xong phần mềm xoắn báo như ảnh thì phải làm gì?",
+          "points": 5.0,
+          "image": "/img/congdoanxoan/group7_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Tắt đi scan edp tiếp và làm bình thường"
+            },
+            {
+              "id": "1",
+              "text": "Báo quản lý"
+            },
+            {
+              "id": "2",
+              "text": "Đánh dấu chừa nếu cần"
+            },
+            {
+              "id": "3",
+              "text": "Xác nhận lại dây của bộ vừa scan và báo quản lý"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 37,
+          "text": "Khi scan EDP xong phần mềm xoắn báo như ảnh thì phải làm gì?",
+          "points": 5.0,
+          "image": "/img/congdoanxoan/group7_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đây là bộ xoắn 4 đoạn phải xoắn theo thứ tự, và đánh dấu dây trước khi xoắn"
+            },
+            {
+              "id": "1",
+              "text": "Đây là bộ xoắn 3 đoạn phải xoắn theo thứ tự, và đánh dấu dây trước khi xoắn"
+            },
+            {
+              "id": "2",
+              "text": "Đây là bộ xoắn 2 đoạn phải xoắn theo thứ tự, và đánh dấu dây trước khi xoắn"
+            },
+            {
+              "id": "3",
+              "text": "Đánh 1 dấu vàng vào số dây 1V41"
+            },
+            {
+              "id": "4",
+              "text": "Đây là bộ xoắn 3 đoạn phải xoắn theo thứ tự, và đánh dấu dây trước khi xoắn. Đánh 1 dấu vàng vào số dây 1V41"
+            }
+          ],
+          "correct": [
+            "4"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VIII.  CHUYỂN HÀNG SAU KHI XOẮN XONG (12 điểm )",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 38,
+          "text": "Nhìn vào ảnh dưới đây thì sau khi xoắn ok hàng sẽ chuyển đi đâu?",
+          "points": 4.0,
+          "image": "/img/congdoanxoan/group8_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Chuyển vào thùng hoàn thiện"
+            },
+            {
+              "id": "1",
+              "text": "Chuyển vào thùng chờ nối"
+            },
+            {
+              "id": "2",
+              "text": "Chuyển vào thùng chờ dập"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 39,
+          "text": "Nhìn vào ảnh dưới đây thì sau khi xoắn ok hàng sẽ chuyển đi đâu?",
+          "points": 4.0,
+          "image": "/img/congdoanxoan/group8_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Chuyển vào thùng hoàn thiện"
+            },
+            {
+              "id": "1",
+              "text": "Chuyển vào thùng chờ nối"
+            },
+            {
+              "id": "2",
+              "text": "Chuyển vào thùng chờ dập"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 40,
+          "text": "Nhìn vào ảnh dưới đây thì sau khi xoắn ok hàng sẽ chuyển đi đâu?",
+          "points": 4.0,
+          "image": "/img/congdoanxoan/group8_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Chuyển vào thùng hoàn thiện"
+            },
+            {
+              "id": "1",
+              "text": "Chuyển vào thùng chờ nối"
+            },
+            {
+              "id": "2",
+              "text": "Chuyển vào thùng chờ dập"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        }
+      ]
+    }
+  ]
+}

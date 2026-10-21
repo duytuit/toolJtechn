@@ -5,7 +5,8 @@
         const groups = read(value, 'groups');
         if (!Array.isArray(groups)) throw new Error('JSON phải có danh sách groups.');
         const used = new Set();
-        return { title: read(value, 'title') || '', minutes: Number(read(value, 'minutes') || 30), groups: groups.map(group => {
+        const scores = read(value, 'scores');
+        return { scores: scores == null ? null : scores, title: read(value, 'title') || '', minutes: Number(read(value, 'minutes') || 30), groups: groups.map(group => {
             const questions = read(group, 'questions');
             if (!Array.isArray(questions)) throw new Error('Mỗi nhóm phải có danh sách questions.');
             return { title: read(group, 'title') || '', columns: Number(read(group, 'columns') || 1), questions: questions.map(question => {
@@ -23,6 +24,10 @@
         }) };
     }
     function validateDefinition(definition) {
+        const scores = definition.scores;
+        if (scores != null && (!Array.isArray(scores) || scores.length !== 2 || scores.some(v => typeof v !== 'number' || !Number.isFinite(v)) ||
+            scores[1] < 0 || scores[0] > 100 || scores[0] <= scores[1]))
+            throw new Error('Mốc điểm phải gồm 2 số: 0 ≤ mốc kiểm tra lại < mốc đạt ≤ 100.');
         const questions = definition.groups.flatMap(group => group.questions);
         if (!definition.groups.length || definition.groups.some(group => !group.questions.length)) throw new Error('Mỗi nhóm phải có ít nhất một câu hỏi.');
         if (questions.length > 500) throw new Error('Đề thi tối đa 500 câu hỏi.');
@@ -42,8 +47,8 @@
         if (Math.abs(total - 100) > 0.000001) throw new Error(`Tổng điểm hiện tại là ${total}; tổng điểm cần bằng 100.`);
         return definition;
     }
-    function create(container, summary) {
-        let groups = [], controlId = 0;
+    function create(container, summary, scoreContainer = container) {
+        let groups = [], scores = [80, 60], controlId = 0, uploads = 0;
         const node = (tag, text, css) => { const result = document.createElement(tag); if (text != null) result.textContent = text; if (css) result.className = css; return result; };
         const button = (text, action, danger = false) => { const result = node('button', text, `btn btn-sm btn-outline-${danger ? 'danger' : 'primary'}`); result.type = 'button'; result.addEventListener('click', action); return result; };
         const update = () => {
@@ -65,6 +70,21 @@
         }
         function render() {
             container.replaceChildren();
+            if (scoreContainer !== container) scoreContainer.replaceChildren();
+            const grading = node('section', null, 'border rounded p-3 mb-3');
+            grading.append(node('h5', 'Mốc điểm phân loại'));
+            const label = node('label', null, 'form-check mb-3');
+            const enabled = node('input', null, 'form-check-input'); enabled.type = 'checkbox'; enabled.checked = scores != null;
+            enabled.addEventListener('change', () => { scores = enabled.checked ? [80, 60] : null; render(); });
+            label.append(enabled, node('span', 'Cấu hình hai mốc điểm riêng cho đề')); grading.append(label);
+            if (scores != null) {
+                ['Điểm tối thiểu để đạt', 'Điểm tối thiểu để kiểm tra lại'].forEach((title, i) => {
+                    const input = field(grading, title, scores[i], value => scores[i] = Number(value), 'number');
+                    input.min = '0'; input.max = '100'; input.required = true;
+                });
+                grading.append(node('p', 'Điểm từ mốc đạt trở lên: Đạt. Từ mốc kiểm tra lại đến dưới mốc đạt: Kiểm tra lại. Dưới mốc kiểm tra lại: Không đạt (Đào tạo lại).', 'small text-muted mb-0'));
+            } else grading.append(node('p', 'Quy tắc cũ: từ 80 đạt; trên 60 kiểm tra lại; từ 50 đào tạo lại; dưới 50 không đạt.', 'small text-muted mb-0'));
+            scoreContainer.append(grading);
             groups.forEach((group, groupIndex) => {
                 const section = node('section', null, 'border rounded p-3 mb-3');
                 const header = node('div', null, 'd-flex justify-content-between align-items-center mb-3');
@@ -82,7 +102,49 @@
                     }, true)); card.append(heading);
                     field(card, 'Nội dung câu hỏi', q.text, value => q.text = value, 'textarea');
                     field(card, 'Điểm', q.points, value => q.points = Number(value), 'number');
-                    field(card, 'Ảnh câu hỏi (ví dụ /img/congdoandap/group2_1.png)', q.image, value => q.image = value.trim());
+                    const preview = node('img', null, 'd-block img-fluid mb-3');
+                    preview.alt = `Ảnh câu hỏi ${q.id}`;
+                    preview.style.width = 'auto'; preview.style.height = 'auto';
+                    const originalImage = node('a', 'Mở ảnh gốc để xem chi tiết', 'btn btn-sm btn-outline-primary mb-3');
+                    originalImage.target = '_blank'; originalImage.rel = 'noopener noreferrer';
+                    const showImage = () => {
+                        const valid = q.image.startsWith('/img/') && !/\.\.|[\\?#]/.test(q.image);
+                        preview.hidden = !valid;
+                        originalImage.hidden = !valid;
+                        if (valid) { preview.src = q.image; originalImage.href = q.image; }
+                        else { preview.removeAttribute('src'); originalImage.removeAttribute('href'); }
+                    };
+                    const imagePath = field(card, 'Ảnh câu hỏi (ví dụ /img/congdoandap/group2_1.png)', q.image, value => { q.image = value.trim(); showImage(); });
+                    const upload = node('input', null, 'form-control mb-2'); upload.type = 'file';
+                    upload.accept = '.jpg,.jpeg,.png,.gif,.webp';
+                    upload.id = 'exam-builder-' + (++controlId);
+                    const imageSection = node('div', null, 'exam-image-upload rounded p-3 mb-3');
+                    const uploadLabel = node('label', 'Tải ảnh câu hỏi', 'form-label fw-bold');
+                    uploadLabel.htmlFor = upload.id;
+                    imageSection.append(uploadLabel, node('p', 'Chọn ảnh từ máy để tải lên tự động. Hỗ trợ JPG, JPEG, PNG, GIF, WEBP; tối đa 10 MB.', 'exam-image-upload-help small mb-2'));
+                    const status = node('div', null, 'small mb-2'); status.setAttribute('role', 'status');
+                    upload.addEventListener('change', async () => {
+                        const file = upload.files[0]; if (!file) return;
+                        uploads++; upload.disabled = true; imagePath.disabled = true;
+                        status.textContent = 'Đang tải ảnh...';
+                        try {
+                            if (!/\.(jpe?g|png|gif|webp)$/i.test(file.name)) throw new Error('Chỉ hỗ trợ ảnh JPG, JPEG, PNG, GIF, WEBP.');
+                            if (file.size > 10 * 1024 * 1024) throw new Error('Ảnh tối đa 10 MB.');
+                            const data = new FormData(); data.append('file', file); data.append('folder', 'exams');
+                            const response = await fetch('/upload/single', { method: 'POST', body: data,
+                                headers: { RequestVerificationToken: document.querySelector('[name="__RequestVerificationToken"]').value } });
+                            const result = await response.json().catch(() => ({}));
+                            if (!response.ok || !read(result, 'success')) throw new Error(read(result, 'message') || `Không tải được ảnh (${response.status}).`);
+                            const path = read(result, 'path');
+                            if (typeof path !== 'string' || !path.startsWith('/img/exams/') || /\.\.|[\\?#]/.test(path)) throw new Error('Đường dẫn ảnh trả về không hợp lệ.');
+                            q.image = path; imagePath.value = path; showImage();
+                            status.textContent = 'Đã tải ảnh. Nhấn Lưu bài thi để lưu đường dẫn vào câu hỏi.';
+                        } catch (error) { status.textContent = error.message; root.JtechnUI.toast(error.message, 'error'); }
+                        finally { uploads--; upload.disabled = false; imagePath.disabled = false; upload.value = ''; }
+                    });
+                    showImage();
+                    imageSection.append(upload, status, preview, originalImage, button('Bỏ ảnh', () => { q.image = ''; imagePath.value = ''; showImage(); }));
+                    card.append(imageSection);
                     const kindLabel = node('label', 'Loại câu hỏi', 'form-label');
                     const kind = node('select', null, 'form-select mb-3'); kind.id = 'exam-builder-' + (++controlId); kindLabel.htmlFor = kind.id;
                     [['single', 'Chọn một đáp án'], ['multiple', 'Chọn nhiều đáp án'], ['matching', 'Ghép số theo hình']].forEach(([value, text]) => kind.add(new Option(text, value)));
@@ -116,12 +178,13 @@
         }
         render();
         return {
-            reset() { groups = []; render(); },
+            reset() { groups = []; scores = [80, 60]; render(); },
             addGroup() { groups.push({ title: '', columns: 1, questions: [] }); render(); },
-            load(value) { const definition = normalizeDefinition(value); groups = definition.groups; render(); return definition; },
+            load(value) { const definition = normalizeDefinition(value); groups = definition.groups; scores = definition.scores == null ? null : [...definition.scores]; render(); return definition; },
             hasContent() { return groups.length > 0; },
             definition(title, minutes, validate = true) {
-                const definition = { title, minutes: Number(minutes), groups };
+                if (uploads) throw new Error('Vui lòng đợi tải ảnh hoàn tất trước khi lưu bài thi.');
+                const definition = { title, minutes: Number(minutes), scores, groups };
                 if (validate) validateDefinition(definition);
                 return JSON.parse(JSON.stringify(definition));
             }

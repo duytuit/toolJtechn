@@ -1,0 +1,333 @@
+{
+  "id": 10,
+  "title": "Test năng lực công nhân mới vào",
+  "minutes": 10,
+  "scores": [
+    90,
+    80
+  ],
+  "groups": [
+    {
+      "title": "",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 1,
+          "text": "Maku được in mấy lần ?",
+          "points": 7.69,
+          "image": "/img/ktnq2/group1_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Maku in 1 lần"
+            },
+            {
+              "id": "1",
+              "text": "Maku in 2 lần"
+            },
+            {
+              "id": "2",
+              "text": "Không có maku"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 2,
+          "text": "Quy trình kiểm tra NQ gồm có bao nhiêu bước?",
+          "points": 7.69,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Gồm 14 bước"
+            },
+            {
+              "id": "1",
+              "text": "Gồm 12 bước"
+            },
+            {
+              "id": "2",
+              "text": "Gồm 15 bước"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 3,
+          "text": "Vị trí nào sau đây được đóng dấu thông mạch ?",
+          "points": 7.69,
+          "image": "/img/ktnq2/group1_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đầu mác sản phẩm"
+            },
+            {
+              "id": "1",
+              "text": " Cuối mác sản phẩm"
+            },
+            {
+              "id": "2",
+              "text": "Chỗ nào cũng được"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 4,
+          "text": "Rải hàng theo hướng nào là đúng ?",
+          "points": 7.69,
+          "image": "/img/ktnq2/group1_5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Rải hàng theo bản vẽ từ trái qua phải"
+            },
+            {
+              "id": "1",
+              "text": "Rải hàng theo bản vẽ phải qua trái"
+            },
+            {
+              "id": "2",
+              "text": "Rải hàng theo như thế nào mình cảm thấy thuận tiện là được"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 5,
+          "text": "Hãy nêu thứ tự các hạng mục KTNQ theo các bước?<br>\n                                           <div>1. Đọc ghi chú của bản vẽ và hình ảnh chú ý treo trên mẫu</div>\n                                           <div>2. Xác nhận mã sản phẩm và số lần sửa đổi của mẫu , hàng , bản vẽ xem có trùng khớp nhau không</div>\n                                           <div>3.Rải mẫu và hàng theo chiều của bản vẽ</div>",
+          "points": 7.69,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bước 1.bước 2.bước 3"
+            },
+            {
+              "id": "1",
+              "text": "Bước 1.bước 3.bước 2"
+            },
+            {
+              "id": "2",
+              "text": "Bước 2.bước 1.bước 3"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 6,
+          "text": "Bạn hãy nêu trình tự kiểm tra phi ống?<br>\n                                           <div>1. Kiểm tra phi ống</div>\n                                           <div>2. Kiểm tra chủng loại ống (chịu nhiệt , không chịu nhiệt , có rãnh , không có rãnh )</div>\n                                           <div>3.Kiểm tra ngoại quan ( biến dạng )</div>",
+          "points": 7.69,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bước 3.bước 1.bước 3"
+            },
+            {
+              "id": "1",
+              "text": "Bước 2.bước 1.bước 3"
+            },
+            {
+              "id": "2",
+              "text": "Bước 2.bước 3.bước 1"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 7,
+          "text": "Nêu trình tự các bước kiểm tra CLIP ?<br>\n                                           <div>1. Vạch bút sơn</div>\n                                           <div>2. Kiểm tra đúng chủng loại, màu sắc</div>\n                                           <div>3. Kiểm tra hướng clip</div>",
+          "points": 7.69,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bước 3.bước 1.bước 3"
+            },
+            {
+              "id": "1",
+              "text": "Bước 2.bước 1.bước 3"
+            },
+            {
+              "id": "2",
+              "text": "Bước 2.bước 3.bước 1"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 8,
+          "text": "Nêu trình tự các bước kiểm tra điểm bó cố định?<br>\n                                           <div>1. Kiểm tra màu băng dính</div>\n                                           <div>2. Kiểm tra hướng bó</div>\n                                           <div>3. Kiểm tra điểm bó chặt chưa ?</div>\n                                           <div>4. Đếm điểm bó</div>",
+          "points": 7.69,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bước 3.bước 1.bước 4 .bước 3"
+            },
+            {
+              "id": "1",
+              "text": "Bước 1.bước 2.bước 3.bước 4"
+            },
+            {
+              "id": "2",
+              "text": "Bước 2.bước 3.bước 1.bước 4"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 9,
+          "text": "\"Nêu trình tự các bước kiểm tra cầu chì?<br>\n                                           <div>1. Dùng JIG để kiểm tra cầu chì</div>\n                                           <div>2. KT chủng loại ,màu sắc, ampe</div>\n                                           <div>3. Kiểm tra hướng cầu chì</div>\n                                           <div>4. KT dấu bút sơn trắng, đỏ trên thân cầu chì</div>",
+          "points": 7.69,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bước 4.bước 1.bước 2 .bước 3"
+            },
+            {
+              "id": "1",
+              "text": "Bước 1.bước 2.bước 3.bước 4"
+            },
+            {
+              "id": "2",
+              "text": "Bước 2.bước 3.bước 1.bước 4"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 10,
+          "text": "Cách phân biệt mấy loại ống bảo vệ tanshi ?<br>\n                                           <div>1. ống ES sấy chảy nhựa,ống sumi không sấy,ống bini sấy không chảy nhựa</div>\n                                           <div>2.Ông ES sấy chảy nhựa,ống sumi sấy không chảy nhựa,ống bini không sấy</div>\n                                           <div>3.ống ES không sấy ,ống sumi sấy không chảy nhựa,ống bini sấy chảy nhựa</div>",
+          "points": 7.69,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Bước 3"
+            },
+            {
+              "id": "1",
+              "text": "Bước 1"
+            },
+            {
+              "id": "2",
+              "text": "Bước 2"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 11,
+          "text": "Quy cách quấn U bằng băng dính là bao nhiêu ?",
+          "points": 7.69,
+          "image": "/img/ktnq/3_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Quấn U từ 0.8~0.85"
+            },
+            {
+              "id": "1",
+              "text": "Quấn U từ 8~8.5"
+            },
+            {
+              "id": "2",
+              "text": "Quấn U từ 0.8~8.5"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 12,
+          "text": "Cách phân biệt mấy loại Tanshi tròn ?",
+          "points": 7.7,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "3 loại"
+            },
+            {
+              "id": "1",
+              "text": "5 loại"
+            },
+            {
+              "id": "2",
+              "text": "4 loại"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 13,
+          "text": "Kiểm tra cắm kết nối connector như thế nào?",
+          "points": 7.72,
+          "image": "/img/ktnq/22_ktnq.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Kiểm tra đã vào lẫy và lẫy đã nảy lên chưa"
+            },
+            {
+              "id": "1",
+              "text": "Kiểm tra bằng cách kéo thử 1 lực"
+            },
+            {
+              "id": "2",
+              "text": "Dùng tay ấn kiểm tra"
+            },
+            {
+              "id": "3",
+              "text": "Thực hiện cả 3 nội dung trên"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        }
+      ]
+    }
+  ]
+}

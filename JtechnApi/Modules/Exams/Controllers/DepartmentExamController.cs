@@ -8,6 +8,7 @@ namespace JtechnApi.Exams.Controllers
 {
     [Authorize(Policy = "Permission:DEPARTMENT_EXAMS.VIEW")]
     [Route("api/department-exams")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public class DepartmentExamController : Controller
     {
         private readonly IDepartmentExamRepository repository;

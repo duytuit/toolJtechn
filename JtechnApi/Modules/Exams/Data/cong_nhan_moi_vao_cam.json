@@ -1,0 +1,1554 @@
+{
+  "id": 1,
+  "title": "Bài kiểm tra năng lực nhận biết màu dây",
+  "minutes": 5,
+  "scores": [96, 90],
+  "groups": [
+    {
+      "title": "Bạn hãy chọn đáp án đúng bằng cách tích vào ô có ký hiệu tương ứng với màu dây:",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 1,
+          "text": "Màu Đỏ",
+          "points": 1.815,
+          "image": "/img/cam/do.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "O"
+            },
+            {
+              "id": "1",
+              "text": "P"
+            },
+            {
+              "id": "2",
+              "text": "R"
+            },
+            {
+              "id": "3",
+              "text": "Y"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 2,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/den.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "B"
+            },
+            {
+              "id": "1",
+              "text": "Br"
+            },
+            {
+              "id": "2",
+              "text": "R"
+            },
+            {
+              "id": "3",
+              "text": "Gr"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 3,
+          "text": "Màu Xanh",
+          "points": 1.815,
+          "image": "/img/cam/xanh.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "L"
+            },
+            {
+              "id": "1",
+              "text": "Lg"
+            },
+            {
+              "id": "2",
+              "text": "G"
+            },
+            {
+              "id": "3",
+              "text": "Sb"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 4,
+          "text": "Màu Nâu",
+          "points": 1.815,
+          "image": "/img/cam/nau.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Br"
+            },
+            {
+              "id": "1",
+              "text": "B"
+            },
+            {
+              "id": "2",
+              "text": "Gr"
+            },
+            {
+              "id": "3",
+              "text": "O"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 5,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/vang.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "O"
+            },
+            {
+              "id": "1",
+              "text": "P"
+            },
+            {
+              "id": "2",
+              "text": "R"
+            },
+            {
+              "id": "3",
+              "text": "Y"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 6,
+          "text": "",
+          "points": 1.99,
+          "image": "/img/cam/xanhlacay.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "G"
+            },
+            {
+              "id": "1",
+              "text": "L"
+            },
+            {
+              "id": "2",
+              "text": "Lg"
+            },
+            {
+              "id": "3",
+              "text": "Sb"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 7,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/xanhlocnon.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "G"
+            },
+            {
+              "id": "1",
+              "text": "L"
+            },
+            {
+              "id": "2",
+              "text": "Lg"
+            },
+            {
+              "id": "3",
+              "text": "Sb"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 8,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/cam.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "O"
+            },
+            {
+              "id": "1",
+              "text": "B"
+            },
+            {
+              "id": "2",
+              "text": "Y"
+            },
+            {
+              "id": "3",
+              "text": "W"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 9,
+          "text": "Màu xám",
+          "points": 1.815,
+          "image": "/img/cam/xam.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Br"
+            },
+            {
+              "id": "1",
+              "text": "Gr"
+            },
+            {
+              "id": "2",
+              "text": "R"
+            },
+            {
+              "id": "3",
+              "text": "B"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 10,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/hong.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "O"
+            },
+            {
+              "id": "1",
+              "text": "P"
+            },
+            {
+              "id": "2",
+              "text": "R"
+            },
+            {
+              "id": "3",
+              "text": "Y"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 11,
+          "text": "Màu xanh da trời",
+          "points": 1.815,
+          "image": "/img/cam/xanhdatroi.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "G"
+            },
+            {
+              "id": "1",
+              "text": "L"
+            },
+            {
+              "id": "2",
+              "text": "Lg"
+            },
+            {
+              "id": "3",
+              "text": "Sb"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 12,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/trang.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Gr"
+            },
+            {
+              "id": "1",
+              "text": "B"
+            },
+            {
+              "id": "2",
+              "text": "O"
+            },
+            {
+              "id": "3",
+              "text": "W"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 13,
+          "text": "Màu tím",
+          "points": 1.815,
+          "image": "/img/cam/tim.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "O"
+            },
+            {
+              "id": "1",
+              "text": "P"
+            },
+            {
+              "id": "2",
+              "text": "V"
+            },
+            {
+              "id": "3",
+              "text": "Y"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 14,
+          "text": "Đỏ - Trắng",
+          "points": 1.815,
+          "image": "/img/cam/dotrang.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "RW"
+            },
+            {
+              "id": "1",
+              "text": "WR"
+            },
+            {
+              "id": "2",
+              "text": "WV"
+            },
+            {
+              "id": "3",
+              "text": "WG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 15,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/doden.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "RB"
+            },
+            {
+              "id": "1",
+              "text": "BR"
+            },
+            {
+              "id": "2",
+              "text": "RY"
+            },
+            {
+              "id": "3",
+              "text": "RG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 16,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/dovang.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "RB"
+            },
+            {
+              "id": "1",
+              "text": "YR"
+            },
+            {
+              "id": "2",
+              "text": "RY"
+            },
+            {
+              "id": "3",
+              "text": "RG"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 17,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/doxanhlacay.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "RB"
+            },
+            {
+              "id": "1",
+              "text": "RL"
+            },
+            {
+              "id": "2",
+              "text": "RY"
+            },
+            {
+              "id": "3",
+              "text": "RG"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 18,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/doxanh.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "RB"
+            },
+            {
+              "id": "1",
+              "text": "RL"
+            },
+            {
+              "id": "2",
+              "text": "RY"
+            },
+            {
+              "id": "3",
+              "text": "RG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 19,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/vangdo.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "YR"
+            },
+            {
+              "id": "1",
+              "text": "YG"
+            },
+            {
+              "id": "2",
+              "text": "RY"
+            },
+            {
+              "id": "3",
+              "text": "YL"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 20,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/vangden.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "YR"
+            },
+            {
+              "id": "1",
+              "text": "YB"
+            },
+            {
+              "id": "2",
+              "text": "RY"
+            },
+            {
+              "id": "3",
+              "text": "BY"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 21,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/vangxanhlacay.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "YR"
+            },
+            {
+              "id": "1",
+              "text": "YG"
+            },
+            {
+              "id": "2",
+              "text": "RY"
+            },
+            {
+              "id": "3",
+              "text": "BY"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 22,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/vangxanh.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "YL"
+            },
+            {
+              "id": "1",
+              "text": "YB"
+            },
+            {
+              "id": "2",
+              "text": "YG"
+            },
+            {
+              "id": "3",
+              "text": "YW"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 23,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/vangtrang.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "YL"
+            },
+            {
+              "id": "1",
+              "text": "WY"
+            },
+            {
+              "id": "2",
+              "text": "YG"
+            },
+            {
+              "id": "3",
+              "text": "YW"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 24,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/xanhlacaytrang.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "GW"
+            },
+            {
+              "id": "1",
+              "text": "WR"
+            },
+            {
+              "id": "2",
+              "text": "GB"
+            },
+            {
+              "id": "3",
+              "text": "WG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 25,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/xanhlacaydo.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "GR"
+            },
+            {
+              "id": "1",
+              "text": "RG"
+            },
+            {
+              "id": "2",
+              "text": "GB"
+            },
+            {
+              "id": "3",
+              "text": "GL"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 26,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/xanhlacayvang.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "GY"
+            },
+            {
+              "id": "1",
+              "text": "GL"
+            },
+            {
+              "id": "2",
+              "text": "GB"
+            },
+            {
+              "id": "3",
+              "text": "GW"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 27,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/xanhlacayden.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "GY"
+            },
+            {
+              "id": "1",
+              "text": "GL"
+            },
+            {
+              "id": "2",
+              "text": "GB"
+            },
+            {
+              "id": "3",
+              "text": "BG"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 28,
+          "text": "Xanh lá cây- Xanh",
+          "points": 1.815,
+          "image": "/img/cam/xanhlacayxanh.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LG"
+            },
+            {
+              "id": "1",
+              "text": "GL"
+            },
+            {
+              "id": "2",
+              "text": "GB"
+            },
+            {
+              "id": "3",
+              "text": "GW"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 29,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/xanh-trang.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LW"
+            },
+            {
+              "id": "1",
+              "text": "WL"
+            },
+            {
+              "id": "2",
+              "text": "LgW"
+            },
+            {
+              "id": "3",
+              "text": "GW"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 30,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/xanh-do.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LR"
+            },
+            {
+              "id": "1",
+              "text": "RL"
+            },
+            {
+              "id": "2",
+              "text": "LgR"
+            },
+            {
+              "id": "3",
+              "text": "GR"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 31,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/xanh-vang.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LY"
+            },
+            {
+              "id": "1",
+              "text": "YL"
+            },
+            {
+              "id": "2",
+              "text": "GY"
+            },
+            {
+              "id": "3",
+              "text": "LB"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 32,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/xanh-den.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LgB"
+            },
+            {
+              "id": "1",
+              "text": "BL"
+            },
+            {
+              "id": "2",
+              "text": "GB"
+            },
+            {
+              "id": "3",
+              "text": "LB"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 33,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/xanh-xanhlacay.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LG"
+            },
+            {
+              "id": "1",
+              "text": "GL"
+            },
+            {
+              "id": "2",
+              "text": "LY"
+            },
+            {
+              "id": "3",
+              "text": "LB"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 34,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/nau-trang.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "BrW"
+            },
+            {
+              "id": "1",
+              "text": "GrW"
+            },
+            {
+              "id": "2",
+              "text": "BrR"
+            },
+            {
+              "id": "3",
+              "text": "BrY"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 35,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/nau-do.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "BrW"
+            },
+            {
+              "id": "1",
+              "text": "GrR"
+            },
+            {
+              "id": "2",
+              "text": "BrR"
+            },
+            {
+              "id": "3",
+              "text": "BrY"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 36,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/nau-vang.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "BrW"
+            },
+            {
+              "id": "1",
+              "text": "GrR"
+            },
+            {
+              "id": "2",
+              "text": "BrR"
+            },
+            {
+              "id": "3",
+              "text": "BrY"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 37,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/nau-den.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "BrW"
+            },
+            {
+              "id": "1",
+              "text": "GrR"
+            },
+            {
+              "id": "2",
+              "text": "BrB"
+            },
+            {
+              "id": "3",
+              "text": "BrY"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 38,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/xanhlocnon-do.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LgW"
+            },
+            {
+              "id": "1",
+              "text": "LgR"
+            },
+            {
+              "id": "2",
+              "text": "LR"
+            },
+            {
+              "id": "3",
+              "text": "GR"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 39,
+          "text": "Xanh lộc non-Vàng",
+          "points": 1.815,
+          "image": "/img/cam/xanhlocnon-vang.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LgW"
+            },
+            {
+              "id": "1",
+              "text": "LgY"
+            },
+            {
+              "id": "2",
+              "text": "LY"
+            },
+            {
+              "id": "3",
+              "text": "GY"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 40,
+          "text": "Xanh lộc non-Đen",
+          "points": 1.815,
+          "image": "/img/cam/xanhlocnon-den.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LB"
+            },
+            {
+              "id": "1",
+              "text": "LgR"
+            },
+            {
+              "id": "2",
+              "text": "LgB"
+            },
+            {
+              "id": "3",
+              "text": "GB"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 41,
+          "text": "Xanh lộc non-Trắng",
+          "points": 1.815,
+          "image": "/img/cam/xanhlocnon-trang.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LgW"
+            },
+            {
+              "id": "1",
+              "text": "GW"
+            },
+            {
+              "id": "2",
+              "text": "LW"
+            },
+            {
+              "id": "3",
+              "text": "GY"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 42,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/den-trang.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "BW"
+            },
+            {
+              "id": "1",
+              "text": "WB"
+            },
+            {
+              "id": "2",
+              "text": "PW"
+            },
+            {
+              "id": "3",
+              "text": "WG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 43,
+          "text": "Đen-Đỏ",
+          "points": 1.815,
+          "image": "/img/cam/den-do.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "BW"
+            },
+            {
+              "id": "1",
+              "text": "BR"
+            },
+            {
+              "id": "2",
+              "text": "RB"
+            },
+            {
+              "id": "3",
+              "text": "BY"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 44,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/den-vang.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "BW"
+            },
+            {
+              "id": "1",
+              "text": "BR"
+            },
+            {
+              "id": "2",
+              "text": "YB"
+            },
+            {
+              "id": "3",
+              "text": "BY"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 45,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/den-xanh.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "BL"
+            },
+            {
+              "id": "1",
+              "text": "LB"
+            },
+            {
+              "id": "2",
+              "text": "BY"
+            },
+            {
+              "id": "3",
+              "text": "BW"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 46,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/den-xanhlacay.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "BL"
+            },
+            {
+              "id": "1",
+              "text": "BG"
+            },
+            {
+              "id": "2",
+              "text": "BY"
+            },
+            {
+              "id": "3",
+              "text": "GB"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 47,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/trang-do.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "WR"
+            },
+            {
+              "id": "1",
+              "text": "RW"
+            },
+            {
+              "id": "2",
+              "text": "WY"
+            },
+            {
+              "id": "3",
+              "text": "WV"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 48,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/trang-xanh.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "WY"
+            },
+            {
+              "id": "1",
+              "text": "LW"
+            },
+            {
+              "id": "2",
+              "text": "WL"
+            },
+            {
+              "id": "3",
+              "text": "WV"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 49,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/trang-vang.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "WY"
+            },
+            {
+              "id": "1",
+              "text": "YW"
+            },
+            {
+              "id": "2",
+              "text": "WL"
+            },
+            {
+              "id": "3",
+              "text": "WR"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 50,
+          "text": "Trắng - Tím",
+          "points": 1.815,
+          "image": "/img/cam/trang-tim.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "WY"
+            },
+            {
+              "id": "1",
+              "text": "WV"
+            },
+            {
+              "id": "2",
+              "text": "WL"
+            },
+            {
+              "id": "3",
+              "text": "WR"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 51,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/trang-xanhlacay.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "WG"
+            },
+            {
+              "id": "1",
+              "text": "WV"
+            },
+            {
+              "id": "2",
+              "text": "WL"
+            },
+            {
+              "id": "3",
+              "text": "GW"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 52,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/cam-trang.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "GW"
+            },
+            {
+              "id": "1",
+              "text": "OW"
+            },
+            {
+              "id": "2",
+              "text": "WY"
+            },
+            {
+              "id": "3",
+              "text": "GW"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 53,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/hong-den.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "PB"
+            },
+            {
+              "id": "1",
+              "text": "BY"
+            },
+            {
+              "id": "2",
+              "text": "LgB"
+            },
+            {
+              "id": "3",
+              "text": "GB"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 54,
+          "text": "Xám - Đỏ",
+          "points": 1.815,
+          "image": "/img/cam/xam-do.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "BrW"
+            },
+            {
+              "id": "1",
+              "text": "GrR"
+            },
+            {
+              "id": "2",
+              "text": "BrR"
+            },
+            {
+              "id": "3",
+              "text": "BrY"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 55,
+          "text": "",
+          "points": 1.815,
+          "image": "/img/cam/xam-den.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "BrW"
+            },
+            {
+              "id": "1",
+              "text": "GrB"
+            },
+            {
+              "id": "2",
+              "text": "BrB"
+            },
+            {
+              "id": "3",
+              "text": "GrY"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        }
+      ]
+    }
+  ]
+}

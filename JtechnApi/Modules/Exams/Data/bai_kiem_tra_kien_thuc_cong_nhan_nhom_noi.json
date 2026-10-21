@@ -1,0 +1,1279 @@
+{
+  "id": 4,
+  "title": "Bài kiểm tra kiến thức công nhân nhóm Nối",
+  "minutes": 30,
+  "scores": [
+    80,
+    60
+  ],
+  "groups": [
+    {
+      "title": "I. AN TOÀN LAO ĐỘNG ( 4 điểm )",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 1,
+          "text": "Theo bạn thao tác an toàn lao động là thao tác nào?",
+          "points": 4.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Khi thay mỏ, dừng thao tác, đi ra ngoài phải tắt nguồn điện"
+            },
+            {
+              "id": "1",
+              "text": "Khi thao tác nối  mỏ nối phải có cover bảo vệ"
+            },
+            {
+              "id": "2",
+              "text": "Khi đang chuẩn bị không để chân lên công tắc chân"
+            },
+            {
+              "id": "3",
+              "text": "Khi thao tác phải sử dụng găng tay bảo hộ"
+            },
+            {
+              "id": "4",
+              "text": "Khi xử lý sự cố máy mọc phải tắt nguồn điện"
+            },
+            {
+              "id": "5",
+              "text": "Tất cả phương án trên"
+            }
+          ],
+          "correct": [
+            "5"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "II. KIỂM TRA NĂNG LỰC NHẬN BIẾT MÀU DÂY ( 12 điểm )\n                                  Bạn hãy chọn đáp án đúng bằng cách tích vào đáp án màu dây tương ứng với màu dây trong ảnh",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 2,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "RV"
+            },
+            {
+              "id": "1",
+              "text": "RW"
+            },
+            {
+              "id": "2",
+              "text": "RY"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 3,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "GY"
+            },
+            {
+              "id": "1",
+              "text": "GW"
+            },
+            {
+              "id": "2",
+              "text": "GBr"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 4,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Br"
+            },
+            {
+              "id": "1",
+              "text": "BR"
+            },
+            {
+              "id": "2",
+              "text": "B"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 5,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Br"
+            },
+            {
+              "id": "1",
+              "text": "BR"
+            },
+            {
+              "id": "2",
+              "text": "BG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 6,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "V"
+            },
+            {
+              "id": "1",
+              "text": "O"
+            },
+            {
+              "id": "2",
+              "text": "G"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 7,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_6.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Lg"
+            },
+            {
+              "id": "1",
+              "text": "LgR"
+            },
+            {
+              "id": "2",
+              "text": "GW"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 8,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_7.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "PV"
+            },
+            {
+              "id": "1",
+              "text": "OR"
+            },
+            {
+              "id": "2",
+              "text": "PB"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 9,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_8.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LW"
+            },
+            {
+              "id": "1",
+              "text": "LY"
+            },
+            {
+              "id": "2",
+              "text": "GY"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 10,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_9.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LR"
+            },
+            {
+              "id": "1",
+              "text": "LW"
+            },
+            {
+              "id": "2",
+              "text": "GL"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 11,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_10.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "YL"
+            },
+            {
+              "id": "1",
+              "text": "LgR"
+            },
+            {
+              "id": "2",
+              "text": "GW"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 12,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_11.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "PO"
+            },
+            {
+              "id": "1",
+              "text": "LG"
+            },
+            {
+              "id": "2",
+              "text": "PV"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 13,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group2_12.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "O"
+            },
+            {
+              "id": "1",
+              "text": "Y"
+            },
+            {
+              "id": "2",
+              "text": "W"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "III. KIỂM TRA THÔNG TIN TRÊN EDP ( 5 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 14,
+          "text": "Giải thích các thông số trên EDP ?",
+          "points": 5.0,
+          "image": "/img/congdoandap/group3_1.png",
+          "kind": "matching",
+          "options": [
+            {
+              "id": "0",
+              "text": "Kích thước dây"
+            },
+            {
+              "id": "1",
+              "text": "Mã sản phẩm"
+            },
+            {
+              "id": "2",
+              "text": "Số dây"
+            },
+            {
+              "id": "3",
+              "text": "Chủng loại dây"
+            },
+            {
+              "id": "4",
+              "text": "Giá để tanshi"
+            },
+            {
+              "id": "5",
+              "text": "Tên lot"
+            },
+            {
+              "id": "6",
+              "text": "Tanshi A"
+            },
+            {
+              "id": "7",
+              "text": "Đầu chuốt Tanshi A"
+            },
+            {
+              "id": "8",
+              "text": "Tanshi B"
+            },
+            {
+              "id": "9",
+              "text": "Đầu chuốt Tanshi B"
+            },
+            {
+              "id": "10",
+              "text": "Nội dung cần chú ý"
+            },
+            {
+              "id": "11",
+              "text": "Số lượng dây cắt"
+            },
+            {
+              "id": "12",
+              "text": "Kí hiệu của lót hàng"
+            },
+            {
+              "id": "13",
+              "text": "Tên mối nối"
+            },
+            {
+              "id": "14",
+              "text": "Kích thước dây sau xoắn"
+            },
+            {
+              "id": "15",
+              "text": "Cost QR"
+            },
+            {
+              "id": "16",
+              "text": "Maku dây"
+            }
+          ],
+          "correct": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "IV. TIÊU CHUẨN B NỐI VÀ TIÊU CHUẨN SỎ ỐNG ( 16 điểm )\n                                   Nhìn vào ảnh tiêu chuẩn B và ống để chọn đúng B cần nối tương ứng",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 15,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group4_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "B1.25"
+            },
+            {
+              "id": "1",
+              "text": "B2"
+            },
+            {
+              "id": "2",
+              "text": "B5.5"
+            },
+            {
+              "id": "3",
+              "text": "B8"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 16,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group4_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "B1.25"
+            },
+            {
+              "id": "1",
+              "text": "B2"
+            },
+            {
+              "id": "2",
+              "text": "B5.5"
+            },
+            {
+              "id": "3",
+              "text": "B8"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 17,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group4_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "B1.25"
+            },
+            {
+              "id": "1",
+              "text": "B2"
+            },
+            {
+              "id": "2",
+              "text": "B5.5"
+            },
+            {
+              "id": "3",
+              "text": "B8"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 18,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group4_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "B1.25"
+            },
+            {
+              "id": "1",
+              "text": "B2"
+            },
+            {
+              "id": "2",
+              "text": "B5.5"
+            },
+            {
+              "id": "3",
+              "text": "B8"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 19,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group4_5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "B14"
+            },
+            {
+              "id": "1",
+              "text": "B22"
+            },
+            {
+              "id": "2",
+              "text": "B38"
+            },
+            {
+              "id": "3",
+              "text": "B60"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 20,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group4_6.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "B14"
+            },
+            {
+              "id": "1",
+              "text": "B22"
+            },
+            {
+              "id": "2",
+              "text": "B38"
+            },
+            {
+              "id": "3",
+              "text": "B60"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 21,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group4_7.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "B14"
+            },
+            {
+              "id": "1",
+              "text": "B22"
+            },
+            {
+              "id": "2",
+              "text": "B38"
+            },
+            {
+              "id": "3",
+              "text": "B60"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 22,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/congdoandap/group4_8.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "B14"
+            },
+            {
+              "id": "1",
+              "text": "B22"
+            },
+            {
+              "id": "2",
+              "text": "B38"
+            },
+            {
+              "id": "3",
+              "text": "B60"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 23,
+          "text": "Những đầu dây nối đơn xem hình bên nếu sơ đồ nối không hiển thị cho dây kamas vậy khi nối có cần cho dây kamas vào mối nối không",
+          "points": 1.0,
+          "image": "/img/congdoandap/group4_9.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Có"
+            },
+            {
+              "id": "1",
+              "text": "Không"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 24,
+          "text": "Tiêu chuẩn sỏ ống ami của dây SRD: Ami = 20",
+          "points": 2.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Sỏ ống L= 10mm"
+            },
+            {
+              "id": "1",
+              "text": "Sỏ ống L= 15mm"
+            },
+            {
+              "id": "2",
+              "text": "Không phải sỏ (Nếu sơ đồ nối ghi chú sỏ ống gì thì sỏ ống đó L=10)"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 25,
+          "text": "Tiêu chuẩn sỏ ống ami của dây SRD: Ami = 30",
+          "points": 2.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Sỏ ống L= 15mm"
+            },
+            {
+              "id": "1",
+              "text": "Sỏ ống L= 20mm"
+            },
+            {
+              "id": "2",
+              "text": "Không phải sỏ"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 26,
+          "text": "Tiêu chuẩn sỏ ống ami của dây SRD: Ami dài từ 40 trở lên thì:",
+          "points": 2.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Lấy chiều dài kích thước ami trừ đi 10 để ra kích thước ống cần sỏ"
+            },
+            {
+              "id": "1",
+              "text": "Lấy chiều dài kích thước ami trừ đi 20 để ra kích thước ống cần sỏ"
+            },
+            {
+              "id": "2",
+              "text": "Sỏ ống dài bằng ami"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 27,
+          "text": "Khi sơ đồ nối không hiển thị ống cần sỏ thì dựa vào đâu để biết mối nối này cần sỏ ống gì",
+          "points": 1.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Dựa vào đầu chuốt và xác định ống cần sỏ theo bảng tiêu chuẩn ( Chuốt 12= Es, chuốt 8= sumi...)"
+            },
+            {
+              "id": "1",
+              "text": "Dựa vào đầu trang SĐN. Nếu đầu trang khoanh vào ống gì thì sẽ sỏ ống đó"
+            },
+            {
+              "id": "2",
+              "text": "Cả 2 đáp án trên"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "V. KIỂM TRA ÁP LỰC KHÍ VÀ KÉO CÂN MÁY NỐI ( 12 điểm )\n                                   Hãy chọn đáp án đúng",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 28,
+          "text": "Áp lực khí: 0.55~0.65 Mpa, >= 15kg, Dây 0.75",
+          "points": 4.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "B1.25"
+            },
+            {
+              "id": "1",
+              "text": "B2"
+            },
+            {
+              "id": "2",
+              "text": "B5.5"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 29,
+          "text": "Áp lực khí: 0.55~0.65 Mpa, >= 29kg, Dây 2",
+          "points": 4.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "B1.25"
+            },
+            {
+              "id": "1",
+              "text": "B2"
+            },
+            {
+              "id": "2",
+              "text": "B5.5"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 30,
+          "text": "Áp lực khí: 0.55~0.65 Mpa, >= 9kg, Dây 0.5",
+          "points": 4.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "B1.25"
+            },
+            {
+              "id": "1",
+              "text": "B2"
+            },
+            {
+              "id": "2",
+              "text": "B5.5"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VI. TIÊU CHUẨN KHOẢNG CÁCH DẬP B NỐI VÀ ĐỒNG THỪA ( 24 điểm)\n                                   Hãy chọn đáp án đúng",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 31,
+          "text": "Tiêu chuẩn khoảng cách dập B nối: B1.25",
+          "points": 4.0,
+          "image": "/img/congdoandap/group6_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Khoảng cách 2 bên vết dập A,B = 0.5~2mm. Khoảng cách của A,B phải đại khái bằng nhau."
+            },
+            {
+              "id": "1",
+              "text": "Khoảng cách 2 bên vết dập A,B = 0.5~1mm. Khoảng cách của A,B phải đại khái bằng nhau"
+            },
+            {
+              "id": "2",
+              "text": "Khoảng cách 2 bên vết dập A,B =  1 ~ 2mm. Khoảng cách của A,B phải đại khái bằng nhau"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 32,
+          "text": "Tiêu chuẩn khoảng cách dập B nối: B2",
+          "points": 4.0,
+          "image": "/img/congdoandap/group6_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Khoảng cách 2 bên vết dập A,B =  1 ~ 2mm. Khoảng cách của A,B phải đại khái bằng nhau"
+            },
+            {
+              "id": "1",
+              "text": "Khoảng cách 2 bên vết dập A,B = 0.5~1mm. Khoảng cách của A,B phải đại khái bằng nhau"
+            },
+            {
+              "id": "2",
+              "text": "Khoảng cách 2 bên vết dập A,B = 0.5~2mm. Khoảng cách của A,B phải đại khái bằng nhau"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 33,
+          "text": "Tiêu chuẩn khoảng cách dập B nối: B5.5",
+          "points": 4.0,
+          "image": "/img/congdoandap/group6_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Khoảng cách 2 bên vết dập A,B = 0.5~2mm. Khoảng cách của A,B phải đại khái bằng nhau"
+            },
+            {
+              "id": "1",
+              "text": "Khoảng cách 2 bên vết dập A,B = 0.5~1mm. Khoảng cách của A,B phải đại khái bằng nhau"
+            },
+            {
+              "id": "2",
+              "text": "Khoảng cách 2 bên vết dập A,B =  1 ~ 2mm. Khoảng cách của A,B phải đại khái bằng nhau"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 34,
+          "text": "Tiêu chuẩn đồng thừa từ B đến vỏ dây điện (Chuốt 8: đồng thừa 1, Chuốt 12: đồng thừa 5)",
+          "points": 3.0,
+          "image": "/img/congdoandap/group6_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "B1.25"
+            },
+            {
+              "id": "1",
+              "text": "B2"
+            },
+            {
+              "id": "2",
+              "text": "B5.5"
+            },
+            {
+              "id": "3",
+              "text": "Cả 3 đáp án trên"
+            }
+          ],
+          "correct": [
+            "3"
+          ]
+        },
+        {
+          "id": 35,
+          "text": "Tiêu chuẩn đồng thừa từ B đến vỏ dây điện (Chuốt 10: đồng thừa 1, Chuốt 14: đồng thừa 5)",
+          "points": 3.0,
+          "image": "/img/congdoandap/group6_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "B8"
+            },
+            {
+              "id": "1",
+              "text": "B14"
+            },
+            {
+              "id": "2",
+              "text": "B22"
+            },
+            {
+              "id": "3",
+              "text": "Cả 3 đáp án trên"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 36,
+          "text": "Tiêu chuẩn đồng thừa từ B đến vỏ dây điện (Chuốt 14: đồng thừa 3 , Chuốt 18: đồng thừa 7)",
+          "points": 3.0,
+          "image": "/img/congdoandap/group6_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "B8"
+            },
+            {
+              "id": "1",
+              "text": "B14"
+            },
+            {
+              "id": "2",
+              "text": "B22"
+            },
+            {
+              "id": "3",
+              "text": "Cả 3 đáp án trên"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 37,
+          "text": "Tiêu chuẩn đồng thừa từ B đến vỏ dây điện (Chuốt 16: đồng thừa 3 , Chuốt 20: đồng thừa 7)",
+          "points": 3.0,
+          "image": "/img/congdoandap/group6_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "B8"
+            },
+            {
+              "id": "1",
+              "text": "B14"
+            },
+            {
+              "id": "2",
+              "text": "B22"
+            },
+            {
+              "id": "3",
+              "text": "Cả 3 đáp án trên"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VII. KIỂM TRA CHẤT LƯỢNG SAU KHI NỐI ( 15 điểm)\n                                   Hãy chọn đáp án đúng",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 38,
+          "text": "Khi nào thì kiểm tra vết dập mối nối?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Kiểm tra vết dập B ngay sau khi nối xong cả mối"
+            },
+            {
+              "id": "1",
+              "text": "Kiểm tra vết dập B ngay sau khi nối xong từng PCS"
+            },
+            {
+              "id": "2",
+              "text": "Kiểm tra vết dập B ngay sau khi nối xong một bộ"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 39,
+          "text": "Khi nối xong phải kiểm tra những gì?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "So sánh số dây trên edp có khớp với số dây trên sơ đồ nối không và xem cả hướng nối của dây"
+            },
+            {
+              "id": "1",
+              "text": "Kiểm tra vết dập của B có nằm trong tiêu chuẩn, có đủ vết dập và có đủ số lượng B cần nối không"
+            },
+            {
+              "id": "2",
+              "text": "Xác nhận đã sỏ ống đúng loại mà sơ đồ nối yêu cầu và sỏ đủ số lượng chưa"
+            },
+            {
+              "id": "3",
+              "text": "Đếm số lượng mối B đã nối của bộ đang làm xem có đủ mối như sơ đồ nối yêu cầu không"
+            },
+            {
+              "id": "4",
+              "text": "Tất cả các đáp án trên"
+            }
+          ],
+          "correct": [
+            "4"
+          ]
+        },
+        {
+          "id": 40,
+          "text": "Những lỗi thường sảy ra khi nối?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Nối sai số dây"
+            },
+            {
+              "id": "1",
+              "text": "Nối thiếu dây"
+            },
+            {
+              "id": "2",
+              "text": "Nối thừa dây"
+            },
+            {
+              "id": "3",
+              "text": "Sỏ sai ống"
+            },
+            {
+              "id": "4",
+              "text": "Sỏ thiếu ống"
+            },
+            {
+              "id": "5",
+              "text": "Sỏ thừa ống"
+            },
+            {
+              "id": "6",
+              "text": "Nối tụt đồng"
+            },
+            {
+              "id": "7",
+              "text": "B bị biến dạng"
+            },
+            {
+              "id": "8",
+              "text": "Vết dập B bị lệch"
+            },
+            {
+              "id": "9",
+              "text": "Nối rối dây"
+            },
+            {
+              "id": "10",
+              "text": "Nối sai tanshi"
+            },
+            {
+              "id": "11",
+              "text": "Nối sai sai đầu gia công, sai đầu chừa dây xoắn"
+            },
+            {
+              "id": "12",
+              "text": "Tất cả đáp án trên"
+            }
+          ],
+          "correct": [
+            "12"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VIII. CÁC CHÚ Ý TRÊN SƠ ĐỒ NỐI CÁCH CHUYỂN HÀNG (12 điểm )\n                                     Hãy chọn đáp án đúng",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 41,
+          "text": "Khi nối bộ có bao nhiêu mối nối trở lên thì bấm vào xem ảnh để phóng mối cần nối lên ?",
+          "points": 3.0,
+          "image": "/img/congdoandap/group8_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "3 mối trở nên"
+            },
+            {
+              "id": "1",
+              "text": "2 mối trở nên"
+            },
+            {
+              "id": "2",
+              "text": "4 mối trở nên"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 42,
+          "text": "Nếu trên sơ đồ nối hiển thị như ảnh thì hàng chuyển vào thùng nào?",
+          "points": 3.0,
+          "image": "/img/congdoandap/group8_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Thùng hàng hoàn thiện"
+            },
+            {
+              "id": "1",
+              "text": "Thùng hàng chờ nhúng"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 43,
+          "text": "Nếu trên sơ đồ nối hiển thị như ảnh thì hàng chuyển vào thùng nào?",
+          "points": 3.0,
+          "image": "/img/congdoandap/group8_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Thùng hàng hoàn thiện"
+            },
+            {
+              "id": "1",
+              "text": "Thùng hàng chờ nhúng"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 44,
+          "text": "Nếu trên sơ đồ nối hiển thị như ảnh thì hàng chuyển vào thùng nào?",
+          "points": 3.0,
+          "image": "/img/congdoandap/group8_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Thùng hàng hoàn thiện"
+            },
+            {
+              "id": "1",
+              "text": "Thùng hàng chờ nhúng"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    }
+  ]
+}

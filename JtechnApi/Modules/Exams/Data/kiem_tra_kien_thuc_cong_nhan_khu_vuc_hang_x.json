@@ -1,0 +1,303 @@
+{
+  "id": 17,
+  "title": "Kiểm tra kiến thức công nhân khu vực hàng X",
+  "minutes": 10,
+  "scores": [
+    80,
+    60
+  ],
+  "groups": [
+    {
+      "title": "I. AN TOÀN LAO ĐỘNG ( 5 điểm )\n                                    Theo bạn thao tác an toàn lao động là thao tác nào? (Khoanh vào câu trả lời đúng)",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 1,
+          "text": "",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Phải quấn tóc gọn gàng khi thao tác"
+            },
+            {
+              "id": "1",
+              "text": "Khi ra ngoài phải treo thẻ thao tác"
+            },
+            {
+              "id": "2",
+              "text": "Khi thao tác phải sử dụng găng tay bảo hộ"
+            },
+            {
+              "id": "3",
+              "text": "Khi phát sinh sự cố cần phảỉ báo cáo cấp trên để tìm biện pháp khắc phục"
+            },
+            {
+              "id": "4",
+              "text": "Tất cả phương án trên"
+            }
+          ],
+          "correct": [
+            "4"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "II. KIỂM TRA CÁCH CẦM CẦN LỰC 10 (điểm )\n                                    Theo bạn hình nào dưới cầm đúng tiêu chuẩn cầm cần lực ?",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 2,
+          "text": "",
+          "points": 10.0,
+          "image": "/img/laprap/nangluccn/group2_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hình 1"
+            },
+            {
+              "id": "1",
+              "text": "Hình 2"
+            },
+            {
+              "id": "2",
+              "text": "Hình 1,2"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "III. Kiểm tra nhận biết các loại cần lực khi tiêu chuẩn hiển thị (20 điểm)\n                                    Theo bạn hình nào dưới cầm đúng tiêu chuẩn cầm cần lực ?",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 3,
+          "text": "Dựa vào hình ảnh bạn hãy chọn đáp án đúng theo dải lực bạn đã được học.(10đ)",
+          "points": 10.0,
+          "image": "/img/laprap/nangluccn/group2_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "<div>Màu vàng lực 2.2 – 3.4</div> <div>Màu tím lực 2.7 – 2.9</div> <div>Màu xanh G lực 4.9 – 5.8</div> <div>Màu đỏ lực 7.05 – 8.0</div> <div>Màu xanh L lực 9.8 – 10</div> <div>Màu hồng lực 13 – 14</div> <div>Màu xanh LG lực 27 – 34</div> <div>Màu cam lực 29 – 74</div>"
+            },
+            {
+              "id": "1",
+              "text": "<div>Màu vàng lực 2.2 ⁓ 3.4</div> <div>Màu tím lực 2.7 ⁓ 2.9</div> <div>Màu xanh G lực 9.8 ⁓ 10</div> <div>Màu xanh L lực 4.9 ⁓ 5.8</div> <div>Màu hồng lực 13 ⁓ 14</div> <div>Màu đỏ lực 7.05 ⁓ 8.0</div> <div>Màu xanh Lg lực 27 ⁓ 34</div> <div>Màu cam lực 29 ⁓ 74</div>"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 4,
+          "text": "Dựa vào hình ảnh dưới  tiêu chuẩn sử dụng cần lực nào là đúng ? 10đ",
+          "points": 10.0,
+          "image": "/img/laprap/nangluccn/group2_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Dùng cần A9 : 39.5 ~ 58"
+            },
+            {
+              "id": "1",
+              "text": "Dùng cần B140 : 29 ~ 74"
+            },
+            {
+              "id": "2",
+              "text": "Cả 2 cần trên"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "IV. Tiêu chuẩn thao tác đánh dấu bút sơn (10 điểm)\n                                    Theo bạn hình ảnh nào đánh dấu bút sơn đúng tiêu chuẩn ?",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 5,
+          "text": "",
+          "points": 10.0,
+          "image": "/img/laprap/nangluccn/group4_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hình a,b"
+            },
+            {
+              "id": "1",
+              "text": "Hình b"
+            },
+            {
+              "id": "2",
+              "text": "Cả 2 hình trên"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "V. Tiêu chuẩn thao tác tháo cầu trì và đánh dấu bút sơn (10 điểm)\n                                    Theo bạn hình nào thể hiện thao tác tháo lá đồng đúng tiêu chuẩn ?",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 6,
+          "text": "",
+          "points": 10.0,
+          "image": "/img/laprap/nangluccn/group5_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hình a"
+            },
+            {
+              "id": "1",
+              "text": "Hình b"
+            },
+            {
+              "id": "2",
+              "text": "Hình c"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VI. Nhận biết hiển thị trên tiêu chuẩn trước khi làm  (45 điểm)\n                                    Hãy chọn đáp án đúng",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 7,
+          "text": "Nhìn vào hình dưới thì phải tháo lá đồng không ?( 5đ)",
+          "points": 5.0,
+          "image": "/img/laprap/nangluccn/group6_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "có"
+            },
+            {
+              "id": "1",
+              "text": "không"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 8,
+          "text": "Nhìn vào hình dưới thì phải tháo lá đồng không ?( 5đ)",
+          "points": 5.0,
+          "image": "/img/laprap/nangluccn/group6_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "có"
+            },
+            {
+              "id": "1",
+              "text": "không"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 9,
+          "text": "Hình nào sử dụng ốc 10 X20 và clip bắt úp ? (10đ)",
+          "points": 10.0,
+          "image": "/img/laprap/nangluccn/group6_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hình a,c"
+            },
+            {
+              "id": "1",
+              "text": "Hình a,b"
+            },
+            {
+              "id": "2",
+              "text": "Cả 3 hình"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 10,
+          "text": "Hình nào bắt nhánh vuông góc 90º (10đ)",
+          "points": 10.0,
+          "image": "/img/laprap/nangluccn/group6_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hình a"
+            },
+            {
+              "id": "1",
+              "text": "Hình b"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 11,
+          "text": "Khi nhìn thấy hình ảnh này trên tiêu chuẩn ta phải làm gì  (15đ)",
+          "points": 15.0,
+          "image": "/img/laprap/nangluccn/group6_5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "<div>\n                                        <p>① 2 nhánh R16A và R15 phải cho đi qua phần dưới của ống xoắn to</p>\n                                        <p>② maku R16B sau khi bắt xong xem phần đầu của ốc và ren có bằng nhau không?<br>\n                                        sau đó đánh dấu bút sơn trắng △3</p>\n                                        <p>③ Kéo lại từng dây của Maku R16B để kiểm tra xem có dây nào bị lỏng, quên chưa bắt không?<br>\n                                        sau đó đánh dấu bút sơn trắng</p>\n                                        </div>"
+            },
+            {
+              "id": "1",
+              "text": "<div><p>\n                                                Đối với tất cả các trường hợp khi bắt 2 dây như hình trên, sau khi bắt xong bắt buộc phải kéo lại để kiểm tra xem có dây nào bị lỏng không.\n                                                Sau đó mới tiến hành đánh dấu bút sơn vào dây.\n                                            </p></div>"
+            },
+            {
+              "id": "2",
+              "text": "Cả 2 đáp án trên"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        }
+      ]
+    }
+  ]
+}

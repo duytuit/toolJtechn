@@ -25,4 +25,10 @@ assert.equal(matching.correct.length, matching.options.length);
 assert.throws(() => editor.validateDefinition(invalid(d => {
     const q = d.groups.flatMap(g => g.questions).find(q => q.kind === 'matching'); q.correct[0] = q.correct[1];
 })), /ghép/);
-console.log('Exam question editor: 14 checks passed.');
+assert.deepEqual(definition.scores, [80, 60]);
+assert.deepEqual(normalize({ ...original, scores: [96, 90] }).scores, [96, 90]);
+assert.equal(normalize({ ...original, scores: null }).scores, null);
+for (const scores of [[96], [90, 96], [90, 90], [101, 90], [96, -1], ['96', 90], [NaN, 90]]) {
+    assert.throws(() => editor.validateDefinition({ ...definition, scores }), /Mốc điểm/);
+}
+console.log('Exam question editor: all checks passed.');

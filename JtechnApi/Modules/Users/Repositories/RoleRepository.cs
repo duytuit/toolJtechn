@@ -449,5 +449,40 @@ namespace JtechnApi.Users.Repositories
         {
             return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
         }
+
+        public async Task<RepositoryResult> AddDepartmentRoles(int departmentId, AssignEmployeeRolesDto input)
+        {
+            if (input?.RoleCodes == null || input.RoleCodes.Count == 0 || input.RoleCodes.Any(string.IsNullOrWhiteSpace))
+                return BadRequest(new { message = "Vui lòng chọn ít nhất một vai trò hợp lệ." });
+            var codes = input.RoleCodes.Select(c => c.Trim().ToUpperInvariant()).Distinct().ToList();
+            await using var transaction = await _context.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+            if (!await _context.Departments.AnyAsync(d => d.Id == departmentId))
+                return NotFound(new { message = "Bộ phận không tồn tại." });
+            var roleIds = await _context.Roles.Where(r => r.IsActive && codes.Contains(r.Code)).Select(r => r.Id).ToListAsync();
+            if (roleIds.Count != codes.Count)
+                return BadRequest(new { message = "Vai trò không tồn tại hoặc đã ngừng hoạt động." });
+            var employeeIds = await _context.Employee.Where(e => e.IsActive &&
+                _context.EmployeeDepartments.Any(d => d.DepartmentId == departmentId && d.EmployeeId == e.Id))
+                .Select(e => e.Id).ToListAsync();
+            if (employeeIds.Count == 0)
+                return Conflict(new { message = "Bộ phận chưa có nhân viên đang hoạt động." });
+            var existing = await _context.RoleEmployees.Where(a => roleIds.Contains(a.RoleId) &&
+                _context.Employee.Any(e => e.Id == a.EmployeeId && e.IsActive &&
+                    _context.EmployeeDepartments.Any(d => d.DepartmentId == departmentId && d.EmployeeId == e.Id)))
+                .Select(a => new { a.EmployeeId, a.RoleId }).ToListAsync();
+            var assigned = existing.Select(a => (a.EmployeeId, a.RoleId)).ToHashSet();
+            var added = 0;
+            foreach (var employeeId in employeeIds)
+                foreach (var roleId in roleIds)
+                    if (assigned.Add((employeeId, roleId)))
+                    {
+                        _context.RoleEmployees.Add(new RoleEmployee { EmployeeId = employeeId, RoleId = roleId, CreatedAt = DateTime.UtcNow });
+                        added++;
+                    }
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return Ok(new { departmentId, employeeCount = employeeIds.Count, addedAssignments = added });
+        }
+
     }
 }

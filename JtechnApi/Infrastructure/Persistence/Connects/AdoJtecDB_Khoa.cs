@@ -9,13 +9,16 @@ using System.Threading.Tasks;
 
 namespace JtechnApi.Shares.Connects
 {
-    public class AdoJtecDB_Khoa : IDisposable
+    public abstract class AdoSqlServerConnection : IDisposable
     {
         private SqlConnection con;
         private SqlTransaction _tran; // transaction hiện tại
-        public AdoJtecDB_Khoa(IOptions<ConnectionStrings> opt)
+        protected AdoSqlServerConnection(string connectionString, string connectionName)
         {
-            con = new SqlConnection(opt.Value.JtecDB_Khoa);
+            if (string.IsNullOrWhiteSpace(connectionString))
+                throw new InvalidOperationException($"Thiếu cấu hình ConnectionStrings:{connectionName}.");
+
+            con = new SqlConnection(connectionString);
             if (con.State == ConnectionState.Closed)
                 con.Open();
         }
@@ -103,6 +106,7 @@ namespace JtechnApi.Shares.Connects
                             return insertCmd.ExecuteNonQuery(); // số dòng insert
                         }
                     }
+
                 }
             }
         }
@@ -178,6 +182,7 @@ namespace JtechnApi.Shares.Connects
                     return cmd.ExecuteNonQuery();
                 }
             }
+
         }
 
         public DataTable LoadTable(string sql)
@@ -420,6 +425,22 @@ namespace JtechnApi.Shares.Connects
                 con.Dispose();
                 con = null;
             }
+        }
+    }
+
+    public class AdoJtecDB_Khoa : AdoSqlServerConnection
+    {
+        public AdoJtecDB_Khoa(IOptions<ConnectionStrings> opt)
+            : base(opt.Value.JtecDB_Khoa, nameof(ConnectionStrings.JtecDB_Khoa))
+        {
+        }
+    }
+
+    public class AdoJtecDB_KhoaB : AdoSqlServerConnection
+    {
+        public AdoJtecDB_KhoaB(IOptions<ConnectionStrings> opt)
+            : base(opt.Value.JtecDB_KhoaB, nameof(ConnectionStrings.JtecDB_KhoaB))
+        {
         }
     }
 }

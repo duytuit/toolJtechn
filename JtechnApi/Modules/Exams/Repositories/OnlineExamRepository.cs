@@ -36,7 +36,7 @@ namespace JtechnApi.Exams.Repositories
                 MissingImages = MissingImages(examId).Length,
                 Attempts = (await History(employeeId)).Where(a => a.CatalogExamId == examId).Select(a => new { a.Id, a.ExamDate, a.IsNewEmployee, a.StartedAt, a.SubmittedAt,
                     Score = a.SubmittedAt != null ? (decimal?)a.Score : null,
-                    Classification = a.SubmittedAt != null ? OnlineExamRepository.Classification(a.Score) : "Chưa nộp" }) };
+                    Classification = a.SubmittedAt != null ? Classification(a.Score, a.Definition) : "Chưa nộp" }) };
         }
 
         public async Task<object> GetCandidate(Guid id, string employeeId)
@@ -207,13 +207,20 @@ namespace JtechnApi.Exams.Repositories
 
         public static string Classification(decimal score) => score >= 80 ? "Đạt" : score > 60 ? "Kiểm tra lại" : score >= 50 ? "Đào tạo lại" : "Không đạt";
 
+        public static string Classification(decimal score, OnlineExamDefinition definition)
+        {
+            var scores = definition?.Scores;
+            if (scores == null) return Classification(score);
+            return score >= scores[0] ? "Đạt" : score >= scores[1] ? "Kiểm tra lại" : "Không đạt (Đào tạo lại)";
+        }
+
         // Never serialize the stored definition to candidates: it contains the answer key.
         public static object CandidateView(OnlineExamAttempt a) => new
         {
             a.Id, a.EmployeeName, a.ExamDate, a.IsNewEmployee, a.StartedAt, a.ExpiresAt, a.SubmittedAt, a.Answers,
             ServerNow = DateTimeOffset.UtcNow,
             Score = a.SubmittedAt != null ? (decimal?)a.Score : null,
-            Classification = a.SubmittedAt != null ? Classification(a.Score) : null,
+            Classification = a.SubmittedAt != null ? Classification(a.Score, a.Definition) : null,
             Definition = new { a.Definition.Title, a.Definition.Minutes,
                 Groups = a.Definition.Groups.Select(g => new { g.Title, g.Columns,
                     Questions = g.Questions.Select(q => new { q.Id, q.Text, q.Points, q.Image, q.Kind, q.Options }) }) }

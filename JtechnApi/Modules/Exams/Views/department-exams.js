@@ -3,10 +3,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const $ = id => document.getElementById(id), form = $('departmentExamForm');
     const token = document.querySelector('[name="__RequestVerificationToken"]').value;
     let editing = null, busy = false;
-    const questions = window.JtechnExamQuestionEditor.create($('examQuestionGroups'), $('examQuestionSummary'));
+    const questions = window.JtechnExamQuestionEditor.create($('examQuestionGroups'), $('examQuestionSummary'), $('examScoreSettings'));
     $('examAddGroup').addEventListener('click', () => { if (!busy) questions.addGroup(); });
     async function api(path = '', method = 'GET', data) {
-        const response = await fetch('/api/department-exams' + path, { method,
+        const response = await fetch('/api/department-exams' + path, { method, cache: 'no-store',
             headers: { 'Content-Type': 'application/json', RequestVerificationToken: token }, body: data === undefined ? undefined : JSON.stringify(data) });
         if (response.status === 204) return;
         const result = await response.json().catch(() => ({}));
@@ -92,7 +92,18 @@ document.addEventListener('DOMContentLoaded', function () {
             if (input.definitionJson.length > 1000000) throw new Error('Nội dung đề tối đa 1 triệu ký tự.');
         } catch (error) { $('examEditorMessage').textContent = error.message; window.JtechnUI.toast(error.message, 'error'); return; }
         busy = true; $('departmentExamFields').disabled = true; $('examSave').disabled = true;
-        try { await api(editing ? '/' + editing : '', editing ? 'PUT' : 'POST', input); close(); window.JtechnUI.toast('Đã lưu bài thi.', 'success'); await load(); }
+        try {
+            const result = await api(editing ? '/' + editing : '', editing ? 'PUT' : 'POST', input);
+            const savedId = editing ?? result.id;
+            // Keep the form open until the database response confirms the requested thresholds.
+            editing = savedId;
+            const saved = await api('/' + savedId);
+            const expected = JSON.parse(input.definitionJson).scores;
+            const actual = window.JtechnExamQuestionEditor.normalizeDefinition(JSON.parse(saved.definitionJson)).scores;
+            if (JSON.stringify(actual) !== JSON.stringify(expected))
+                throw new Error('Máy chủ chưa lưu đúng mốc điểm. Vui lòng khởi động lại ứng dụng để áp dụng mã mới, rồi lưu lại. Nội dung form được giữ nguyên.');
+            close(); window.JtechnUI.toast('Đã lưu bài thi và mốc điểm.', 'success'); await load();
+        }
         catch (error) { $('examEditorMessage').textContent = error.message; window.JtechnUI.toast(error.message, 'error'); }
         finally { busy = false; $('departmentExamFields').disabled = false; $('examSave').disabled = false; }
     });

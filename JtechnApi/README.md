@@ -8,6 +8,8 @@ Gán bộ phận nhân viên tại `/admin/employee-departments`: [SQL và hư�
 
 Quản lý bộ phận SQL Server tại `/admin/departments`: [script SQL và hướng dẫn cài đặt](Modules/Departments/README.md).
 
+Thống kê bảng mục tiêu lắp ráp tại `/assembled-combine-target` (dữ liệu từ `JtecDB_KhoaB`).
+
 Chức năng thi online tại `/admin/exams`: [hướng dẫn cấu hình đề, hình ảnh và lưu kết quả](Modules/Exams/README.md).
 
 Ứng dụng ASP.NET Core MVC + API, tổ chức theo module nghiệp vụ trong một project.

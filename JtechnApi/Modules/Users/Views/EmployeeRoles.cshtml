@@ -11,6 +11,19 @@
     <a class="btn btn-outline-secondary" href="/admin/roles">Quay lại quản lý vai trò</a>
 </div>
 
+@Html.AntiForgeryToken()
+<section class="panel-card mb-4">
+    <h5>Gán vai trò theo bộ phận</h5>
+    <p class="text-muted small">Bổ sung vai trò đã chọn cho tất cả nhân viên đang hoạt động thuộc bộ phận. Các vai trò hiện có được giữ nguyên.</p>
+    <fieldset id="departmentRoleFields" disabled>
+        <label for="roleDepartment" class="form-label">Bộ phận</label>
+        <select id="roleDepartment" class="form-select mb-3"><option value="">Chọn bộ phận</option></select>
+        <div id="departmentRoleList" class="row g-3 mb-3"></div>
+        <button type="button" id="saveDepartmentRoles" class="btn btn-primary">Lưu vai trò cho bộ phận</button>
+    </fieldset>
+    <div id="departmentRoleMessage" class="small mt-3" role="status" aria-live="polite"></div>
+</section>
+
 <section class="panel-card">
     <div class="row align-items-end g-3">
         <div class="col-lg-7">
@@ -81,7 +94,8 @@
                 return response.status === 204 ? null : response.json();
             };
 
-            const renderRoles = (currentRoles = []) => {
+            const renderRoles = (currentRoles = [], target = roleList) => {
+                const roleList = target;
                 roleList.replaceChildren();
                 if (!roles.length) {
                     const empty = document.createElement('div');
@@ -97,11 +111,11 @@
                     column.className = 'col-md-6 col-xl-4';
                     const card = document.createElement('label');
                     card.className = 'border rounded-3 p-3 d-flex gap-3 h-100';
-                    card.htmlFor = `employee-role-${role.id}`;
+                    card.htmlFor = `${target.id}-role-${role.id}`;
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
                     checkbox.className = 'form-check-input mt-1';
-                    checkbox.id = `employee-role-${role.id}`;
+                    checkbox.id = `${target.id}-role-${role.id}`;
                     checkbox.value = role.code;
                     checkbox.checked = selectedCodes.has(role.code);
                     const text = document.createElement('span');
@@ -142,7 +156,7 @@
                 if (preselectRequestedRole && requestedRole) {
                     const targetRole = roles.find(role => role.code === requestedRole);
                     const checkbox = targetRole
-                        ? document.querySelector(`#employee-role-${targetRole.id}`)
+                        ? document.querySelector(`#employeeRoleList-role-${targetRole.id}`)
                         : null;
                     if (checkbox) checkbox.checked = true;
                 }
@@ -156,6 +170,11 @@
                     request(`${api}/roles`)
                 ]);
                 picker.disabled = false;
+                const departments = await request('/api/departments/all');
+                const departmentSelect = document.querySelector('#roleDepartment');
+                departments.forEach(department => departmentSelect.add(new Option(department.name, department.id)));
+                renderRoles(roles.filter(role => role.code === requestedRole), document.querySelector('#departmentRoleList'));
+                document.querySelector('#departmentRoleFields').disabled = false;
 
                 const requestedEmployeeId = new URLSearchParams(window.location.search).get('employeeId');
                 if (requestedEmployeeId && employees.some(employee => String(employee.id) === requestedEmployeeId)) {
@@ -184,6 +203,7 @@
                 saveButton.disabled = true;
                 saving = true;
                 picker.disabled = true;
+                document.querySelector('#departmentRoleFields').disabled = true;
                 try {
                     await request(`${api}/employees/${employeeId}/roles`, {
                         method: 'PUT',
@@ -195,6 +215,39 @@
                     window.JtechnUI.toast(error.message, 'error');
                 } finally {
                     saving = false;
+                    picker.disabled = false;
+                    document.querySelector('#departmentRoleFields').disabled = false;
+                    saveButton.disabled = !employeeSelect.value || loadedEmployeeId !== employeeSelect.value;
+                }
+            });
+
+            document.querySelector('#saveDepartmentRoles').addEventListener('click', async () => {
+                if (saving) return;
+                const fields = document.querySelector('#departmentRoleFields');
+                const message = document.querySelector('#departmentRoleMessage');
+                const departmentId = document.querySelector('#roleDepartment').value;
+                const roleCodes = [...document.querySelectorAll('#departmentRoleList input:checked')].map(input => input.value);
+                if (!departmentId || !roleCodes.length) {
+                    message.textContent = 'Vui lòng chọn bộ phận và ít nhất một vai trò.';
+                    return;
+                }
+                fields.disabled = true;
+                saving = true;
+                picker.disabled = true;
+                saveButton.disabled = true;
+                message.textContent = 'Đang lưu...';
+                try {
+                    const result = await request(`${api}/departments/${departmentId}/roles`, {
+                        method: 'PUT', headers: { RequestVerificationToken: document.querySelector('[name="__RequestVerificationToken"]').value },
+                        body: JSON.stringify({ roleCodes })
+                    });
+                    message.textContent = `Đã lưu cho ${result.employeeCount} nhân viên; bổ sung ${result.addedAssignments} lượt gán vai trò.`;
+                    window.JtechnUI.toast(message.textContent, 'success');
+                    if (employeeSelect.value) await loadEmployeeRoles();
+                } catch (error) { message.textContent = error.message; window.JtechnUI.toast(error.message, 'error'); }
+                finally {
+                    saving = false;
+                    fields.disabled = false;
                     picker.disabled = false;
                     saveButton.disabled = !employeeSelect.value || loadedEmployeeId !== employeeSelect.value;
                 }

@@ -1,10 +1,13 @@
 @inject Microsoft.AspNetCore.Authorization.IAuthorizationService Authorization
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Environment
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Bài thi theo bộ phận";
     var canCreate = (await Authorization.AuthorizeAsync(User, null, "Permission:DEPARTMENT_EXAMS.CREATE")).Succeeded;
     var canUpdate = (await Authorization.AuthorizeAsync(User, null, "Permission:DEPARTMENT_EXAMS.UPDATE")).Succeeded;
     var canDelete = (await Authorization.AuthorizeAsync(User, null, "Permission:DEPARTMENT_EXAMS.DELETE")).Succeeded;
+    var questionEditorVersion = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.IO.File.ReadAllBytes(System.IO.Path.Combine(Environment.ContentRootPath, "Modules", "Exams", "Views", "exam-question-editor.js"))));
+    var departmentExamVersion = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.IO.File.ReadAllBytes(System.IO.Path.Combine(Environment.ContentRootPath, "Modules", "Exams", "Views", "department-exams.js"))));
 }
 @Html.AntiForgeryToken()
 <div class="page-header panel-card">
@@ -24,12 +27,13 @@
                 <div class="col-md-4">@await Html.PartialAsync("_CompactInput", new JtechnApi.ViewModels.CompactInputModel { Id = "examName", Name = "name", Label = "Tên bài thi", Required = true, MaxLength = 200 })</div>
                 <div class="col-md-4"><label class="form-label" for="examMinutes">Thời gian (phút) *</label><input id="examMinutes" name="minutes" type="number" min="1" max="480" class="form-control" value="30" required /></div>
                 <div class="col-md-8"><label class="form-label" for="examDescription">Mô tả</label><textarea id="examDescription" name="description" rows="2" maxlength="1000" class="form-control"></textarea></div>
+                <div class="col-12"><div id="examScoreSettings"></div></div>
                 <div class="col-12 border-top pt-3">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                         <div><h5 class="mb-1">Câu hỏi bài thi</h5><small id="examQuestionSummary" class="text-muted" aria-live="polite"></small></div>
                         <button id="examAddGroup" type="button" class="btn btn-outline-primary">+ Thêm nhóm câu hỏi</button>
                     </div>
-                    <p class="small text-muted">Thêm nhóm, câu hỏi và các lựa chọn bên dưới. Đánh dấu đáp án đúng; tổng điểm của đề phải bằng 100. Nội dung đáp án hỗ trợ HTML định dạng.</p>
+                    <p class="small text-muted">Thêm nhóm, câu hỏi và các lựa chọn bên dưới. Mỗi câu hỏi có mục Tải ảnh câu hỏi để chọn ảnh từ máy. Đánh dấu đáp án đúng; tổng điểm của đề phải bằng 100. Nội dung đáp án hỗ trợ HTML định dạng.</p>
                     <div id="examQuestionGroups"></div>
                 </div>
                 <div class="col-12 border-top pt-3">
@@ -72,6 +76,6 @@
     <div id="examLaunchLinks" class="d-flex flex-wrap gap-2 mt-3" aria-label="Mở làm bài thi"></div>
 </section>
 @section Scripts {
-    <script src="/js/exam-question-editor.js"></script>
-    <script src="/js/department-exams.js"></script>
+    <script src="/js/exam-question-editor.js?v=@questionEditorVersion"></script>
+    <script src="/js/department-exams.js?v=@departmentExamVersion"></script>
 }

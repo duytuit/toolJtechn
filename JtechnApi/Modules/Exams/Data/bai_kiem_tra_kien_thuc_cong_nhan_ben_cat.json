@@ -1,0 +1,711 @@
+{
+  "id": 7,
+  "title": "Bài kiểm tra kiến thức công nhân bên cắt",
+  "minutes": 30,
+  "scores": [
+    80,
+    60
+  ],
+  "groups": [
+    {
+      "title": "I. AN TOÀN LAO ĐỘNG ( 5 điểm )",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 1,
+          "text": "Theo bạn thao tác an toàn lao động là thao tác nào? (Khoanh vào câu trả lời đúng)",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Khi cắt dây phải có mặt nạ bảo vệ"
+            },
+            {
+              "id": "1",
+              "text": "Khi treo dây lên xe phải treo đều hai bên"
+            },
+            {
+              "id": "2",
+              "text": "Khi sử lý sự cố phải dừng máy"
+            },
+            {
+              "id": "3",
+              "text": "Khi kẹt tanshi phải dùng nhíp gắp tanshi"
+            },
+            {
+              "id": "4",
+              "text": "Khi lấy dây phải bê bằng hai tay"
+            },
+            {
+              "id": "5",
+              "text": "Tất cả các phương án"
+            }
+          ],
+          "correct": [
+            "5"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "II. KIỂM TRA NĂNG LỰC NHẬN BIẾT MÀU DÂY ( 15 điểm )\n                                              Bạn hãy chọn đáp án đúng bằng cách tích vào đáp án màu dây tương ứng với màu dây trong ảnh",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 2,
+          "text": "",
+          "points": 1.25,
+          "image": "/img/congdoandap/group2_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "RV"
+            },
+            {
+              "id": "1",
+              "text": "RW"
+            },
+            {
+              "id": "2",
+              "text": "RY"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 3,
+          "text": "",
+          "points": 1.25,
+          "image": "/img/congdoandap/group2_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "GY"
+            },
+            {
+              "id": "1",
+              "text": "GW"
+            },
+            {
+              "id": "2",
+              "text": "GBr"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 4,
+          "text": "",
+          "points": 1.25,
+          "image": "/img/congdoandap/group2_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Br"
+            },
+            {
+              "id": "1",
+              "text": "BR"
+            },
+            {
+              "id": "2",
+              "text": "B"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 5,
+          "text": "",
+          "points": 1.25,
+          "image": "/img/congdoandap/group2_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Br"
+            },
+            {
+              "id": "1",
+              "text": "BR"
+            },
+            {
+              "id": "2",
+              "text": "BG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 6,
+          "text": "",
+          "points": 1.25,
+          "image": "/img/congdoandap/group2_5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "V"
+            },
+            {
+              "id": "1",
+              "text": "O"
+            },
+            {
+              "id": "2",
+              "text": "G"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 7,
+          "text": "",
+          "points": 1.25,
+          "image": "/img/congdoandap/group2_6.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Lg"
+            },
+            {
+              "id": "1",
+              "text": "LgR"
+            },
+            {
+              "id": "2",
+              "text": "GW"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 8,
+          "text": "",
+          "points": 1.25,
+          "image": "/img/congdoandap/group2_7.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "PV"
+            },
+            {
+              "id": "1",
+              "text": "OR"
+            },
+            {
+              "id": "2",
+              "text": "PB"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 9,
+          "text": "",
+          "points": 1.25,
+          "image": "/img/congdoandap/group2_8.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LW"
+            },
+            {
+              "id": "1",
+              "text": "LY"
+            },
+            {
+              "id": "2",
+              "text": "GY"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 10,
+          "text": "",
+          "points": 1.25,
+          "image": "/img/congdoandap/group2_9.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LR"
+            },
+            {
+              "id": "1",
+              "text": "LW"
+            },
+            {
+              "id": "2",
+              "text": "GL"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 11,
+          "text": "",
+          "points": 1.25,
+          "image": "/img/congdoandap/group2_10.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "YL"
+            },
+            {
+              "id": "1",
+              "text": "LgR"
+            },
+            {
+              "id": "2",
+              "text": "GW"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 12,
+          "text": "",
+          "points": 1.25,
+          "image": "/img/congdoandap/group2_11.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "PO"
+            },
+            {
+              "id": "1",
+              "text": "LG"
+            },
+            {
+              "id": "2",
+              "text": "PV"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 13,
+          "text": "",
+          "points": 1.25,
+          "image": "/img/congdoandap/group2_12.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "O"
+            },
+            {
+              "id": "1",
+              "text": "Y"
+            },
+            {
+              "id": "2",
+              "text": "W"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "III. KIỂM TRA THÔNG TIN TRÊN EDP ( 15 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 14,
+          "text": "Giải thích các thông số trên EDP ?",
+          "points": 15.0,
+          "image": "/img/congdoandap/group3_1.png",
+          "kind": "matching",
+          "options": [
+            {
+              "id": "0",
+              "text": "Kích thước dây"
+            },
+            {
+              "id": "1",
+              "text": "Mã sản phẩm"
+            },
+            {
+              "id": "2",
+              "text": "Số dây"
+            },
+            {
+              "id": "3",
+              "text": "Chủng loại dây"
+            },
+            {
+              "id": "4",
+              "text": "Giá để tanshi"
+            },
+            {
+              "id": "5",
+              "text": "Tên lot"
+            },
+            {
+              "id": "6",
+              "text": "Tanshi A"
+            },
+            {
+              "id": "7",
+              "text": "Đầu chuốt Tanshi A"
+            },
+            {
+              "id": "8",
+              "text": "Tanshi B"
+            },
+            {
+              "id": "9",
+              "text": "Đầu chuốt Tanshi B"
+            },
+            {
+              "id": "10",
+              "text": "Nội dung cần chú ý"
+            },
+            {
+              "id": "11",
+              "text": "Số lượng dây cắt"
+            },
+            {
+              "id": "12",
+              "text": "Kí hiệu của lót hàng"
+            },
+            {
+              "id": "13",
+              "text": "Tên mối nối"
+            },
+            {
+              "id": "14",
+              "text": "Kích thước dây sau xoắn"
+            },
+            {
+              "id": "15",
+              "text": "Cost QR"
+            },
+            {
+              "id": "16",
+              "text": "Maku dây"
+            }
+          ],
+          "correct": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "IV. Phân biệt chủng loại kích cỡ dây ( 10 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 15,
+          "text": "Dựa vào đâu để Phân biệt kích cỡ dây, màu dây ?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Dựa vào edp"
+            },
+            {
+              "id": "1",
+              "text": "Dựa vào tem mác dán trên quận dây"
+            },
+            {
+              "id": "2",
+              "text": "Tất cả các phương án"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 16,
+          "text": "Các chủng loại dây khó cắt được phân biệt như thế nào?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Mác Qr code màu vàng"
+            },
+            {
+              "id": "1",
+              "text": "Mác Qr code màu trắng"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "V.NHỮNG LỖI CÓ THỂ PHÁT SINH TRONG CÔNG ĐOẠN CẮT( 15 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 17,
+          "text": "Tích vào câu trả lời đúng?",
+          "points": 15.0,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Lỗi Sai chủng loại dây"
+            },
+            {
+              "id": "1",
+              "text": "Máy không chuốt được vỏ dây"
+            },
+            {
+              "id": "2",
+              "text": "Cắt sai đầu chuất"
+            },
+            {
+              "id": "3",
+              "text": "Cắt thừa thiếu số lượng"
+            },
+            {
+              "id": "4",
+              "text": "Cắt âm dương kích thước"
+            },
+            {
+              "id": "5",
+              "text": "Dập nhầm đầu so với chiều ghiboshi"
+            },
+            {
+              "id": "6",
+              "text": "Lỗi xước dây・Đứt dây"
+            },
+            {
+              "id": "7",
+              "text": "Sỏ sai, sỏ nhầm"
+            },
+            {
+              "id": "8",
+              "text": "Thiếu ghiboshi・Thừa ghiboshi"
+            },
+            {
+              "id": "9",
+              "text": "Lỗi gia công dây shirrudo bị ngắn"
+            },
+            {
+              "id": "10",
+              "text": "Cắm sai nhầm đầu gia công"
+            },
+            {
+              "id": "11",
+              "text": "Nối nhầm đầu chuốt"
+            },
+            {
+              "id": "12",
+              "text": "Lỗi biến dạng tanshi・hỏng・xước"
+            },
+            {
+              "id": "13",
+              "text": "Lỗi chiều cao tanshi"
+            },
+            {
+              "id": "14",
+              "text": "Lỗi ngược maku"
+            }
+          ],
+          "correct": [
+            "0",
+            "2",
+            "3",
+            "4",
+            "6",
+            "7",
+            "8",
+            "9",
+            "12",
+            "13",
+            "14"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VI.ĐỨNG MÁY (20 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 18,
+          "text": "Sử lý sự cố máy? (5 ĐIỂM) (Tích vào câu trả lời đúng)",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Dừng máy, kiểm tra dây, bỏ dây xước hỏng nếu có, trừ số lượng, kiểm tra lại máy sử lý lỗi đầu vào"
+            },
+            {
+              "id": "1",
+              "text": "Dừng máy, kiểm tra lại máy sử lý lỗi đầu vào, bỏ dây xước hỏng nếu có, trừ số lượng trên máy "
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 19,
+          "text": "Khi thiết lập dây cắt kiểm tra những gì (15 ĐIỂM)",
+          "points": 15.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Khi lắp dây chếch chủng loại dây trên edp trùng khớp với mác Qr code và dán trên quận dây"
+            },
+            {
+              "id": "1",
+              "text": "Kiểm tra con lăn theo chủng loại dây "
+            },
+            {
+              "id": "2",
+              "text": "Kiểm tra lực giao theo chủng loại dây"
+            },
+            {
+              "id": "3",
+              "text": "Kiểm tra dây xem có đủ đầu chuất, đủ kích thước , dây có vết xước không"
+            },
+            {
+              "id": "4",
+              "text": "Cắt thử để tes lực giao bẻ đầu đồng đứt NG sẽ điều chỉn lại, ok sẽ tiến hàng cắt hàng loạt"
+            },
+            {
+              "id": "5",
+              "text": "Tất cả các phương án"
+            }
+          ],
+          "correct": [
+            "5"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VII.GIA CÔNG, SỎ(20 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 20,
+          "text": "Trên EDP có bao nhiêu vi trí hiển thị sở? (10 ĐIỂM) (Tích vào câu trả lời đúng)",
+          "points": 10.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "1"
+            },
+            {
+              "id": "1",
+              "text": "2"
+            },
+            {
+              "id": "2",
+              "text": "3"
+            },
+            {
+              "id": "3",
+              "text": "4"
+            },
+            {
+              "id": "4",
+              "text": "5"
+            }
+          ],
+          "correct": [
+            "4"
+          ]
+        },
+        {
+          "id": 21,
+          "text": "Nhìn vào đâu để lấy gôm (10 ĐIỂM)",
+          "points": 10.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Nhìn vào tên gôm hiển thị trên edp"
+            },
+            {
+              "id": "1",
+              "text": "Nhìn vào vị trí giá gôm"
+            },
+            {
+              "id": "2",
+              "text": "Nhìn vào tên gôm hiển thị trên edp, Xác định vị trí giá gôm trên edp, đối chiếu với mác gôm hiển thị trên giá và mác trên túi gôm trùng khớp"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        }
+      ]
+    }
+  ]
+}

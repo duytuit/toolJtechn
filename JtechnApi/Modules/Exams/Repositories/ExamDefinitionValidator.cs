@@ -11,6 +11,9 @@ namespace JtechnApi.Exams.Repositories
             var definition = JsonSerializer.Deserialize<OnlineExamDefinition>(json, Json);
             if (definition?.Groups == null || definition.Groups.Count == 0 || definition.Groups.Any(g => g == null || g.Questions == null || g.Questions.Count == 0))
                 throw new ArgumentException("Đề phải có nhóm và câu hỏi.");
+            if (definition.Scores != null && (definition.Scores.Length != 2 || definition.Scores[0] > 100 ||
+                definition.Scores[1] < 0 || definition.Scores[0] <= definition.Scores[1]))
+                throw new ArgumentException("Mốc điểm phải gồm 2 số: 0 ≤ mốc kiểm tra lại < mốc đạt ≤ 100.");
             var questions = definition.Groups.SelectMany(g => g.Questions).ToList();
             if (questions.Count > 500 || questions.Any(q => q == null) || questions.Select(q => q.Id).Distinct().Count() != questions.Count)
                 throw new ArgumentException("Tối đa 500 câu, ID câu hỏi phải duy nhất.");

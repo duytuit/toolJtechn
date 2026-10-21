@@ -257,7 +257,41 @@ namespace JtechnApi.Shares
             }
             return result;
         }
-        public static async Task<UploadResult> ProcessFileAsync(IFormFile file,string folder)
+        public static async Task<UploadResult> ProcessExamImageAsync(IFormFile file, string webRoot)
+        {
+            if (file == null || file.Length == 0) return new UploadResult(false, "File rỗng.");
+            if (file.Length > 10 * 1024 * 1024) return new UploadResult(false, "Ảnh tối đa 10 MB.");
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }.Contains(extension))
+                return new UploadResult(false, "Chỉ hỗ trợ ảnh JPG, JPEG, PNG, GIF, WEBP.");
+            await using var source = file.OpenReadStream();
+            var header = new byte[12];
+            var count = 0;
+            while (count < header.Length)
+            {
+                var read = await source.ReadAsync(header, count, header.Length - count);
+                if (read == 0) break;
+                count += read;
+            }
+            var valid = extension switch
+            {
+                ".jpg" or ".jpeg" => count >= 3 && header[0] == 0xff && header[1] == 0xd8 && header[2] == 0xff,
+                ".png" => count >= 8 && header.Take(8).SequenceEqual(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }),
+                ".gif" => count >= 6 && (System.Text.Encoding.ASCII.GetString(header, 0, 6) is "GIF87a" or "GIF89a"),
+                ".webp" => count >= 12 && System.Text.Encoding.ASCII.GetString(header, 0, 4) == "RIFF" && System.Text.Encoding.ASCII.GetString(header, 8, 4) == "WEBP",
+                _ => false
+            };
+            if (!valid) return new UploadResult(false, "Nội dung file không đúng định dạng ảnh.");
+            var name = Guid.NewGuid().ToString("N") + extension;
+            var directory = Path.Combine(webRoot, "img", "exams");
+            Directory.CreateDirectory(directory);
+            await using var target = new FileStream(Path.Combine(directory, name), FileMode.CreateNew);
+            await target.WriteAsync(header, 0, count);
+            await source.CopyToAsync(target);
+            return new UploadResult(true, "OK", "/img/exams/" + name);
+        }
+
+        public static async Task<UploadResult> ProcessFileAsync(IFormFile file, string folder, string webRoot)
         {
             long _fileSizeLimit = 50 * 1024 * 1024;            // 50 MB
             string[] _permittedExtensions = { ".jpg", ".png", ".pdf" ,".xls",".xlsx"};
@@ -272,27 +306,25 @@ namespace JtechnApi.Shares
             if (!found)
                 return new UploadResult(false, $"Không hỗ trợ định dạng {ext}.");
 
-            // Thư mục : wwwroot/uploads/yyyy/MM
-            // UNC gốc – dùng chuỗi verbatim @"" để đỡ phải gấp đôi \\
-            const string UNC_ROOT = @"\\192.168.207.6\jtecdata\JTEC_PD_PROGAM\CMSWeb\jtecweb\public\public\assets\files";
-
-            // Nếu có folder thì thêm vào UNC path
-            string targetFolder = !string.IsNullOrWhiteSpace(folder)
-                ? Path.Combine(UNC_ROOT, folder.Replace("..", "").Trim())
-                : UNC_ROOT;
+            var segments = (folder ?? "").Trim().Replace('\\', '/').Split('/', StringSplitOptions.RemoveEmptyEntries);
+            if (segments.Any(segment => segment == "." || segment == ".." ||
+                segment.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0))
+                return new UploadResult(false, "Thư mục không hợp lệ.");
+            var filesRoot = Path.GetFullPath(Path.Combine(webRoot, "files"));
+            var targetFolder = Path.GetFullPath(Path.Combine(new[] { filesRoot }.Concat(segments).ToArray()));
+            if (targetFolder != filesRoot && !targetFolder.StartsWith(filesRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+                return new UploadResult(false, "Thư mục không hợp lệ.");
 
             // tạo thư mục (nếu chưa có)
             Directory.CreateDirectory(targetFolder);
-            string date_file = DateTime.Now.ToString("yyyyMMdd-HHmmss") + "-";
-            var filePath = Path.Combine(targetFolder, date_file+file.FileName);
+            var fileName = Guid.NewGuid().ToString("N") + ext;
+            var filePath = Path.Combine(targetFolder, fileName);
 
-            await using var stream = new FileStream(filePath, FileMode.Create);
+            await using var stream = new FileStream(filePath, FileMode.CreateNew);
             await file.CopyToAsync(stream);
 
             // Đường dẫn trả về cho client
-            var relativePath = !string.IsNullOrWhiteSpace(folder)
-                ? $"public/assets/files/{folder}/{date_file}{file.FileName}"
-                : $"public/assets/files/{date_file}{file.FileName}";
+            var relativePath = "/files/" + string.Join("/", segments.Select(Uri.EscapeDataString).Append(fileName));
 
             return new UploadResult(true, "OK", $"{relativePath}");
         }

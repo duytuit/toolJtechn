@@ -1,0 +1,1225 @@
+{
+  "id": 11,
+  "title": "Bài kiểm tra kiến thức công nhân Bóp Hàn,Gia công",
+  "minutes": 30,
+  "scores": [
+    80,
+    60
+  ],
+  "groups": [
+    {
+      "title": "I. AN TOÀN LAO ĐỘNG ( 3 điểm )\n                                    Theo bạn thao tác an toàn lao động là thao tác nào? (Tích vào đáp án đúng)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 1,
+          "text": "Theo bạn thao tác an toàn lao động là thao tác nào?",
+          "points": 8.0,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đeo kính bảo hộ khi thao tác hàn, nhúng"
+            },
+            {
+              "id": "1",
+              "text": "Khoảng cách tay cầm dây đến máy ≥ 30mm"
+            },
+            {
+              "id": "2",
+              "text": "Đeo găng tay, khẩu trang khi thao tác hàn, nhúng"
+            },
+            {
+              "id": "3",
+              "text": "Khi vừa hàn, nhúng xong không được chạm tay vào"
+            },
+            {
+              "id": "4",
+              "text": " Hàn, nhúng xong có thể dùng tay không để gạt thiếc dư"
+            }
+          ],
+          "correct": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "II. KIỂM TRA NĂNG LỰC NHẬN BIẾT MÀU DÂY ( 6 điểm )\n                                  Bạn hãy chọn đáp án đúng bằng cách tích vào đáp án màu dây tương ứng với màu dây trong ảnh",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 2,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "RV"
+            },
+            {
+              "id": "1",
+              "text": "RW"
+            },
+            {
+              "id": "2",
+              "text": "RY"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 3,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "GY"
+            },
+            {
+              "id": "1",
+              "text": "GW"
+            },
+            {
+              "id": "2",
+              "text": "GBr"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 4,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Br"
+            },
+            {
+              "id": "1",
+              "text": "BR"
+            },
+            {
+              "id": "2",
+              "text": "B"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 5,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Br"
+            },
+            {
+              "id": "1",
+              "text": "BR"
+            },
+            {
+              "id": "2",
+              "text": "BG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 6,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "V"
+            },
+            {
+              "id": "1",
+              "text": "O"
+            },
+            {
+              "id": "2",
+              "text": "G"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 7,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_6.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Lg"
+            },
+            {
+              "id": "1",
+              "text": "LgR"
+            },
+            {
+              "id": "2",
+              "text": "GW"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 8,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_7.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "PV"
+            },
+            {
+              "id": "1",
+              "text": "OR"
+            },
+            {
+              "id": "2",
+              "text": "PB"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        },
+        {
+          "id": 9,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_8.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LW"
+            },
+            {
+              "id": "1",
+              "text": "LY"
+            },
+            {
+              "id": "2",
+              "text": "GY"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 10,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_9.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "LR"
+            },
+            {
+              "id": "1",
+              "text": "LW"
+            },
+            {
+              "id": "2",
+              "text": "GL"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 11,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_10.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "YL"
+            },
+            {
+              "id": "1",
+              "text": "LgR"
+            },
+            {
+              "id": "2",
+              "text": "GW"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 12,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_11.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "PO"
+            },
+            {
+              "id": "1",
+              "text": "LG"
+            },
+            {
+              "id": "2",
+              "text": "PV"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 13,
+          "text": "",
+          "points": 0.5,
+          "image": "/img/congdoandap/group2_12.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "O"
+            },
+            {
+              "id": "1",
+              "text": "Y"
+            },
+            {
+              "id": "2",
+              "text": "W"
+            }
+          ],
+          "correct": [
+            "2"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "III. KIỂM TRA THÔNG TIN TRÊN EDP ( 10 điểm)",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 14,
+          "text": "Giải thích các thông số trên EDP ?",
+          "points": 10.0,
+          "image": "/img/congdoandap2/group3_1.png",
+          "kind": "matching",
+          "options": [
+            {
+              "id": "0",
+              "text": "Kích thước dây"
+            },
+            {
+              "id": "1",
+              "text": "Mã sản phẩm"
+            },
+            {
+              "id": "2",
+              "text": "Số dây"
+            },
+            {
+              "id": "3",
+              "text": "Chủng loại, kích cỡ, màu sắc dây"
+            },
+            {
+              "id": "4",
+              "text": "Vị trí để tanshi"
+            },
+            {
+              "id": "5",
+              "text": "Số lot"
+            },
+            {
+              "id": "6",
+              "text": "Tanshi A"
+            },
+            {
+              "id": "7",
+              "text": "Đầu chuốt Tanshi A"
+            },
+            {
+              "id": "8",
+              "text": "Tanshi B"
+            },
+            {
+              "id": "9",
+              "text": "Đầu chuốt Tanshi B"
+            },
+            {
+              "id": "10",
+              "text": "Nội dung cần chú ý"
+            },
+            {
+              "id": "11",
+              "text": "Số lượng"
+            },
+            {
+              "id": "12",
+              "text": "Kí hiệu của lót hàng"
+            },
+            {
+              "id": "13",
+              "text": "Tên mối nối"
+            },
+            {
+              "id": "14",
+              "text": "Kích thước dây sau xoắn"
+            },
+            {
+              "id": "15",
+              "text": "Mã QR"
+            },
+            {
+              "id": "16",
+              "text": "Maku dây"
+            },
+            {
+              "id": "17",
+              "text": "Kí hiệu dập chồng"
+            },
+            {
+              "id": "18",
+              "text": "Sỏ ống, gomusen... đầu A/B"
+            },
+            {
+              "id": "19",
+              "text": "Dập xong hàn"
+            }
+          ],
+          "correct": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "IV. Chuẩn bị hàng",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 15,
+          "text": "Phân loại hàng (2 điểm)",
+          "points": 2.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Không cần phân loại hàng, làm đến đâu lấy đến đó"
+            },
+            {
+              "id": "1",
+              "text": "Chia hàng hàn tanshi càng, hàn linh kiện, tanshi chân, bóp tanshi, gia công... ra từng thùng"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 16,
+          "text": "Thứ tự làm hàng (2 điểm)",
+          "points": 2.0,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hàng cũ làm trước, hàng mới làm sau"
+            },
+            {
+              "id": "1",
+              "text": "Hàng ưu tiên, hàng trong lịch xuất làm trước"
+            },
+            {
+              "id": "2",
+              "text": "Hàng nào ở trên làm trước, dưới làm sau"
+            }
+          ],
+          "correct": [
+            "0",
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "V.Quy trình thao tác Bóp, Hàn, Gia công",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 17,
+          "text": "Dụng cụ đo nhiệt độ mỏ hàn (Bạn hãy chọn hình ảnh đúng - 1.25 điểm)?",
+          "points": 1.25,
+          "image": "/img/dap_han_gia_cong/group5_cau3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 18,
+          "text": "Dụng cụ đo nhiệt độ mỏ hàn (Bạn hãy chọn hình ảnh đúng - 1.25 điểm)?",
+          "points": 1.25,
+          "image": "/img/dap_han_gia_cong/group5_cau4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 19,
+          "text": "Dụng cụ đo nhiệt độ mỏ hàn (Bạn hãy chọn hình ảnh đúng - 1.25 điểm)?",
+          "points": 1.25,
+          "image": "/img/dap_han_gia_cong/group5_cau1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 20,
+          "text": "Dụng cụ đo nhiệt độ mỏ hàn (Bạn hãy chọn hình ảnh đúng - 1.25 điểm)?",
+          "points": 1.25,
+          "image": "/img/dap_han_gia_cong/group5_cau2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 21,
+          "text": "Trình tự thao tác đo nhiệt độ mỏ hàn (Bạn hãy chọn đáp án đúng-5điểm)?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Phương án 1:<br> <div style=\"margin-left: 35px;\">1. Bật nguồn điện máy đo nhiệt độ mỏ hàn</div> <div style=\"margin-left: 35px;\">2. Cắm phích điện mỏ hàn</div> <div style=\"margin-left: 35px;\">3. Vặn nút điều chỉnh nhiệt độ mỏ hàn 420℃</div> <div style=\"margin-left: 35px;\">4. Đợi cho nhiệt độ của mỏ hàn tăng dần lên đến khi đèn nhấp nháy</div> <div style=\"margin-left: 35px;\">5. Đặt thiếc vào mỏ hàn và tiến hành đo nhiệt độ</div> <div style=\"margin-left: 35px;\">6. Kiểm tra nhiệt độ của mỏ hàn từ 350℃～450℃ sau đó nhập vào bảng kiểm tra nhiệt độ mỏ hàn</div>"
+            },
+            {
+              "id": "1",
+              "text": "Phương án 2:<br>\n                                                       <div style=\"margin-left: 35px;\">1. Bật nguồn điện máy đo nhiệt độ mỏ hàn</div>\n                                                       <div style=\"margin-left: 35px;\">2. Cắm phích điện mỏ hàn</div>\n                                                       <div style=\"margin-left: 35px;\">3. Đợi cho nhiệt độ của mỏ hàn tăng dần lên đến khi đèn nhấp nháy</div>\n                                                       <div style=\"margin-left: 35px;\">4. Vặn nút điều chỉnh nhiệt độ mỏ hàn 420℃</div>\n                                                       <div style=\"margin-left: 35px;\">5. Kiểm tra nhiệt độ của mỏ hàn từ 350℃～450℃ sau đó nhập vào bảng kiểm tra nhiệt độ mỏ hàn</div>\n                                                       <div style=\"margin-left: 35px;\">6. Đặt thiếc vào mỏ hàn và tiến hành đo nhiệt độ</div>"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 22,
+          "text": "Trình tự  thao tác Hàn gồm những bước nào (Bạn hãy chọn phương án đúng-5điểm) ?",
+          "points": 5.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Phương án 2:<br> <div style=\"margin-left: 35px;\">1. Chuẩn bị dây điện</div> <div style=\"margin-left: 35px;\">2. Xem yêu cầu trên EDP hoặc mở sơ đồ</div> <div style=\"margin-left: 35px;\">3. Nhúng đầu dây cần hàn vào dung dịch Flux hoặc dùng chổi quét vào vị trí cần hàn</div> <div style=\"margin-left: 35px;\">4. Tiến hành hàn dây, linh kiện theo yêu cầu</div> <div style=\"margin-left: 35px;\">5. Kiểm tra ngoại quan, Ok thì tít vào phần mềm rồi chuyển hàng, NG thì sửa lại</div>"
+            },
+            {
+              "id": "1",
+              "text": "Phương án 1:<br>\n                                                       <div style=\"margin-left: 35px;\">1. Chuẩn bị dây điện</div>\n                                                       <div style=\"margin-left: 35px;\">2. Xem yêu cầu trên EDP hoặc mở sơ đồ</div>\n                                                       <div style=\"margin-left: 35px;\">3. Không cần sử dụng dung dịch Flux khi hàn</div>\n                                                       <div style=\"margin-left: 35px;\">4. Kiểm tra ngoại quan, Ok thì tít vào phần mềm rồi chuyển hàng, NG thì sửa lại</div>\n                                                       <div style=\"margin-left: 35px;\">5. Tiến hành hàn dây, linh kiện theo yêu cầu</div>"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 23,
+          "text": "Thao tác kiểm tra kìm bóp gia công linh kiện (Bạn hãy chọn đáp án đúng-5điểm)?",
+          "points": 5.0,
+          "image": "/img/dap_han_gia_cong/group5_cau5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Phương án 1:<br> <div style=\"margin-left: 35px;\">1. Mở phần mềm hàn nhúng</div> <div style=\"margin-left: 35px;\">2. Nhấn vào ô kìm bóp</div> <div style=\"margin-left: 35px;\">3. Scan EDP hoặc nhập tay số lot vào ô \"Số lot\"</div> <div style=\"margin-left: 35px;\">4. Kiểm tra kìm bóp theo các hạng mục được yêu cầu</div> <div style=\"margin-left: 35px;\">5. Tích vào ô vuông ở nội dung vừa kiểm tra</div> <div style=\"margin-left: 35px;\">6. Sau khi tích hết các hạng mục nhấn \"enter\"</div> <div style=\"margin-left: 35px;\">7. Lot nào sử dụng kìm bóp cũng phải kiểm tra</div>"
+            },
+            {
+              "id": "1",
+              "text": "Phương án 2:<br>\n                                                       <div style=\"margin-left: 35px;\">1. Mở phần mềm hàn nhúng</div>\n                                                       <div style=\"margin-left: 35px;\">2. Nhấn vào ô kìm bóp</div>\n                                                       <div style=\"margin-left: 35px;\">3. Scan EDP hoặc nhập tay số lot vào ô \"Số lot\"</div>\n                                                       <div style=\"margin-left: 35px;\">4. Kiểm tra kìm bóp theo các hạng mục được yêu cầu</div>\n                                                       <div style=\"margin-left: 35px;\">5. Tích vào ô vuông ở nội dung vừa kiểm tra</div>\n                                                       <div style=\"margin-left: 35px;\">6. Sau khi tích hết các hạng mục nhấn \"enter\"</div>\n                                                       <div style=\"margin-left: 35px;\">7. 1 ngày chỉ cần kiểm tra kìm bóp 1 lần</div>"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 24,
+          "text": "Dựa vào đâu để bóp, hàn, gia công  tanshi, linh kiện (5điểm)?",
+          "points": 5.0,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Làm theo hướng dẫn"
+            },
+            {
+              "id": "1",
+              "text": "Làm theo ghi chú trên EDP"
+            },
+            {
+              "id": "2",
+              "text": "Làm theo tiêu chuẩn"
+            },
+            {
+              "id": "3",
+              "text": "Làm theo chỉ thị của cấp trên"
+            },
+            {
+              "id": "4",
+              "text": "Làm theo sơ đồ"
+            },
+            {
+              "id": "5",
+              "text": "Làm theo trí nhớ"
+            }
+          ],
+          "correct": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4"
+          ]
+        },
+        {
+          "id": 25,
+          "text": "Dựa vào đâu để biết loại tanshi, linh kiện nào dùng kìm bóp nào (6điểm)?",
+          "points": 6.0,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Dựa vào bảng quản lý mã Keta"
+            },
+            {
+              "id": "1",
+              "text": "Dựa theo ghi chú trên EDP"
+            },
+            {
+              "id": "2",
+              "text": "Dựa vào bảng quản lý kìm bóp"
+            },
+            {
+              "id": "3",
+              "text": "Dựa theo trí nhớ"
+            }
+          ],
+          "correct": [
+            "0",
+            "1",
+            "2"
+          ]
+        },
+        {
+          "id": 26,
+          "text": "Tiêu chuẩn khi hàn tanshi, linh kiện (6điểm)?",
+          "points": 6.0,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hàn không cháy dây, hở đồng"
+            },
+            {
+              "id": "1",
+              "text": "Bề mặt thiếc bóng mịn"
+            },
+            {
+              "id": "2",
+              "text": "Hàn theo tiêu chuẩn"
+            },
+            {
+              "id": "3",
+              "text": "Hàn gắn kết dây điện với tanshi, linh kiện là được, không cần ngấu thiếc"
+            },
+            {
+              "id": "4",
+              "text": "Bề mặt thiếc sần sùi, thiếc sống"
+            }
+          ],
+          "correct": [
+            "0",
+            "1",
+            "2"
+          ]
+        },
+        {
+          "id": 27,
+          "text": "Tiêu chuẩn khi bóp tanshi, linh kiện (4điểm)?",
+          "points": 4.0,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Nhìn thấy hở đồng trên qua lỗ ở đầu tanshi hoặc hở đồng theo tiêu chuẩn dập"
+            },
+            {
+              "id": "1",
+              "text": "Kéo lại 1 lực tanshi, linh kiện không bị tuột ra khỏi dây điện"
+            },
+            {
+              "id": "2",
+              "text": "Không cần nhìn thấy đồng trên"
+            },
+            {
+              "id": "3",
+              "text": "Bóp xong là ok, không cần kéo lại 1 lực để kiểm tra"
+            }
+          ],
+          "correct": [
+            "0",
+            "1"
+          ]
+        },
+        {
+          "id": 28,
+          "text": "Tiêu chuẩn khi gia công linh kiện (2 điểm)?",
+          "points": 2.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Gia công theo tiêu chuẩn hướng dẫn"
+            },
+            {
+              "id": "1",
+              "text": "Gia công theo kinh nghiệm, thói quen"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 29,
+          "text": "Chú ý khi kiểm tra nhiệt độ mỏ hàn (6điểm)?",
+          "points": 6.0,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Cài đặt nhiệt độ trên mỏ hàn ở 420℃"
+            },
+            {
+              "id": "1",
+              "text": "※Nút cài đặt và điều chỉnh nhiệt độ khác nhau nên phải tiến hành đo lường chính xác"
+            },
+            {
+              "id": "2",
+              "text": "Cài đặt nhiệt độ trên mỏ hàn trong khoảng 350℃～450℃"
+            }
+          ],
+          "correct": [
+            "0",
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VI.Kiểm tra ngoại quan (11 điểm)",
+      "columns": 3,
+      "questions": [
+        {
+          "id": 30,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/dap_han_gia_cong/group6_cau1.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 31,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/dap_han_gia_cong/group6_cau2.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 32,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/dap_han_gia_cong/group6_cau3.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 33,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/dap_han_gia_cong/group6_cau4.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 34,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/dap_han_gia_cong/group6_cau5.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 35,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/dap_han_gia_cong/group6_cau6.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 36,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/dap_han_gia_cong/group6_cau7.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 37,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/dap_han_gia_cong/group6_cau8.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 38,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/dap_han_gia_cong/group6_cau9.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 39,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/dap_han_gia_cong/group6_cau10.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 40,
+          "text": "",
+          "points": 1.0,
+          "image": "/img/dap_han_gia_cong/group6_cau11.png",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "OK"
+            },
+            {
+              "id": "1",
+              "text": "NG"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VII. Xử lý hàng lỗi",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 41,
+          "text": "Linh kiện lỗi từ nhà sản xuất (2 điểm)",
+          "points": 2.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Dừng lại, báo cáo cấp trên để được xử lý, hướng dẫn"
+            },
+            {
+              "id": "1",
+              "text": "Vẫn làm bình thường"
+            }
+          ],
+          "correct": [
+            "0"
+          ]
+        },
+        {
+          "id": 42,
+          "text": "Hàng lỗi do thao tác (4 điểm)?",
+          "points": 4.0,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hàng hàn tanshi, tanshi càng… tanshi tồn xưởng nhiều có thể cắt đi bóp hàn hoặc dập lại"
+            },
+            {
+              "id": "1",
+              "text": "Hàng linh kiện lỗi do thao tác phải báo cáo lên cấp trên để được hướng dẫn cách sửa"
+            },
+            {
+              "id": "2",
+              "text": "Dây kích thước ngắn, cắt đi sửa lại mà bị âm kích thước phải báo cấp trên xử lý, hướng dẫn"
+            },
+            {
+              "id": "3",
+              "text": "Hàng lỗi do thao tác mà thiếu nguyên liệu phải dừng lại, báo cáo ngay cho cấp trên để được hướng dẫn"
+            },
+            {
+              "id": "4",
+              "text": "Hàng linh kiện lỗi do thao tác tự sửa, không cần báo cáo lên cấp trên"
+            }
+          ],
+          "correct": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VIII.Phân loại hàng Hoàn thiện, xoắn, nối (6 điểm )",
+      "columns": 1,
+      "questions": [
+        {
+          "id": 43,
+          "text": "Hàng xoắn (Bạn hãy chọn đáp án đúng) ( 2 điểm )?",
+          "points": 2.0,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hàng đã được dập hết tất cả đầu tanshi,Hiển thị  số  ở phần thông số xoắn"
+            },
+            {
+              "id": "1",
+              "text": "Đã dập 1 đầu tanshi, đầu còn lại là J nối, Hiển thị  số  ở phần thông số xoắn"
+            },
+            {
+              "id": "2",
+              "text": "Đã dập 1 đầu tanshi, đầu còn lại là J nối, Phần thông số xoắn không có số,Không có ghi chú xoắn cùng với số dây nào ở phần ghi chú"
+            },
+            {
+              "id": "3",
+              "text": "Hàng đã được dập tất cả các đầu tanshi & Không hiển thị xoắn, nối"
+            }
+          ],
+          "correct": [
+            "0",
+            "1"
+          ]
+        },
+        {
+          "id": 44,
+          "text": "Hàng nối (Bạn hãy chọn đáp án đúng) ( 2 điểm )?",
+          "points": 2.0,
+          "image": "",
+          "kind": "multiple",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đã dập 1 đầu tanshi, đầu còn lại là J nối, Phần thông số xoắn không có số,Không có ghi chú xoắn cùng với số dây nào ở phần ghi chú"
+            },
+            {
+              "id": "1",
+              "text": "Dây SRD đã dập hết đầu tanshi ,Có lõi dây J nối (ở phần tanshi hoặc ghi chú),Có ami L=20mm trở lên (ami không ghi chú gì)"
+            },
+            {
+              "id": "2",
+              "text": "Đã dập 1 đầu tanshi, đầu còn lại là J nối, Hiển thị  số  ở phần thông số xoắn"
+            }
+          ],
+          "correct": [
+            "0",
+            "1"
+          ]
+        },
+        {
+          "id": 45,
+          "text": "Hàng 1 đầu  (Bạn hãy chọn đáp án đúng) ( 1 điểm )?",
+          "points": 1.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Đã dập 1 đầu tanshi, đầu còn lại là J nối, Phần thông số xoắn không có số,Không có ghi chú xoắn cùng với số dây nào ở phần ghi chú"
+            },
+            {
+              "id": "1",
+              "text": "Đối với dây đơn: đã được dập 1 đầu,  đầu còn  lại chưa được dập,  Dây dập chồng, SRD, sỏ ống * hoặc conector: Còn bất kì 1 đầu nào chưa dập"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        },
+        {
+          "id": 46,
+          "text": "Hàng hoàn thiện  (Bạn hãy chọn đáp án đúng) ( 1 điểm)?",
+          "points": 1.0,
+          "image": "",
+          "kind": "single",
+          "options": [
+            {
+              "id": "0",
+              "text": "Hàng đã được dập hết tất cả đầu tanshi,Hiển thị  số  ở phần thông số xoắn"
+            },
+            {
+              "id": "1",
+              "text": "Hàng đã được dập tất cả các đầu tanshi & Không hiển thị xoắn, nối"
+            }
+          ],
+          "correct": [
+            "1"
+          ]
+        }
+      ]
+    }
+  ]
+}

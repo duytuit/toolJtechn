@@ -467,7 +467,7 @@
             <div class="overview">
                 <article class="panel timeline-panel">
                     <div class="panel-head">
-                        <div><h2 class="panel-title">TIẾN ĐỘ SẢN XUẤT THEO THỜI GIAN</h2><div class="panel-subtitle">Target và Actual lũy kế từ 08:00 đến từng mốc</div></div>
+                        <div><h2 class="panel-title">TIẾN ĐỘ SẢN XUẤT THEO THỜI GIAN</h2><div class="panel-subtitle">Target tại từng mốc · Actual cộng dồn từ 08:00 theo MinuteProduction</div></div>
                         <div class="legend"><span class="legend-item"><i class="legend-dot" style="background:var(--yellow)"></i>Target</span><span class="legend-item"><i class="legend-dot" style="background:var(--cyan)"></i>Actual</span></div>
                     </div>
                     <div class="chart-host" id="overviewChart"></div>
@@ -503,7 +503,7 @@
             <div class="detail-kpis" id="detailKpis"></div>
             <div class="detail-main">
                 <article class="panel detail-table">
-                    <div class="panel-head"><div><h2 class="panel-title">TARGET VÀ ACTUAL THEO MỐC</h2><div class="panel-subtitle">Thực tế lấy từ lịch sử TimeInput đã ghi nhận</div></div></div>
+                    <div class="panel-head"><div><h2 class="panel-title">TARGET VÀ ACTUAL THEO MỐC</h2><div class="panel-subtitle">Target và Actual tổng hợp theo MinuteProduction</div></div></div>
                     <div class="chart-host" id="detailChart"></div>
                     <div class="table-wrap"><table><thead><tr><th>Thời gian</th><th>Target ngày</th><th>Actual ghi nhận</th><th>Chênh lệch</th><th>Hoàn thành</th></tr></thead><tbody id="detailTable"></tbody></table></div>
                 </article>
@@ -521,17 +521,17 @@
             <div class="status-drawer-content" id="statusDrawerContent"></div>
         </aside>
     </div>
-    <footer class="alert-strip"><span id="dataNote">Dữ liệu từ Control_Assembled_Combine_Target · JtecDB_KhoaB</span><span id="lastUpdated">Chưa cập nhật</span></footer>
+    <footer class="alert-strip"><span id="dataNote">Dữ liệu từ Control_Assembled_Combine_Visualize_30 · JtecDB_KhoaB</span><span id="lastUpdated">Chưa cập nhật</span></footer>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const checkpoints = [10, 12, 15, 17, 20];
     const checkpointLabels = checkpoints.map(hour => `${hour}h`);
-    const checkpointTimeLabels = checkpoints.map(hour => `${String(hour).padStart(2, '0')}:00`);
     const productionStartHour = 8;
     const productionSlotLabels = checkpointLabels;
-    const productionHours = checkpoints[checkpoints.length - 1] - productionStartHour;
+    const productionSlotTimeLabels = checkpoints.map(hour =>
+        `${String(productionStartHour).padStart(2, '0')}:00–${String(hour).padStart(2, '0')}:00`);
     const $ = selector => document.querySelector(selector);
     const state = { raw: [], employees: [], selected: null, totalRows: 0, truncated: false, screen: 'overview', filterGroup: 'all', autoCyclePaused: false, statusTotalRows: 0, statusTruncated: false, statusCounts: [] };
     const themeStorageKey = 'jtechn-production-dashboard-theme';
@@ -563,12 +563,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const key = Object.keys(row || {}).find(candidate => candidate.toLowerCase() === name.toLowerCase());
         return key ? row[key] : null;
     };
+    const getAny = (row, names) => {
+        for (const name of names) {
+            const value = get(row, name);
+            if (value != null && value !== '') return value;
+        }
+        return null;
+    };
+    const targetOf = row => asNumber(getAny(row, ['Target', 'QtyTarget']));
+    const actualOf = row => asNumber(getAny(row, ['Actual', 'QtyActual']));
     const text = (row, key) => String(get(row, key) ?? '').trim();
     const timeOf = row => {
         const value = get(row, 'TimeInput');
         if (!value) return null;
         const parsed = new Date(value);
         return Number.isNaN(parsed.getTime()) ? null : parsed;
+    };
+    const productionMinuteOf = row => {
+        const value = get(row, 'MinuteProduction');
+        const match = String(value ?? '').match(/(?:^|[T\s])(\d{1,2}):(\d{2})/);
+        if (match) return Number(match[1]) * 60 + Number(match[2]);
+        const hour = get(row, 'HourProduction');
+        return hour == null ? null : Math.round(asNumber(hour) * 60);
     };
     const localDateString = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     const dateInput = $('#productionDate');
@@ -591,17 +607,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return text(row, 'CodeSub') || `${text(row, 'FirstNameSub')}|${text(row, 'LastNameSub')}|${text(row, 'GroupSub')}|${text(row, 'TypeSub')}`;
     }
 
-    function latestRow(rows, before = null) {
+    function latestProductionRow(rows, cutoffMinute) {
         return rows.filter(row => {
-            const time = timeOf(row);
-            return time && (before === null || time <= before);
+            const minute = productionMinuteOf(row);
+            return minute != null && minute <= cutoffMinute;
         }).at(-1) || null;
     }
 
     function checkpointsFor(employee) {
         return checkpoints.map(hour => {
-            const cutoff = new Date(`${dateInput.value}T${String(hour).padStart(2, '0')}:59:59`);
-            return { hour, row: latestRow(employee.history, cutoff) };
+            return { hour, row: latestProductionRow(employee.history, hour * 60) };
         });
     }
 
@@ -613,15 +628,18 @@ document.addEventListener('DOMContentLoaded', () => {
             map.get(key).history.push(row);
         });
         return [...map.values()].map(employee => {
-            employee.history.sort((a, b) => timeOf(a) - timeOf(b));
+            employee.history.sort((a, b) => {
+                const minuteDifference = (productionMinuteOf(a) ?? -1) - (productionMinuteOf(b) ?? -1);
+                return minuteDifference || (timeOf(a) || 0) - (timeOf(b) || 0);
+            });
             employee.current = employee.history[employee.history.length - 1];
-            employee.target = asNumber(get(employee.current, 'QtyTarget'));
-            employee.actual = asNumber(get(employee.current, 'QtyActual'));
+            employee.target = targetOf(employee.current);
+            employee.actual = employee.history.reduce((sum, row) => sum + actualOf(row), 0);
             employee.checkpoints = checkpointsFor(employee);
-            employee.name = [text(employee.current, 'FirstNameSub'), text(employee.current, 'LastNameSub')].filter(Boolean).join(' ') || 'Chưa có tên';
+            employee.name = text(employee.current, 'NameSub') || [text(employee.current, 'FirstNameSub'), text(employee.current, 'LastNameSub')].filter(Boolean).join(' ') || 'Chưa có tên';
             employee.code = text(employee.current, 'CodeSub') || '—';
             employee.type = text(employee.current, 'TypeSub') || 'Chưa phân loại';
-            employee.group = text(employee.current, 'GroupSub') || 'Chưa phân nhóm';
+            employee.group = text(employee.current, 'GroupMember') || text(employee.current, 'GroupSub') || 'Chưa phân nhóm';
             employee.totalHour = get(employee.current, 'TotalHour');
             return employee;
         }).sort((a, b) => a.name.localeCompare(b.name, 'vi'));
@@ -653,14 +671,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function groupAggregates(employees) {
         const groups = new Map();
         employees.forEach(employee => {
-            if (!groups.has(employee.group)) groups.set(employee.group, { name: employee.group, employees: [], target: 0, actual: 0, checkpoints: checkpoints.map(() => ({ actual: 0, samples: 0 })) });
+            if (!groups.has(employee.group)) groups.set(employee.group, { name: employee.group, employees: [], target: 0, actual: 0, checkpoints: checkpoints.map(() => ({ target: 0, actual: 0, samples: 0 })) });
             const group = groups.get(employee.group);
             group.employees.push(employee);
             group.target += employee.target;
             group.actual += employee.actual;
-            employee.checkpoints.forEach((point, index) => {
-                if (!point.row) return;
-                group.checkpoints[index].actual += asNumber(get(point.row, 'QtyActual'));
+            checkpoints.forEach((_, index) => {
+                const progress = employeeProductionProgress(employee, index);
+                group.checkpoints[index].target += progress.target;
+                if (progress.actual == null) return;
+                group.checkpoints[index].actual += progress.actual;
                 group.checkpoints[index].samples++;
             });
         });
@@ -679,23 +699,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return index;
     }
 
-    function employeeProductionProgress(employee, hour) {
-        const start = new Date(`${dateInput.value}T${String(productionStartHour).padStart(2, '0')}:00:00`);
-        const end = new Date(`${dateInput.value}T${String(hour).padStart(2, '0')}:00:00`);
-        const startRow = latestRow(employee.history, start);
-        const endRow = latestRow(employee.history, end);
-        const actual = endRow
-            ? Math.max(asNumber(get(endRow, 'QtyActual')) - (startRow ? asNumber(get(startRow, 'QtyActual')) : 0), 0)
-            : null;
+    function employeeProductionProgress(employee, index) {
+        const hour = checkpoints[index];
+        const endMinute = hour * 60;
+        const targetRow = employee.checkpoints[index].row;
+        const actualRows = employee.history.filter(row => {
+            const minute = productionMinuteOf(row);
+            return minute != null && minute >= productionStartHour * 60 && minute <= endMinute;
+        });
         return {
-            target: employee.target * (hour - productionStartHour) / productionHours,
-            actual
+            target: targetRow ? targetOf(targetRow) : 0,
+            actual: actualRows.length ? actualRows.reduce((sum, row) => sum + actualOf(row), 0) : null
         };
     }
 
-    function productionSlotTotals(employees) {
-        return checkpoints.map(hour => {
-            const points = employees.map(employee => employeeProductionProgress(employee, hour));
+    function productionTotals(employees) {
+        return checkpoints.map((_, index) => {
+            const points = employees.map(employee => employeeProductionProgress(employee, index));
             const samples = points.filter(point => point.actual != null);
             return {
                 target: points.reduce((sum, point) => sum + point.target, 0),
@@ -705,11 +725,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function activeProductionSlotIndex() {
+    function activeCumulativeCheckpointIndex() {
         const now = new Date();
         if (dateInput.value !== localDateString(now)) return -1;
         let index = -1;
-        checkpoints.forEach((hour, i) => { if (now.getHours() >= hour) index = i; });
+        checkpoints.forEach((hour, checkpointIndex) => {
+            if (now.getHours() >= hour) index = checkpointIndex;
+        });
         return index;
     }
 
@@ -782,12 +804,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         host.innerHTML = groups.map(group => {
-            const max = Math.max(1, group.target, ...group.checkpoints.map(point => point.actual || 0));
+            const max = Math.max(1, ...group.checkpoints.flatMap(point => [point.target, point.actual || 0]));
             const color = group.rate >= 100 ? 'var(--green)' : 'var(--blue)';
             const mini = group.checkpoints.map((point, index) => {
-                const targetH = Math.max(2, group.target / max * 42);
+                const targetH = Math.max(2, point.target / max * 42);
                 const actualH = point.actual == null ? 0 : Math.max(2, point.actual / max * 42);
-                return `<div class="mini-point" title="${checkpointLabels[index]} · Target ${formatNumber(group.target)} · Actual ${point.actual == null ? 'Chưa ghi nhận' : formatNumber(point.actual)}">
+                return `<div class="mini-point" title="08:00–${checkpointTimeLabels[index]} · Target ${formatNumber(point.target)} · Actual ${point.actual == null ? 'Chưa ghi nhận' : formatNumber(point.actual)}">
                     <div class="mini-bars"><i class="mini-bar" style="height:${targetH}px;background:var(--yellow);opacity:.85"></i><i class="mini-bar" style="height:${actualH}px;background:var(--cyan)"></i></div>
                     <span class="mini-label">${checkpointLabels[index]}</span>
                 </div>`;
@@ -803,19 +825,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderEmployeeCharts(employees) {
         const host = $('#employeeGrid');
-        if (!employees.length) {
+        const visibleEmployees = employees.filter(employee => employee.code !== '12345');
+        if (!visibleEmployees.length) {
             host.innerHTML = '<div class="empty">Không có dữ liệu nhân viên phù hợp với bộ lọc.</div>';
             return;
         }
-        host.innerHTML = employees.map(employee => {
+        host.innerHTML = visibleEmployees.map(employee => {
             const status = statusFor(employee);
             const pct = employee.target ? employee.actual / employee.target * 100 : 0;
-            const progress = checkpoints.map(hour => employeeProductionProgress(employee, hour));
+            const progress = checkpoints.map((_, index) => employeeProductionProgress(employee, index));
             const chartMax = Math.max(1, ...progress.flatMap(point => [point.target, point.actual || 0]));
             const bars = progress.map((point, index) => {
                 const targetHeight = Math.max(2, point.target / chartMax * 34);
                 const actualHeight = point.actual == null ? 0 : Math.max(2, point.actual / chartMax * 34);
-                return `<div class="mini-point" title="08:00–${checkpointTimeLabels[index]} · Target ${formatNumber(point.target)} · Actual ${point.actual == null ? 'Chưa ghi nhận' : formatNumber(point.actual)}">
+                return `<div class="mini-point" title="${productionSlotTimeLabels[index]} · Target ${formatNumber(point.target)} · Actual ${point.actual == null ? 'Chưa ghi nhận' : formatNumber(point.actual)}">
                     <div class="mini-bars">
                         <div class="mini-column"><span class="mini-value">${formatNumber(point.target)}</span><i class="mini-bar" style="height:${targetHeight}px;background:var(--yellow);opacity:.85"></i></div>
                         <div class="mini-column"><span class="mini-value">${point.actual == null ? '—' : formatNumber(point.actual)}</span><i class="mini-bar" style="height:${actualHeight}px;background:var(--cyan)"></i></div>
@@ -832,7 +855,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </article>`;
         }).join('');
         host.querySelectorAll('[data-employee]').forEach(row => {
-            const open = () => showDetail(employees.find(employee => employee.key === row.dataset.employee));
+            const open = () => showDetail(visibleEmployees.find(employee => employee.key === row.dataset.employee));
             row.addEventListener('click', open);
             row.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); } });
         });
@@ -968,18 +991,17 @@ document.addEventListener('DOMContentLoaded', () => {
             ['Hoàn thành', `${formatNumber(pct)}%`, pct >= 100 ? 'c-green' : 'c-cyan'],
             ['Bản ghi giờ', employee.history.filter(row => timeOf(row)).length.toLocaleString('vi-VN'), '']
         ].map(item => `<div class="detail-kpi"><span>${item[0]}</span><strong class="${item[2]}">${item[1]}</strong></div>`).join('');
-        const points = employee.checkpoints.map(point => ({
-            target: employee.target,
-            actual: point.row ? asNumber(get(point.row, 'QtyActual')) : null
-        }));
+        const points = employee.checkpoints.map((_, index) => employeeProductionProgress(employee, index));
         renderBarChart($('#detailChart'), points, { width: 900, height: 290 });
         const current = currentCheckpoint();
         $('#detailTable').innerHTML = employee.checkpoints.map((point, index) => {
-            const actual = point.row ? asNumber(get(point.row, 'QtyActual')) : null;
-            const diff = actual == null ? null : actual - employee.target;
-            const rate = actual == null || !employee.target ? null : actual / employee.target * 100;
+            const progress = employeeProductionProgress(employee, index);
+            const actual = progress.actual;
+            const target = progress.target;
+            const diff = actual == null ? null : actual - target;
+            const rate = actual == null || !target ? null : actual / target * 100;
             return `<tr class="${index === current ? 'current-row' : current >= 0 && index > current ? 'future-row' : ''}">
-                <td>${checkpointLabels[index]}</td><td class="c-yellow">${formatNumber(employee.target)}</td>
+                <td>${checkpointLabels[index]}</td><td class="c-yellow">${formatNumber(target)}</td>
                 <td class="${actual == null ? '' : 'c-cyan'}">${actual == null ? '—' : formatNumber(actual)}</td>
                 <td class="${diff == null ? '' : diff >= 0 ? 'c-green' : 'c-red'}">${diff == null ? '—' : formatNumber(diff)}</td>
                 <td>${rate == null ? '—' : `${formatNumber(rate)}%`}</td></tr>`;
@@ -1018,24 +1040,26 @@ document.addEventListener('DOMContentLoaded', () => {
     function render() {
         renderGroupFilter();
         const employees = filteredEmployees();
-        const summary = totals(employees);
+        const overviewEmployees = employees.filter(employee => employee.code !== '12345');
+        const summary = totals(overviewEmployees);
         $('#kpiTarget').textContent = formatNumber(summary.target);
         $('#kpiActual').textContent = formatNumber(summary.actual);
         $('#kpiRate').textContent = `${formatNumber(summary.rate)}%`;
         $('#kpiRateProgress').style.width = `${Math.min(summary.rate, 100)}%`;
         $('#kpiMissing').textContent = formatNumber(summary.missing);
-        const progress = productionSlotTotals(employees);
-        renderBarChart($('#overviewChart'), progress, { labels: productionSlotLabels, activeIndex: activeProductionSlotIndex() });
+        const progress = productionTotals(overviewEmployees);
+        renderBarChart($('#overviewChart'), progress, { labels: productionSlotLabels, activeIndex: activeCumulativeCheckpointIndex() });
         renderDonut($('#overviewDonut'), summary.target, summary.actual);
         renderEmployeeCharts(employees);
         renderStatusMonitor();
-        $('#employeeSummary').textContent = `${employees.length.toLocaleString('vi-VN')} nhân viên · Tổng Actual ${formatNumber(summary.actual)}`;
+        const visibleEmployeeCount = employees.filter(employee => employee.code !== '12345').length;
+        $('#employeeSummary').textContent = `${visibleEmployeeCount.toLocaleString('vi-VN')} nhân viên hiển thị · Tổng Actual ${formatNumber(summary.actual)}`;
         if (state.selected) {
             const updated = state.employees.find(employee => employee.key === state.selected.key);
             if (updated) { state.selected = updated; renderDetail(updated); }
         }
-        if (state.truncated || state.statusTruncated) $('#dataNote').textContent = 'Đang hiển thị tối đa 5.000 bản ghi mỗi bảng · Control_Assembled_Combine_Target · Control_Assembled_Status';
-        else $('#dataNote').textContent = 'Dữ liệu từ Control_Assembled_Combine_Target · Control_Assembled_Status · JtecDB_KhoaB';
+        if (state.truncated || state.statusTruncated) $('#dataNote').textContent = 'Đang hiển thị tối đa 5.000 bản ghi mỗi bảng · Control_Assembled_Combine_Visualize_30 · Control_Assembled_Status';
+        else $('#dataNote').textContent = 'Dữ liệu từ Control_Assembled_Combine_Visualize_30 · Control_Assembled_Status · JtecDB_KhoaB';
     }
 
     async function loadData() {

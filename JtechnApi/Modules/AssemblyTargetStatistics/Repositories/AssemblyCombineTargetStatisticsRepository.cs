@@ -7,6 +7,7 @@ namespace JtechnApi.Modules.AssemblyTargetStatistics.Repositories
     public class AssemblyCombineTargetStatisticsRepository
     {
         private const int MaxRows = 5000;
+        private const string TargetTable = "dbo.Control_Assembled_Combine_Visualize_30";
         private readonly AdoJtecDB_KhoaB _database;
 
         public AssemblyCombineTargetStatisticsRepository(AdoJtecDB_KhoaB database)
@@ -18,7 +19,7 @@ namespace JtechnApi.Modules.AssemblyTargetStatistics.Repositories
         {
             var startDate = date.Date;
             var endDate = startDate.AddDays(1);
-            const string dateFilter = " WHERE TimeInput >= @startDate AND TimeInput < @endDate";
+            const string dateFilter = " WHERE DateProduction >= @startDate AND DateProduction < @endDate";
             var parameterNames = new[] { "@startDate", "@endDate" };
             var parameterValues = new object[] { startDate, endDate };
             var statusStartDate = DateTime.Today;
@@ -28,12 +29,12 @@ namespace JtechnApi.Modules.AssemblyTargetStatistics.Repositories
             var statusParameterValues = new object[] { statusStartDate, statusEndDate };
 
             var countTable = _database.LoadTable(
-                "SELECT COUNT_BIG(1) AS TotalRows FROM dbo.Control_Assembled_Combine_Target" + dateFilter,
+                "SELECT COUNT_BIG(1) AS TotalRows FROM " + TargetTable + dateFilter,
                 parameterNames,
                 parameterValues,
                 parameterNames.Length);
             var dataTable = _database.LoadTable(
-                $"SELECT TOP ({MaxRows}) * FROM dbo.Control_Assembled_Combine_Target{dateFilter} ORDER BY TimeInput DESC",
+                $"SELECT TOP ({MaxRows}) * FROM {TargetTable}{dateFilter} ORDER BY TimeInput DESC",
                 parameterNames,
                 parameterValues,
                 parameterNames.Length);

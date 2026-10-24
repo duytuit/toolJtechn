@@ -182,6 +182,7 @@ namespace JtechnApi.Shares.Connects
 
         public DataTable LoadTable(string sql)
         {
+          Console.WriteLine($"[SQL DEBUG] LoadTable SQL: {sql}");
             using (SqlCommand cmd = new SqlCommand(sql, con, _tran))
             {
                 cmd.CommandType = CommandType.Text;

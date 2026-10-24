@@ -1,0 +1,369 @@
+﻿@{
+    var selectedArea = ViewData["Area"] as string ?? "dap";
+    var areaName = ViewData["AreaName"] as string ?? "Bên Dập";
+    var machinePrefix = ViewData["MachinePrefix"] as string ?? "MT-D";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <script>
+        try {
+            if (localStorage.getItem('stamping-wire-theme-v2') === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        } catch { }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/stamping-wire-production.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="app">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 21V8l4 2V6l4 2V3h8v18H4Z" /><path d="M8 14h2m3 0h2m3 0h1M8 18h2m3 0h2m3 0h1M14 6h2" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="eyebrow">PRODUCTION MONITORING · STAMPING WIRE</div>
+                    <h1>BẢNG GIÁM SÁT SẢN LƯỢNG MÁY DẬP DÂY · @areaName.ToUpperInvariant()</h1>
+                </div>
+            </div>
+            <div class="toolbar">
+                <nav class="area-tabs" aria-label="Khu vực sản xuất">
+                    <a class="area-tab @(selectedArea == "dap" ? "active" : "")" href="/stamping-wire-production/dap" aria-current="@(selectedArea == "dap" ? "page" : null)">Dập</a>
+                    <a class="area-tab @(selectedArea == "noi" ? "active" : "")" href="/stamping-wire-production/noi" aria-current="@(selectedArea == "noi" ? "page" : null)">Nối</a>
+                    <a class="area-tab @(selectedArea == "xoan" ? "active" : "")" href="/stamping-wire-production/xoan" aria-current="@(selectedArea == "xoan" ? "page" : null)">Xoắn</a>
+                </nav>
+                <button class="icon-btn theme-button" id="themeButton" type="button" aria-label="Chuyển sang giao diện tối">◐ Dark</button>
+                <div class="clock" id="clock">--:--:--</div>
+                <div class="live"><span class="live-dot"></span><span id="liveText">Đang kết nối</span></div>
+                <span class="page-indicator" id="pageIndicator" aria-live="polite">1 / 1</span>
+                <button class="icon-btn cycle-button" id="nextButton" type="button" title="Chuyển sang trang máy tiếp theo" disabled>Next</button>
+                <button class="icon-btn cycle-button" id="stopButton" type="button" title="Dừng tự động chuyển trang" disabled>Stop</button>
+                <button class="icon-btn" id="refreshButton" type="button" title="Cập nhật ngay" aria-label="Cập nhật ngay">↻</button>
+                <button class="icon-btn" id="fullscreenButton" type="button" title="Toàn màn hình" aria-label="Toàn màn hình">⛶</button>
+            </div>
+        </header>
+        <section class="kpis" aria-label="Tổng quan sản xuất">
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V10l6 3V7l6 3V3h6v18H3Z"/><path d="M7 17h1m4 0h1m4 0h1"/></svg></div><div><div class="kpi-label">Tổng số máy</div><div class="kpi-value" id="kpiMachines">—<span class="kpi-unit">máy</span></div></div><span class="kpi-watermark" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V10l6 3V7l6 3V3h6v18H3Z"/><path d="M7 17h1m4 0h1m4 0h1"/></svg></span></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></div><div><div class="kpi-label">Tổng mục tiêu</div><div class="kpi-value" id="kpiTarget">—</div></div><span class="kpi-watermark" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v18h17M8 16v-5m5 5V6m5 10V9"/></svg></div><div><div class="kpi-label">Tổng sản lượng</div><div class="kpi-value" id="kpiActual">—</div></div><span class="kpi-watermark" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v18h17M8 16v-5m5 5V6m5 10V9"/></svg></span></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 16 5-5 4 3 6-9m-5 0h5v5"/></svg></div><div><div class="kpi-label">Tỷ lệ hoàn thành</div><div class="kpi-value" id="kpiRate">—</div></div><span class="kpi-watermark" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 16 5-5 4 3 6-9m-5 0h5v5"/></svg></span></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></div><div><div class="kpi-label">Máy đạt mục tiêu</div><div class="kpi-value" id="kpiAchieved">—<span class="kpi-unit">máy</span></div></div><span class="kpi-watermark" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></span></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 10 18H2L12 3Zm0 6v5m0 3h.01"/></svg></div><div><div class="kpi-label">Máy chưa đạt</div><div class="kpi-value" id="kpiBehind">—<span class="kpi-unit">máy</span></div></div><span class="kpi-watermark" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 10 18H2L12 3Zm0 6v5m0 3h.01"/></svg></span></article>
+        </section>
+        <main class="machines" id="machineGrid" aria-live="polite">
+            <div class="empty-state">Đang tải dữ liệu sản xuất…</div>
+        </main>
+        <footer class="footer"><span id="dataNote">Nguồn dữ liệu: Control_StampingWire_Visualize_Status</span><span id="lastUpdated">Chưa cập nhật</span></footer>
+    </div>
+    <script>
+        (() => {
+            const checkpoints = ['10:00', '12:00', '15:00', '17:00', '20:00'];
+            const productionStartMinute = 6 * 60;
+            const machinePrefix = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(machinePrefix));
+            const state = { rows: [], endOfDayTargetRows: [], columns: [], totalRows: 0, truncated: false, pageIndex: 0, autoNextTimer: null, autoNextEnabled: true };
+            const $ = (selector) => document.querySelector(selector);
+            const applyTheme = (theme) => {
+                document.documentElement.setAttribute('data-theme', theme);
+                const dark = theme === 'dark';
+                $('#themeButton').textContent = '☀☾';
+                $('#themeButton').setAttribute('aria-pressed', String(dark));
+                $('#themeButton').setAttribute('aria-label', dark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối');
+                try {
+                    localStorage.setItem('stamping-wire-theme-v2', theme);
+                } catch { }
+            };
+            const normalize = (value) => String(value ?? '')
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase().replace(/[^a-z0-9]/g, '');
+            const formatNumber = (value, digits = 0) => value != null && value !== '' && Number.isFinite(Number(value))
+                ? Number(value).toLocaleString('vi-VN', { maximumFractionDigits: digits })
+                : '—';
+            const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[char]));
+            const findColumn = (aliases) => {
+                const candidates = aliases.map(normalize);
+                return state.columns.find((column) => candidates.includes(normalize(column)))
+                    ?? state.columns.find((column) => candidates.some((alias) => normalize(column).includes(alias)));
+            };
+            const valueOf = (row, aliases) => {
+                const column = findColumn(aliases);
+                return column ? row[column] : null;
+            };
+            const numberOf = (value) => {
+                if (value == null || value === '') return null;
+                const numeric = Number(String(value).replace(/,/g, '').trim());
+                return Number.isFinite(numeric) ? numeric : null;
+            };
+            const machineAliases = ['MachineName', 'Machine', 'MachineNo', 'MachineNumber', 'MachineCode', 'CodeMachine', 'NameMachine', 'TenMay', 'MaMay'];
+            const actualAliases = ['QtyActual', 'ActualQty', 'Actual', 'TotalActual', 'QtyOutput', 'OutputQty', 'ActualQuantity', 'ProductionQuantity', 'ProducedQty', 'SoLuongThucTe'];
+            const targetAliases = ['QtyTarget', 'TargetQty', 'Target', 'TotalTarget', 'QtyPlan', 'PlanQty', 'QtyRequest', 'TargetQuantity', 'SoLuongMucTieu', 'KeHoach'];
+            const statusAliases = ['ProductionStatus', 'MachineStatus', 'Status', 'StatusName', 'TrangThai'];
+            const minuteProductionAliases = ['MinuteProduction'];
+            const hourProductionAliases = ['HourProduction'];
+            const machineName = (row) => String(valueOf(row, machineAliases) ?? '').trim();
+            const statusOf = (row, actual, target) => {
+                const explicit = normalize(valueOf(row, statusAliases));
+                if (/(pause|stop|tamnghi|dungmay)/.test(explicit)) return 'paused';
+                if (/(delay|late|slow|tre|cham)/.test(explicit)) return 'delayed';
+                if (/(achieved|complete|finish|datmuctieu|hoanthanh)/.test(explicit)) return 'achieved';
+                if (target != null && actual != null && actual >= target) return 'achieved';
+                return 'running';
+            };
+            const statusText = (status) => ({
+                running: 'Đang sản xuất', achieved: 'Đạt mục tiêu', delayed: 'Chậm tiến độ', paused: 'Tạm dừng'
+            }[status]);
+            const productionMinuteOf = (row) => {
+                const value = valueOf(row, minuteProductionAliases);
+                const match = String(value ?? '').match(/(?:^|[T\s])(\d{1,2}):(\d{2})/);
+                if (match) return Number(match[1]) * 60 + Number(match[2]);
+                const hour = numberOf(valueOf(row, hourProductionAliases));
+                return hour == null ? null : Math.round(hour * 60);
+            };
+            const targetAtMinute = (history, minute) => [...history].reverse().find((row) =>
+                productionMinuteOf(row) === minute && numberOf(valueOf(row, targetAliases)) != null);
+            const currentCheckpoint = () => {
+                const hour = new Date().getHours();
+                const minute = new Date().getMinutes();
+                const time = hour * 60 + minute;
+                let current = -1;
+                checkpoints.forEach((label, index) => {
+                    const [h, m] = label.split(':').map(Number);
+                    if (time >= h * 60 + m) current = index;
+                });
+                return current;
+            };
+            const pageSize = () => {
+                const styles = window.getComputedStyle($('#machineGrid'));
+                const columnCount = styles.gridTemplateColumns.split(' ').length;
+                const rowCount = styles.gridTemplateRows.split(' ').length;
+                return Math.max(1, columnCount * rowCount);
+            };
+            const filteredRows = () => {
+                const rowsByMachine = new Map();
+                state.rows.forEach((row) => {
+                    const name = machineName(row);
+                    if (!name || !name.toUpperCase().startsWith(machinePrefix)) return;
+                    if (!rowsByMachine.has(name)) rowsByMachine.set(name, []);
+                    rowsByMachine.get(name).push(row);
+                });
+                return Array.from(rowsByMachine, ([name, history]) => {
+                    history.sort((a, b) => (productionMinuteOf(a) ?? -1) - (productionMinuteOf(b) ?? -1));
+                    const productionRows = history.filter((row) => {
+                        const minute = productionMinuteOf(row);
+                        return minute != null && minute >= productionStartMinute;
+                    });
+                    const current = productionRows[productionRows.length - 1] ?? history[history.length - 1];
+                    const actual = productionRows.reduce((sum, row) => sum + (numberOf(valueOf(row, actualAliases)) ?? 0), 0);
+                    const points = checkpoints.map((label) => {
+                        const [hour, minute] = label.split(':').map(Number);
+                        const endMinute = hour * 60 + minute;
+                        const targetRow = targetAtMinute(history, endMinute);
+                        const actualRows = history.filter((row) => {
+                            const productionMinute = productionMinuteOf(row);
+                            return productionMinute != null
+                                && productionMinute >= productionStartMinute
+                                && productionMinute <= endMinute;
+                        });
+                        return {
+                            target: targetRow ? numberOf(valueOf(targetRow, targetAliases)) : null,
+                            actual: actualRows.length
+                                ? actualRows.reduce((sum, row) => sum + (numberOf(valueOf(row, actualAliases)) ?? 0), 0)
+                                : null
+                        };
+                    });
+                    const endOfDayTargetRow = state.endOfDayTargetRows.find((row) =>
+                        machineName(row).toUpperCase() === name.toUpperCase())
+                        ?? targetAtMinute(history, 21 * 60 + 30);
+                    const target = endOfDayTargetRow
+                        ? numberOf(valueOf(endOfDayTargetRow, targetAliases))
+                        : null;
+                    return {
+                        name,
+                        actual,
+                        target,
+                        points,
+                        status: statusOf(current, actual, target)
+                    };
+                }).filter((machine) => machine.actual > 0)
+                    .sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+            };
+            const totalEndOfDayTarget = (records) => {
+                const targetByMachine = new Map();
+                const machineNames = new Set(records.map((machine) => machine.name.toUpperCase()));
+                state.endOfDayTargetRows.forEach((row) => {
+                    const name = machineName(row);
+                    const target = numberOf(valueOf(row, targetAliases));
+                    if (machineNames.has(name.toUpperCase()) && target != null) {
+                        targetByMachine.set(name.toUpperCase(), target);
+                    }
+                });
+                if (targetByMachine.size) {
+                    return [...targetByMachine.values()].reduce((sum, target) => sum + target, 0);
+                }
+                return records.reduce((sum, machine) => sum + (machine.target ?? 0), 0);
+            };
+            const renderCheckpoint = (machine, index) => {
+                const time = checkpoints[index];
+                const { actual, target } = machine.points[index];
+                const isFuture = index > currentCheckpoint();
+                const isCurrent = index === currentCheckpoint();
+                const hasComparison = actual != null && target != null;
+                const className = isFuture ? 'future'
+                    : `${hasComparison ? actual >= target ? 'met' : 'behind' : ''}${isCurrent ? ' current' : ''}`.trim();
+                const displayedActual = isFuture ? '—' : formatNumber(actual);
+                const displayedTarget = formatNumber(target);
+                const value = `${displayedActual} / ${displayedTarget}`;
+                return `<div class="checkpoint ${className}" title="${escapeHtml(time + ' · ' + value)}">
+                    <span class="checkpoint-time">${time}</span><span class="checkpoint-value"><span>${escapeHtml(displayedActual)}</span> / <span>${escapeHtml(displayedTarget)}</span></span>
+                </div>`;
+            };
+            const renderCard = (machine) => {
+                const status = machine.status;
+                const percent = machine.target > 0 && machine.actual != null ? machine.actual / machine.target * 100 : null;
+                const progress = percent == null ? 0 : Math.min(100, Math.max(0, percent));
+                const noProduction = machine.actual == null || machine.actual <= 0;
+                return `<article class="machine-card ${status}${noProduction ? ' no-production' : ''}" aria-label="${escapeHtml(machine.name)}, ${statusText(status)}">
+                    <div class="card-head">
+                        <div class="machine-title"><span class="machine-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V10l6 3V7l6 3V3h6v18H3Z"/><path d="M7 17h1m4 0h1m4 0h1"/></svg></span><span class="machine-name">${escapeHtml(machine.name)}</span></div>
+                        <span class="badge">${statusText(status)}</span>
+                    </div>
+                    <div class="quantity-block">
+                        <div class="quantity"><strong>${formatNumber(machine.actual)} <span>/ ${formatNumber(machine.target)}</span></strong></div>
+                        <div class="quantity-meter">
+                            <div class="quantity-progress" role="progressbar" aria-label="Tiến độ sản lượng ${escapeHtml(machine.name)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress.toFixed(1)}" aria-valuetext="${percent == null ? 'Chưa có dữ liệu' : `${formatNumber(percent, 1)}%`}"><span style="width:${progress}%"></span><strong class="progress-quantity">${formatNumber(machine.actual)} / ${formatNumber(machine.target)}</strong></div>
+                            <span class="quantity-percent">${percent == null ? '—' : `${formatNumber(percent, 1)}%`}</span>
+                        </div>
+                    </div>
+                    <div class="checkpoints">${checkpoints.map((_, pointIndex) => renderCheckpoint(machine, pointIndex)).join('')}</div>
+                </article>`;
+            };
+            const stopAutoNext = () => {
+                state.autoNextEnabled = false;
+                if (state.autoNextTimer != null) {
+                    window.clearInterval(state.autoNextTimer);
+                    state.autoNextTimer = null;
+                }
+                $('#stopButton').disabled = true;
+            };
+            const startAutoNext = () => {
+                if (!state.autoNextEnabled || state.autoNextTimer != null || filteredRows().length <= pageSize()) return;
+                state.autoNextTimer = window.setInterval(() => {
+                    const pageCount = Math.ceil(filteredRows().length / pageSize());
+                    if (pageCount <= 1) {
+                        window.clearInterval(state.autoNextTimer);
+                        state.autoNextTimer = null;
+                        render();
+                        return;
+                    }
+                    state.pageIndex = (state.pageIndex + 1) % pageCount;
+                    render();
+                }, 10000);
+            };
+            const render = () => {
+                const records = filteredRows();
+                const totalActual = records.reduce((sum, item) => sum + (item.actual ?? 0), 0);
+                const totalTarget = totalEndOfDayTarget(records);
+                const achieved = records.filter((item) => item.status === 'achieved').length;
+                $('#kpiMachines').innerHTML = `${formatNumber(records.length)}<span class="kpi-unit">máy</span>`;
+                $('#kpiTarget').textContent = formatNumber(totalTarget);
+                $('#kpiActual').textContent = formatNumber(totalActual);
+                $('#kpiRate').textContent = `${formatNumber(totalTarget ? totalActual / totalTarget * 100 : 0, 1)}%`;
+                $('#kpiAchieved').innerHTML = `${formatNumber(achieved)}<span class="kpi-unit">máy</span>`;
+                $('#kpiBehind').innerHTML = `${formatNumber(records.length - achieved)}<span class="kpi-unit">máy</span>`;
+                const currentPageSize = pageSize();
+                const pageCount = Math.max(1, Math.ceil(records.length / currentPageSize));
+                state.pageIndex = Math.min(state.pageIndex, pageCount - 1);
+                $('#pageIndicator').textContent = `${state.pageIndex + 1} / ${pageCount}`;
+                $('#nextButton').disabled = pageCount <= 1;
+                $('#stopButton').disabled = state.autoNextTimer == null;
+                if (pageCount <= 1 && state.autoNextTimer != null) {
+                    window.clearInterval(state.autoNextTimer);
+                    state.autoNextTimer = null;
+                    $('#stopButton').disabled = true;
+                } else if (pageCount > 1) {
+                    startAutoNext();
+                    $('#stopButton').disabled = state.autoNextTimer == null;
+                }
+                const shown = records.slice(state.pageIndex * currentPageSize, (state.pageIndex + 1) * currentPageSize);
+                if (!shown.length) {
+                    $('#machineGrid').innerHTML = '<div class="empty-state">Không có dữ liệu máy phù hợp với bộ lọc.</div>';
+                    return;
+                }
+                const cards = shown.map(renderCard);
+                $('#machineGrid').innerHTML = cards.join('');
+            };
+            const loadData = async () => {
+                $('#liveText').textContent = 'Đang cập nhật';
+                $('#refreshButton').disabled = true;
+                $('.live').dataset.status = 'loading';
+                try {
+                    const response = await fetch('/api/stamping-wire-production/data', { headers: { Accept: 'application/json' } });
+                    if (!response.ok) throw new Error(`Lỗi tải dữ liệu (${response.status})`);
+                    const data = await response.json();
+                    state.rows = data.rows ?? data.Rows ?? [];
+                    state.endOfDayTargetRows = data.endOfDayTargetRows ?? data.EndOfDayTargetRows ?? [];
+                    state.columns = data.columns ?? data.Columns ?? [];
+                    state.totalRows = data.totalRows ?? data.TotalRows ?? state.rows.length;
+                    state.truncated = data.isTruncated ?? data.IsTruncated ?? false;
+                    render();
+                    $('.live').dataset.status = 'connected';
+                    const missing = [findColumn(machineAliases), findColumn(actualAliases), findColumn(targetAliases)].some((column) => !column);
+                    $('#dataNote').textContent = state.truncated
+                        ? `Đang tải tối đa ${formatNumber(state.rows.length)} / ${formatNumber(state.totalRows)} bản ghi · Control_StampingWire_Visualize_Status`
+                        : 'Nguồn dữ liệu: Control_StampingWire_Visualize_Status';
+                    if (missing) $('#dataNote').textContent += ' · Cần đối chiếu tên cột máy / thực tế / mục tiêu';
+                    $('#lastUpdated').textContent = `Cập nhật lúc ${new Date().toLocaleTimeString('vi-VN', { hour12: false })}`;
+                    $('#liveText').textContent = 'Đang trực tiếp';
+                } catch (error) {
+                    $('.live').dataset.status = 'error';
+                    $('#machineGrid').innerHTML = `<div class="error-state">${escapeHtml(error.message || 'Không thể tải dữ liệu sản xuất.')}</div>`;
+                    $('#liveText').textContent = 'Mất kết nối';
+                } finally {
+                    $('#refreshButton').disabled = false;
+                }
+            };
+            applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+            const updateClock = () => { $('#clock').textContent = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }); };
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                window.clearTimeout(resizeTimer);
+                resizeTimer = window.setTimeout(() => {
+                    state.pageIndex = 0;
+                    render();
+                }, 150);
+            });
+            $('#nextButton').addEventListener('click', () => {
+                const pageCount = Math.ceil(filteredRows().length / pageSize());
+                if (pageCount <= 1) return;
+                state.pageIndex = (state.pageIndex + 1) % pageCount;
+                render();
+            });
+            $('#themeButton').addEventListener('click', () => {
+                const nextTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                applyTheme(nextTheme);
+            });
+            $('#stopButton').addEventListener('click', stopAutoNext);
+            $('#refreshButton').addEventListener('click', loadData);
+            $('#fullscreenButton').addEventListener('click', async () => {
+                if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+                else await document.exitFullscreen();
+            });
+            updateClock();
+            window.setInterval(updateClock, 1000);
+            window.setInterval(loadData, 60000);
+            loadData();
+        })();
+    </script>
+</body>
+</html>

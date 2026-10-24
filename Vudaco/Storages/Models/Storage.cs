@@ -28,6 +28,10 @@ namespace Vudaco.Storages.Models
         [MaxLength(191)]
         public string Address { get; set; }
 
+        [Column("tax_code")]
+        [MaxLength(50)]
+        public string TaxCode { get; set; }
+
         [Column("created_by")]
         public int? CreatedBy { get; set; }
 

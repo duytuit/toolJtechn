@@ -69,6 +69,7 @@ namespace Vudaco.Storages.Controllers
                  Name = StorageDto.Name,
                  Note = StorageDto.Note,
                  Address = StorageDto.Address,
+                 TaxCode = StorageDto.TaxCode,
                  CreatedBy = userId,
                  CreatedAt = DateTime.Now,
                  UpdatedAt = DateTime.Now,
@@ -96,6 +97,7 @@ namespace Vudaco.Storages.Controllers
             storage.Code = StorageDto.Code?? StorageDto.Name;
             storage.Name = StorageDto.Name;
             storage.Note = StorageDto.Note;
+            storage.TaxCode = StorageDto.TaxCode;
             storage.Address = StorageDto.Address;
             storage.UpdatedBy = userId;
             storage.UpdatedAt = DateTime.Now;

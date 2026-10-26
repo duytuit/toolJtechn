@@ -69,17 +69,18 @@ namespace asyncDataSoltec
 				// nạp dữ liệu vào DB
 				asyncData();
 
-				DateTime newDate = currentDateTime.AddDays(-29);
-				string folderPath = Path.Combine(Directory.GetCurrentDirectory() + "/complete"); // Thư mục cần quét
-				string extension = "*.bin"; // Định dạng file cần lấy (vd: *.txt, *.jpg, *.csv)
-				string[] files = Directory.GetFiles(folderPath, extension);
-				foreach (string file in files)
+				DateTime cutoffDateTime = currentDateTime.AddDays(-7);
+				string folderPath = Path.Combine(Directory.GetCurrentDirectory(), "complete");
+				if (Directory.Exists(folderPath))
 				{
-					FileInfo fileInfo = new FileInfo(file);
-
-					if (fileInfo.LastWriteTime.ToString("dd_MM_yyyy") == newDate.ToString("dd_MM_yyyy"))
+					string[] files = Directory.GetFiles(folderPath, "*.bin");
+					foreach (string file in files)
 					{
-						File.Delete(file);
+						FileInfo fileInfo = new FileInfo(file);
+						if (fileInfo.LastWriteTime < cutoffDateTime)
+						{
+							File.Delete(file);
+						}
 					}
 				}
 			}

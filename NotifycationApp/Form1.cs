@@ -72,25 +72,34 @@ namespace NotifycationApp
 
             //_client.OnLog += (msg) => Invoke((Action)(() => richTextBox1.AppendText(msg + "\n")));
             _client.OnMessageReceived += HandleSocketMessage;
+            _client.OnConnected += () => _ = SendSocketSubscriptionAsync(_client, _cts.Token);
             // _client.OnConnected += () => Invoke((Action)(() => labelStatus.Text = "🟢 Connected"));
             // _client.OnDisconnected += () => Invoke((Action)(() => labelStatus.Text = "🔴 Disconnected"));
             _client.OnLog += (log) =>
             {
                 FileLogger.Log(log);
-                Invoke((Action)(() =>
-                {
-
-                }));
             };
             await _client.StartAsync(_cts.Token);
+        }
+
+        private async Task SendSocketSubscriptionAsync(WebSocketClient client, CancellationToken token)
+        {
             var obj = new
             {
                 Event = 15,
                 Chanel = "dencanhbao_cd_dap",
-                MessageText= ""
+                MessageText = ""
             };
-            string jsonData = JsonConvert.SerializeObject(obj);
-            await _client.SendMessageAsync(jsonData, _cts.Token);
+            try
+            {
+                string jsonData = JsonConvert.SerializeObject(obj);
+                await client.SendMessageAsync(jsonData, token);
+            }
+            catch (OperationCanceledException) when (token.IsCancellationRequested) { }
+            catch (Exception ex)
+            {
+                FileLogger.Log("Failed to subscribe to notification channel: " + ex);
+            }
         }
 
         private async void HandleSocketMessage(string message)

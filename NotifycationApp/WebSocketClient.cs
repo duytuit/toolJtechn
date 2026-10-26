@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Security;
 using System.Net.WebSockets;
@@ -24,6 +25,7 @@ namespace NotifycationApp
         private bool _isReconnecting;
 
         private readonly object _syncLock = new object();
+        private readonly SemaphoreSlim _sendLock = new SemaphoreSlim(1, 1);
 
         public event Action<string> OnMessageReceived;
         public event Action OnConnected;
@@ -44,23 +46,36 @@ namespace NotifycationApp
 
         public async Task StopAsync()
         {
+            ClientWebSocket socket;
+            lock (_syncLock)
+            {
+                socket = _client;
+                _client = null;
+            }
+
             try
             {
-                if (_client != null && _client.State == WebSocketState.Open)
+                if (socket != null && socket.State == WebSocketState.Open)
                 {
-                    await _client.CloseAsync(
-                        WebSocketCloseStatus.NormalClosure,
-                        "Client closed",
-                        CancellationToken.None
-                    );
+                    await _sendLock.WaitAsync();
+                    try
+                    {
+                        await socket.CloseAsync(
+                            WebSocketCloseStatus.NormalClosure,
+                            "Client closed",
+                            CancellationToken.None);
+                    }
+                    finally
+                    {
+                        _sendLock.Release();
+                    }
                 }
             }
             catch { }
 
             try
             {
-                _client?.Dispose();
-                _client = null;
+                socket?.Dispose();
             }
             catch { }
 
@@ -69,28 +84,71 @@ namespace NotifycationApp
 
         public async Task SendMessageAsync(string message, CancellationToken token)
         {
-            if (_client == null || _client.State != WebSocketState.Open)
-            {
-                Log("⚠️ Cannot send: socket not connected.");
-                await HandleDisconnectAsync(token);
-                return;
-            }
+            await SendMessageAsync(message, token, null);
+        }
 
+        private async Task SendMessageAsync(
+            string message,
+            CancellationToken token,
+            ClientWebSocket expectedSocket)
+        {
+            ClientWebSocket socket = null;
+            Exception sendError = null;
+            bool disconnected = false;
+
+            await _sendLock.WaitAsync(token);
             try
             {
-                var buffer = Encoding.UTF8.GetBytes(message);
-                await _client.SendAsync(
-                    new ArraySegment<byte>(buffer),
-                    WebSocketMessageType.Text,
-                    true,
-                    token
-                );
+                lock (_syncLock)
+                    socket = expectedSocket ?? _client;
+
+                if (socket == null)
+                {
+                    Log("⚠️ Cannot send: socket not connected.");
+                    return;
+                }
+
+                if (expectedSocket != null && !ReferenceEquals(socket, expectedSocket))
+                    return;
+
+                if (socket.State != WebSocketState.Open)
+                {
+                    disconnected = true;
+                }
+                else
+                {
+                    var buffer = Encoding.UTF8.GetBytes(message);
+                    await socket.SendAsync(
+                        new ArraySegment<byte>(buffer),
+                        WebSocketMessageType.Text,
+                        true,
+                        token);
+                }
             }
             catch (Exception ex)
             {
-                Log("❌ Send error: " + ex.Message);
-                await HandleDisconnectAsync(token);
+                sendError = ex;
             }
+            finally
+            {
+                _sendLock.Release();
+            }
+
+            if (token.IsCancellationRequested)
+                return;
+
+            if (sendError != null)
+            {
+                if (IsCurrentSocket(socket))
+                {
+                    Log("❌ Send error: " + sendError.Message);
+                    await HandleDisconnectAsync(socket, token);
+                }
+                return;
+            }
+
+            if (disconnected)
+                await HandleDisconnectAsync(socket, token);
         }
 
         /* ======================= CORE ======================= */
@@ -103,137 +161,197 @@ namespace NotifycationApp
                 _isConnecting = true;
             }
 
-            while (!token.IsCancellationRequested)
+            try
             {
-                try
+                while (!token.IsCancellationRequested)
                 {
-                    _client?.Dispose();
+                    var socket = new ClientWebSocket();
+                    lock (_syncLock)
+                        _client = socket;
 
-                    _client = new ClientWebSocket();
-                    ServicePointManager.ServerCertificateValidationCallback = IgnoreCertificateValidation;
+                    try
+                    {
+                        ServicePointManager.ServerCertificateValidationCallback = IgnoreCertificateValidation;
 
-                    Log("🔌 Connecting...");
-                    await _client.ConnectAsync(_serverUri, token);
+                        Log("🔌 Connecting...");
+                        await socket.ConnectAsync(_serverUri, token);
 
-                    _lastReceivedTime = DateTime.UtcNow;
-                    _isConnecting = false;
+                        _lastReceivedTime = DateTime.UtcNow;
+                        Log("✅ Connected!");
+                        OnConnected?.Invoke();
 
-                    Log("✅ Connected!");
-                    OnConnected?.Invoke();
+                        _ = Task.Run(() => ReceiveLoopAsync(socket, token));
+                        _ = Task.Run(() => KeepAliveLoopAsync(socket, token));
+                        return;
+                    }
+                    catch (OperationCanceledException) when (token.IsCancellationRequested)
+                    {
+                        socket.Dispose();
+                        lock (_syncLock)
+                        {
+                            if (ReferenceEquals(_client, socket))
+                                _client = null;
+                        }
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        socket.Dispose();
+                        lock (_syncLock)
+                        {
+                            if (ReferenceEquals(_client, socket))
+                                _client = null;
+                        }
 
-                    _ = Task.Run(() => ReceiveLoopAsync(token));
-                    _ = Task.Run(() => KeepAliveLoopAsync(token));
-
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    Log("❌ Connect failed: " + ex.Message);
-                    await Task.Delay(_reconnectDelay, token);
+                        Log("❌ Connect failed: " + ex.Message);
+                        await Task.Delay(_reconnectDelay, token);
+                    }
                 }
             }
-
-            _isConnecting = false;
+            catch (OperationCanceledException) when (token.IsCancellationRequested) { }
+            finally
+            {
+                lock (_syncLock)
+                    _isConnecting = false;
+            }
         }
 
-        private async Task ReceiveLoopAsync(CancellationToken token)
+        private async Task ReceiveLoopAsync(ClientWebSocket socket, CancellationToken token)
         {
             var buffer = new byte[4096];
 
             try
             {
-                while (_client != null &&
-                       _client.State == WebSocketState.Open &&
-                       !token.IsCancellationRequested)
+                while (socket.State == WebSocketState.Open && !token.IsCancellationRequested)
                 {
-                    var result = await _client.ReceiveAsync(
-                        new ArraySegment<byte>(buffer),
-                        token
-                    );
-
-                    if (result.MessageType == WebSocketMessageType.Close)
+                    using (var message = new MemoryStream())
                     {
-                        Log("🔚 Server closed connection.");
-                        break;
+                        WebSocketReceiveResult result;
+                        do
+                        {
+                            result = await socket.ReceiveAsync(
+                                new ArraySegment<byte>(buffer),
+                                token);
+
+                            if (result.MessageType == WebSocketMessageType.Close)
+                            {
+                                Log("🔚 Server closed connection.");
+                                await HandleDisconnectAsync(socket, token);
+                                return;
+                            }
+
+                            message.Write(buffer, 0, result.Count);
+                        }
+                        while (!result.EndOfMessage);
+
+                        _lastReceivedTime = DateTime.UtcNow;
+                        OnMessageReceived?.Invoke(Encoding.UTF8.GetString(message.ToArray()));
                     }
-
-                    var msg = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    _lastReceivedTime = DateTime.UtcNow;
-
-                    OnMessageReceived?.Invoke(msg);
                 }
             }
+            catch (OperationCanceledException) when (token.IsCancellationRequested) { }
             catch (Exception ex)
             {
-                Log("⚠️ Receive error: " + ex.Message);
+                if (IsCurrentSocket(socket))
+                    Log("⚠️ Receive error: " + ex.Message);
             }
 
-            await HandleDisconnectAsync(token);
+            await HandleDisconnectAsync(socket, token);
         }
 
-        private async Task KeepAliveLoopAsync(CancellationToken token)
+        private async Task KeepAliveLoopAsync(ClientWebSocket socket, CancellationToken token)
         {
             while (!token.IsCancellationRequested)
             {
+                if (socket.State != WebSocketState.Open)
+                {
+                    await HandleDisconnectAsync(socket, token);
+                    return;
+                }
+
+                if (DateTime.UtcNow - _lastReceivedTime > _receiveTimeout)
+                {
+                    Log("⏰ Receive timeout. Network lost?");
+                    await HandleDisconnectAsync(socket, token);
+                    return;
+                }
+
+                var ping = JsonConvert.SerializeObject(new
+                {
+                    Event = 15,
+                    Chanel = "dencanhbao_cd_dap",
+                    MessageText = "ping"
+                });
+
                 try
                 {
-                    if (_client == null || _client.State != WebSocketState.Open)
-                    {
-                        await HandleDisconnectAsync(token);
-                        return;
-                    }
-
-                    // TIMEOUT kiểm tra mạng treo
-                    if (DateTime.UtcNow - _lastReceivedTime > _receiveTimeout)
-                    {
-                        Log("⏰ Receive timeout. Network lost?");
-                        await HandleDisconnectAsync(token);
-                        return;
-                    }
-
-                    // Ping
-                    var ping = JsonConvert.SerializeObject(new
-                    {
-                        Event = 15,
-                        Chanel = "dencanhbao_cd_dap",
-                        MessageText = "ping"
-                    });
-
-                    await SendMessageAsync(ping, token);
+                    await SendMessageAsync(ping, token, socket);
                 }
-                catch { }
+                catch (OperationCanceledException) when (token.IsCancellationRequested)
+                {
+                    return;
+                }
 
-                await Task.Delay(_pingInterval, token);
+                try
+                {
+                    await Task.Delay(_pingInterval, token);
+                }
+                catch (OperationCanceledException) when (token.IsCancellationRequested)
+                {
+                    return;
+                }
             }
         }
 
         /* ======================= RECONNECT ======================= */
 
-        private async Task HandleDisconnectAsync(CancellationToken token)
+        private async Task HandleDisconnectAsync(ClientWebSocket socket, CancellationToken token)
         {
-            lock (_syncLock)
-            {
-                if (_isReconnecting) return;
-                _isReconnecting = true;
-            }
-
+            bool ownsReconnect = false;
             try
             {
-                OnDisconnected?.Invoke();
-                Log("🔁 Reconnecting...");
+                await _sendLock.WaitAsync(token);
+                try
+                {
+                    lock (_syncLock)
+                    {
+                        if (_isReconnecting ||
+                            token.IsCancellationRequested ||
+                            !ReferenceEquals(_client, socket))
+                            return;
 
-                _client?.Dispose();
-                _client = null;
+                        _isReconnecting = true;
+                        ownsReconnect = true;
+                        _client = null;
+                    }
+
+                    OnDisconnected?.Invoke();
+                    Log("🔁 Reconnecting...");
+                    socket.Dispose();
+                }
+                finally
+                {
+                    _sendLock.Release();
+                }
 
                 await Task.Delay(_reconnectDelay, token);
+                await ConnectLoopAsync(token);
             }
-            catch { }
+            catch (OperationCanceledException) when (token.IsCancellationRequested) { }
             finally
             {
-                _isReconnecting = false;
+                if (ownsReconnect)
+                {
+                    lock (_syncLock)
+                        _isReconnecting = false;
+                }
             }
+        }
 
-            await ConnectLoopAsync(token);
+        private bool IsCurrentSocket(ClientWebSocket socket)
+        {
+            lock (_syncLock)
+                return ReferenceEquals(_client, socket);
         }
 
         /* ======================= UTILS ======================= */

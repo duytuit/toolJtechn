@@ -101,6 +101,7 @@ h1 { margin: 0; color: #fff; font-size: clamp(16px, 1.08vw, 22px); line-height: 
 .checkpoint.behind { background: var(--red-soft); }
 .checkpoint.current { background: var(--blue-soft); box-shadow: inset 0 0 0 1px #26BFD4; }
 .checkpoint.future { background: var(--neutral-soft); }
+.checkpoint.next { background: var(--blue-soft); box-shadow: inset 0 0 0 1px #26BFD4; }
 .checkpoint-time { color: #64748B; font-size: clamp(10px, .63vw, 12px); font-weight: 800; white-space: nowrap; }
 .checkpoint-value { max-width: 100%; overflow: visible; color: var(--navy); font-size: clamp(10px, .68vw, 13px); font-weight: 800; font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; }
 :root:fullscreen .machine-title { font-size: 26px; }
@@ -388,17 +389,75 @@ h1 { font-size: clamp(16px,1.23vw,25px); letter-spacing: -.025em; }
 :root[data-theme="dark"] .checkpoint.met { background: #174638; }
 :root[data-theme="dark"] .checkpoint.behind { background: #4a293a; }
 :root[data-theme="dark"] .checkpoint.future { background: #1a2e40; }
-:root[data-theme="dark"] .checkpoint.current { box-shadow: inset 0 0 0 1px #6794ae; }
+:root[data-theme="dark"] .checkpoint.current,
+:root[data-theme="dark"] .checkpoint.next { box-shadow: inset 0 0 0 1px #6794ae; }
 :root[data-theme="dark"] .checkpoint.current:not(.met):not(.behind) { background: #163d59; }
+:root[data-theme="dark"] .checkpoint.next:not(.met):not(.behind) { background: #163d59; }
 :root[data-theme="dark"] .checkpoint-time { color: #b5cadd; }
 :root[data-theme="dark"] .checkpoint-value { color: #e1effb; }
 :root[data-theme="dark"] .checkpoint.met .checkpoint-value { color: #a0f0c8; }
 :root[data-theme="dark"] .checkpoint.behind .checkpoint-time { color: #f1acbd; }
 :root[data-theme="dark"] .checkpoint.behind .checkpoint-value { color: #ffc1ce; }
 :root[data-theme="dark"] .checkpoint.future .checkpoint-value { color: #a8bdd0; }
+.quantity-block { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto; align-items: center; gap: 10px; }
+.quantity { display: flex; flex-direction: row; }
+.quantity::before { display: none; }
+.quantity-stat { min-width: 0; min-height: 58px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); }
+.quantity-actual { flex: 0 1 34%; border-color: var(--blue-border); background: var(--blue-soft); }
+.quantity-target { flex: 1 1 66%; }
+.quantity-label { color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .04em; white-space: nowrap; }
+.quantity-targets { width: 100%; display: flex; justify-content: space-evenly; gap: 12px; }
+.quantity-targets > span { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.quantity-targets small { color: var(--muted); font-size: 10px; font-weight: 700; white-space: nowrap; }
+.quantity-targets strong { color: var(--navy); font-size: clamp(16px, 1.05vw, 21px); font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.quantity-actual strong { color: var(--blue); font-size: clamp(21px, 1.4vw, 28px); font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.quantity-meter { grid-column: 1 / -1; width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 5px 8px; }
+.quantity-percent { min-width: 0; font-size: clamp(11px, .85vw, 16px); padding: 4px 6px; }
+:root[data-theme="dark"] .quantity-targets strong,
+:root[data-theme="dark"] .quantity-actual strong { color: #edf5ff; }
+:root[data-theme="dark"] .quantity-actual { border-color: #326383; background: #163d59; }
 :root[data-theme="dark"] .empty-state { background: #102536; color: #b6cadf; }
 :root[data-theme="dark"] .error-state { background: #352536; color: #ffc1ce; border-color: #915064; }
 
 /* Wrap the pair when needed instead of truncating checkpoint quantities. */
 .checkpoint-value { width: 100%; overflow: visible; text-overflow: clip; white-space: normal; line-height: 1.25; overflow-wrap: anywhere; }
 .checkpoint-value > span { display: inline-block; max-width: 100%; vertical-align: top; }
+
+/* Compact card layout keeps the machine, quantity, progress, and checkpoints visible together. */
+.machine-card { grid-template-rows: auto minmax(0, 1fr) minmax(48px, .55fr); gap: 4px; padding: 8px 10px; }
+.card-head { padding-bottom: 5px; }
+.machine-title { gap: 9px; font-size: clamp(18px, 1.15vw, 23px); }
+.machine-icon { width: 32px; height: 32px; flex-basis: 32px; }
+.machine-icon .ui-icon { width: 28px; height: 28px; }
+.badge { padding: 6px 9px; font-size: 11px; }
+.quantity-block { gap: 6px; padding: 0 2px; }
+.quantity-stat { min-height: 50px; padding: 4px 8px; border-radius: 8px; }
+.quantity-targets { gap: 8px; }
+.quantity-targets small { font-size: 9px; }
+.quantity-targets strong { font-size: clamp(15px, .95vw, 19px); }
+.quantity-actual strong { font-size: clamp(20px, 1.25vw, 25px); }
+.quantity-meter { gap: 4px 7px; }
+.quantity-progress { height: 23px; }
+.progress-quantity { font-size: 12px; }
+.quantity-percent { font-size: 14px; padding: 3px 6px; }
+.checkpoints { gap: 3px; padding: 3px; }
+.checkpoint { gap: 3px; padding: 3px 2px; }
+.checkpoint-value { font-size: clamp(10px, .65vw, 12px); }
+
+@media (max-width: 700px) {
+    .machine-card { grid-template-rows: 30px minmax(100px, 1fr) minmax(44px, .45fr); gap: 4px; padding: 7px 8px; }
+    .quantity-stat { min-height: 46px; padding: 3px 5px; }
+    .quantity-label { font-size: 10px; }
+    .quantity-targets { gap: 6px; }
+    .quantity-targets small { font-size: 8px; }
+    .quantity-targets strong { font-size: 14px; }
+    .quantity-actual strong { font-size: 19px; }
+    .quantity-percent { font-size: 12px; }
+    .checkpoints { gap: 2px; padding: 2px; }
+}
+.cut-details { min-width: 0; min-height: 0; display: flex; align-items: center; justify-content: space-around; gap: 6px; padding: 4px 6px; border-radius: 8px; background: var(--blue-soft); }
+.cut-details > span { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.cut-details small { color: var(--muted); font-size: 9px; font-weight: 700; }
+.cut-details strong { max-width: 100%; overflow: hidden; color: var(--navy); font-size: 11px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+:root[data-theme="dark"] .cut-details { background: #163d59; }
+:root[data-theme="dark"] .cut-details strong { color: #edf5ff; }

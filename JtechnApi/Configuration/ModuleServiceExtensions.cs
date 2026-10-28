@@ -3,6 +3,8 @@ using JtechnApi.Departments;
 using JtechnApi.Employees;
 using JtechnApi.Exams;
 using JtechnApi.Modules.AssemblyTargetStatistics.Repositories;
+using JtechnApi.Modules.CutProduction.Repositories;
+using JtechnApi.Modules.PlugProduction.Repositories;
 using JtechnApi.Modules.StampingWireStatistics.Repositories;
 using JtechnApi.Users;
 using Microsoft.Extensions.Configuration;
@@ -21,6 +23,8 @@ namespace JtechnApi.Configuration
             services.AddEmployeesModule();
             services.AddScoped<AssemblyCombineTargetStatisticsRepository>();
             services.AddScoped<StampingWireProductionRepository>();
+            services.AddScoped<CutProductionRepository>();
+            services.AddScoped<PlugProductionRepository>();
 
             return services;
         }

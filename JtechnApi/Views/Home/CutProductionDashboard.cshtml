@@ -1,0 +1,338 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <script>
+        try {
+            if (localStorage.getItem('stamping-wire-theme-v2') === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        } catch { }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/stamping-wire-production.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="app">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 21V8l4 2V6l4 2V3h8v18H4Z" /><path d="M8 14h2m3 0h2m3 0h1M8 18h2m3 0h2m3 0h1M14 6h2" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="eyebrow">PRODUCTION MONITORING · CUTTING</div>
+                    <h1>BẢNG GIÁM SÁT SẢN LƯỢNG CÔNG ĐOẠN CẮT</h1>
+                </div>
+            </div>
+            <div class="toolbar">
+                <nav class="area-tabs" aria-label="Công đoạn sản xuất">
+                    <a class="area-tab active" href="/cut-production" aria-current="page">Cắt</a>
+                </nav>
+                <button class="icon-btn theme-button" id="themeButton" type="button" aria-label="Chuyển sang giao diện tối">◐ Dark</button>
+                <div class="clock" id="clock">--:--:--</div>
+                <div class="live"><span class="live-dot"></span><span id="liveText">Đang kết nối</span></div>
+                <span class="page-indicator" id="pageIndicator" aria-live="polite">1 / 1</span>
+                <button class="icon-btn cycle-button" id="nextButton" type="button" title="Chuyển trang tiếp theo" disabled>Next</button>
+                <button class="icon-btn cycle-button" id="stopButton" type="button" title="Dừng tự động chuyển trang" disabled>Stop</button>
+                <button class="icon-btn" id="refreshButton" type="button" title="Cập nhật ngay" aria-label="Cập nhật ngay">↻</button>
+                <button class="icon-btn" id="fullscreenButton" type="button" title="Toàn màn hình" aria-label="Toàn màn hình">⛶</button>
+            </div>
+        </header>
+        <section class="kpis" aria-label="Tổng quan sản xuất công đoạn Cắt">
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true">▦</div><div><div class="kpi-label">Tổng số máy</div><div class="kpi-value" id="kpiRows">—</div></div></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true">◎</div><div><div class="kpi-label">Tổng mục tiêu</div><div class="kpi-value" id="kpiTarget">—</div></div></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true">▥</div><div><div class="kpi-label">Tổng sản lượng thực tế</div><div class="kpi-value" id="kpiActual">—</div></div></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true">↗</div><div><div class="kpi-label">Tỷ lệ hoàn thành</div><div class="kpi-value" id="kpiRate">—</div></div></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true">✓</div><div><div class="kpi-label">Đạt mục tiêu</div><div class="kpi-value" id="kpiAchieved">—</div></div></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true">!</div><div><div class="kpi-label">Chưa đạt</div><div class="kpi-value" id="kpiBehind">—</div></div></article>
+        </section>
+        <main class="machines" id="machineGrid" aria-live="polite">
+            <div class="empty-state">Đang tải dữ liệu sản xuất…</div>
+        </main>
+        <footer class="footer"><span id="dataNote">Nguồn dữ liệu: Control_ProgramCalculatorCut_Visualize_ByDay</span><span id="lastUpdated">Chưa cập nhật</span></footer>
+    </div>
+    <script>
+        (() => {
+            const checkpoints = ['10:00', '12:00', '15:00', '17:00', '21:30'];
+            const productionStartMinute = 6 * 60;
+            const state = { rows: [], columns: [], totalRows: 0, truncated: false, pageIndex: 0, autoNextTimer: null, autoNextEnabled: true };
+            const $ = (selector) => document.querySelector(selector);
+            const aliases = {
+                machine: ['MachineName', 'Machine', 'MachineNo', 'MachineNumber', 'MachineCode', 'CodeMachine', 'NameMachine', 'TenMay', 'MaMay'],
+                actual: ['QtyActual', 'ActualQty', 'Actual', 'TotalActual', 'QtyCut', 'CutQuantity', 'QuantityActual', 'ActualQuantity', 'ProducedQty', 'ProductionQty', 'QtyOutput', 'OutputQty', 'QtyByDay', 'SoLuongThucTe'],
+                target: ['QtyTarget', 'TargetQty', 'Target', 'QtyPlan', 'PlanQty', 'QtyRequest', 'QuantityTarget', 'TargetQuantity', 'PlannedQty', 'SoLuongMucTieu', 'KeHoach'],
+                minute: ['MinuteProduction'],
+                hour: ['HourProduction']
+            };
+            const normalize = (value) => String(value ?? '')
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase().replace(/[^a-z0-9]/g, '');
+            const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[char]));
+            const formatNumber = (value, digits = 0) => value != null && Number.isFinite(Number(value))
+                ? Number(value).toLocaleString('vi-VN', { maximumFractionDigits: digits })
+                : '—';
+            const findColumn = (names) => {
+                const normalized = names.map(normalize);
+                return state.columns.find((column) => normalized.includes(normalize(column)))
+                    ?? state.columns.find((column) => normalized.some((name) => normalize(column).includes(name)));
+            };
+            const valueOf = (row, names) => {
+                const column = findColumn(names);
+                return column ? row[column] : null;
+            };
+            const numberOf = (value) => {
+                if (value == null || value === '') return null;
+                const numeric = Number(String(value).replace(/,/g, '').trim());
+                return Number.isFinite(numeric) ? numeric : null;
+            };
+            const machineName = (row) => String(valueOf(row, aliases.machine) ?? '').trim();
+            const productionMinuteOf = (row) => {
+                const value = valueOf(row, aliases.minute);
+                const match = String(value ?? '').match(/(?:^|[T\s])(\d{1,2}):(\d{2})/);
+                if (match) return Number(match[1]) * 60 + Number(match[2]);
+                const hour = numberOf(valueOf(row, aliases.hour));
+                return hour == null ? null : Math.round(hour * 60);
+            };
+            const targetAtMinute = (history, minute) => [...history].reverse().find((row) =>
+                productionMinuteOf(row) === minute && numberOf(valueOf(row, aliases.target)) != null);
+            const currentCheckpoint = () => {
+                const now = new Date();
+                const time = now.getHours() * 60 + now.getMinutes();
+                return checkpoints.reduce((current, label, index) => {
+                    const [hour, minute] = label.split(':').map(Number);
+                    return time >= hour * 60 + minute ? index : current;
+                }, -1);
+            };
+            const nextCheckpoint = () => {
+                const now = new Date();
+                const time = now.getHours() * 60 + now.getMinutes();
+                const next = checkpoints.findIndex((label) => {
+                    const [hour, minute] = label.split(':').map(Number);
+                    return time < hour * 60 + minute;
+                });
+                return next < 0 ? checkpoints.length - 1 : next;
+            };
+            const statusText = (status) => ({
+                running: 'Đang sản xuất', achieved: 'Đạt mục tiêu', delayed: 'Chậm tiến độ', paused: 'Tạm dừng'
+            }[status]);
+            const pageSize = () => {
+                const styles = window.getComputedStyle($('#machineGrid'));
+                return Math.max(1, styles.gridTemplateColumns.split(' ').length * styles.gridTemplateRows.split(' ').length);
+            };
+            const nextPage = () => {
+                const pageCount = Math.ceil(machineRecords().length / pageSize());
+                if (pageCount <= 1) {
+                    state.pageIndex = 0;
+                    render();
+                    return;
+                }
+                state.pageIndex = state.pageIndex >= pageCount - 1 ? 0 : state.pageIndex + 1;
+                render();
+            };
+            const machineRecords = () => {
+                const rowsByMachine = new Map();
+                const now = new Date();
+                const currentMinute = now.getHours() * 60 + now.getMinutes();
+                state.rows.forEach((row) => {
+                    const name = machineName(row);
+                    if (!name) return;
+                    if (!rowsByMachine.has(name)) rowsByMachine.set(name, []);
+                    rowsByMachine.get(name).push(row);
+                });
+                return Array.from(rowsByMachine, ([name, history]) => {
+                    history.sort((a, b) => (productionMinuteOf(a) ?? -1) - (productionMinuteOf(b) ?? -1));
+                    const productionRows = history.filter((row) => {
+                        const minute = productionMinuteOf(row);
+                        return minute != null && minute >= productionStartMinute;
+                    });
+                    const currentRows = productionRows.filter((row) => productionMinuteOf(row) <= currentMinute);
+                    const actual = currentRows.reduce((sum, row) => sum + (numberOf(valueOf(row, aliases.actual)) ?? 0), 0);
+                    const currentTargetRow = [...history].reverse().find((row) => {
+                        const minute = productionMinuteOf(row);
+                        return minute != null
+                            && minute >= productionStartMinute
+                            && minute <= currentMinute
+                            && numberOf(valueOf(row, aliases.target)) != null;
+                    });
+                    const currentTarget = currentTargetRow
+                        ? numberOf(valueOf(currentTargetRow, aliases.target))
+                        : null;
+                    const points = checkpoints.map((label) => {
+                        const [hour, minute] = label.split(':').map(Number);
+                        const endMinute = hour * 60 + minute;
+                        const targetRow = targetAtMinute(history, endMinute);
+                        const actualRows = productionRows.filter((row) => productionMinuteOf(row) <= endMinute);
+                        return {
+                            target: targetRow ? numberOf(valueOf(targetRow, aliases.target)) : null,
+                            actual: actualRows.length
+                                ? actualRows.reduce((sum, row) => sum + (numberOf(valueOf(row, aliases.actual)) ?? 0), 0)
+                                : null
+                        };
+                    });
+                    points[nextCheckpoint()].actual = actual;
+                    const midDayTargetRow = targetAtMinute(history, 13 * 60 + 30);
+                    const endOfDayTargetRow = targetAtMinute(history, 21 * 60 + 30);
+                    const midDayTarget = midDayTargetRow ? numberOf(valueOf(midDayTargetRow, aliases.target)) : null;
+                    const target = endOfDayTargetRow ? numberOf(valueOf(endOfDayTargetRow, aliases.target)) : null;
+                    const activeTarget = now.getHours() * 60 + now.getMinutes() < 13 * 60 + 30
+                        ? midDayTarget
+                        : target;
+                    return {
+                        name,
+                        actual,
+                        target,
+                        midDayTarget,
+                        currentTarget,
+                        points,
+                        status: currentTarget != null && actual >= currentTarget ? 'achieved' : 'running'
+                    };
+                }).sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+            };
+            const renderCheckpoint = (machine, index) => {
+                const time = checkpoints[index];
+                const { actual, target } = machine.points[index];
+                const isNext = index === nextCheckpoint() && index > currentCheckpoint();
+                const isFuture = index > currentCheckpoint() && !isNext;
+                const isCurrent = index === currentCheckpoint();
+                const hasComparison = actual != null && target != null;
+                const className = isFuture ? 'future'
+                    : `${hasComparison ? actual >= target ? 'met' : 'behind' : ''}${isNext ? ' next' : isCurrent ? ' current' : ''}`.trim();
+                const displayedActual = isFuture ? '—' : formatNumber(actual);
+                const displayedTarget = formatNumber(target);
+                return `<div class="checkpoint ${className}" title="${escapeHtml(time + ' · ' + displayedActual + ' / ' + displayedTarget)}">
+                    <span class="checkpoint-time">${time}</span><span class="checkpoint-value"><span>${escapeHtml(displayedActual)}</span> / <span>${escapeHtml(displayedTarget)}</span></span>
+                </div>`;
+            };
+            const renderCard = (machine) => {
+                const { actual, target, midDayTarget, name: title, status } = machine;
+                const now = new Date();
+                const activeTarget = now.getHours() * 60 + now.getMinutes() < 13 * 60 + 30
+                    ? midDayTarget
+                    : target;
+                const percent = activeTarget > 0 && actual != null ? actual / activeTarget * 100 : null;
+                const progress = percent == null ? 0 : Math.min(100, Math.max(0, percent));
+                return `<article class="machine-card ${status}${actual == null || actual <= 0 ? ' no-production' : ''}" aria-label="${escapeHtml(title)}, ${statusText(status)}">
+                    <div class="card-head">
+                        <div class="machine-title"><span class="machine-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V8l4 2V6l4 2V3h8v18H4Z"/><path d="M8 14h2m3 0h2m3 0h1"/></svg></span><span class="machine-name">${escapeHtml(title)}</span></div>
+                        <span class="badge">${statusText(status)}</span>
+                    </div>
+                    <div class="quantity-block">
+                        <div class="quantity">
+                            <div class="quantity-stat quantity-actual"><span class="quantity-label">Thực tế</span><strong>${formatNumber(actual)}</strong></div>
+                            <div class="quantity-stat quantity-target">
+                                <span class="quantity-label">Mục tiêu</span>
+                                <div class="quantity-targets">
+                                    <span><small>06:00–13:30</small><strong>${formatNumber(midDayTarget)}</strong></span>
+                                    <span><small>06:00–21:30</small><strong>${formatNumber(target)}</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="quantity-meter">
+                            <div class="quantity-progress" role="progressbar" aria-label="Tiến độ ${escapeHtml(title)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress.toFixed(1)}" aria-valuetext="${percent == null ? 'Chưa có dữ liệu mục tiêu hoặc sản lượng' : `${formatNumber(percent, 1)}%`}"><span style="width:${progress}%"></span><strong class="progress-quantity">${formatNumber(actual)} / ${formatNumber(activeTarget)}</strong></div>
+                            <span class="quantity-percent">${percent == null ? '—' : `${formatNumber(percent, 1)}%`}</span>
+                        </div>
+                    </div>
+                    <div class="checkpoints">${checkpoints.map((_, pointIndex) => renderCheckpoint(machine, pointIndex)).join('')}</div>
+                </article>`;
+            };
+            const render = () => {
+                const records = machineRecords();
+                const totalActual = records.reduce((sum, item) => sum + (item.actual ?? 0), 0);
+                const totalTarget = records.reduce((sum, item) => sum + (item.target ?? 0), 0);
+                const achieved = records.filter((item) =>
+                    item.currentTarget != null && item.actual != null && item.actual >= item.currentTarget).length;
+                $('#kpiRows').textContent = formatNumber(records.length);
+                $('#kpiTarget').textContent = formatNumber(totalTarget);
+                $('#kpiActual').textContent = formatNumber(totalActual);
+                $('#kpiRate').textContent = `${formatNumber(totalTarget > 0 ? totalActual / totalTarget * 100 : 0, 1)}%`;
+                $('#kpiAchieved').textContent = formatNumber(achieved);
+                $('#kpiBehind').textContent = formatNumber(records.length - achieved);
+                const size = pageSize();
+                const pageCount = Math.max(1, Math.ceil(records.length / size));
+                state.pageIndex = Math.min(state.pageIndex, pageCount - 1);
+                $('#pageIndicator').textContent = `${state.pageIndex + 1} / ${pageCount}`;
+                $('#nextButton').disabled = pageCount <= 1;
+                $('#stopButton').disabled = state.autoNextTimer == null;
+                if (state.autoNextTimer != null && pageCount <= 1) {
+                    window.clearInterval(state.autoNextTimer);
+                    state.autoNextTimer = null;
+                } else if (pageCount > 1 && state.autoNextEnabled && state.autoNextTimer == null) {
+                    state.autoNextTimer = window.setInterval(() => {
+                        nextPage();
+                    }, 10000);
+                }
+                const shown = records.slice(state.pageIndex * size, (state.pageIndex + 1) * size);
+                $('#machineGrid').innerHTML = shown.length
+                    ? shown.map(renderCard).join('')
+                    : '<div class="empty-state">Không có dữ liệu sản xuất công đoạn Cắt.</div>';
+            };
+            const loadData = async () => {
+                $('#liveText').textContent = 'Đang cập nhật';
+                $('#refreshButton').disabled = true;
+                $('.live').dataset.status = 'loading';
+                try {
+                    const response = await fetch('/api/cut-production/data', { headers: { Accept: 'application/json' } });
+                    if (!response.ok) throw new Error(`Lỗi tải dữ liệu (${response.status})`);
+                    const data = await response.json();
+                    state.rows = data.rows ?? data.Rows ?? [];
+                    state.columns = data.columns ?? data.Columns ?? [];
+                    state.totalRows = data.totalRows ?? data.TotalRows ?? state.rows.length;
+                    state.truncated = data.isTruncated ?? data.IsTruncated ?? false;
+                    render();
+                    $('.live').dataset.status = 'connected';
+                    $('#dataNote').textContent = state.truncated
+                        ? `Đang hiển thị ${formatNumber(state.rows.length)} / ${formatNumber(state.totalRows)} dòng · Control_ProgramCalculatorCut_Visualize_ByDay`
+                        : 'Nguồn dữ liệu: Control_ProgramCalculatorCut_Visualize_ByDay';
+                    $('#lastUpdated').textContent = `Cập nhật lúc ${new Date().toLocaleTimeString('vi-VN', { hour12: false })}`;
+                    $('#liveText').textContent = 'Đang trực tiếp';
+                } catch (error) {
+                    $('.live').dataset.status = 'error';
+                    $('#machineGrid').innerHTML = `<div class="error-state">${escapeHtml(error.message || 'Không thể tải dữ liệu sản xuất.')}</div>`;
+                    $('#liveText').textContent = 'Mất kết nối';
+                } finally {
+                    $('#refreshButton').disabled = false;
+                }
+            };
+            const applyTheme = (theme) => {
+                document.documentElement.setAttribute('data-theme', theme);
+                const dark = theme === 'dark';
+                $('#themeButton').textContent = '☀☾';
+                $('#themeButton').setAttribute('aria-pressed', String(dark));
+                $('#themeButton').setAttribute('aria-label', dark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối');
+                try { localStorage.setItem('stamping-wire-theme-v2', theme); } catch { }
+            };
+            applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+            const updateClock = () => { $('#clock').textContent = new Date().toLocaleTimeString('vi-VN', { hour12: false }); };
+            $('#themeButton').addEventListener('click', () => applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+            $('#refreshButton').addEventListener('click', loadData);
+            $('#nextButton').addEventListener('click', nextPage);
+            $('#stopButton').addEventListener('click', () => {
+                state.autoNextEnabled = false;
+                if (state.autoNextTimer != null) window.clearInterval(state.autoNextTimer);
+                state.autoNextTimer = null;
+                $('#stopButton').disabled = true;
+            });
+            $('#fullscreenButton').addEventListener('click', async () => {
+                if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+                else await document.exitFullscreen();
+            });
+            window.addEventListener('resize', () => { state.pageIndex = 0; render(); });
+            updateClock();
+            window.setInterval(updateClock, 1000);
+            window.setInterval(loadData, 60000);
+            loadData();
+        })();
+    </script>
+</body>
+</html>

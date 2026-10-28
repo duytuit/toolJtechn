@@ -199,7 +199,7 @@
                         points,
                         status: currentTarget != null && actual >= currentTarget ? 'achieved' : 'running'
                     };
-                }).filter((machine) => machine.name.toUpperCase().includes(state.machineType))
+                }).filter((machine) => machine.name.toUpperCase().includes(state.machineType) && machine.actual > 0)
                     .sort((a, b) => a.name.localeCompare(b.name, 'vi'));
             };
             const renderCheckpoint = (machine, index) => {
@@ -273,7 +273,7 @@
                 } else if (pageCount > 1 && state.autoNextEnabled && state.autoNextTimer == null) {
                     state.autoNextTimer = window.setInterval(() => {
                         nextPage();
-                    }, 10000);
+                    }, 30000);
                 }
                 const shown = records.slice(state.pageIndex * size, (state.pageIndex + 1) * size);
                 $('#machineGrid').innerHTML = shown.length

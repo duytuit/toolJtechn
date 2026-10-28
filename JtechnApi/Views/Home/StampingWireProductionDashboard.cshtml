@@ -165,6 +165,8 @@
                 return Math.max(1, columnCount * rowCount);
             };
             const filteredRows = () => {
+                const now = new Date();
+                const currentMinute = now.getHours() * 60 + now.getMinutes();
                 const rowsByMachine = new Map();
                 state.rows.forEach((row) => {
                     const name = machineName(row);
@@ -179,7 +181,8 @@
                         return minute != null && minute >= productionStartMinute;
                     });
                     const current = productionRows[productionRows.length - 1] ?? history[history.length - 1];
-                    const actual = productionRows.reduce((sum, row) => sum + (numberOf(valueOf(row, actualAliases)) ?? 0), 0);
+                    const currentActualRows = productionRows.filter((row) => productionMinuteOf(row) <= currentMinute);
+                    const actual = currentActualRows.reduce((sum, row) => sum + (numberOf(valueOf(row, actualAliases)) ?? 0), 0);
                     const points = checkpoints.map((label) => {
                         const [hour, minute] = label.split(':').map(Number);
                         const endMinute = hour * 60 + minute;
@@ -302,7 +305,7 @@
                     }
                     state.pageIndex = (state.pageIndex + 1) % pageCount;
                     render();
-                }, 10000);
+                }, 30000);
             };
             const render = () => {
                 const records = filteredRows();
@@ -311,8 +314,10 @@
                 const now = new Date();
                 const isMidDayTarget = now.getHours() * 60 + now.getMinutes() < 13 * 60 + 30;
                 const achieved = records.filter((item) => {
-                    const target = isMidDayTarget ? item.midDayTarget : item.target;
-                    return target != null && item.actual != null && item.actual >= target;
+                    const currentPoint = item.points[nextCheckpoint()];
+                    return currentPoint.target != null
+                        && currentPoint.actual != null
+                        && currentPoint.actual >= currentPoint.target;
                 }).length;
                 $('#kpiMachines').innerHTML = `${formatNumber(records.length)}<span class="kpi-unit">máy</span>`;
                 $('#kpiTarget').textContent = formatNumber(totalTarget);

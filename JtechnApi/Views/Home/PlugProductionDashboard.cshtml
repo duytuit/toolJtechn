@@ -254,7 +254,7 @@
                     window.clearInterval(state.autoNextTimer);
                     state.autoNextTimer = null;
                 } else if (pageCount > 1 && state.autoNextEnabled && state.autoNextTimer == null) {
-                    state.autoNextTimer = window.setInterval(nextPage, 10000);
+                    state.autoNextTimer = window.setInterval(nextPage, 30000);
                 }
                 $('#stopButton').disabled = state.autoNextTimer == null;
                 const shown = items.slice(state.pageIndex * size, (state.pageIndex + 1) * size);

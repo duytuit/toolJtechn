@@ -1,7 +1,8 @@
-﻿@{
+@{
     var selectedArea = ViewData["Area"] as string ?? "dap";
     var areaName = ViewData["AreaName"] as string ?? "Bên Dập";
     var machinePrefix = ViewData["MachinePrefix"] as string ?? "MT-D";
+    var isStampingArea = selectedArea == "dap";
     Layout = null;
 }
 <!DOCTYPE html>
@@ -70,7 +71,8 @@
             const checkpoints = ['10:00', '12:00', '15:00', '17:00', '20:00'];
             const productionStartMinute = 6 * 60;
             const machinePrefix = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(machinePrefix));
-            const state = { rows: [], midDayTargetRows: [], endOfDayTargetRows: [], columns: [], totalRows: 0, truncated: false, pageIndex: 0, autoNextTimer: null, autoNextEnabled: true };
+            const isStampingArea = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(isStampingArea));
+            const state = { rows: [], midDayTargetRows: [], endOfDayTargetRows: [], columns: [], stampingActual: null, totalRows: 0, truncated: false, pageIndex: 0, autoNextTimer: null, autoNextEnabled: true };
             const $ = (selector) => document.querySelector(selector);
             const applyTheme = (theme) => {
                 document.documentElement.setAttribute('data-theme', theme);
@@ -115,9 +117,8 @@
             const statusOf = (row, actual, target) => {
                 const explicit = normalize(valueOf(row, statusAliases));
                 if (/(pause|stop|tamnghi|dungmay)/.test(explicit)) return 'paused';
-                if (/(delay|late|slow|tre|cham)/.test(explicit)) return 'delayed';
-                if (/(achieved|complete|finish|datmuctieu|hoanthanh)/.test(explicit)) return 'achieved';
                 if (target != null && actual != null && actual >= target) return 'achieved';
+                if (/(delay|late|slow|tre|cham)/.test(explicit)) return 'delayed';
                 return 'running';
             };
             const statusText = (status) => ({
@@ -151,6 +152,10 @@
                     return time < hour * 60 + minute;
                 });
                 return next < 0 ? checkpoints.length - 1 : next;
+            };
+            const activeCheckpoint = () => {
+                const current = currentCheckpoint();
+                return current >= 0 ? current : nextCheckpoint();
             };
             const targetForMinute = (history, rows, name, minute) => {
                 const targetRow = rows.find((row) =>
@@ -200,7 +205,8 @@
                                 : null
                         };
                     });
-                    points[nextCheckpoint()].actual = actual;
+                    points[activeCheckpoint()].actual = actual;
+                    const activePoint = points[activeCheckpoint()];
                     const midDayTarget = targetForMinute(
                         history,
                         state.midDayTargetRows,
@@ -218,7 +224,7 @@
                         target,
                         midDayTarget,
                         points,
-                        status: statusOf(current, actual, target)
+                        status: statusOf(current, activePoint.actual, activePoint.target)
                     };
                 }).filter((machine) => machine.actual > 0)
                     .sort((a, b) => a.name.localeCompare(b.name, 'vi'));
@@ -309,12 +315,14 @@
             };
             const render = () => {
                 const records = filteredRows();
-                const totalActual = records.reduce((sum, item) => sum + (item.actual ?? 0), 0);
+                const totalActual = isStampingArea && state.stampingActual != null
+                    ? state.stampingActual
+                    : records.reduce((sum, item) => sum + (item.actual ?? 0), 0);
                 const totalTarget = totalEndOfDayTarget(records);
                 const now = new Date();
                 const isMidDayTarget = now.getHours() * 60 + now.getMinutes() < 13 * 60 + 30;
                 const achieved = records.filter((item) => {
-                    const currentPoint = item.points[nextCheckpoint()];
+                    const currentPoint = item.points[activeCheckpoint()];
                     return currentPoint.target != null
                         && currentPoint.actual != null
                         && currentPoint.actual >= currentPoint.target;
@@ -355,6 +363,22 @@
                     const response = await fetch('/api/stamping-wire-production/data', { headers: { Accept: 'application/json' } });
                     if (!response.ok) throw new Error(`Lỗi tải dữ liệu (${response.status})`);
                     const data = await response.json();
+                    if (isStampingArea) {
+                        const stampingActualResponse = await fetch('/api/stamping-wire-production/stamping-actual', {
+                            headers: { Accept: 'application/json' }
+                        });
+                        if (!stampingActualResponse.ok) {
+                            throw new Error(`Lỗi tải tổng sản lượng Dập (${stampingActualResponse.status})`);
+                        }
+                        const stampingActualData = await stampingActualResponse.json();
+                        const stampingActual = Number(stampingActualData.totalActual ?? stampingActualData.TotalActual);
+                        if (!Number.isFinite(stampingActual)) {
+                            throw new Error('Dữ liệu tổng sản lượng Dập không hợp lệ.');
+                        }
+                        state.stampingActual = stampingActual;
+                    } else {
+                        state.stampingActual = null;
+                    }
                     state.rows = data.rows ?? data.Rows ?? [];
                     state.midDayTargetRows = data.midDayTargetRows ?? data.MidDayTargetRows ?? [];
                     state.endOfDayTargetRows = data.endOfDayTargetRows ?? data.EndOfDayTargetRows ?? [];

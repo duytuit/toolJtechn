@@ -42,6 +42,12 @@ namespace JtechnApi.Modules.StampingWireStatistics.Controllers
             return Ok(_repository.GetSnapshot());
         }
 
+        [HttpGet("/api/stamping-wire-production/stamping-actual")]
+        public IActionResult StampingActual()
+        {
+            return Ok(new { TotalActual = _repository.GetStampingActualForToday() });
+        }
+
         private IActionResult Dashboard(string area, string areaName, string machinePrefix)
         {
             ViewData["Title"] = $"Giám sát sản lượng máy dập dây - {areaName}";

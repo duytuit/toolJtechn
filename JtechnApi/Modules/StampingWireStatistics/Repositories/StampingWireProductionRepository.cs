@@ -14,6 +14,49 @@ namespace JtechnApi.Modules.StampingWireStatistics.Repositories
             _database = database;
         }
 
+        public decimal GetStampingActualForToday()
+        {
+            const string sql = @"
+DECLARE @WorkDate DATE = CONVERT(DATE, GETDATE());
+
+SELECT
+    ISNULL(b1.QtySingle, 0)
+        + (ISNULL(b2.QtyDouble, 0) * 2)
+        + ISNULL(b3.QtyDouble, 0) AS TotalActual
+FROM
+(
+    SELECT SUM(QtyInput) AS QtySingle
+    FROM [SmartManagement].[dbo].[Control_ProgramStamping_Status]
+    WHERE TimeInput >= @WorkDate
+      AND TimeInput < DATEADD(DAY, 1, @WorkDate)
+      AND HeadTanshiCompare <> '2D'
+      AND IDDouble IS NULL
+) AS b1
+CROSS JOIN
+(
+    SELECT SUM(QtyInput) AS QtyDouble
+    FROM [SmartManagement].[dbo].[Control_ProgramStamping_Status]
+    WHERE TimeInput >= @WorkDate
+      AND TimeInput < DATEADD(DAY, 1, @WorkDate)
+      AND HeadTanshiCompare = '2D'
+) AS b2
+CROSS JOIN
+(
+    SELECT SUM(QtyInput) AS QtyDouble
+    FROM [SmartManagement].[dbo].[Control_ProgramStamping_Status_Double]
+    WHERE TimeInput >= @WorkDate
+      AND TimeInput < DATEADD(DAY, 1, @WorkDate)
+) AS b3;";
+
+            var result = _database.LoadTable(sql);
+            if (result.Rows.Count == 0)
+            {
+                throw new InvalidOperationException("Không có kết quả sản lượng Dập trong ngày hiện tại.");
+            }
+
+            return Convert.ToDecimal(result.Rows[0]["TotalActual"]);
+        }
+
         public object GetSnapshot()
         {
             var countSql = $"SELECT COUNT_BIG(1) AS TotalRows FROM {TargetTable}";

@@ -15,7 +15,25 @@ namespace JtechnApi.Modules.CutProduction.Controllers
         [HttpGet("/cut-production")]
         public IActionResult Index()
         {
+            return Dashboard("CA");
+        }
+
+        [HttpGet("/cut-production/ca")]
+        public IActionResult SmallCut()
+        {
+            return Dashboard("CA");
+        }
+
+        [HttpGet("/cut-production/td")]
+        public IActionResult AutomaticCut()
+        {
+            return Dashboard("TD");
+        }
+
+        private IActionResult Dashboard(string machineType)
+        {
             ViewData["Title"] = "Giám sát sản lượng công đoạn Cắt";
+            ViewData["MachineType"] = machineType;
             return View("~/Views/Home/CutProductionDashboard.cshtml");
         }
 

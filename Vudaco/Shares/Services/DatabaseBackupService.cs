@@ -78,7 +78,17 @@ namespace Vudaco.Shares.Services
             var archivePath = Path.ChangeExtension(backupPath, ".rar");
             await CompressToRarAsync(backupPath, archivePath);
 
+            if (!File.Exists(archivePath) || new FileInfo(archivePath).Length == 0)
+            {
+                throw new InvalidOperationException(
+                    $"File nén backup không tồn tại hoặc rỗng: {archivePath}");
+            }
+
             File.Delete(backupPath);
+            if (File.Exists(backupPath))
+            {
+                throw new IOException($"Không thể xóa file backup sau khi nén thành công: {backupPath}");
+            }
 
             Directory.CreateDirectory(localFolder);
             var localArchivePath = Path.Combine(localFolder, Path.GetFileName(archivePath));
@@ -123,13 +133,16 @@ namespace Vudaco.Shares.Services
                 throw new InvalidOperationException("Không thể khởi động WinRAR/rar.exe.");
             }
 
+            var standardOutputTask = process.StandardOutput.ReadToEndAsync();
+            var standardErrorTask = process.StandardError.ReadToEndAsync();
             await process.WaitForExitAsync();
+            var standardOutput = await standardOutputTask;
+            var standardError = await standardErrorTask;
 
             if (process.ExitCode != 0 || !File.Exists(archivePath))
             {
-                var error = await process.StandardError.ReadToEndAsync();
                 throw new InvalidOperationException(
-                    $"Nén file backup thành RAR thất bại (ExitCode: {process.ExitCode}). {error}");
+                    $"Nén file backup thành RAR thất bại (ExitCode: {process.ExitCode}). {standardError} {standardOutput}");
             }
         }
 

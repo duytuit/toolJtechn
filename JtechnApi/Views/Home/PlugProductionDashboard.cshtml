@@ -98,8 +98,10 @@
                 const numeric = Number(String(value).replace(/,/g, '').trim());
                 return Number.isFinite(numeric) ? numeric : null;
             };
-            const statusOf = (actual, target) =>
-                target != null && actual != null && actual >= target ? 'achieved' : 'running';
+            const statusOf = (actual, target) => {
+                if (target == null || actual == null) return 'running';
+                return actual >= target ? 'achieved' : 'delayed';
+            };
             const statusText = (status) => ({
                 running: 'Đang sản xuất', achieved: 'Đạt mục tiêu', delayed: 'Chậm tiến độ', paused: 'Tạm dừng'
             }[status]);

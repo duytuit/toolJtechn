@@ -197,7 +197,9 @@
                         midDayTarget,
                         currentTarget,
                         points,
-                        status: currentTarget != null && actual >= currentTarget ? 'achieved' : 'running'
+                        status: currentTarget == null
+                            ? 'running'
+                            : actual >= currentTarget ? 'achieved' : 'delayed'
                     };
                 }).filter((machine) => machine.name.toUpperCase().includes(state.machineType) && machine.actual > 0)
                     .sort((a, b) => a.name.localeCompare(b.name, 'vi'));

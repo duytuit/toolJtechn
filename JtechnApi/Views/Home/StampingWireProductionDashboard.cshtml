@@ -118,6 +118,7 @@
                 const explicit = normalize(valueOf(row, statusAliases));
                 if (/(pause|stop|tamnghi|dungmay)/.test(explicit)) return 'paused';
                 if (target != null && actual != null && actual >= target) return 'achieved';
+                if (target != null && actual != null && actual < target) return 'delayed';
                 if (/(delay|late|slow|tre|cham)/.test(explicit)) return 'delayed';
                 return 'running';
             };

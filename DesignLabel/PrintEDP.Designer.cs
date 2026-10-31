@@ -37,6 +37,7 @@ namespace WindowsFormsApp5
             this.btnLoadLotNo = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.btnPrintLotNo = new System.Windows.Forms.Button();
+            this.btnExportExcel = new System.Windows.Forms.Button();
             this.rtbLotNo = new System.Windows.Forms.RichTextBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -72,6 +73,7 @@ namespace WindowsFormsApp5
             this.panel2.Controls.Add(this.btnLoadLotNo);
             this.panel2.Controls.Add(this.groupBox1);
             this.panel2.Controls.Add(this.btnPrintLotNo);
+            this.panel2.Controls.Add(this.btnExportExcel);
             this.panel2.Controls.Add(this.rtbLotNo);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel2.Location = new System.Drawing.Point(619, 3);
@@ -130,14 +132,24 @@ namespace WindowsFormsApp5
             this.btnPrintLotNo.Text = "Xem trước / in";
             this.btnPrintLotNo.UseVisualStyleBackColor = true;
             this.btnPrintLotNo.Click += new System.EventHandler(this.btnPrintLotNo_Click);
+            //
+            // btnExportExcel
+            //
+            this.btnExportExcel.Location = new System.Drawing.Point(6, 127);
+            this.btnExportExcel.Name = "btnExportExcel";
+            this.btnExportExcel.Size = new System.Drawing.Size(165, 23);
+            this.btnExportExcel.TabIndex = 7;
+            this.btnExportExcel.Text = "Xuất Excel kết quả";
+            this.btnExportExcel.UseVisualStyleBackColor = true;
+            this.btnExportExcel.Click += new System.EventHandler(this.btnExportExcel_Click);
             // 
             // rtbLotNo
             // 
             this.rtbLotNo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.rtbLotNo.Location = new System.Drawing.Point(1, 130);
+            this.rtbLotNo.Location = new System.Drawing.Point(1, 159);
             this.rtbLotNo.Name = "rtbLotNo";
-            this.rtbLotNo.Size = new System.Drawing.Size(176, 426);
+            this.rtbLotNo.Size = new System.Drawing.Size(176, 397);
             this.rtbLotNo.TabIndex = 2;
             this.rtbLotNo.Text = "Chưa nhập file Excel";
             // 
@@ -163,6 +175,7 @@ namespace WindowsFormsApp5
         private System.Windows.Forms.Panel plPriviewPageLotNo;
         private System.Windows.Forms.Button btnLoadLotNo;
         private System.Windows.Forms.Button btnPrintLotNo;
+        private System.Windows.Forms.Button btnExportExcel;
         private System.Windows.Forms.Button btnOpenCondition;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;

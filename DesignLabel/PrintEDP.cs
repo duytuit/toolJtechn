@@ -20,6 +20,7 @@ namespace WindowsFormsApp5
         private readonly OracleHelper _oracle;
         private readonly List<EdpRequest> _requests = new List<EdpRequest>();
         private readonly List<EdpLabel> _labels = new List<EdpLabel>();
+        private List<EdpPrintPage> _printPages = new List<EdpPrintPage>();
         private Form1.LayoutData _template;
         private int _printIndex;
 
@@ -72,8 +73,9 @@ namespace WindowsFormsApp5
                     _requests.Clear();
                     _requests.AddRange(requests);
                     _labels.Clear();
+                    _printPages.Clear();
                     rtbLotNo.Lines = _requests
-                        .Select(request => request.Sequence + "    " + request.EdpSymbol)
+                        .Select(request => request.Sequence + "    " + request.EdpSymbol + "    " + request.SoDay)
                         .ToArray();
                     groupBox1.Text = "Thống kê kết quả: " + _requests.Count + " mã";
                     UpdatePreviewScrollSize();
@@ -114,6 +116,7 @@ namespace WindowsFormsApp5
 
                 var sequenceColumn = FindColumn(headerColumns, "発注SEQ", "ORDERSEQ", "ORDERSEQUENCE", "SEQ", "LOT", "LOTNO", "ロット", "ロットNO", "製番");
                 var symbolColumn = FindColumn(headerColumns, "EDP記号", "記号EDP", "EDP", "記号", "MARK");
+                var soDayColumn = FindColumn(headerColumns, "soday", "SENBAN", "線番");
                 var hasHeader = sequenceColumn.HasValue;
                 if (!hasHeader && firstRow.Cell(1).GetValue<string>().Any(char.IsLetter))
                     throw new InvalidDataException("Không tìm thấy cột 発注SEQ. File Excel cần có tiêu đề 発注SEQ; ký hiệu EDP có thể dùng tiêu đề EDP hoặc 記号.");
@@ -135,7 +138,10 @@ namespace WindowsFormsApp5
                     result.Add(new EdpRequest
                     {
                         Sequence = sequence,
-                        EdpSymbol = string.IsNullOrWhiteSpace(symbol) ? "I3" : symbol
+                        EdpSymbol = string.IsNullOrWhiteSpace(symbol) ? "I3" : symbol,
+                        SoDay = soDayColumn.HasValue
+                            ? row.Cell(soDayColumn.Value).GetFormattedString().Trim()
+                            : string.Empty
                     });
                 }
 
@@ -143,7 +149,11 @@ namespace WindowsFormsApp5
                     throw new InvalidDataException("Không có 発注SEQ hợp lệ trong file Excel.");
 
                 return result
-                    .GroupBy(request => request.Sequence, StringComparer.OrdinalIgnoreCase)
+                    .GroupBy(request => new
+                    {
+                        Sequence = request.Sequence.ToUpperInvariant(),
+                        SoDay = request.SoDay.ToUpperInvariant()
+                    })
                     .Select(group => group.First())
                     .ToList();
             }
@@ -186,14 +196,16 @@ namespace WindowsFormsApp5
             }
 
             var orderSql = @"
-                SELECT H10F.製番, H10F.品目C, H10F.発注SEQ, H10F.発注数
+                SELECT H10F.製番, H10F.品目C, H10F.発注SEQ, H10F.発注SEQ2, H10F.発注数
                 FROM DFW_H10F H10F
                 WHERE H10F.発注SEQ IN (" + string.Join(",", sequenceNames) + ")";
             var orderRows = _oracle.ExecuteDataTable(orderSql, sequenceParameters.ToArray());
             if (orderRows.Rows.Count == 0)
                 throw new InvalidOperationException("Không tìm thấy dữ liệu DFW_H10F theo 発注SEQ đã nhập.");
 
-            var requestBySequence = _requests.ToDictionary(request => request.Sequence, StringComparer.OrdinalIgnoreCase);
+            var requestsBySequence = _requests
+                .GroupBy(request => request.Sequence, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.ToList(), StringComparer.OrdinalIgnoreCase);
             var productCodeBySequence = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             foreach (DataRow row in orderRows.Rows)
             {
@@ -208,22 +220,52 @@ namespace WindowsFormsApp5
                 throw new InvalidOperationException("Không có 品目C hợp lệ trong dữ liệu DFW_H10F.");
 
             var productParameters = new List<OracleParameter>();
-            var productNames = new List<string>();
-            for (var index = 0; index < productCodes.Count; index++)
+            var structureConditions = new List<string>();
+            foreach (var request in _requests)
             {
+                string requestedProductCode;
+                if (!productCodeBySequence.TryGetValue(request.Sequence, out requestedProductCode))
+                    continue;
+
+                var index = structureConditions.Count;
                 var name = ":hin" + index;
-                productNames.Add(name);
                 productParameters.Add(new OracleParameter(name, OracleDbType.Varchar2)
                 {
-                    Value = productCodes[index]
+                    Value = requestedProductCode
                 });
+                var condition = "C.HINCD = " + name;
+                if (!string.IsNullOrWhiteSpace(request.SoDay))
+                {
+                    var senbanName = ":senban" + index;
+                    condition += " AND TRIM(C.SENBAN) = " + senbanName;
+                    productParameters.Add(new OracleParameter(senbanName, OracleDbType.Varchar2)
+                    {
+                        Value = request.SoDay
+                    });
+                }
+                structureConditions.Add("(" + condition + ")");
             }
 
             var structureSql = @"
-                SELECT HINCD, SENBAN, MARKNO, SENSYU, SENTYO, SURYO, TABA,
-                       TWIST1, TWIST2, TWIST3, TASCDA, TASMEIA, TASCDB, TASMEIB, BIKO
-                FROM TDCJSIJI
-                WHERE HINCD IN (" + string.Join(",", productNames) + ")";
+                WITH ShelfLocations AS (
+                    SELECT TRIM(品目K) || TRIM(品目C) AS PartCode,
+                           MAX(TRIM(棚番)) AS ShelfNumber
+                    FROM TAD_Z60M
+                    WHERE TRIM(場所C) = '1510'
+                    GROUP BY TRIM(品目K) || TRIM(品目C)
+                )
+                SELECT C.HINCD, C.SENBAN, C.MARKNO, C.SENSYU, C.SENTYO, C.SURYO, C.TABA,
+                       C.TWIST1, C.TWIST2, C.TWIST3, C.TASCDA, C.TASMEIA, C.TASCDB, C.TASMEIB, C.BIKO,
+                       C.NOUKI, C.KAWAA, C.KAWAB, C.GUMCDA, C.GUMCDB,
+                       C.INFOMEIA1, C.INFOMEIA2, C.INFOMEIB1, C.INFOMEIB2,
+                       TA.ShelfNumber AS ShelfTerminalA, GA.ShelfNumber AS ShelfSleeveA,
+                       TB.ShelfNumber AS ShelfTerminalB, GB.ShelfNumber AS ShelfSleeveB
+                FROM TDCJSIJI C
+                LEFT JOIN ShelfLocations TA ON TA.PartCode = TRIM(C.TASCDA)
+                LEFT JOIN ShelfLocations GA ON GA.PartCode = TRIM(C.GUMCDA)
+                LEFT JOIN ShelfLocations TB ON TB.PartCode = TRIM(C.TASCDB)
+                LEFT JOIN ShelfLocations GB ON GB.PartCode = TRIM(C.GUMCDB)
+                WHERE " + string.Join(" OR ", structureConditions);
             var structureRows = _oracle.ExecuteDataTable(structureSql, productParameters.ToArray());
             var structuresByProduct = structureRows.Rows.Cast<DataRow>()
                 .GroupBy(row => GetValue(row, "HINCD"), StringComparer.OrdinalIgnoreCase)
@@ -234,25 +276,89 @@ namespace WindowsFormsApp5
             {
                 var sequence = GetValue(orderRow, "発注SEQ");
                 string productCode;
-                EdpRequest request;
+                List<EdpRequest> requests;
                 if (!productCodeBySequence.TryGetValue(sequence, out productCode) ||
-                    !requestBySequence.TryGetValue(sequence, out request))
+                    !requestsBySequence.TryGetValue(sequence, out requests))
                     continue;
 
                 List<DataRow> componentRows;
                 if (!structuresByProduct.TryGetValue(productCode, out componentRows))
                     continue;
 
-                foreach (var component in componentRows)
-                    _labels.Add(CreateLabel(orderRow, component, productCode, request.EdpSymbol));
+                foreach (var request in requests)
+                {
+                    foreach (var component in componentRows)
+                    {
+                        if (!string.IsNullOrWhiteSpace(request.SoDay) &&
+                            !string.Equals(GetValue(component, "SENBAN"), request.SoDay, StringComparison.OrdinalIgnoreCase))
+                            continue;
+
+                        _labels.Add(CreateLabel(orderRow, component, productCode, request.EdpSymbol));
+                    }
+                }
             }
 
             if (_labels.Count == 0)
                 throw new InvalidOperationException("Đã tìm thấy DFW_H10F nhưng không có cấu thành tương ứng trong TDCJSIJI.");
 
-            groupBox1.Text = "Thống kê kết quả: " + _labels.Count + " EDP";
+            RebuildPrintPages();
+        }
+
+        private void RebuildPrintPages()
+        {
+            _printPages.Clear();
+            var groups = Conditional.LoadPrintGroups(AppDomain.CurrentDomain.BaseDirectory);
+            _printPages = BuildPrintPages(_labels, groups);
+            groupBox1.Text = "Thống kê kết quả: " + _labels.Count + " EDP / " + _printPages.Count + " trang";
             UpdatePreviewScrollSize();
             plPriviewPageLotNo.Invalidate();
+        }
+
+        private static List<EdpPrintPage> BuildPrintPages(List<EdpLabel> labels, List<Conditional.ConditionData> groups)
+        {
+            var pages = new List<EdpPrintPage>();
+            var remaining = new List<EdpLabel>(labels);
+            foreach (var label in labels)
+                label.MatchedCondition = string.Empty;
+            foreach (var group in groups)
+            {
+                var matched = remaining.Select(label => new
+                {
+                    Label = label,
+                    Priority = group.GetMatchPriority(label.Get("SENSYU"), label.Get("TASCDA"),
+                        label.Get("TASCDB"), label.Get("GUMCDA"), label.Get("GUMCDB"))
+                }).Where(match => match.Priority >= 0).OrderBy(match => match.Priority)
+                    .Select(match => match.Label).ToList();
+
+                foreach (var label in matched)
+                {
+                    var priority = group.GetMatchPriority(label.Get("SENSYU"), label.Get("TASCDA"),
+                        label.Get("TASCDB"), label.Get("GUMCDA"), label.Get("GUMCDB"));
+                    label.MatchedCondition = new[] { "loai_day", "tanshi", "gom" }[priority];
+                }
+                AddGroupPages(pages, group.Name, matched);
+                var assigned = new HashSet<EdpLabel>(matched);
+                remaining.RemoveAll(label => assigned.Contains(label));
+            }
+
+            AddGroupPages(pages, groups.Count > 0 ? "Chưa phân nhóm" : null, remaining);
+            return pages;
+        }
+
+        private static void AddGroupPages(List<EdpPrintPage> pages, string groupName, List<EdpLabel> labels)
+        {
+            if (labels.Count == 0)
+                return;
+
+            if (!string.IsNullOrEmpty(groupName))
+                pages.Add(new EdpPrintPage { GroupName = groupName, IsGroupCover = true });
+
+            for (var first = 0; first < labels.Count; first += 5)
+                pages.Add(new EdpPrintPage
+                {
+                    GroupName = groupName,
+                    Labels = labels.Skip(first).Take(5).ToList()
+                });
         }
 
         private static EdpLabel CreateLabel(DataRow orderRow, DataRow component, string productCode, string edpSymbol)
@@ -263,23 +369,93 @@ namespace WindowsFormsApp5
                 ["OrderSequence"] = GetValue(orderRow, "発注SEQ"),
                 ["OrderQuantity"] = GetValue(orderRow, "発注数"),
                 ["ProductCode"] = productCode,
+                ["QrContent"] = BuildQrContent(orderRow, component, productCode),
+                ["ProductCodePrefix"] = string.IsNullOrEmpty(productCode) ? string.Empty : productCode.Substring(0, 1),
+                ["ProductCodeBody"] = string.IsNullOrEmpty(productCode) ? string.Empty : productCode.Substring(1),
                 ["EdpSymbol"] = edpSymbol,
                 ["SENBAN"] = GetValue(component, "SENBAN"),
                 ["MARKNO"] = GetValue(component, "MARKNO"),
-                ["SENSYU"] = GetValue(component, "SENSYU"),
+                ["SENSYU"] = GetDisplayCode(component, "SENSYU"),
                 ["SENTYO"] = GetValue(component, "SENTYO"),
                 ["SURYO"] = GetValue(component, "SURYO"),
                 ["TABA"] = GetValue(component, "TABA"),
                 ["TWIST1"] = GetValue(component, "TWIST1"),
                 ["TWIST2"] = GetValue(component, "TWIST2"),
                 ["TWIST3"] = GetValue(component, "TWIST3"),
-                ["TASCDA"] = GetValue(component, "TASCDA"),
+                ["TASCDA"] = GetDisplayCode(component, "TASCDA"),
                 ["TASMEIA"] = GetValue(component, "TASMEIA"),
-                ["TASCDB"] = GetValue(component, "TASCDB"),
+                ["TASCDB"] = GetDisplayCode(component, "TASCDB"),
                 ["TASMEIB"] = GetValue(component, "TASMEIB"),
+                ["KAWAA"] = GetValue(component, "KAWAA"),
+                ["KAWAB"] = GetValue(component, "KAWAB"),
+                ["GUMCDA"] = GetDisplayCode(component, "GUMCDA"),
+                ["GUMCDB"] = GetDisplayCode(component, "GUMCDB"),
+                ["ShelfTerminalA"] = GetValue(component, "ShelfTerminalA"),
+                ["ShelfSleeveA"] = GetValue(component, "ShelfSleeveA"),
+                ["ShelfTerminalB"] = GetValue(component, "ShelfTerminalB"),
+                ["ShelfSleeveB"] = GetValue(component, "ShelfSleeveB"),
+                ["DueDate"] = GetDueDate(component),
+                ["ProcessingA"] = string.Join(Environment.NewLine,
+                    new[] { GetValue(component, "INFOMEIA1"), GetValue(component, "INFOMEIA2") }
+                        .Where(value => !string.IsNullOrWhiteSpace(value))),
+                ["ProcessingB"] = string.Join(Environment.NewLine,
+                    new[] { GetValue(component, "INFOMEIB1"), GetValue(component, "INFOMEIB2") }
+                        .Where(value => !string.IsNullOrWhiteSpace(value))),
                 ["BIKO"] = GetValue(component, "BIKO")
             };
             return new EdpLabel(values);
+        }
+
+        private static string BuildQrContent(DataRow orderRow, DataRow component, string productCode)
+        {
+            // QR uses complete database codes, before removing display prefixes.
+            // The last two fields are reserved and remain empty, as in the sample.
+            return string.Join(",", new[]
+            {
+                GetQrValue(component, "SENTYO"),
+                GetQrValue(component, "KAWAA"),
+                GetQrValue(component, "KAWAB"),
+                GetQrValue(orderRow, "発注数"),
+                GetQrValue(orderRow, "発注SEQ"),
+                GetQrValue(orderRow, "発注SEQ2"),
+                (productCode ?? string.Empty).Trim(),
+                GetQrValue(component, "SENBAN"),
+                GetQrValue(component, "SENSYU"),
+                GetQrValue(component, "TASCDA"),
+                GetQrValue(component, "GUMCDA"),
+                GetQrValue(component, "TASCDB"),
+                GetQrValue(component, "GUMCDB"),
+                string.Empty,
+                string.Empty
+            });
+        }
+
+        private static string GetQrValue(DataRow row, string columnName)
+        {
+            return row.Table.Columns.Contains(columnName) && row[columnName] != DBNull.Value
+                ? Convert.ToString(row[columnName], System.Globalization.CultureInfo.InvariantCulture).Trim()
+                : string.Empty;
+        }
+
+        private static string GetDisplayCode(DataRow component, string columnName)
+        {
+            var value = GetValue(component, columnName);
+            return value.Length > 0 ? value.Substring(1) : string.Empty;
+        }
+
+        private static string GetDueDate(DataRow component)
+        {
+            if (component.Table.Columns.Contains("NOUKI") && component["NOUKI"] is DateTime)
+                return ((DateTime)component["NOUKI"]).ToString("yy/MM/dd");
+
+            var value = GetValue(component, "NOUKI");
+            DateTime date;
+            return DateTime.TryParseExact(value,
+                new[] { "yyyyMMdd", "yyyy/MM/dd", "yyyy-MM-dd", "yy/MM/dd", "yyMMdd" },
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None, out date)
+                ? date.ToString("yy/MM/dd")
+                : value;
         }
 
         private static string GetValue(DataRow row, string columnName)
@@ -289,12 +465,122 @@ namespace WindowsFormsApp5
                 : string.Empty;
         }
 
+        private void btnExportExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (_labels.Count == 0)
+                    LoadEdpData();
+                else
+                    RebuildPrintPages();
+
+                using (var dialog = new SaveFileDialog
+                {
+                    Filter = "Excel files (*.xlsx)|*.xlsx",
+                    DefaultExt = "xlsx",
+                    AddExtension = true,
+                    FileName = "EDP_KetQuaDieuKien.xlsx",
+                    Title = "Xuất kết quả áp dụng điều kiện"
+                })
+                {
+                    if (dialog.ShowDialog(this) != DialogResult.OK)
+                        return;
+
+                    SaveConditionResults(_printPages, dialog.FileName);
+                    MessageBox.Show("Đã xuất " + _labels.Count + " EDP / " + _printPages.Count + " trang in.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Không thể xuất Excel kết quả điều kiện: " + ex.Message);
+            }
+        }
+
+        private static void SaveConditionResults(List<EdpPrintPage> pages, string filePath)
+        {
+            var details = new DataTable();
+            details.Columns.Add("STT", typeof(int));
+            details.Columns.Add("Nhóm");
+            details.Columns.Add("Điều kiện khớp");
+            details.Columns.Add("Trang A4", typeof(int));
+            details.Columns.Add("Vị trí trên trang", typeof(int));
+            var fields = new[]
+            {
+                new[] { "発注SEQ", "OrderSequence" }, new[] { "Ký hiệu EDP", "EdpSymbol" },
+                new[] { "品番", "ProductCode" }, new[] { "線番 (soday)", "SENBAN" },
+                new[] { "Loại dây", "SENSYU" }, new[] { "Chiều dài", "SENTYO" },
+                new[] { "Số lượng (発注数)", "OrderQuantity" }, new[] { "束", "TABA" },
+                new[] { "Cos A", "TASCDA" }, new[] { "Cos B", "TASCDB" },
+                new[] { "Gôm A", "GUMCDA" }, new[] { "Gôm B", "GUMCDB" },
+                new[] { "Kệ cos A", "ShelfTerminalA" }, new[] { "Kệ cos B", "ShelfTerminalB" },
+                new[] { "Kệ gôm A", "ShelfSleeveA" }, new[] { "Kệ gôm B", "ShelfSleeveB" },
+                new[] { "Tuốt vỏ A", "KAWAA" }, new[] { "Tuốt vỏ B", "KAWAB" },
+                new[] { "Xử lý A", "ProcessingA" }, new[] { "Xử lý B", "ProcessingB" },
+                new[] { "納期", "DueDate" }, new[] { "備考", "BIKO" },
+                new[] { "Nội dung QR", "QrContent" }
+            };
+            foreach (var field in fields)
+                details.Columns.Add(field[0]);
+
+            var printPages = new DataTable();
+            printPages.Columns.Add("Trang A4", typeof(int));
+            printPages.Columns.Add("Nhóm");
+            printPages.Columns.Add("Loại trang");
+            printPages.Columns.Add("Số EDP", typeof(int));
+
+            for (var pageIndex = 0; pageIndex < pages.Count; pageIndex++)
+            {
+                var page = pages[pageIndex];
+                var groupName = page.GroupName ?? "Không áp dụng nhóm";
+                printPages.Rows.Add(pageIndex + 1, groupName,
+                    page.IsGroupCover ? "Trang tên nhóm" : "Trang EDP", page.Labels.Count);
+
+                for (var slot = 0; slot < page.Labels.Count; slot++)
+                {
+                    var label = page.Labels[slot];
+                    var values = new List<object>
+                    {
+                        details.Rows.Count + 1, groupName, label.MatchedCondition,
+                        pageIndex + 1, slot + 1
+                    };
+                    values.AddRange(fields.Select(field => (object)label.Get(field[1])));
+                    details.Rows.Add(values.ToArray());
+                }
+            }
+
+            using (var workbook = new XLWorkbook())
+            {
+                var resultSheet = workbook.Worksheets.Add("Kết quả điều kiện");
+                resultSheet.Cell(1, 1).InsertTable(details, "EdpConditionResults", true);
+                resultSheet.SheetView.FreezeRows(1);
+                resultSheet.SheetView.FreezeColumns(2);
+                resultSheet.Columns().AdjustToContents(10, 35);
+                // Keep identifiers as text, including leading zeroes and long codes.
+                resultSheet.Range(2, 6, Math.Max(2, details.Rows.Count + 1), details.Columns.Count)
+                    .Style.NumberFormat.Format = "@";
+                for (var index = 0; index < fields.Length; index++)
+                {
+                    if (fields[index][1] == "ProcessingA" || fields[index][1] == "ProcessingB")
+                        resultSheet.Column(index + 6).Style.Alignment.WrapText = true;
+                }
+                resultSheet.Rows().AdjustToContents();
+
+                var pageSheet = workbook.Worksheets.Add("Trang in");
+                pageSheet.Cell(1, 1).InsertTable(printPages, "EdpPrintPages", true);
+                pageSheet.SheetView.FreezeRows(1);
+                pageSheet.Columns().AdjustToContents(10, 35);
+                workbook.SaveAs(filePath);
+            }
+        }
+
         private void btnPrintLotNo_Click(object sender, EventArgs e)
         {
             try
             {
                 if (_labels.Count == 0)
                     LoadEdpData();
+                else
+                    RebuildPrintPages();
 
                 _printIndex = 0;
                 using (var document = new PrintDocument())
@@ -302,6 +588,7 @@ namespace WindowsFormsApp5
                     document.DefaultPageSettings.PaperSize = new PaperSize("A4", 827, 1169);
                     document.DefaultPageSettings.Landscape = false;
                     document.DefaultPageSettings.Margins = new Margins(0, 0, 0, 0);
+                    document.OriginAtMargins = false;
                     document.BeginPrint += (s, args) => _printIndex = 0;
                     document.PrintPage += PrintDocument_PrintPage;
                     using (var preview = new PrintPreviewDialog
@@ -325,8 +612,8 @@ namespace WindowsFormsApp5
         {
             e.Graphics.PageUnit = GraphicsUnit.Millimeter;
             DrawA4Page(e.Graphics, _printIndex);
-            _printIndex += Math.Min(5, _labels.Count - _printIndex);
-            e.HasMorePages = _printIndex < _labels.Count;
+            _printIndex++;
+            e.HasMorePages = _printIndex < _printPages.Count;
         }
 
         private void PreviewPanel_Paint(object sender, PaintEventArgs e)
@@ -342,7 +629,7 @@ namespace WindowsFormsApp5
             const float pageHeightMm = 297f;
             const float pageGapPixels = 16f;
             const float pageMarginPixels = 8f;
-            var pageCount = Math.Max(1, (_labels.Count + 4) / 5);
+            var pageCount = Math.Max(1, _printPages.Count);
             var pageWidthPixels = pageWidthMm * scale;
             var pageHeightPixels = pageHeightMm * scale;
             var left = (plPriviewPageLotNo.ClientSize.Width - pageWidthPixels) / 2f;
@@ -363,7 +650,7 @@ namespace WindowsFormsApp5
                     e.Graphics.Transform = transform;
                 }
 
-                DrawA4Page(e.Graphics, pageIndex * 5);
+                DrawA4Page(e.Graphics, pageIndex);
                 e.Graphics.Restore(state);
             }
         }
@@ -383,7 +670,7 @@ namespace WindowsFormsApp5
             const float pageHeightMm = 297f;
             const float pageGapPixels = 16f;
             const float pageMarginPixels = 8f;
-            var pageCount = Math.Max(1, (_labels.Count + 4) / 5);
+            var pageCount = Math.Max(1, _printPages.Count);
             var contentHeight = 2 * pageMarginPixels +
                 pageCount * pageHeightMm * scale +
                 (pageCount - 1) * pageGapPixels;
@@ -392,30 +679,47 @@ namespace WindowsFormsApp5
                 (int)Math.Ceiling(contentHeight));
         }
 
-        private void DrawA4Page(Graphics graphics, int firstLabel)
+        private void DrawA4Page(Graphics graphics, int pageIndex)
         {
             using (var pageBrush = new SolidBrush(Color.White))
-            using (var pagePen = new Pen(Color.Gray, 0.25f))
             {
                 graphics.FillRectangle(pageBrush, 0, 0, 210, 297);
-                graphics.DrawRectangle(pagePen, 0, 0, 210, 297);
+            }
+
+            if (pageIndex < 0 || pageIndex >= _printPages.Count)
+                return;
+
+            var page = _printPages[pageIndex];
+            if (page.IsGroupCover)
+            {
+                using (var font = new Font("Arial", 16f, FontStyle.Bold, GraphicsUnit.World))
+                using (var brush = new SolidBrush(Color.Black))
+                using (var format = new StringFormat
+                {
+                    Alignment = StringAlignment.Center,
+                    LineAlignment = StringAlignment.Center,
+                    Trimming = StringTrimming.EllipsisCharacter
+                })
+                    graphics.DrawString(page.GroupName, font, brush, new RectangleF(10, 10, 190, 277), format);
+                return;
             }
 
             const int labelsPerPage = 5;
             const float pageWidthMm = 210f;
             const float pageHeightMm = 297f;
+            const float gapMm = 6f;
             var labelWidthMm = PixelsToMillimeters(GetLabelWidthPixels());
             var labelHeightMm = PixelsToMillimeters(GetLabelHeightPixels());
-            if (labelWidthMm > pageWidthMm || labelHeightMm * labelsPerPage > pageHeightMm)
+            var totalHeightMm = labelsPerPage * labelHeightMm + (labelsPerPage - 1) * gapMm;
+            if (labelWidthMm > pageWidthMm || totalHeightMm > pageHeightMm)
                 throw new InvalidDataException("Kích thước EDP không vừa khổ A4 khi in 5 nhãn.");
 
-            var gapMm = (pageHeightMm - labelsPerPage * labelHeightMm) / (labelsPerPage + 1);
-            var count = Math.Min(labelsPerPage, _labels.Count - firstLabel);
+            var count = page.Labels.Count;
             for (var index = 0; index < count; index++)
             {
                 var x = (pageWidthMm - labelWidthMm) / 2f;
-                var y = gapMm + index * (labelHeightMm + gapMm);
-                DrawLabel(graphics, x, y, _labels[firstLabel + index]);
+                var y = index * (labelHeightMm + gapMm);
+                DrawLabel(graphics, x, y, page.Labels[index]);
             }
         }
 
@@ -423,27 +727,21 @@ namespace WindowsFormsApp5
         {
             var state = graphics.Save();
             graphics.TranslateTransform(x, y);
-            var labelWidthMm = PixelsToMillimeters(GetLabelWidthPixels());
-            var labelHeightMm = PixelsToMillimeters(GetLabelHeightPixels());
-            using (var borderPen = new Pen(Color.Black, 0.22f))
+            foreach (var line in _template.Lines ?? new List<Form1.LineObject>())
             {
-                graphics.DrawRectangle(borderPen, 0, 0, labelWidthMm, labelHeightMm);
-                foreach (var line in _template.Lines ?? new List<Form1.LineObject>())
+                using (var linePen = new Pen(Color.Black, Math.Max(0.15f, PixelsToMillimeters(line.Thickness))))
                 {
-                    using (var linePen = new Pen(Color.Black, Math.Max(0.15f, PixelsToMillimeters(line.Thickness))))
-                    {
-                        graphics.DrawLine(
-                            linePen,
-                            PixelsToMillimeters(line.Start.X),
-                            PixelsToMillimeters(line.Start.Y),
-                            PixelsToMillimeters(line.End.X),
-                            PixelsToMillimeters(line.End.Y));
-                    }
+                    graphics.DrawLine(
+                        linePen,
+                        PixelsToMillimeters(line.Start.X),
+                        PixelsToMillimeters(line.Start.Y),
+                        PixelsToMillimeters(line.End.X),
+                        PixelsToMillimeters(line.End.Y));
                 }
-
-                foreach (var item in _template.Items)
-                    DrawLayoutItem(graphics, item, label);
             }
+
+            foreach (var item in _template.Items)
+                DrawLayoutItem(graphics, item, label);
             graphics.Restore(state);
         }
 
@@ -490,7 +788,9 @@ namespace WindowsFormsApp5
                         using (var format = new StringFormat(StringFormat.GenericTypographic)
                         {
                             Trimming = StringTrimming.EllipsisCharacter,
-                            FormatFlags = StringFormatFlags.NoWrap
+                            FormatFlags = item.Text == "{ProcessingA}" || item.Text == "{ProcessingB}"
+                                ? (StringFormatFlags)0
+                                : StringFormatFlags.NoWrap
                         })
                         {
                             graphics.DrawString(text, font, brush, new RectangleF(x, y, width, height), format);
@@ -580,17 +880,36 @@ namespace WindowsFormsApp5
             {
                 form.ShowDialog(this);
             }
+            try
+            {
+                RebuildPrintPages();
+            }
+            catch (Exception ex)
+            {
+                UpdatePreviewScrollSize();
+                plPriviewPageLotNo.Invalidate();
+                MessageBox.Show("Không thể áp dụng nhóm điều kiện: " + ex.Message);
+            }
+        }
+
+        private sealed class EdpPrintPage
+        {
+            public string GroupName { get; set; }
+            public bool IsGroupCover { get; set; }
+            public List<EdpLabel> Labels { get; set; } = new List<EdpLabel>();
         }
 
         private sealed class EdpRequest
         {
             public string Sequence { get; set; }
             public string EdpSymbol { get; set; }
+            public string SoDay { get; set; }
         }
 
         private sealed class EdpLabel
         {
             private readonly Dictionary<string, string> _values;
+            public string MatchedCondition { get; set; }
 
             public EdpLabel(Dictionary<string, string> values)
             {

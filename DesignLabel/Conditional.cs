@@ -99,7 +99,7 @@ namespace WindowsFormsApp5
         private List<string> GetPartCodes(string text)
         {
             return text
-                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Split(new[] { ',', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(code => code.Trim())
                 .Where(code => !string.IsNullOrWhiteSpace(code))
                 .ToList();
@@ -154,11 +154,70 @@ namespace WindowsFormsApp5
             lbMayCat.Text = machineName;
             LoadMachineCondition(machineName);
         }
-        private class ConditionData
+        internal static List<ConditionData> LoadPrintGroups(string directory)
         {
+            var listPath = Path.Combine(directory, "ListMachineCut.json");
+            if (!File.Exists(listPath))
+                return new List<ConditionData>();
+
+            var names = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(listPath));
+            if (names == null)
+                throw new InvalidDataException("Danh sách nhóm điều kiện không hợp lệ.");
+
+            var result = new List<ConditionData>();
+            foreach (var name in names.Where(value => !string.IsNullOrWhiteSpace(value))
+                .Select(value => value.Trim()).Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                var fileName = name;
+                foreach (var character in Path.GetInvalidFileNameChars())
+                    fileName = fileName.Replace(character, '_');
+
+                var path = Path.Combine(directory, fileName + ".json");
+                // A newly added group has no condition file until its first update.
+                if (!File.Exists(path))
+                    continue;
+
+                var condition = JsonConvert.DeserializeObject<ConditionData>(File.ReadAllText(path));
+                if (condition == null)
+                    throw new InvalidDataException("Điều kiện nhóm " + name + " không hợp lệ.");
+
+                condition.Name = name;
+                result.Add(condition);
+            }
+            return result;
+        }
+
+        internal class ConditionData
+        {
+            [JsonIgnore]
+            public string Name { get; set; }
             public List<string> loai_day { get; set; }
             public List<string> tanshi { get; set; }
             public List<string> gom { get; set; }
+
+            public int GetMatchPriority(string wire, string terminalA, string terminalB, string sleeveA, string sleeveB)
+            {
+                if (ContainsCode(loai_day, wire))
+                    return 0;
+                if (ContainsCode(tanshi, terminalA) || ContainsCode(tanshi, terminalB))
+                    return 1;
+                if (ContainsCode(gom, sleeveA) || ContainsCode(gom, sleeveB))
+                    return 2;
+                return -1;
+            }
+
+            private static bool ContainsCode(List<string> codes, string value)
+            {
+                var normalized = NormalizeCode(value);
+                return normalized.Length > 0 && codes != null &&
+                    codes.Any(code => NormalizeCode(code) == normalized);
+            }
+
+            private static string NormalizeCode(string value)
+            {
+                return new string((value ?? string.Empty).Where(character => !char.IsWhiteSpace(character))
+                    .Select(char.ToUpperInvariant).ToArray());
+            }
         }
 
         private void btnXoa_Click(object sender, EventArgs e)

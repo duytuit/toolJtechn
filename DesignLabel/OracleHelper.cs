@@ -19,6 +19,11 @@ namespace WindowsFormsApp5
 
         public DataTable ExecuteDataTable(string sql)
         {
+            return ExecuteDataTable(sql, new OracleParameter[0]);
+        }
+
+        public DataTable ExecuteDataTable(string sql, params OracleParameter[] parameters)
+        {
             using (var connection =
                 new OracleConnection(_connectionString))
             using (var command =
@@ -26,6 +31,9 @@ namespace WindowsFormsApp5
             using (var adapter =
                 new OracleDataAdapter(command))
             {
+                if (parameters != null && parameters.Length > 0)
+                    command.Parameters.AddRange(parameters);
+
                 var table = new DataTable();
 
                 connection.Open();

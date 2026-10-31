@@ -87,10 +87,15 @@ void RejectDefinition(Action<OnlineExamDefinition> change, string name)
     catch (ArgumentException) { Check(true, name); }
 }
 RejectDefinition(d => d.Groups[0].Questions[0].Points += 1, "Database exam rejects totals other than 100");
+var roundedDefinition = JsonSerializer.Deserialize<OnlineExamDefinition>(JsonSerializer.Serialize(definition));
+roundedDefinition.Groups[0].Questions[0].Points += 0.001m;
+Check(ExamDefinitionValidator.Parse(JsonSerializer.Serialize(roundedDefinition)).Groups.Count == definition.Groups.Count,
+    "Database exam rounds total points to two decimal places");
 RejectDefinition(d => d.Groups[1].Questions[0].Id = d.Groups[0].Questions[0].Id, "Database exam rejects duplicate question IDs");
 RejectDefinition(d => d.Groups[0].Questions[0].Correct = new[] { "invalid-option" }, "Database exam rejects answer keys outside the choices");
 RejectDefinition(d => d.Groups[0].Questions[0].Image = "/img/../secret.png", "Database exam rejects image path traversal");
 RejectDefinition(d => d.Groups[0].Questions[0].Kind = "unknown", "Database exam rejects unknown question types");
+
 using var services = new ServiceCollection().AddScoped<IDepartmentExamRepository>(_ => new TestExamCatalog(id =>
 {
     if (id != 101 && id != 102) throw new InvalidOperationException("Exam unavailable");
@@ -122,6 +127,24 @@ Check(storedMetadata.IsNewEmployee == true, "New employee selection is persisted
 await databaseExams.StartCandidate("12346", "Test", 101, new OnlineExamStartInput { ExamDate = new DateTime(2021, 1, 1), IsNewEmployee = false });
 var resumedMetadata = await databaseExams.Get(metadataId, "12346");
 Check(resumedMetadata.ExamDate == storedMetadata.ExamDate && resumedMetadata.IsNewEmployee == true, "Resuming does not overwrite exam date or employee category");
+var attemptStore = new TestAttemptStore();
+using var persistentServices = new ServiceCollection()
+    .AddScoped<IDepartmentExamRepository>(_ => new TestExamCatalog(id =>
+    {
+        var copy = JsonSerializer.Deserialize<OnlineExamDefinition>(JsonSerializer.Serialize(definition));
+        copy.Id = id; copy.Title = "Stored exam";
+        return copy;
+    }))
+    .AddScoped<IOnlineExamAttemptStore>(_ => attemptStore)
+    .BuildServiceProvider();
+var databaseStoredExams = new OnlineExamRepository(environment, persistentServices.GetRequiredService<IServiceScopeFactory>());
+var databaseStored = JsonDocument.Parse(JsonSerializer.Serialize(await databaseStoredExams.StartCandidate("12345", "Test", 101,
+    new OnlineExamStartInput { ExamDate = DateTime.UtcNow.Date })));
+var databaseStoredId = databaseStored.RootElement.GetProperty("Id").GetGuid();
+await databaseStoredExams.SaveCandidate(databaseStoredId, "12345", perfect, true);
+Check((await new OnlineExamRepository(environment, persistentServices.GetRequiredService<IServiceScopeFactory>())
+    .Get(databaseStoredId, "12345")).Score == 100, "Registered attempt store persists submitted results across repository instances");
+Check((await databaseStoredExams.History("12345")).Any(item => item.Id == databaseStoredId), "Registered attempt store provides history without file storage");
 Console.WriteLine($"{checks} checks passed. Temporary test data: {folder}");
 
 sealed class TestEnvironment : IWebHostEnvironment
@@ -145,4 +168,28 @@ sealed class TestExamCatalog : IDepartmentExamRepository
     public Task<JtechnApi.Shares.RepositoryResult> GetById(int id) => throw new NotSupportedException();
     public Task<JtechnApi.Shares.RepositoryResult> Save(int? id, JtechnApi.Exams.Dtos.DepartmentExamInput input) => throw new NotSupportedException();
     public Task<JtechnApi.Shares.RepositoryResult> Delete(int id) => throw new NotSupportedException();
+}
+
+sealed class TestAttemptStore : IOnlineExamAttemptStore
+{
+    private readonly Dictionary<Guid, string> attempts = new();
+
+    public Task<OnlineExamAttempt> Get(Guid id, string employeeId)
+    {
+        if (!attempts.TryGetValue(id, out var value)) return Task.FromResult<OnlineExamAttempt>(null);
+        var attempt = JsonSerializer.Deserialize<OnlineExamAttempt>(value);
+        return Task.FromResult(attempt.EmployeeId == employeeId ? attempt : null);
+    }
+
+    public Task<List<OnlineExamAttempt>> History(string employeeId) => Task.FromResult(attempts.Values
+        .Select(value => JsonSerializer.Deserialize<OnlineExamAttempt>(value))
+        .Where(attempt => attempt.EmployeeId == employeeId)
+        .OrderByDescending(attempt => attempt.StartedAt)
+        .ToList());
+
+    public Task Save(OnlineExamAttempt attempt)
+    {
+        attempts[attempt.Id] = JsonSerializer.Serialize(attempt);
+        return Task.CompletedTask;
+    }
 }

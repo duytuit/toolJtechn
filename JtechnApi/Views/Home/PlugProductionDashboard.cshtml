@@ -119,6 +119,15 @@
                     return time >= hour * 60 + minute ? index : current;
                 }, -1);
             };
+            const nextCheckpoint = () => {
+                const now = new Date();
+                const time = now.getHours() * 60 + now.getMinutes();
+                const next = checkpoints.findIndex((label) => {
+                    const [hour, minute] = label.split(':').map(Number);
+                    return time < hour * 60 + minute;
+                });
+                return next < 0 ? checkpoints.length - 1 : next;
+            };
             const todayString = () => {
                 const now = new Date();
                 return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -173,6 +182,9 @@
                                 : null
                         };
                     });
+                    if (productionDate === todayString() && nextCheckpoint() > currentCheckpoint()) {
+                        points[nextCheckpoint()].actual = actual;
+                    }
                     return {
                         row: latestRow,
                         rows: item.rows,
@@ -204,13 +216,14 @@
                 const progress = percent == null ? 0 : Math.min(100, Math.max(0, percent));
                 const checkpointsHtml = points.map((point, index) => {
                     const isFuture = snapshotDate === todayString() && index > currentCheckpoint();
+                    const isUpcoming = isFuture && index === nextCheckpoint();
                     const hasComparison = point.actual != null && point.target != null;
                     const className = isFuture
-                        ? 'future'
+                        ? isUpcoming ? 'pending' : 'future'
                         : hasComparison
                             ? point.actual >= point.target ? 'met' : 'behind'
                             : '';
-                    const actualValue = isFuture ? '—' : formatNumber(point.actual);
+                    const actualValue = isFuture && !isUpcoming ? '—' : formatNumber(point.actual);
                     const targetValue = formatNumber(point.target);
                     return `<div class="checkpoint ${className}" title="${escapeHtml(point.time + ' · ' + actualValue + ' / ' + targetValue)}">
                         <span class="checkpoint-time">${point.time}</span>

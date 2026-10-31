@@ -1,0 +1,278 @@
+@inject Microsoft.AspNetCore.Authorization.IAuthorizationService Authorization
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Kết quả bài test";
+    var canDelete = (await Authorization.AuthorizeAsync(User, null, "Permission:TEST_RESULTS.DELETE")).Succeeded;
+}
+@Html.AntiForgeryToken()
+<div class="page-header panel-card">
+    <div><p class="section-kicker">Test Kỹ Năng</p><h2 class="mb-0">Kết quả bài test</h2></div>
+</div>
+<section class="panel-card">
+    <div class="panel-head flex-wrap gap-3">
+        <div><h5 class="mb-1">Danh sách kết quả</h5><small id="resultCount" class="text-muted" role="status">Đang tải...</small></div>
+        <div class="d-flex flex-wrap gap-3">
+            <div>
+                <label class="form-label" for="resultsDepartmentFilter">Bộ phận</label>
+                <select id="resultsDepartmentFilter" class="form-select"><option value="">Tất cả bộ phận</option></select>
+            </div>
+            <div>
+                <label class="form-label" for="resultsExamFilter">Bài thi</label>
+                <select id="resultsExamFilter" class="form-select"><option value="">Tất cả bài thi</option></select>
+            </div>
+            <div class="d-flex align-items-end">
+                <button id="exportResults" type="button" class="btn btn-primary text-nowrap" aria-label="Tải kết quả bài test dạng Excel">
+                    Tải Excel (.xlsx)
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="quickStatistics" class="quick-statistics-grid mb-4" aria-live="polite">
+        <div class="text-muted small">Đang tải thống kê nhanh...</div>
+    </div>
+    <div id="quickStatisticsMessage" class="small mb-3" role="status" aria-live="polite"></div>
+    @await Html.PartialAsync("_DataTable", new JtechnApi.ViewModels.DataTableModel
+    {
+        Id = "examResultsTable", PageSize = 20, EnableSearch = true, EnableServerPagination = true, EnableDelete = canDelete,
+        EmptyMessage = "Chưa có kết quả bài thi.",
+        SearchPlaceholder = "Tìm nhân viên, mã hoặc bài thi...",
+        Columns = new[]
+        {
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "examDate", Header = "Ngày thi", Format = "date" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "cycleName", Header = "Kỳ thi" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "employeeName", Header = "Nhân viên", Format = "strong" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "employeeCode", Header = "Mã NV" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "examName", Header = "Bài thi" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "mission", Header = "Lần thi" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "scoreSummary", Header = "Đúng/Tổng" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "score", Header = "Điểm" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "resultStatus", Header = "Kết quả", Format = "badge" }
+        }
+    })
+    <div id="resultsMessage" class="small mt-3" role="status" aria-live="polite"></div>
+</section>
+@section Scripts {
+<script>
+(() => {
+    const count = document.getElementById('resultCount');
+    const message = document.getElementById('resultsMessage');
+    const table = document.getElementById('examResultsTable');
+    const departmentFilter = document.getElementById('resultsDepartmentFilter');
+    const examFilter = document.getElementById('resultsExamFilter');
+    const exportButton = document.getElementById('exportResults');
+    const quickStatistics = document.getElementById('quickStatistics');
+    const quickStatisticsMessage = document.getElementById('quickStatisticsMessage');
+    const requestToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
+    let exams = [];
+    let requestId = 0;
+    let quickStatisticsRequestId = 0;
+    async function load(page = 1, pageSize = 20, search = '') {
+        const currentRequestId = ++requestId;
+        message.textContent = '';
+        try {
+            const query = new URLSearchParams({ page, pageSize, search });
+            if (departmentFilter.value) query.set('deptId', departmentFilter.value);
+            if (examFilter.value) query.set('examId', examFilter.value);
+            const response = await fetch(`/api/exam-results?${query}`, { credentials: 'same-origin' });
+            if (!response.ok) throw new Error(`Không tải được kết quả (${response.status}).`);
+            const data = await response.json();
+            if (currentRequestId !== requestId) return;
+            window.JtechnDataTable.setServerRows('examResultsTable', data.items, data.totalItems, data.page);
+            count.textContent = `Tổng ${data.totalItems} lượt đã nộp`;
+        } catch (error) {
+            if (currentRequestId !== requestId) return;
+            window.JtechnDataTable.showMessage('examResultsTable', 'Không thể tải dữ liệu.', true);
+            message.textContent = error.message;
+            count.textContent = 'Tải dữ liệu thất bại';
+        }
+    }
+    function updateExams() {
+        const selectedDepartment = departmentFilter.value;
+        const selectedExam = examFilter.value;
+        examFilter.replaceChildren(new Option('Tất cả bài thi', ''));
+        exams.filter(exam => !selectedDepartment || String(exam.departmentId) === selectedDepartment)
+            .forEach(exam => examFilter.add(new Option(exam.name, exam.id)));
+        if ([...examFilter.options].some(option => option.value === selectedExam))
+            examFilter.value = selectedExam;
+    }
+    async function initialize() {
+        try {
+            const response = await fetch('/api/exam-results/filters', { credentials: 'same-origin' });
+            if (!response.ok) throw new Error(`Không tải được bộ lọc (${response.status}).`);
+            const filters = await response.json();
+            filters.departments.forEach(department =>
+                departmentFilter.add(new Option(department.name, department.id)));
+            exams = filters.exams;
+            updateExams();
+            await Promise.all([load(), refreshQuickStatistics()]);
+        } catch (error) {
+            message.textContent = error.message;
+            count.textContent = 'Không tải được bộ lọc hoặc kết quả';
+            window.JtechnDataTable.showMessage('examResultsTable', 'Không thể tải dữ liệu.', true);
+        }
+    }
+    async function exportResults() {
+        message.textContent = '';
+        exportButton.disabled = true;
+        try {
+            const query = new URLSearchParams();
+            if (departmentFilter.value) query.set('deptId', departmentFilter.value);
+            if (examFilter.value) query.set('examId', examFilter.value);
+            const search = table.querySelector('[data-table-search]')?.value.trim();
+            if (search) query.set('search', search);
+            const response = await fetch(`/api/exam-results/export?${query}`, { credentials: 'same-origin' });
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || `Xuất Excel thất bại (${response.status}).`);
+            }
+            const blob = await response.blob();
+            const filename = response.headers.get('Content-Disposition')?.match(/filename="?([^";]+)"?/i)?.[1]
+                || 'ket-qua-bai-test.xlsx';
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.append(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            message.textContent = error.message;
+        } finally {
+            exportButton.disabled = false;
+        }
+    }
+    async function refreshQuickStatistics() {
+        const currentRequestId = ++quickStatisticsRequestId;
+        quickStatisticsMessage.textContent = '';
+        quickStatistics.innerHTML = '<div class="text-muted small">Đang tải thống kê nhanh...</div>';
+        try {
+            const query = new URLSearchParams();
+            if (departmentFilter.value) query.set('deptId', departmentFilter.value);
+            if (examFilter.value) query.set('examId', examFilter.value);
+            const response = await fetch(`/api/exam-results/quick-statistics?${query}`, { credentials: 'same-origin' });
+            if (!response.ok) throw new Error(`Không tải được thống kê nhanh (${response.status}).`);
+            const data = await response.json();
+            if (currentRequestId !== quickStatisticsRequestId) return;
+            quickStatistics.replaceChildren(...data.periods.map(renderQuickStatisticsPeriod));
+        } catch (error) {
+            if (currentRequestId !== quickStatisticsRequestId) return;
+            quickStatistics.replaceChildren();
+            quickStatisticsMessage.textContent = error.message;
+        }
+    }
+    function renderQuickStatisticsPeriod(period) {
+        const start = new Date(period.startDate);
+        const month = `${String(start.getMonth() + 1).padStart(2, '0')}/${start.getFullYear()}`;
+        const startDay = start.getDate();
+        const endDay = new Date(period.endDate).getDate();
+        const card = document.createElement('section');
+        card.className = 'quick-statistics-card';
+        const heading = document.createElement('h6');
+        heading.className = 'quick-statistics-title';
+        heading.textContent = `Kết quả Đợt ${period.period} (Từ ${startDay} đến ${endDay}) tháng ${month}`;
+        card.append(heading);
+
+        const metrics = document.createElement('div');
+        metrics.className = 'quick-statistics-metrics';
+        metrics.append(
+            createQuickStatisticsMetric('Tổng', period.total, period.period, 'total'),
+            createQuickStatisticsMetric('Đạt', period.passed, period.period, 'passed'),
+            createQuickStatisticsMetric(`Chưa đạt (${period.failed})`, period.failed, period.period, 'failed'),
+            createQuickStatisticsMetric('Thi lại', period.retake, period.period, 'retake'),
+            createQuickStatisticsMetric('Đào tạo lại', period.retrain, period.period, 'retrain'),
+            createQuickStatisticsMetric('Chưa thi', period.notTaken, period.period, 'notTaken')
+        );
+        card.append(metrics);
+        return card;
+    }
+    function createQuickStatisticsMetric(label, value, period, category) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'quick-statistics-metric';
+        const title = document.createElement('span');
+        title.textContent = label;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn btn-link quick-statistics-value';
+        button.dataset.period = period;
+        button.dataset.category = category;
+        button.textContent = Number(value).toLocaleString('vi-VN');
+        button.setAttribute('aria-label', `Xuất Excel ${label}: ${button.textContent} nhân viên`);
+        wrapper.append(title, button);
+        return wrapper;
+    }
+    async function exportQuickStatistics(period, category, button) {
+        quickStatisticsMessage.textContent = '';
+        button.disabled = true;
+        try {
+            const query = new URLSearchParams({ period, category });
+            if (departmentFilter.value) query.set('deptId', departmentFilter.value);
+            if (examFilter.value) query.set('examId', examFilter.value);
+            const response = await fetch(`/api/exam-results/quick-statistics/export?${query}`, { credentials: 'same-origin' });
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || `Xuất Excel thất bại (${response.status}).`);
+            }
+            const blob = await response.blob();
+            const filename = response.headers.get('Content-Disposition')?.match(/filename="?([^";]+)"?/i)?.[1]
+                || 'thong-ke-nhanh.xlsx';
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.append(link);
+            link.click();
+            link.remove();
+            window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch (error) {
+            quickStatisticsMessage.textContent = error.message;
+        } finally {
+            button.disabled = false;
+        }
+    }
+    quickStatistics.addEventListener('click', event => {
+        const button = event.target.closest('button[data-period][data-category]');
+        if (button) exportQuickStatistics(button.dataset.period, button.dataset.category, button);
+    });
+    table.addEventListener('datatable:page', event => {
+        load(event.detail.page, event.detail.pageSize, event.detail.search);
+    });
+    table.addEventListener('datatable:delete', async event => {
+        const row = event.detail.row;
+        try {
+            if (!await window.JtechnUI.confirm({
+                title: 'Xóa kết quả bài thi',
+                message: `Xóa kết quả thi của "${row.employeeName}" trong bài "${row.examName}"? Dữ liệu sẽ được xóa mềm.`,
+                confirmText: 'Xóa kết quả',
+                confirmVariant: 'danger'
+            })) return;
+
+            const response = await fetch(`/api/exam-results/${row.id}`, {
+                method: 'DELETE',
+                credentials: 'same-origin',
+                headers: { RequestVerificationToken: requestToken }
+            });
+            if (!response.ok) throw new Error(`Không xóa được kết quả (${response.status}).`);
+            window.JtechnUI.toast('Đã xóa kết quả bài thi.', 'success');
+            const search = table.querySelector('[data-table-search]')?.value.trim() || '';
+            await load(1, 20, search);
+        } catch (error) {
+            message.textContent = error.message;
+            window.JtechnUI.toast(error.message, 'error');
+        }
+    });
+    departmentFilter.addEventListener('change', () => {
+        examFilter.value = '';
+        updateExams();
+        load();
+        refreshQuickStatistics();
+    });
+    examFilter.addEventListener('change', () => {
+        load();
+        refreshQuickStatistics();
+    });
+    exportButton.addEventListener('click', exportResults);
+    document.addEventListener('DOMContentLoaded', initialize, { once: true });
+})();
+</script>
+}

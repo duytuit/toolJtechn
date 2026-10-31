@@ -2,7 +2,7 @@
 
 ## Cài đặt và sử dụng
 
-1. Chọn database SQL Server của `ConnectionStrings:JtecDB_Default`, chạy `Sql/001_department_exam.sql` để tạo bảng mới.
+1. Chọn database SQL Server của `ConnectionStrings:JtecDB_Default`, chạy `Sql/001_department_exam.sql` để tạo danh mục đề. Khi cài mới, chạy thêm `Sql/002_online_exam_attempt.sql` để tạo bảng lượt thi; nếu bảng lượt thi đã được tạo từ phiên bản schema trước, chạy `Sql/003_online_exam_attempt_storage.sql` thay thế.
 2. Khởi động lại ứng dụng và đăng nhập tài khoản có quyền `DEPARTMENT_EXAMS.VIEW` (vai trò `ADMIN` có toàn quyền).
 3. Mở `/admin/department-exams` hoặc menu **Bài thi theo bộ phận**.
 4. Thêm bài thi, chọn bộ phận có trong danh mục, nhập mã, tên, mô tả, thời gian và nội dung JSON. Có thể tải file `Data/stamping-new.json` trên máy để nhập đề mẫu vào form.
@@ -37,7 +37,7 @@ Script chưa được tự chạy trên database. Script là `CREATE TABLE` thô
 
 - Luồng thi hỗ trợ chọn bài bằng `examId`. Hạn thi và lịch sử được tách theo bài; cùng nhân viên không bị mở nhầm lượt đang làm của đề khác.
 - `/admin/exams` hiển thị các đề đang mở trong các bộ phận được gán cho nhân viên qua `employee_department`. Chỉ tài khoản nhân viên đang làm việc, bộ phận và liên kết chưa xóa mới được chọn bài. Bài mới phải được nhập vào SQL Server; không tự mở đề file cũ cho người thi mới.
-- Danh mục và nội dung đề mới lưu SQL Server; bài làm và kết quả vẫn lưu trong `App_Data/OnlineExams`. Chức năng này chưa chuyển lịch sử bài làm sang database.
+- Danh mục đề và lượt thi đều lưu trong SQL Server. Bảng `dbo.online_exam_attempt` lưu thông tin kết quả theo cột, cùng snapshot JSON của đề/đáp án để tải lại và tiếp tục lượt chưa nộp. Các lượt cũ còn trong `App_Data/OnlineExams` không tự động chuyển đổi.
 - Quản lý nội dung và đáp án chỉ dành cho `ADMIN`; API người thi chỉ trả dữ liệu đề không có đáp án đúng. Server kiểm tra bộ phận khi xem chi tiết đề, bắt đầu, tiếp tục và lưu lượt chưa nộp; không bỏ qua kiểm tra này cho quản trị viên. Đổi ID trên URL không mở được đề ngoài bộ phận của nhân viên. Lượt đã nộp vẫn có thể xem theo quyền sở hữu dù phân công sau này thay đổi.
 - Trước khi bắt đầu, chọn **Ngày thi** và tích hoặc bỏ tích **Nhân viên mới**. Ngày thi lưu riêng trong `ExamDate`, không thay đổi `StartedAt` (UTC, thời điểm tạo lượt thật). Không dùng ngày thi do người dùng chọn để tính hạn nộp.
 - Hai thông tin trên lưu cùng lượt thi trong `App_Data/OnlineExams` và được hiển thị trong lịch sử/thông tin bài làm. Tiếp tục lượt đang làm không đổi ngày thi hoặc cờ nhân viên mới. Lượt cũ thiếu thông tin hiển thị “Chưa ghi nhận”. Không cần thay đổi bảng SQL vì lịch sử bài làm hiện vẫn lưu file.

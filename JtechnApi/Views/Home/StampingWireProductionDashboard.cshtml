@@ -33,8 +33,7 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="eyebrow">PRODUCTION MONITORING · STAMPING WIRE</div>
-                    <h1>BẢNG GIÁM SÁT SẢN LƯỢNG MÁY DẬP DÂY · @areaName.ToUpperInvariant()</h1>
+                    <h1>BẢNG GIÁM SÁT SẢN LƯỢNG MÁY · @areaName.ToUpperInvariant()</h1>
                 </div>
             </div>
             <div class="toolbar">
@@ -58,8 +57,8 @@
             <article class="kpi"><div class="kpi-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></div><div><div class="kpi-label">Tổng mục tiêu</div><div class="kpi-value" id="kpiTarget">—</div></div><span class="kpi-watermark" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span></article>
             <article class="kpi"><div class="kpi-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v18h17M8 16v-5m5 5V6m5 10V9"/></svg></div><div><div class="kpi-label">Tổng sản lượng</div><div class="kpi-value" id="kpiActual">—</div></div><span class="kpi-watermark" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v18h17M8 16v-5m5 5V6m5 10V9"/></svg></span></article>
             <article class="kpi"><div class="kpi-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 16 5-5 4 3 6-9m-5 0h5v5"/></svg></div><div><div class="kpi-label">Tỷ lệ hoàn thành</div><div class="kpi-value" id="kpiRate">—</div></div><span class="kpi-watermark" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 16 5-5 4 3 6-9m-5 0h5v5"/></svg></span></article>
-            <article class="kpi"><div class="kpi-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></div><div><div class="kpi-label">Máy đạt mục tiêu</div><div class="kpi-value" id="kpiAchieved">—<span class="kpi-unit">máy</span></div></div><span class="kpi-watermark" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></span></article>
-            <article class="kpi"><div class="kpi-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 10 18H2L12 3Zm0 6v5m0 3h.01"/></svg></div><div><div class="kpi-label">Máy chưa đạt</div><div class="kpi-value" id="kpiBehind">—<span class="kpi-unit">máy</span></div></div><span class="kpi-watermark" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 10 18H2L12 3Zm0 6v5m0 3h.01"/></svg></span></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></div><div><div class="kpi-label">Đạt mục tiêu</div><div class="kpi-value" id="kpiAchieved">—<span class="kpi-unit">máy</span></div></div><span class="kpi-watermark" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></span></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 10 18H2L12 3Zm0 6v5m0 3h.01"/></svg></div><div><div class="kpi-label">Chưa đạt</div><div class="kpi-value" id="kpiBehind">—<span class="kpi-unit">máy</span></div></div><span class="kpi-watermark" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 10 18H2L12 3Zm0 6v5m0 3h.01"/></svg></span></article>
         </section>
         <main class="machines" id="machineGrid" aria-live="polite">
             <div class="empty-state">Đang tải dữ liệu sản xuất…</div>
@@ -248,13 +247,13 @@
             const renderCheckpoint = (machine, index) => {
                 const time = checkpoints[index];
                 const { actual, target } = machine.points[index];
-                const isNext = index === nextCheckpoint() && index > currentCheckpoint();
-                const isFuture = index > currentCheckpoint() && !isNext;
-                const isCurrent = index === currentCheckpoint();
+                const isFuture = index > currentCheckpoint();
+                const isUpcoming = isFuture && index === nextCheckpoint();
                 const hasComparison = actual != null && target != null;
-                const className = isFuture ? 'future'
-                    : `${hasComparison ? actual >= target ? 'met' : 'behind' : ''}${isNext ? ' next' : isCurrent ? ' current' : ''}`.trim();
-                const displayedActual = isFuture ? '—' : formatNumber(actual);
+                const className = isFuture
+                    ? isUpcoming ? 'pending' : 'future'
+                    : hasComparison ? actual >= target ? 'met' : 'behind' : '';
+                const displayedActual = isFuture && !isUpcoming ? '—' : formatNumber(actual);
                 const displayedTarget = formatNumber(target);
                 const value = `${displayedActual} / ${displayedTarget}`;
                 return `<div class="checkpoint ${className}" title="${escapeHtml(time + ' · ' + value)}">

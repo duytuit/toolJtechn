@@ -1,0 +1,105 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Thống kê bài test";
+}
+<div class="page-header panel-card">
+    <div><p class="section-kicker">Test Kỹ Năng</p><h2 class="mb-0">Thống kê</h2></div>
+</div>
+<div id="statisticsSummary" class="row g-3 mb-3" aria-live="polite"></div>
+<section class="panel-card mb-4">
+    <div class="panel-head"><div><h5 class="mb-1">Danh sách nhân viên trả lời sai</h5><small id="wrongAnswerCount" class="text-muted"></small></div></div>
+    @await Html.PartialAsync("_DataTable", new JtechnApi.ViewModels.DataTableModel
+    {
+        Id = "wrongAnswersTable", PageSize = 20, EnableSearch = true, EnableServerPagination = true,
+        EmptyMessage = "Chưa có dữ liệu câu trả lời sai.",
+        SearchPlaceholder = "Tìm nhân viên, bài thi hoặc câu hỏi...",
+        Columns = new[]
+        {
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "examDate", Header = "Ngày thi", Format = "date" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "employeeName", Header = "Nhân viên", Format = "strong" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "employeeCode", Header = "Mã NV" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "examName", Header = "Bài thi" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "imageUrl", Header = "Hình ảnh", Format = "image" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "question", Header = "Câu hỏi" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "answerSummary", Header = "Trả lời" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "score", Header = "Điểm" }
+        }
+    })
+</section>
+<section class="panel-card">
+    <div class="panel-head"><div><h5 class="mb-1">Top 10 câu trả lời sai nhiều nhất</h5><small class="text-muted">Xếp hạng theo số lượt trả lời sai của từng câu hỏi.</small></div></div>
+    @await Html.PartialAsync("_DataTable", new JtechnApi.ViewModels.DataTableModel
+    {
+        Id = "topWrongAnswersTable", PageSize = 10, EnableSearch = true, EnablePagination = false,
+        EmptyMessage = "Chưa có dữ liệu thống kê.", SearchPlaceholder = "Tìm câu hỏi...",
+        Columns = new[]
+        {
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "rank", Header = "#", CssClass = "text-end" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "imageUrl", Header = "Hình ảnh", Format = "image" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "question", Header = "Câu hỏi" },
+            new JtechnApi.ViewModels.DataTableColumnModel { Field = "wrongCount", Header = "Số lượt sai", CssClass = "text-end", Format = "strong" }
+        }
+    })
+    <div id="statisticsMessage" class="small mt-3" role="status" aria-live="polite"></div>
+</section>
+@section Scripts {
+<script>
+(() => {
+    const message = document.getElementById('statisticsMessage');
+    const table = document.getElementById('wrongAnswersTable');
+    let requestId = 0;
+    async function load(page = 1, pageSize = 20, search = '') {
+        const currentRequestId = ++requestId;
+        try {
+            const query = new URLSearchParams({ page, pageSize, search });
+            const response = await fetch(`/api/exam-results/statistics?${query}`, { credentials: 'same-origin' });
+            if (!response.ok) throw new Error(`Không tải được thống kê (${response.status}).`);
+            const data = await response.json();
+            if (currentRequestId !== requestId) return;
+            document.getElementById('wrongAnswerCount').textContent = `${data.wrongAnswerTotalItems} lượt trả lời sai`;
+            const summary = document.getElementById('statisticsSummary');
+            summary.replaceChildren();
+            for (const [label, value] of [
+                ['Lượt đã nộp', data.submittedAttempts],
+                ['Đạt', data.passedAttempts],
+                ['Không đạt', data.failedAttempts]
+            ]) {
+                const column = document.createElement('div');
+                column.className = 'col-md-4';
+                const card = document.createElement('div');
+                card.className = 'panel-card h-100';
+                const title = document.createElement('div');
+                title.className = 'small text-muted';
+                title.textContent = label;
+                const number = document.createElement('strong');
+                number.className = 'fs-4';
+                number.textContent = value;
+                card.append(title, number);
+                column.append(card);
+                summary.append(column);
+            }
+            window.JtechnDataTable.setServerRows(
+                'wrongAnswersTable',
+                data.wrongAnswers,
+                data.wrongAnswerTotalItems,
+                data.wrongAnswerPage);
+            window.JtechnDataTable.setRows('topWrongAnswersTable', data.topWrongQuestions.map((item, index) => ({
+                rank: index + 1,
+                imageUrl: item.imageUrl,
+                question: item.question,
+                wrongCount: item.wrongCount
+            })));
+        } catch (error) {
+            if (currentRequestId !== requestId) return;
+            window.JtechnDataTable.showMessage('wrongAnswersTable', 'Không thể tải dữ liệu.', true);
+            window.JtechnDataTable.showMessage('topWrongAnswersTable', 'Không thể tải dữ liệu.', true);
+            message.textContent = error.message;
+        }
+    }
+    table.addEventListener('datatable:page', event => {
+        load(event.detail.page, event.detail.pageSize, event.detail.search);
+    });
+    document.addEventListener('DOMContentLoaded', () => load(), { once: true });
+})();
+</script>
+}

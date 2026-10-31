@@ -2,6 +2,13 @@
 
 namespace JtechnApi.Exams.Repositories
 {
+    public interface IOnlineExamAttemptStore
+    {
+        Task<OnlineExamAttempt> Get(Guid id, string employeeId);
+        Task<List<OnlineExamAttempt>> History(string employeeId);
+        Task Save(OnlineExamAttempt attempt);
+    }
+
     public interface IOnlineExamRepository
     {
         Task<object> Catalog(string employeeId, int? examId = null);

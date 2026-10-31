@@ -47,6 +47,7 @@
         public OnlineExamDefinition Definition { get; set; }
         public Dictionary<int, string[]> Answers { get; set; } = new();
         public decimal Score { get; set; }
+        public int Mission { get; set; } = 1;
     }
 
     public class OnlineExamAnswers

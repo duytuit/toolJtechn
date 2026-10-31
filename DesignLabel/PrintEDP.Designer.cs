@@ -106,8 +106,9 @@ namespace WindowsFormsApp5
             this.btnLoadLotNo.Name = "btnLoadLotNo";
             this.btnLoadLotNo.Size = new System.Drawing.Size(165, 23);
             this.btnLoadLotNo.TabIndex = 4;
-            this.btnLoadLotNo.Text = "Tải dữ liệu";
+            this.btnLoadLotNo.Text = "Nhập Excel";
             this.btnLoadLotNo.UseVisualStyleBackColor = true;
+            this.btnLoadLotNo.Click += new System.EventHandler(this.btnLoadLotNo_Click);
             // 
             // groupBox1
             // 
@@ -126,8 +127,9 @@ namespace WindowsFormsApp5
             this.btnPrintLotNo.Name = "btnPrintLotNo";
             this.btnPrintLotNo.Size = new System.Drawing.Size(165, 23);
             this.btnPrintLotNo.TabIndex = 3;
-            this.btnPrintLotNo.Text = "Xem trước";
+            this.btnPrintLotNo.Text = "Xem trước / in";
             this.btnPrintLotNo.UseVisualStyleBackColor = true;
+            this.btnPrintLotNo.Click += new System.EventHandler(this.btnPrintLotNo_Click);
             // 
             // rtbLotNo
             // 
@@ -137,7 +139,7 @@ namespace WindowsFormsApp5
             this.rtbLotNo.Name = "rtbLotNo";
             this.rtbLotNo.Size = new System.Drawing.Size(176, 426);
             this.rtbLotNo.TabIndex = 2;
-            this.rtbLotNo.Text = "";
+            this.rtbLotNo.Text = "Chưa nhập file Excel";
             // 
             // PrintEDP
             // 

@@ -28,8 +28,10 @@ namespace JtechnApi.Configuration
             new SidebarMenuItem("PRODUCTION_PROGRESS", "Tiến độ thực hiện", "#", "◌", "Sản xuất"),
             new SidebarMenuItem("DAILY_REPORTS", "Báo cáo ngày", "#", "◎", "Báo cáo"),
             new SidebarMenuItem("INCIDENT_REPORTS", "Báo cáo sự cố", "#", "◎", "Báo cáo"),
-            new SidebarMenuItem("ONLINE_EXAMS", "Thi trực tuyến", "/admin/exams", "✓"),
-            new SidebarMenuItem("DEPARTMENT_EXAMS", "Bài thi theo bộ phận", "/admin/department-exams", "✓")
+            new SidebarMenuItem("ONLINE_EXAMS", "Thi trực tuyến", "/admin/exams", "✓", "Test Kỹ Năng"),
+            new SidebarMenuItem("DEPARTMENT_EXAMS", "Bài thi theo bộ phận", "/admin/department-exams", "✓", "Test Kỹ Năng"),
+            new SidebarMenuItem("TEST_RESULTS", "Kết quả bài test", "/admin/exam-results", "✓", "Test Kỹ Năng"),
+            new SidebarMenuItem("TEST_STATISTICS", "Thống kê", "/admin/exam-statistics", "▤", "Test Kỹ Năng")
         });
     }
 }

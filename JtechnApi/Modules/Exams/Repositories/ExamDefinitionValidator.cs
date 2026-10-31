@@ -33,7 +33,8 @@ namespace JtechnApi.Exams.Repositories
                 if (!string.IsNullOrEmpty(q.Image) && (!q.Image.StartsWith("/img/", StringComparison.Ordinal) || q.Image.Contains("..") || q.Image.Contains('\\') || q.Image.Contains('?') || q.Image.Contains('#')))
                     throw new ArgumentException($"Câu {q.Id}: ảnh phải nằm dưới /img/.");
             }
-            if (questions.Sum(q => q.Points) != 100) throw new ArgumentException("Tổng điểm đề thi phải bằng 100.");
+            var totalPoints = decimal.Round(questions.Sum(q => q.Points), 2, MidpointRounding.AwayFromZero);
+            if (totalPoints != 100m) throw new ArgumentException("Tổng điểm đề thi phải bằng 100.");
             return definition;
         }
 

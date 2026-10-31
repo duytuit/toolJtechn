@@ -14,7 +14,7 @@
         {
           "id": 1,
           "text": "Maku được in mấy lần ?",
-          "points": 4.54,
+          "points": 4.46,
           "image": "/img/ktnq/1_ktnq.png",
           "kind": "single",
           "options": [
@@ -38,7 +38,7 @@
         {
           "id": 2,
           "text": "Kích thước 10mm thể hiện điều gi?",
-          "points": 4.54,
+          "points": 4.74,
           "image": "/img/ktnq/2_ktnq.png",
           "kind": "single",
           "options": [

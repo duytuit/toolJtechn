@@ -39,13 +39,31 @@ Danh sách đường dẫn chính xác nằm ở trường `image` trong JSON đ
 - Đáp án tự lưu khi đổi lựa chọn và mỗi 5 giây khi có thay đổi. Trạng thái lưu hiển thị trên giao diện. Đóng trang khi chưa lưu sẽ có cảnh báo.
 - Server quyết định hạn nộp bằng UTC. Tải lại hoặc đóng trang không đặt lại thời gian. Sau hạn, chỉ chấm đáp án đã tới server trước hạn; không nhận thay đổi muộn. Lượt hết hạn được chấm khi có yêu cầu lưu/nộp hoặc mở lại lượt đó.
 - Nộp lại một lượt đã nộp trả về kết quả đã lưu, không chấm lại. Mỗi lượt giữ bản sao đề để chỉnh đề sau này không thay đổi lượt cũ.
-- Bài và kết quả lưu bằng JSON trong `App_Data/OnlineExams`, theo ID lượt. Thư mục này không nằm trong static files, không đưa vào Git và bị loại khỏi đầu vào build/publish.
-- Cấp quyền ghi cho tài khoản chạy ứng dụng; đặt thư mục này trên ổ lưu bền vững và sao lưu. Không xóa thư mục khi deploy. Cơ chế khóa hiện tại dành cho một process/máy chủ; cần chuyển sang database với concurrency control trước khi chạy nhiều instance.
+- Lượt thi, tiến độ, đáp án và kết quả được lưu trong SQL Server `dbo.online_exam_attempt`; snapshot JSON giữ nguyên đề và câu trả lời để tiếp tục/nộp bài. `results` là số câu đúng, `scores` là điểm, `status` là BIT (1 đạt, 0 không đạt, NULL chưa nộp), `counting_time` tính bằng giây, `limit_time` tính bằng phút và `fail_aws` là JSON câu sai cùng câu trả lời. `cycle_name` được lưu theo tháng/năm của ngày thi (`create_date`), định dạng `MMyyyy` (ví dụ `092026`).
+- Chạy `Sql/002_online_exam_attempt.sql` khi tạo bảng mới. Nếu đã chạy script bảng cũ `002_online_exam_attempt.sql`, chạy thêm `Sql/003_online_exam_attempt_storage.sql` để bổ sung khóa và snapshot cần cho lưu/đọc từ database. Các lượt cũ chỉ có trong `App_Data/OnlineExams` không tự động nhập vào SQL Server.
 - Chưa đồng bộ vào bảng MySQL `exams` cũ và chưa có màn hình quản lý kết quả của toàn bộ nhân viên. API `GET /Exam` hiện có được giữ nguyên.
 
 ## API
 
 Tất cả endpoint mới yêu cầu đăng nhập; chỉ xem/sửa lượt thuộc tài khoản hiện tại. Các POST dùng antiforgery token từ trang Razor. Không tự cấp quyền quản lý hoặc thay đổi policy hiện có.
+
+## Kết quả và thống kê
+
+Menu **Test Kỹ Năng** gồm Thi trực tuyến, Bài thi theo bộ phận, Kết quả bài test và Thống kê. Kết quả hiển thị lượt đã nộp theo trang; thống kê gồm danh sách câu trả lời sai và top 10 câu hỏi bị trả lời sai nhiều nhất. Hai trang yêu cầu quyền `TEST_RESULTS.VIEW` và `TEST_STATISTICS.VIEW` tương ứng. Thống kê tổng hợp các lượt đang lưu trong SQL Server; dữ liệu bài thi cũ chỉ lưu trong file JSON không xuất hiện.
+
+| Method | Đường dẫn | Nội dung |
+| --- | --- | --- |
+| GET | `/api/exam-results/filters` | Danh sách bộ phận và bài thi cho bộ lọc kết quả |
+| GET | `/api/exam-results?page=1&pageSize=20&deptId=&examId=&search=` | Danh sách kết quả đã nộp, lọc bộ phận/bài thi và phân trang |
+| GET | `/api/exam-results/export?deptId=&examId=&search=` | Xuất Excel toàn bộ kết quả phù hợp với bộ lọc hiện tại |
+| GET | `/api/exam-results/quick-statistics?deptId=&examId=` | Thống kê nhanh hai đợt trong tháng hiện tại (ngày 1–15 và ngày 16–cuối tháng) |
+| GET | `/api/exam-results/quick-statistics/export?period=1&category=passed&deptId=&examId=` | Xuất Excel theo đợt và nhóm thống kê (`total`, `passed`, `failed`, `retake`, `retrain`, `notTaken`) |
+| DELETE | `/api/exam-results/{id}` | Xóa mềm một kết quả đã nộp; yêu cầu `TEST_RESULTS.DELETE` |
+| GET | `/api/exam-results/statistics?page=1&pageSize=20&search=` | Thống kê, trang câu trả lời sai và top 10 câu sai |
+
+Thống kê nhanh đếm nhân viên đang hoạt động có bộ phận được gán; khi lọc bài thi, bộ phận của bài thi được dùng nếu chưa chọn bộ phận. Mỗi nhân viên được xếp theo lượt nộp gần nhất trong từng đợt; nhân viên chưa có lượt nộp trong khoảng ngày đó nằm trong nhóm **Chưa thi**. Các số liệu có thể bấm để xuất danh sách Excel tương ứng.
+
+Danh sách nhân viên/câu hỏi trả lời sai chỉ trả về một trang mỗi request; có thể tìm theo tên/mã nhân viên, bài thi, câu hỏi và nội dung trả lời. `_DataTable` yêu cầu trang tiếp theo từ API thay vì phân trang toàn bộ kết quả tại trình duyệt.
 
 | Method | Đường dẫn | Nội dung |
 | --- | --- | --- |

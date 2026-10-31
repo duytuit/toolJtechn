@@ -20,7 +20,22 @@
 
         const value = readField(row, column.field);
         const text = formatValue(value, column.format);
-        if (column.format === 'badge' && text !== '—') {
+        if (column.format === 'image') {
+            if (typeof value === 'string' && value.startsWith('/img/') &&
+                !value.includes('..') && !value.includes('\\') &&
+                !value.includes('?') && !value.includes('#')) {
+                const image = document.createElement('img');
+                image.src = value;
+                image.alt = column.imageAltField
+                    ? String(readField(row, column.imageAltField) ?? '')
+                    : 'Hình minh họa';
+                image.loading = 'lazy';
+                image.className = 'data-table-thumbnail';
+                cell.append(image);
+            } else {
+                cell.textContent = '—';
+            }
+        } else if (column.format === 'badge' && text !== '—') {
             const badge = document.createElement('span');
             badge.className = 'status-pill';
             badge.textContent = text;
@@ -72,15 +87,18 @@
 
     const render = (state) => {
         const query = state.search?.value.trim().toLocaleLowerCase() || '';
-        const filtered = query
+        const filtered = !state.enableServerPagination && query
             ? state.rows.filter(row => state.columns.some(column =>
                 `${readField(row, column.field) ?? ''} ${column.secondaryField ? readField(row, column.secondaryField) ?? '' : ''}`
                     .toLocaleLowerCase().includes(query)))
             : state.rows;
-        const pageCount = state.enablePagination ? Math.max(1, Math.ceil(filtered.length / state.pageSize)) : 1;
+        const totalItems = state.enableServerPagination ? state.totalItems : filtered.length;
+        const pageCount = state.enablePagination ? Math.max(1, Math.ceil(totalItems / state.pageSize)) : 1;
         state.page = Math.min(state.page, pageCount);
         const start = state.enablePagination ? (state.page - 1) * state.pageSize : 0;
-        const pageRows = state.enablePagination ? filtered.slice(start, start + state.pageSize) : filtered;
+        const pageRows = state.enableServerPagination
+            ? filtered
+            : state.enablePagination ? filtered.slice(start, start + state.pageSize) : filtered;
 
         state.body.replaceChildren();
         if (pageRows.length === 0) {
@@ -101,9 +119,9 @@
         }
 
         if (state.summary) {
-            const first = filtered.length === 0 ? 0 : start + 1;
+            const first = totalItems === 0 ? 0 : start + 1;
             const last = start + pageRows.length;
-            state.summary.textContent = `${first}–${last} / ${filtered.length}`;
+            state.summary.textContent = `${first}–${last} / ${totalItems}`;
             state.pageLabel.textContent = `${state.page} / ${pageCount}`;
             state.previous.disabled = state.page <= 1;
             state.next.disabled = state.page >= pageCount;
@@ -126,8 +144,10 @@
                 next: element.querySelector('[data-table-next]'),
                 pageSize: Math.max(1, Number(element.dataset.pageSize) || 10),
                 page: 1,
+                totalItems: 0,
                 emptyMessage: element.dataset.emptyMessage || 'Không có dữ liệu phù hợp.',
                 enablePagination: element.dataset.enablePagination === 'true',
+                enableServerPagination: element.dataset.enableServerPagination === 'true',
                 enableView: element.dataset.enableView === 'true',
                 enableEdit: element.dataset.enableEdit === 'true',
                 enableDelete: element.dataset.enableDelete === 'true'
@@ -138,14 +158,35 @@
 
             state.search?.addEventListener('input', () => {
                 state.page = 1;
+                if (state.enableServerPagination) {
+                    state.element.dispatchEvent(new CustomEvent('datatable:page', {
+                        bubbles: true,
+                        detail: { page: state.page, pageSize: state.pageSize, search: state.search.value.trim() }
+                    }));
+                    return;
+                }
                 render(state);
             });
             state.previous?.addEventListener('click', () => {
                 state.page = Math.max(1, state.page - 1);
+                if (state.enableServerPagination) {
+                    state.element.dispatchEvent(new CustomEvent('datatable:page', {
+                        bubbles: true,
+                        detail: { page: state.page, pageSize: state.pageSize, search: state.search?.value.trim() || '' }
+                    }));
+                    return;
+                }
                 render(state);
             });
             state.next?.addEventListener('click', () => {
                 state.page++;
+                if (state.enableServerPagination) {
+                    state.element.dispatchEvent(new CustomEvent('datatable:page', {
+                        bubbles: true,
+                        detail: { page: state.page, pageSize: state.pageSize, search: state.search?.value.trim() || '' }
+                    }));
+                    return;
+                }
                 render(state);
             });
 
@@ -173,6 +214,19 @@
             if (!Array.isArray(rows)) throw new TypeError('Dữ liệu datatable phải là một mảng.');
             state.rows = rows;
             state.page = 1;
+            render(state);
+        },
+        setServerRows(id, rows, totalItems, page) {
+            const state = tables.get(id);
+            if (!state) throw new Error(`Không tìm thấy datatable "${id}".`);
+            if (!state.enableServerPagination) throw new Error(`Datatable "${id}" chưa bật phân trang server.`);
+            if (!Array.isArray(rows) || !Number.isInteger(totalItems) || totalItems < 0 ||
+                !Number.isInteger(page) || page < 1) {
+                throw new TypeError('Dữ liệu phân trang server không hợp lệ.');
+            }
+            state.rows = rows;
+            state.totalItems = totalItems;
+            state.page = page;
             render(state);
         },
         showMessage(id, message, isError = false) {

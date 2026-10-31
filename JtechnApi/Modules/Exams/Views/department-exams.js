@@ -17,12 +17,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const rows = await api($('examDepartmentFilter').value ? '?departmentId=' + $('examDepartmentFilter').value : '');
         window.JtechnDataTable.setRows('departmentExamTable', rows.map(row => ({ ...row, status: row.isActive ? 'Mở thi' : 'Đóng thi' })));
         $('examCount').textContent = `${rows.length} bài thi`;
-        $('examLaunchLinks').replaceChildren();
-        rows.filter(row => row.isActive).forEach(row => {
-            const link = document.createElement('a'); link.className = 'btn btn-sm btn-outline-primary';
-            link.href = '/admin/exams?examId=' + row.id; link.textContent = 'Làm bài: ' + row.name;
-            $('examLaunchLinks').append(link);
-        });
     }
     const fail = error => { $('examListMessage').textContent = error.message; window.JtechnUI.toast(error.message, 'error'); };
     function close() { editing = null; $('examEditor').hidden = true; form.reset(); questions.reset(); }

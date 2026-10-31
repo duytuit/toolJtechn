@@ -11,6 +11,7 @@ namespace JtechnApi.Shares.BaseRepository
     {
         public DbSet<Employee> Employee { get; set; }
         public DbSet<DepartmentExam> DepartmentExams { get; set; }
+        public DbSet<OnlineExamAttemptRecord> OnlineExamAttempts { get; set; }
         public DbSet<EmployeeDepartment> EmployeeDepartments { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Role> Roles { get; set; }
@@ -27,6 +28,9 @@ namespace JtechnApi.Shares.BaseRepository
         {
             base.OnModelCreating(modelBuider);
             modelBuider.Entity<DepartmentExam>().HasQueryFilter(e => e.DeletedAt == null);
+            modelBuider.Entity<OnlineExamAttemptRecord>().HasIndex(e => e.AttemptKey)
+                .IsUnique().HasFilter("[attempt_key] IS NOT NULL");
+            modelBuider.Entity<OnlineExamAttemptRecord>().HasIndex(e => new { e.EmployeeId, e.CatalogExamId, e.SubmittedAt });
             modelBuider.Entity<DepartmentExam>().HasIndex(e => e.Code).IsUnique();
             modelBuider.Entity<EmployeeDepartment>().HasIndex(a => new { a.EmployeeId, a.DepartmentId }).IsUnique();
             modelBuider.Entity<EmployeeDepartment>().HasQueryFilter(a => a.DeletedAt == null);

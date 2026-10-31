@@ -30,7 +30,6 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="eyebrow">PRODUCTION MONITORING · CUTTING</div>
                     <h1>BẢNG GIÁM SÁT SẢN LƯỢNG CÔNG ĐOẠN CẮT</h1>
                 </div>
             </div>
@@ -52,7 +51,7 @@
         <section class="kpis" aria-label="Tổng quan sản xuất công đoạn Cắt">
             <article class="kpi"><div class="kpi-icon" aria-hidden="true">▦</div><div><div class="kpi-label">Tổng số máy</div><div class="kpi-value" id="kpiRows">—</div></div></article>
             <article class="kpi"><div class="kpi-icon" aria-hidden="true">◎</div><div><div class="kpi-label">Tổng mục tiêu</div><div class="kpi-value" id="kpiTarget">—</div></div></article>
-            <article class="kpi"><div class="kpi-icon" aria-hidden="true">▥</div><div><div class="kpi-label">Tổng sản lượng thực tế</div><div class="kpi-value" id="kpiActual">—</div></div></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true">▥</div><div><div class="kpi-label">Tổng sản lượng</div><div class="kpi-value" id="kpiActual">—</div></div></article>
             <article class="kpi"><div class="kpi-icon" aria-hidden="true">↗</div><div><div class="kpi-label">Tỷ lệ hoàn thành</div><div class="kpi-value" id="kpiRate">—</div></div></article>
             <article class="kpi"><div class="kpi-icon" aria-hidden="true">✓</div><div><div class="kpi-label">Đạt mục tiêu</div><div class="kpi-value" id="kpiAchieved">—</div></div></article>
             <article class="kpi"><div class="kpi-icon" aria-hidden="true">!</div><div><div class="kpi-label">Chưa đạt</div><div class="kpi-value" id="kpiBehind">—</div></div></article>
@@ -207,13 +206,13 @@
             const renderCheckpoint = (machine, index) => {
                 const time = checkpoints[index];
                 const { actual, target } = machine.points[index];
-                const isNext = index === nextCheckpoint() && index > currentCheckpoint();
-                const isFuture = index > currentCheckpoint() && !isNext;
-                const isCurrent = index === currentCheckpoint();
+                const isFuture = index > currentCheckpoint();
+                const isUpcoming = isFuture && index === nextCheckpoint();
                 const hasComparison = actual != null && target != null;
-                const className = isFuture ? 'future'
-                    : `${hasComparison ? actual >= target ? 'met' : 'behind' : ''}${isNext ? ' next' : isCurrent ? ' current' : ''}`.trim();
-                const displayedActual = isFuture ? '—' : formatNumber(actual);
+                const className = isFuture
+                    ? isUpcoming ? 'pending' : 'future'
+                    : hasComparison ? actual >= target ? 'met' : 'behind' : '';
+                const displayedActual = isFuture && !isUpcoming ? '—' : formatNumber(actual);
                 const displayedTarget = formatNumber(target);
                 return `<div class="checkpoint ${className}" title="${escapeHtml(time + ' · ' + displayedActual + ' / ' + displayedTarget)}">
                     <span class="checkpoint-time">${time}</span><span class="checkpoint-value"><span>${escapeHtml(displayedActual)}</span> / <span>${escapeHtml(displayedTarget)}</span></span>

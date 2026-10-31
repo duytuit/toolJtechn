@@ -12,6 +12,7 @@ namespace JtechnApi.ViewModels
         public int PageSize { get; set; } = 10;
         public bool EnableSearch { get; set; } = true;
         public bool EnablePagination { get; set; } = true;
+        public bool EnableServerPagination { get; set; }
         public bool EnableEdit { get; set; }
         public bool EnableView { get; set; }
         public bool EnableDelete { get; set; }

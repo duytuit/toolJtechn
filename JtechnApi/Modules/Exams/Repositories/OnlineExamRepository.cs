@@ -89,6 +89,14 @@ namespace JtechnApi.Exams.Repositories
 
         private async Task Write(OnlineExamAttempt attempt)
         {
+            using var scope = scopes?.CreateScope();
+            var store = scope?.ServiceProvider.GetService(typeof(IOnlineExamAttemptStore)) as IOnlineExamAttemptStore;
+            if (store != null)
+            {
+                await store.Save(attempt);
+                return;
+            }
+
             Directory.CreateDirectory(Folder);
             var target = FileName(attempt.Id);
             var temporary = target + ".tmp";
@@ -98,6 +106,10 @@ namespace JtechnApi.Exams.Repositories
 
         private async Task<OnlineExamAttempt> Read(Guid id, string employeeId)
         {
+            using var scope = scopes?.CreateScope();
+            var store = scope?.ServiceProvider.GetService(typeof(IOnlineExamAttemptStore)) as IOnlineExamAttemptStore;
+            if (store != null) return await store.Get(id, employeeId);
+
             if (!File.Exists(FileName(id))) return null;
             var attempt = JsonSerializer.Deserialize<OnlineExamAttempt>(await File.ReadAllTextAsync(FileName(id)), json);
             return attempt.EmployeeId == employeeId ? attempt : null;
@@ -112,6 +124,10 @@ namespace JtechnApi.Exams.Repositories
 
         private async Task<List<OnlineExamAttempt>> HistoryCore(string employeeId)
         {
+            using var scope = scopes?.CreateScope();
+            var store = scope?.ServiceProvider.GetService(typeof(IOnlineExamAttemptStore)) as IOnlineExamAttemptStore;
+            if (store != null) return await store.History(employeeId);
+
             var result = new List<OnlineExamAttempt>();
             if (!Directory.Exists(Folder)) return result;
             foreach (var file in Directory.EnumerateFiles(Folder, "*.json"))

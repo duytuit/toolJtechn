@@ -1,6 +1,7 @@
 (function (root) {
     'use strict';
     const read = (object, key) => object?.[key] ?? object?.[key[0].toUpperCase() + key.slice(1)];
+    const roundPoints = total => Math.round((total + Number.EPSILON) * 100) / 100;
     function normalizeDefinition(value) {
         const groups = read(value, 'groups');
         if (!Array.isArray(groups)) throw new Error('JSON phải có danh sách groups.');
@@ -44,7 +45,8 @@
             if (q.image && (!q.image.startsWith('/img/') || /\.\.|[\\?#]/.test(q.image))) throw new Error(`Câu ${q.id}: đường dẫn ảnh phải nằm trong /img/.`);
             total += q.points;
         }
-        if (Math.abs(total - 100) > 0.000001) throw new Error(`Tổng điểm hiện tại là ${total}; tổng điểm cần bằng 100.`);
+        const roundedTotal = roundPoints(total);
+        if (roundedTotal !== 100) throw new Error(`Tổng điểm hiện tại là ${roundedTotal.toFixed(2)}; tổng điểm cần bằng 100.`);
         return definition;
     }
     function create(container, summary, scoreContainer = container) {
@@ -54,8 +56,9 @@
         const update = () => {
             const questions = groups.flatMap(group => group.questions);
             const total = questions.reduce((sum, q) => sum + (Number(q.points) || 0), 0);
-            summary.textContent = `${groups.length} nhóm · ${questions.length} câu · ${Number(total.toFixed(4))}/100 điểm`;
-            summary.className = Math.abs(total - 100) < 0.000001 ? 'text-success small' : 'text-muted small';
+            const roundedTotal = roundPoints(total);
+            summary.textContent = `${groups.length} nhóm · ${questions.length} câu · ${roundedTotal.toFixed(2)}/100 điểm`;
+            summary.className = roundedTotal === 100 ? 'text-success small' : 'text-muted small';
         };
         function field(parent, label, value, onInput, type = 'text') {
             const wrap = node('div', null, 'mb-3');

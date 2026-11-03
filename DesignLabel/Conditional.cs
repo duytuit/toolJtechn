@@ -20,6 +20,17 @@ namespace WindowsFormsApp5
         public Conditional()
         {
             InitializeComponent();
+            numericUpDown1.Minimum = 0;
+            numericUpDown1.Maximum = int.MaxValue;
+            try
+            {
+                numericUpDown1.Value = LoadAutomaticSettings(AppDomain.CurrentDomain.BaseDirectory).MinimumOrderQuantity;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Không thể đọc ngưỡng máy tự động: " + ex.Message);
+            }
+            numericUpDown1.ValueChanged += (s, e) => SaveAutomaticSettings();
             lboxmay.DoubleClick += lboxmay_DoubleClick;
             LoadMachineCutList();
         }
@@ -73,11 +84,13 @@ namespace WindowsFormsApp5
                 machineName = machineName.Replace(invalidCharacter, '_');
             }
 
-            var condition = new
+            var condition = new ConditionData
             {
                 loai_day = GetPartCodes(richTextBox1.Text),
                 tanshi = GetPartCodes(richTextBox2.Text),
-                gom = GetPartCodes(richTextBox3.Text)
+                gom = GetPartCodes(richTextBox3.Text),
+                soday = GetPartCodes(richTextBox4.Text),
+                IsAutomatic = checkBox1.Checked
             };
 
             string json = JsonConvert.SerializeObject(condition, Formatting.Indented);
@@ -111,6 +124,8 @@ namespace WindowsFormsApp5
             richTextBox1.Text = "";
             richTextBox2.Text = "";
             richTextBox3.Text = "";
+            richTextBox4.Text = "";
+            checkBox1.Checked = false;
             foreach (char invalidCharacter in Path.GetInvalidFileNameChars())
             {
                 machineName = machineName.Replace(invalidCharacter, '_');
@@ -137,6 +152,8 @@ namespace WindowsFormsApp5
                 richTextBox1.Text = string.Join(",", condition.loai_day ?? new List<string>());
                 richTextBox2.Text = string.Join(",", condition.tanshi ?? new List<string>());
                 richTextBox3.Text = string.Join(",", condition.gom ?? new List<string>());
+                richTextBox4.Text = string.Join(",", condition.soday ?? new List<string>());
+                checkBox1.Checked = condition.IsAutomatic;
             }
             catch (Exception ex)
             {
@@ -154,6 +171,37 @@ namespace WindowsFormsApp5
             lbMayCat.Text = machineName;
             LoadMachineCondition(machineName);
         }
+        private void SaveAutomaticSettings()
+        {
+            try
+            {
+                var settings = new AutomaticPrintSettings { MinimumOrderQuantity = numericUpDown1.Value };
+                File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AutoMachineSettings.json"),
+                    JsonConvert.SerializeObject(settings, Formatting.Indented));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Không thể lưu ngưỡng máy tự động: " + ex.Message);
+            }
+        }
+
+        internal static AutomaticPrintSettings LoadAutomaticSettings(string directory)
+        {
+            var path = Path.Combine(directory, "AutoMachineSettings.json");
+            var settings = File.Exists(path)
+                ? JsonConvert.DeserializeObject<AutomaticPrintSettings>(File.ReadAllText(path))
+                : new AutomaticPrintSettings();
+            if (settings == null || settings.MinimumOrderQuantity < 0 || settings.MinimumOrderQuantity > int.MaxValue)
+                throw new InvalidDataException("Ngưỡng số lượng máy tự động không hợp lệ.");
+            return settings;
+        }
+
+        internal class AutomaticPrintSettings
+        {
+            [JsonProperty("min_order_quantity")]
+            public decimal MinimumOrderQuantity { get; set; } = 7m;
+        }
+
         internal static List<ConditionData> LoadPrintGroups(string directory)
         {
             var listPath = Path.Combine(directory, "ListMachineCut.json");
@@ -194,16 +242,37 @@ namespace WindowsFormsApp5
             public List<string> loai_day { get; set; }
             public List<string> tanshi { get; set; }
             public List<string> gom { get; set; }
+            public List<string> soday { get; set; }
+            [JsonProperty("is_automatic")]
+            public bool IsAutomatic { get; set; }
+
+            public int GetLabelMatchPriority(string senban, string wire, string terminalA, string terminalB, string sleeveA, string sleeveB)
+            {
+                var priority = GetMatchPriority(wire, terminalA, terminalB, sleeveA, sleeveB);
+                if (priority >= 0)
+                    return priority;
+                return ContainsPartialCode(soday, senban) ? 3 : -1;
+            }
 
             public int GetMatchPriority(string wire, string terminalA, string terminalB, string sleeveA, string sleeveB)
             {
-                if (ContainsCode(loai_day, wire))
+                if (ContainsPartialCode(loai_day, wire))
                     return 0;
                 if (ContainsCode(tanshi, terminalA) || ContainsCode(tanshi, terminalB))
                     return 1;
                 if (ContainsCode(gom, sleeveA) || ContainsCode(gom, sleeveB))
                     return 2;
                 return -1;
+            }
+
+            private static bool ContainsPartialCode(List<string> codes, string value)
+            {
+                var normalized = NormalizeCode(value);
+                return normalized.Length > 0 && codes != null && codes.Any(code =>
+                {
+                    var condition = NormalizeCode(code);
+                    return condition.Length > 0 && normalized.Contains(condition);
+                });
             }
 
             private static bool ContainsCode(List<string> codes, string value)
@@ -225,6 +294,8 @@ namespace WindowsFormsApp5
             richTextBox1.Text = "";
             richTextBox2.Text = "";
             richTextBox3.Text = "";
+            richTextBox4.Text = "";
+            checkBox1.Checked = false;
             lbMayCat.Text = "";
             if (lboxmay.SelectedIndex < 0)
             {

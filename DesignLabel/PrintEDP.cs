@@ -196,7 +196,7 @@ namespace WindowsFormsApp5
             }
 
             var orderSql = @"
-                SELECT H10F.製番, H10F.品目C, H10F.発注SEQ, H10F.発注SEQ2, H10F.発注数
+                SELECT H10F.製番, H10F.品目C, H10F.発注SEQ, H10F.発注SEQ2, H10F.発注数, H10F.納期
                 FROM DFW_H10F H10F
                 WHERE H10F.発注SEQ IN (" + string.Join(",", sequenceNames) + ")";
             var orderRows = _oracle.ExecuteDataTable(orderSql, sequenceParameters.ToArray());
@@ -256,7 +256,7 @@ namespace WindowsFormsApp5
                 )
                 SELECT C.HINCD, C.SENBAN, C.MARKNO, C.SENSYU, C.SENTYO, C.SURYO, C.TABA,
                        C.TWIST1, C.TWIST2, C.TWIST3, C.TASCDA, C.TASMEIA, C.TASCDB, C.TASMEIB, C.BIKO,
-                       C.NOUKI, C.KAWAA, C.KAWAB, C.GUMCDA, C.GUMCDB,
+                       C.NOUKI, C.KAWAA, C.KAWAB, C.GUMCDA, C.GUMCDB, C.JOINTGA, C.JOINTGB,
                        C.INFOMEIA1, C.INFOMEIA2, C.INFOMEIB1, C.INFOMEIB2,
                        TA.ShelfNumber AS ShelfTerminalA, GA.ShelfNumber AS ShelfSleeveA,
                        TB.ShelfNumber AS ShelfTerminalB, GB.ShelfNumber AS ShelfSleeveB
@@ -308,33 +308,40 @@ namespace WindowsFormsApp5
         {
             _printPages.Clear();
             var groups = Conditional.LoadPrintGroups(AppDomain.CurrentDomain.BaseDirectory);
-            _printPages = BuildPrintPages(_labels, groups);
+            var settings = Conditional.LoadAutomaticSettings(AppDomain.CurrentDomain.BaseDirectory);
+            _printPages = BuildPrintPages(_labels, groups, settings.MinimumOrderQuantity);
             groupBox1.Text = "Thống kê kết quả: " + _labels.Count + " EDP / " + _printPages.Count + " trang";
             UpdatePreviewScrollSize();
             plPriviewPageLotNo.Invalidate();
         }
 
-        private static List<EdpPrintPage> BuildPrintPages(List<EdpLabel> labels, List<Conditional.ConditionData> groups)
+        private static List<EdpPrintPage> BuildPrintPages(List<EdpLabel> labels, List<Conditional.ConditionData> groups,
+            decimal automaticMinimumQuantity = 7m)
         {
             var pages = new List<EdpPrintPage>();
             var remaining = new List<EdpLabel>(labels);
             foreach (var label in labels)
                 label.MatchedCondition = string.Empty;
-            foreach (var group in groups)
+            // Partition by quantity before matching; orders never cross between machine types.
+            foreach (var group in groups.OrderByDescending(condition => condition.IsAutomatic))
             {
-                var matched = remaining.Select(label => new
+                var matched = remaining.Where(label => group.IsAutomatic ==
+                    MeetsAutomaticQuantity(label, automaticMinimumQuantity)).Select(label => new
                 {
                     Label = label,
-                    Priority = group.GetMatchPriority(label.Get("SENSYU"), label.Get("TASCDA"),
+                    Priority = group.GetLabelMatchPriority(label.Get("SENBAN"), label.Get("SENSYU"), label.Get("TASCDA"),
                         label.Get("TASCDB"), label.Get("GUMCDA"), label.Get("GUMCDB"))
                 }).Where(match => match.Priority >= 0).OrderBy(match => match.Priority)
                     .Select(match => match.Label).ToList();
 
                 foreach (var label in matched)
                 {
-                    var priority = group.GetMatchPriority(label.Get("SENSYU"), label.Get("TASCDA"),
+                    var priority = group.GetLabelMatchPriority(label.Get("SENBAN"), label.Get("SENSYU"), label.Get("TASCDA"),
                         label.Get("TASCDB"), label.Get("GUMCDA"), label.Get("GUMCDB"));
-                    label.MatchedCondition = new[] { "loai_day", "tanshi", "gom" }[priority];
+                    label.MatchedCondition = new[] { "loai_day", "tanshi", "gom", "soday" }[priority];
+                    if (group.IsAutomatic)
+                        label.MatchedCondition = "発注数 >= " + automaticMinimumQuantity.ToString(
+                            System.Globalization.CultureInfo.InvariantCulture) + " + " + label.MatchedCondition;
                 }
                 AddGroupPages(pages, group.Name, matched);
                 var assigned = new HashSet<EdpLabel>(matched);
@@ -343,6 +350,14 @@ namespace WindowsFormsApp5
 
             AddGroupPages(pages, groups.Count > 0 ? "Chưa phân nhóm" : null, remaining);
             return pages;
+        }
+
+        private static bool MeetsAutomaticQuantity(EdpLabel label, decimal minimumQuantity)
+        {
+            decimal quantity;
+            return decimal.TryParse(label.Get("OrderQuantity"),
+                System.Globalization.NumberStyles.AllowLeadingSign | System.Globalization.NumberStyles.AllowDecimalPoint,
+                System.Globalization.CultureInfo.InvariantCulture, out quantity) && quantity >= minimumQuantity;
         }
 
         private static void AddGroupPages(List<EdpPrintPage> pages, string groupName, List<EdpLabel> labels)
@@ -367,7 +382,7 @@ namespace WindowsFormsApp5
             {
                 ["LotNumber"] = GetValue(orderRow, "製番"),
                 ["OrderSequence"] = GetValue(orderRow, "発注SEQ"),
-                ["OrderQuantity"] = GetValue(orderRow, "発注数"),
+                ["OrderQuantity"] = GetQrValue(orderRow, "発注数"),
                 ["ProductCode"] = productCode,
                 ["QrContent"] = BuildQrContent(orderRow, component, productCode),
                 ["ProductCodePrefix"] = string.IsNullOrEmpty(productCode) ? string.Empty : productCode.Substring(0, 1),
@@ -390,11 +405,13 @@ namespace WindowsFormsApp5
                 ["KAWAB"] = GetValue(component, "KAWAB"),
                 ["GUMCDA"] = GetDisplayCode(component, "GUMCDA"),
                 ["GUMCDB"] = GetDisplayCode(component, "GUMCDB"),
+                ["JOINTGA"] = GetValue(component, "JOINTGA"),
+                ["JOINTGB"] = GetValue(component, "JOINTGB"),
                 ["ShelfTerminalA"] = GetValue(component, "ShelfTerminalA"),
                 ["ShelfSleeveA"] = GetValue(component, "ShelfSleeveA"),
                 ["ShelfTerminalB"] = GetValue(component, "ShelfTerminalB"),
                 ["ShelfSleeveB"] = GetValue(component, "ShelfSleeveB"),
-                ["DueDate"] = GetDueDate(component),
+                ["DueDate"] = GetDueDate(orderRow),
                 ["ProcessingA"] = string.Join(Environment.NewLine,
                     new[] { GetValue(component, "INFOMEIA1"), GetValue(component, "INFOMEIA2") }
                         .Where(value => !string.IsNullOrWhiteSpace(value))),
@@ -443,12 +460,12 @@ namespace WindowsFormsApp5
             return value.Length > 0 ? value.Substring(1) : string.Empty;
         }
 
-        private static string GetDueDate(DataRow component)
+        private static string GetDueDate(DataRow orderRow)
         {
-            if (component.Table.Columns.Contains("NOUKI") && component["NOUKI"] is DateTime)
-                return ((DateTime)component["NOUKI"]).ToString("yy/MM/dd");
+            if (orderRow.Table.Columns.Contains("納期") && orderRow["納期"] is DateTime)
+                return ((DateTime)orderRow["納期"]).ToString("yy/MM/dd");
 
-            var value = GetValue(component, "NOUKI");
+            var value = GetValue(orderRow, "納期");
             DateTime date;
             return DateTime.TryParseExact(value,
                 new[] { "yyyyMMdd", "yyyy/MM/dd", "yyyy-MM-dd", "yy/MM/dd", "yyMMdd" },
@@ -512,6 +529,7 @@ namespace WindowsFormsApp5
                 new[] { "Số lượng (発注数)", "OrderQuantity" }, new[] { "束", "TABA" },
                 new[] { "Cos A", "TASCDA" }, new[] { "Cos B", "TASCDB" },
                 new[] { "Gôm A", "GUMCDA" }, new[] { "Gôm B", "GUMCDB" },
+                new[] { "G A", "JOINTGA" }, new[] { "G B", "JOINTGB" },
                 new[] { "Kệ cos A", "ShelfTerminalA" }, new[] { "Kệ cos B", "ShelfTerminalB" },
                 new[] { "Kệ gôm A", "ShelfSleeveA" }, new[] { "Kệ gôm B", "ShelfSleeveB" },
                 new[] { "Tuốt vỏ A", "KAWAA" }, new[] { "Tuốt vỏ B", "KAWAB" },

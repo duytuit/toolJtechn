@@ -48,21 +48,31 @@ namespace WindowsFormsApp5
             this.txtMaSP = new System.Windows.Forms.TextBox();
             this.lboxmay = new System.Windows.Forms.ListBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.richTextBox4 = new System.Windows.Forms.RichTextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            this.groupBox3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
             // richTextBox1
             // 
             this.richTextBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.richTextBox1.Location = new System.Drawing.Point(9, 158);
+            this.richTextBox1.Location = new System.Drawing.Point(3, 67);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(146, 277);
+            this.richTextBox1.Size = new System.Drawing.Size(110, 288);
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "";
             // 
@@ -70,9 +80,9 @@ namespace WindowsFormsApp5
             // 
             this.richTextBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.richTextBox2.Location = new System.Drawing.Point(161, 158);
+            this.richTextBox2.Location = new System.Drawing.Point(118, 67);
             this.richTextBox2.Name = "richTextBox2";
-            this.richTextBox2.Size = new System.Drawing.Size(158, 277);
+            this.richTextBox2.Size = new System.Drawing.Size(122, 288);
             this.richTextBox2.TabIndex = 1;
             this.richTextBox2.Text = "";
             // 
@@ -80,16 +90,16 @@ namespace WindowsFormsApp5
             // 
             this.richTextBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.richTextBox3.Location = new System.Drawing.Point(325, 158);
+            this.richTextBox3.Location = new System.Drawing.Point(245, 67);
             this.richTextBox3.Name = "richTextBox3";
-            this.richTextBox3.Size = new System.Drawing.Size(146, 277);
+            this.richTextBox3.Size = new System.Drawing.Size(114, 287);
             this.richTextBox3.TabIndex = 2;
             this.richTextBox3.Text = "";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(31, 133);
+            this.label1.Location = new System.Drawing.Point(24, 51);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(77, 13);
             this.label1.TabIndex = 3;
@@ -98,7 +108,7 @@ namespace WindowsFormsApp5
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(216, 133);
+            this.label2.Location = new System.Drawing.Point(161, 51);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(39, 13);
             this.label2.TabIndex = 4;
@@ -107,7 +117,7 @@ namespace WindowsFormsApp5
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(383, 133);
+            this.label3.Location = new System.Drawing.Point(287, 51);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(29, 13);
             this.label3.TabIndex = 5;
@@ -116,7 +126,7 @@ namespace WindowsFormsApp5
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(31, 63);
+            this.label4.Location = new System.Drawing.Point(4, 23);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(51, 13);
             this.label4.TabIndex = 6;
@@ -126,7 +136,7 @@ namespace WindowsFormsApp5
             // 
             this.lbMayCat.AutoSize = true;
             this.lbMayCat.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lbMayCat.Location = new System.Drawing.Point(110, 55);
+            this.lbMayCat.Location = new System.Drawing.Point(53, 16);
             this.lbMayCat.Name = "lbMayCat";
             this.lbMayCat.Size = new System.Drawing.Size(75, 24);
             this.lbMayCat.TabIndex = 7;
@@ -134,9 +144,9 @@ namespace WindowsFormsApp5
             // 
             // btnConditional
             // 
-            this.btnConditional.Location = new System.Drawing.Point(325, 58);
+            this.btnConditional.Location = new System.Drawing.Point(338, 18);
             this.btnConditional.Name = "btnConditional";
-            this.btnConditional.Size = new System.Drawing.Size(146, 23);
+            this.btnConditional.Size = new System.Drawing.Size(130, 23);
             this.btnConditional.TabIndex = 8;
             this.btnConditional.Text = "Cập nhật";
             this.btnConditional.UseVisualStyleBackColor = true;
@@ -243,20 +253,95 @@ namespace WindowsFormsApp5
             // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.btnConditional);
-            this.panel1.Controls.Add(this.richTextBox1);
-            this.panel1.Controls.Add(this.label1);
-            this.panel1.Controls.Add(this.label2);
-            this.panel1.Controls.Add(this.label3);
-            this.panel1.Controls.Add(this.label4);
-            this.panel1.Controls.Add(this.richTextBox2);
-            this.panel1.Controls.Add(this.lbMayCat);
-            this.panel1.Controls.Add(this.richTextBox3);
+            this.panel1.Controls.Add(this.groupBox3);
+            this.panel1.Controls.Add(this.groupBox1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(3, 3);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(480, 444);
             this.panel1.TabIndex = 0;
+            // 
+            // richTextBox4
+            // 
+            this.richTextBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.richTextBox4.Location = new System.Drawing.Point(363, 67);
+            this.richTextBox4.Name = "richTextBox4";
+            this.richTextBox4.Size = new System.Drawing.Size(108, 287);
+            this.richTextBox4.TabIndex = 10;
+            this.richTextBox4.Text = "";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(407, 51);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(40, 13);
+            this.label5.TabIndex = 11;
+            this.label5.Text = "Số dây";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(22, 28);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(134, 13);
+            this.label6.TabIndex = 12;
+            this.label6.Text = "lấy EDP cho máy tự động: ";
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.numericUpDown1);
+            this.groupBox1.Controls.Add(this.label6);
+            this.groupBox1.Location = new System.Drawing.Point(3, 9);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(472, 67);
+            this.groupBox1.TabIndex = 13;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Thiết lập lọc số lượng EDP cho máy tự động";
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.checkBox1);
+            this.groupBox3.Controls.Add(this.label4);
+            this.groupBox3.Controls.Add(this.lbMayCat);
+            this.groupBox3.Controls.Add(this.label5);
+            this.groupBox3.Controls.Add(this.btnConditional);
+            this.groupBox3.Controls.Add(this.label3);
+            this.groupBox3.Controls.Add(this.label1);
+            this.groupBox3.Controls.Add(this.richTextBox4);
+            this.groupBox3.Controls.Add(this.label2);
+            this.groupBox3.Controls.Add(this.richTextBox1);
+            this.groupBox3.Controls.Add(this.richTextBox2);
+            this.groupBox3.Controls.Add(this.richTextBox3);
+            this.groupBox3.Location = new System.Drawing.Point(1, 81);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(474, 359);
+            this.groupBox3.TabIndex = 14;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Cập nhật thông tin nhóm điều kiện";
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(241, 22);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(96, 17);
+            this.checkBox1.TabIndex = 12;
+            this.checkBox1.Text = "là máy tự động";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            // 
+            // numericUpDown1
+            // 
+            this.numericUpDown1.Location = new System.Drawing.Point(162, 26);
+            this.numericUpDown1.Name = "numericUpDown1";
+            this.numericUpDown1.Size = new System.Drawing.Size(120, 20);
+            this.numericUpDown1.TabIndex = 13;
+            this.numericUpDown1.Value = new decimal(new int[] {
+            7,
+            0,
+            0,
+            0});
             // 
             // Conditional
             // 
@@ -273,7 +358,11 @@ namespace WindowsFormsApp5
             this.panel3.ResumeLayout(false);
             this.panel3.PerformLayout();
             this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -299,5 +388,12 @@ namespace WindowsFormsApp5
         private System.Windows.Forms.Button btnAddConditition;
         private System.Windows.Forms.TextBox txtMaSP;
         private System.Windows.Forms.ListBox lboxmay;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.RichTextBox richTextBox4;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.NumericUpDown numericUpDown1;
     }
 }

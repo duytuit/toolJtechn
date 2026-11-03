@@ -1,4 +1,4 @@
-﻿@{
+@{
     Layout = null;
 }
 <!DOCTYPE html>
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/stamping-wire-production.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/plug-production.css" asp-append-version="true" />
 </head>
 <body>
     <div class="app">
@@ -40,30 +41,32 @@
                 <button class="icon-btn theme-button" id="themeButton" type="button" aria-label="Chuyển sang giao diện tối">◐ Dark</button>
                 <div class="clock" id="clock">--:--:--</div>
                 <div class="live"><span class="live-dot"></span><span id="liveText">Đang kết nối</span></div>
-                <span class="page-indicator" id="pageIndicator" aria-live="polite">1 / 1</span>
-                <button class="icon-btn cycle-button" id="nextButton" type="button" title="Chuyển trang tiếp theo" disabled>Next</button>
-                <button class="icon-btn cycle-button" id="stopButton" type="button" title="Dừng tự động chuyển trang" disabled>Stop</button>
                 <button class="icon-btn" id="refreshButton" type="button" title="Cập nhật ngay" aria-label="Cập nhật ngay">↻</button>
                 <button class="icon-btn" id="fullscreenButton" type="button" title="Toàn màn hình" aria-label="Toàn màn hình">⛶</button>
             </div>
         </header>
-        <section class="kpis" aria-label="Tổng quan sản xuất công đoạn Cắm">
-            <article class="kpi"><div class="kpi-icon" aria-hidden="true">▦</div><div><div class="kpi-label">Số nhóm Cắm</div><div class="kpi-value" id="kpiRows">—</div></div></article>
-            <article class="kpi"><div class="kpi-icon" aria-hidden="true">◎</div><div><div class="kpi-label">Tổng mục tiêu</div><div class="kpi-value" id="kpiTarget">—</div></div></article>
-            <article class="kpi"><div class="kpi-icon" aria-hidden="true">▥</div><div><div class="kpi-label">Tổng sản lượng thực tế</div><div class="kpi-value" id="kpiActual">—</div></div></article>
-            <article class="kpi"><div class="kpi-icon" aria-hidden="true">↗</div><div><div class="kpi-label">Tỷ lệ hoàn thành</div><div class="kpi-value" id="kpiRate">—</div></div></article>
-            <article class="kpi"><div class="kpi-icon" aria-hidden="true">✓</div><div><div class="kpi-label">Đạt mục tiêu</div><div class="kpi-value" id="kpiAchieved">—</div></div></article>
-            <article class="kpi"><div class="kpi-icon" aria-hidden="true">!</div><div><div class="kpi-label">Chưa đạt</div><div class="kpi-value" id="kpiBehind">—</div></div></article>
+        <section class="overview" aria-label="Tổng quan sản xuất">
+            <article class="metric target"><div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="13" r="8"/><circle cx="11" cy="13" r="4"/><path d="m11 13 9-10m-5 0h5v5"/></svg></div><div><div class="metric-label">Tổng mục tiêu</div><strong id="kpiTarget">—</strong><p>Mục tiêu sản lượng cả ngày</p></div></article>
+            <article class="metric actual"><div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20v-6h3v6m4 0V8h3v12m4 0V3h3v17"/></svg></div><div><div class="metric-label">Tổng thực tế</div><strong id="kpiActual">—</strong><p>Sản lượng đã ghi nhận</p></div></article>
+            <article class="metric rate"><div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10v6a5 5 0 0 1-10 0V3Zm0 2H3v3a4 4 0 0 0 4 4m10-7h4v3a4 4 0 0 1-4 4M12 14v6m-4 1h8"/></svg></div><div><div class="metric-label">Tỷ lệ hoàn thành</div><strong id="kpiRate">—</strong><div class="overview-progress" role="progressbar" aria-label="Tỷ lệ hoàn thành" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="totalProgress"></span></div></div></article>
+            <article class="metric missing"><div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 9-5 9 5-9 5-9-5Zm0 5 9 5 9-5M3 17l9 5 9-5"/></svg></div><div><div class="metric-label">Sản lượng còn thiếu</div><strong id="kpiMissing">—</strong><p>Số lượng cần hoàn thành</p></div></article>
         </section>
-        <main class="machines" id="machineGrid" aria-live="polite">
-            <div class="empty-state">Đang tải dữ liệu sản xuất…</div>
+        <main class="production-layout">
+            <section class="chart-panel" aria-label="Biểu đồ sản lượng các nhóm Cắm">
+                <div class="chart-header"><div class="chart-legend"><span><i class="target-key"></i>Target</span><span><i class="actual-key"></i>Actual</span></div></div>
+                <div class="chart-scroll" id="machineGrid" aria-live="polite"><div class="empty-state">Đang tải dữ liệu sản xuất…</div></div>
+            </section>
+            <aside class="summary-panel" aria-labelledby="summaryTitle">
+                <h2 id="summaryTitle"><span aria-hidden="true">▥</span> CHẤT LƯỢNG THÁNG <span id="summaryMonth"></span></h2>
+                <table class="summary-table"><thead><tr><th>Mục tiêu lỗi</th><th>Lỗi phát sinh</th><th>Đánh giá</th></tr></thead><tbody><tr><td class="summary-target">—</td><td class="summary-actual">—</td><td><span class="summary-status">Chưa có dữ liệu</span></td></tr></tbody></table>
+            </aside>
         </main>
         <footer class="footer"><span id="dataNote">Nguồn dữ liệu: Control_ProgramPlug_Visualize</span><span id="lastUpdated">Chưa cập nhật</span></footer>
     </div>
     <script>
         (() => {
             const checkpoints = ['10:00', '12:00', '15:00', '17:00', '20:00'];
-            const state = { rows: [], columns: [], totalRows: 0, truncated: false, pageIndex: 0, autoNextTimer: null, autoNextEnabled: true };
+            const state = { rows: [], columns: [], totalRows: 0, truncated: false };
             const $ = (selector) => document.querySelector(selector);
             const aliases = {
                 group: ['GroupMember'],
@@ -198,84 +201,61 @@
                         title: item.group || item.name || item.code || 'Nhóm Cắm',
                         status: statusOf(actual, target)
                     };
-                }).filter((item) => item.actual > 0)
+                })
                     .sort((a, b) => a.title.localeCompare(b.title, 'vi') || a.name.localeCompare(b.name, 'vi'));
             };
-            const pageSize = () => {
-                const styles = window.getComputedStyle($('#machineGrid'));
-                return Math.max(1, styles.gridTemplateColumns.split(' ').length * styles.gridTemplateRows.split(' ').length);
-            };
-            const nextPage = () => {
-                const count = Math.ceil(records().length / pageSize());
-                state.pageIndex = count <= 1 || state.pageIndex >= count - 1 ? 0 : state.pageIndex + 1;
-                render();
-            };
-            const renderCard = (record) => {
-                const { row, name, actual, target, title, status, points, snapshotDate } = record;
-                const percent = target > 0 && actual != null ? actual / target * 100 : null;
-                const progress = percent == null ? 0 : Math.min(100, Math.max(0, percent));
-                const checkpointsHtml = points.map((point, index) => {
-                    const isFuture = snapshotDate === todayString() && index > currentCheckpoint();
-                    const isUpcoming = isFuture && index === nextCheckpoint();
-                    const hasComparison = point.actual != null && point.target != null;
-                    const className = isFuture
-                        ? isUpcoming ? 'pending' : 'future'
-                        : hasComparison
-                            ? point.actual >= point.target ? 'met' : 'behind'
-                            : '';
-                    const actualValue = isFuture && !isUpcoming ? '—' : formatNumber(point.actual);
-                    const targetValue = formatNumber(point.target);
-                    return `<div class="checkpoint ${className}" title="${escapeHtml(point.time + ' · ' + actualValue + ' / ' + targetValue)}">
-                        <span class="checkpoint-time">${point.time}</span>
-                        <span class="checkpoint-value"><span>${escapeHtml(actualValue)}</span> / <span>${escapeHtml(targetValue)}</span></span>
-                    </div>`;
-                }).join('');
-                const noProduction = actual == null || actual <= 0;
-                return `<article class="machine-card ${status}${noProduction ? ' no-production' : ''}" aria-label="${escapeHtml(title)} ${escapeHtml(name)}, ${statusText(status)}">
-                    <div class="card-head">
-                        <div class="machine-title"><span class="machine-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V10l6 3V7l6 3V3h6v18H3Z"/><path d="M7 17h1m4 0h1m4 0h1"/></svg></span><span class="machine-name">${escapeHtml(title)}${name ? ` · ${escapeHtml(name)}` : ''}</span></div>
-                        <span class="badge">${statusText(status)}</span>
-                    </div>
-                    <div class="quantity-block">
-                        <div class="quantity">
-                            <div class="quantity-stat quantity-actual"><span class="quantity-label">Thực tế</span><strong>${formatNumber(actual)}</strong></div>
-                            <div class="quantity-stat quantity-target"><span class="quantity-label">Mục tiêu</span><strong>${formatNumber(target)}</strong></div>
-                        </div>
-                        <div class="quantity-meter">
-                            <div class="quantity-progress" role="progressbar" aria-label="Tiến độ ${escapeHtml(title)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress.toFixed(1)}" aria-valuetext="${percent == null ? 'Chưa có dữ liệu mục tiêu hoặc sản lượng' : `${formatNumber(percent, 1)}%`}"><span style="width:${progress}%"></span><strong class="progress-quantity">${formatNumber(actual)} / ${formatNumber(target)}</strong></div>
-                            <span class="quantity-percent">${percent == null ? '—' : `${formatNumber(percent, 1)}%`}</span>
-                        </div>
-                    </div>
-                    <div class="checkpoints">${checkpointsHtml}</div>
-                </article>`;
-            };
             const render = () => {
-                const items = records();
-                const totalActual = items.reduce((sum, item) => sum + (item.actual ?? 0), 0);
-                const totalTarget = items.reduce((sum, item) => sum + (item.target ?? 0), 0);
-                const achieved = items.filter((item) => item.target != null && item.actual != null && item.actual >= item.target).length;
-                $('#kpiRows').textContent = formatNumber(items.length);
+                const grouped = new Map();
+                records().forEach((item) => {
+                    const key = item.name || item.group || item.title;
+                    const entry = grouped.get(key) || { title: key, target: 0, actual: 0 };
+                    entry.target += item.target ?? 0;
+                    entry.actual += item.actual ?? 0;
+                    grouped.set(key, entry);
+                });
+                const items = [...grouped.values()].sort((a, b) => a.title.localeCompare(b.title, 'vi', { numeric: true }));
+                const totalTarget = items.reduce((sum, item) => sum + item.target, 0);
+                const totalActual = items.reduce((sum, item) => sum + item.actual, 0);
+                const rate = totalTarget > 0 ? totalActual / totalTarget * 100 : 0;
                 $('#kpiTarget').textContent = formatNumber(totalTarget);
                 $('#kpiActual').textContent = formatNumber(totalActual);
-                $('#kpiRate').textContent = `${formatNumber(totalTarget > 0 ? totalActual / totalTarget * 100 : 0, 1)}%`;
-                $('#kpiAchieved').textContent = formatNumber(achieved);
-                $('#kpiBehind').textContent = formatNumber(items.length - achieved);
-                const size = pageSize();
-                const pageCount = Math.max(1, Math.ceil(items.length / size));
-                state.pageIndex = Math.min(state.pageIndex, pageCount - 1);
-                $('#pageIndicator').textContent = `${state.pageIndex + 1} / ${pageCount}`;
-                $('#nextButton').disabled = pageCount <= 1;
-                if (state.autoNextTimer != null && pageCount <= 1) {
-                    window.clearInterval(state.autoNextTimer);
-                    state.autoNextTimer = null;
-                } else if (pageCount > 1 && state.autoNextEnabled && state.autoNextTimer == null) {
-                    state.autoNextTimer = window.setInterval(nextPage, 30000);
+                $('#kpiRate').textContent = `${formatNumber(rate, 1)}%`;
+                $('#kpiMissing').textContent = formatNumber(Math.max(0, totalTarget - totalActual));
+                $('#totalProgress').style.width = `${Math.min(100, rate)}%`;
+                $('.overview-progress').setAttribute('aria-valuenow', String(Math.min(100, rate)));
+                $('.overview-progress').setAttribute('aria-valuetext', `${formatNumber(rate, 1)}%`);
+                const now = new Date();
+                $('#summaryMonth').textContent = `${now.getMonth() + 1}/${now.getFullYear()}`;
+                if (!items.length) {
+                    $('#machineGrid').innerHTML = '<div class="empty-state">Không có dữ liệu sản xuất công đoạn Cắm.</div>';
+                    return;
                 }
-                $('#stopButton').disabled = state.autoNextTimer == null;
-                const shown = items.slice(state.pageIndex * size, (state.pageIndex + 1) * size);
-                $('#machineGrid').innerHTML = shown.length
-                    ? shown.map(renderCard).join('')
-                    : '<div class="empty-state">Không có dữ liệu sản xuất công đoạn Cắm.</div>';
+                const width = Math.max(850, items.length * 205 + 110);
+                const height = 465, left = 85, top = 36, bottom = 370;
+                const peak = Math.max(1, ...items.flatMap(item => [item.target, item.actual]));
+                const roughStep = peak / 5;
+                const magnitude = 10 ** Math.floor(Math.log10(roughStep));
+                const step = [1, 2, 2.5, 5, 10].map(n => n * magnitude).find(n => n >= roughStep);
+                const maximum = Math.ceil(peak / step) * step;
+                const plotWidth = width - left - 20;
+                const slot = plotWidth / items.length;
+                const barWidth = Math.min(105, slot * .36);
+                const y = value => bottom - value / maximum * (bottom - top);
+                let drawing = '';
+                for (let value = 0; value <= maximum; value += step) {
+                    const pos = y(value);
+                    drawing += `<line x1="${left}" y1="${pos}" x2="${width - 20}" y2="${pos}" class="grid-line"/><text x="${left - 15}" y="${pos + 6}" text-anchor="end" class="axis-label">${formatNumber(value)}</text>`;
+                }
+                drawing += `<path d="M${left} ${top}V${bottom}H${width - 20}" class="axis-line"/>`;
+                items.forEach((item, index) => {
+                    const center = left + slot * (index + .5);
+                    const percent = item.target > 0 ? `${formatNumber(item.actual / item.target * 100, 1)}%` : '—';
+                    [[item.target, center - barWidth, 'targetBar'], [item.actual, center, 'actualBar']].forEach(([value, x, fill]) => {
+                        drawing += `<rect x="${x}" y="${y(value)}" width="${barWidth}" height="${bottom - y(value)}" rx="6" fill="url(#${fill})"><title>${escapeHtml(item.title)} · ${fill === 'targetBar' ? 'Target' : 'Actual'}: ${formatNumber(value)}</title></rect><text x="${x + barWidth / 2}" y="${y(value) - 10}" text-anchor="middle" class="bar-label">${formatNumber(value)}</text>`;
+                    });
+                    drawing += `<text x="${center}" y="${bottom + 28}" text-anchor="middle" class="group-label">${escapeHtml(item.title)}</text><rect x="${center - 52}" y="${bottom + 42}" width="104" height="30" rx="15" class="rate-pill"/><text x="${center}" y="${bottom + 63}" text-anchor="middle" class="rate-label">${percent}</text>`;
+                });
+                $('#machineGrid').innerHTML = `<svg class="production-chart" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="plotTitle plotDescription"><title id="plotTitle">Sản lượng các nhóm Cắm</title><desc id="plotDescription">${escapeHtml(items.map(item => `${item.title}: mục tiêu ${formatNumber(item.target)}, thực tế ${formatNumber(item.actual)}`).join('; '))}</desc><defs><linearGradient id="targetBar" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffa600"/><stop offset="1" stop-color="#ff9400"/></linearGradient><linearGradient id="actualBar" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#00c8ed"/><stop offset="1" stop-color="#00b6e4"/></linearGradient></defs>${drawing}</svg>`;
             };
             const loadData = async () => {
                 $('#liveText').textContent = 'Đang cập nhật';
@@ -316,18 +296,11 @@
             const updateClock = () => { $('#clock').textContent = new Date().toLocaleTimeString('vi-VN', { hour12: false }); };
             $('#themeButton').addEventListener('click', () => applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
             $('#refreshButton').addEventListener('click', loadData);
-            $('#nextButton').addEventListener('click', nextPage);
-            $('#stopButton').addEventListener('click', () => {
-                state.autoNextEnabled = false;
-                if (state.autoNextTimer != null) window.clearInterval(state.autoNextTimer);
-                state.autoNextTimer = null;
-                $('#stopButton').disabled = true;
-            });
             $('#fullscreenButton').addEventListener('click', async () => {
                 if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
                 else await document.exitFullscreen();
             });
-            window.addEventListener('resize', () => { state.pageIndex = 0; render(); });
+            window.addEventListener('resize', render);
             updateClock();
             window.setInterval(updateClock, 1000);
             window.setInterval(loadData, 60000);

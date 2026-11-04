@@ -31,7 +31,7 @@
                 </div>
                 <div>
                     <div class="eyebrow">PRODUCTION MONITORING · PLUGGING</div>
-                    <h1>BẢNG GIÁM SÁT SẢN LƯỢNG CÔNG ĐOẠN CẮM</h1>
+                    <h1>BẢNG THÀNH TÍCH CÔNG ĐOẠN CẮM</h1>
                 </div>
             </div>
             <div class="toolbar">
@@ -46,19 +46,22 @@
             </div>
         </header>
         <section class="overview" aria-label="Tổng quan sản xuất">
-            <article class="metric target"><div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="13" r="8"/><circle cx="11" cy="13" r="4"/><path d="m11 13 9-10m-5 0h5v5"/></svg></div><div><div class="metric-label">Tổng mục tiêu</div><strong id="kpiTarget">—</strong><p>Mục tiêu sản lượng cả ngày</p></div></article>
+            <article class="daily-goal" aria-label="Mục tiêu tổng cả ngày" aria-live="polite">
+                <table><thead><tr><th scope="col">Tổng mục tiêu<br /><span id="dailyTargetDate">—</span></th><th scope="col">Đạt được</th></tr></thead><tbody><tr><td rowspan="2" id="dailyTarget">—</td><td id="dailyActual">—</td></tr><tr><td id="dailyRate">—</td></tr></tbody></table>
+            </article>
+            <article class="metric target"><div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="13" r="8"/><circle cx="11" cy="13" r="4"/><path d="m11 13 9-10m-5 0h5v5"/></svg></div><div><div class="metric-label">Tổng mục tiêu</div><strong id="kpiTarget">—</strong><p id="targetTimeFrame">Khung giờ: —</p></div></article>
             <article class="metric actual"><div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20v-6h3v6m4 0V8h3v12m4 0V3h3v17"/></svg></div><div><div class="metric-label">Tổng thực tế</div><strong id="kpiActual">—</strong><p>Sản lượng đã ghi nhận</p></div></article>
             <article class="metric rate"><div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10v6a5 5 0 0 1-10 0V3Zm0 2H3v3a4 4 0 0 0 4 4m10-7h4v3a4 4 0 0 1-4 4M12 14v6m-4 1h8"/></svg></div><div><div class="metric-label">Tỷ lệ hoàn thành</div><strong id="kpiRate">—</strong><div class="overview-progress" role="progressbar" aria-label="Tỷ lệ hoàn thành" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="totalProgress"></span></div></div></article>
             <article class="metric missing"><div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 9-5 9 5-9 5-9-5Zm0 5 9 5 9-5M3 17l9 5 9-5"/></svg></div><div><div class="metric-label">Sản lượng còn thiếu</div><strong id="kpiMissing">—</strong><p>Số lượng cần hoàn thành</p></div></article>
         </section>
         <main class="production-layout">
             <section class="chart-panel" aria-label="Biểu đồ sản lượng các nhóm Cắm">
-                <div class="chart-header"><div class="chart-legend"><span><i class="target-key"></i>Target</span><span><i class="actual-key"></i>Actual</span></div></div>
+                <div class="chart-header"><div class="chart-legend"><span><i class="target-key"></i>Mục tiêu</span><span><i class="actual-key"></i>Thực tế</span></div></div>
                 <div class="chart-scroll" id="machineGrid" aria-live="polite"><div class="empty-state">Đang tải dữ liệu sản xuất…</div></div>
             </section>
             <aside class="summary-panel" aria-labelledby="summaryTitle">
                 <h2 id="summaryTitle"><span aria-hidden="true">▥</span> CHẤT LƯỢNG THÁNG <span id="summaryMonth"></span></h2>
-                <table class="summary-table"><thead><tr><th>Mục tiêu lỗi</th><th>Lỗi phát sinh</th><th>Đánh giá</th></tr></thead><tbody><tr><td class="summary-target">—</td><td class="summary-actual">—</td><td><span class="summary-status">Chưa có dữ liệu</span></td></tr></tbody></table>
+                <table class="summary-table"><thead><tr><th>Nhóm</th><th>Mục tiêu lỗi</th><th>Lỗi phát sinh</th><th>Đánh giá</th></tr></thead><tbody><tr><td>—</td><td class="summary-target">—</td><td class="summary-actual">—</td><td><span class="summary-status">Chưa có dữ liệu</span></td></tr></tbody><tfoot></tfoot></table>
             </aside>
         </main>
         <footer class="footer"><span id="dataNote">Nguồn dữ liệu: Control_ProgramPlug_Visualize</span><span id="lastUpdated">Chưa cập nhật</span></footer>
@@ -66,7 +69,7 @@
     <script>
         (() => {
             const checkpoints = ['10:00', '12:00', '15:00', '17:00', '20:00'];
-            const state = { rows: [], columns: [], totalRows: 0, truncated: false };
+            const state = { rows: [], columns: [], totalRows: 0, truncated: false, qualityRows: [] };
             const $ = (selector) => document.querySelector(selector);
             const aliases = {
                 group: ['GroupMember'],
@@ -159,8 +162,16 @@
                     const actual = availableRows
                         .filter((row) => String(valueOf(row, aliases.dateProduction) ?? '').slice(0, 10) === productionDate)
                         .reduce((sum, row) => sum + (numberOf(valueOf(row, aliases.actual)) ?? 0), 0);
-                    const targetRow = availableRows.slice().reverse().find((row) =>
-                        numberOf(valueOf(row, aliases.target)) != null);
+                    const targetCheckpoint = checkpoints.find(label => {
+                        const [hour, minute] = label.split(':').map(Number);
+                        return hour * 60 + minute > currentMinute;
+                    }) ?? checkpoints[checkpoints.length - 1];
+                    const [targetHour, targetMinute] = targetCheckpoint.split(':').map(Number);
+                    const targetCheckpointMinute = targetHour * 60 + targetMinute;
+                    const targetRow = item.rows.find(row =>
+                        String(valueOf(row, aliases.dateProduction) ?? '').slice(0, 10) === productionDate
+                        && productionMinuteOf(row) === targetCheckpointMinute
+                        && numberOf(valueOf(row, aliases.target)) != null);
                     const target = targetRow ? numberOf(valueOf(targetRow, aliases.target)) : null;
                     const latestRow = item.rows[item.rows.length - 1];
                     const points = checkpoints.map((label) => {
@@ -197,6 +208,7 @@
                         snapshotDate: productionDate,
                         actual,
                         target,
+                        targetMinute: targetRow ? productionMinuteOf(targetRow) : null,
                         points,
                         title: item.group || item.name || item.code || 'Nhóm Cắm',
                         status: statusOf(actual, target)
@@ -206,7 +218,13 @@
             };
             const render = () => {
                 const grouped = new Map();
-                records().forEach((item) => {
+                const productionRecords = records();
+                const dailyTarget = productionRecords.reduce((sum, item) => {
+                    const lastTargetRow = [...item.rows].reverse().find(row =>
+                        numberOf(valueOf(row, aliases.target)) != null);
+                    return sum + (lastTargetRow ? numberOf(valueOf(lastTargetRow, aliases.target)) : 0);
+                }, 0);
+                productionRecords.forEach((item) => {
                     const key = item.name || item.group || item.title;
                     const entry = grouped.get(key) || { title: key, target: 0, actual: 0 };
                     entry.target += item.target ?? 0;
@@ -216,8 +234,16 @@
                 const items = [...grouped.values()].sort((a, b) => a.title.localeCompare(b.title, 'vi', { numeric: true }));
                 const totalTarget = items.reduce((sum, item) => sum + item.target, 0);
                 const totalActual = items.reduce((sum, item) => sum + item.actual, 0);
+                $('#dailyTarget').textContent = productionRecords.length ? formatNumber(dailyTarget) : '—';
+                $('#dailyActual').textContent = productionRecords.length ? formatNumber(totalActual) : '—';
+                $('#dailyRate').textContent = dailyTarget > 0
+                    ? `${formatNumber(totalActual / dailyTarget * 100, 1)}%` : '—';
                 const rate = totalTarget > 0 ? totalActual / totalTarget * 100 : 0;
                 $('#kpiTarget').textContent = formatNumber(totalTarget);
+                const targetTimes = [...new Set(productionRecords.map(item => item.targetMinute)
+                    .filter(minute => minute != null))].sort((a, b) => a - b)
+                    .map(minute => `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`);
+                $('#targetTimeFrame').textContent = `Đến: ${targetTimes.length ? targetTimes.join(' / ') : '—'} giờ`;
                 $('#kpiActual').textContent = formatNumber(totalActual);
                 $('#kpiRate').textContent = `${formatNumber(rate, 1)}%`;
                 $('#kpiMissing').textContent = formatNumber(Math.max(0, totalTarget - totalActual));
@@ -226,6 +252,28 @@
                 $('.overview-progress').setAttribute('aria-valuetext', `${formatNumber(rate, 1)}%`);
                 const now = new Date();
                 $('#summaryMonth').textContent = `${now.getMonth() + 1}/${now.getFullYear()}`;
+                $('.summary-table tbody').innerHTML = state.qualityRows.length
+                    ? state.qualityRows.map(row => {
+                        const target = numberOf(row.targetError ?? row.TargetError);
+                        const actual = numberOf(row.inputError ?? row.InputError);
+                        const status = target == null || actual == null
+                            ? 'Chưa có dữ liệu'
+                            : actual <= target ? 'Đạt' : 'Không đạt';
+                        const group = row.lastNameSub ?? row.LastNameSub ?? '—';
+                        return `<tr><td>${escapeHtml(group)}</td><td class="summary-target">${formatNumber(target, 2)}</td><td class="summary-actual">${formatNumber(actual, 2)}</td><td><span class="summary-status">${status}</span></td></tr>`;
+                    }).join('')
+                    : '<tr><td>—</td><td class="summary-target">—</td><td class="summary-actual">—</td><td><span class="summary-status">Chưa có dữ liệu</span></td></tr>';
+                const qualityTargets = state.qualityRows.map(row => numberOf(row.targetError ?? row.TargetError));
+                const qualityActuals = state.qualityRows.map(row => numberOf(row.inputError ?? row.InputError));
+                const totalQualityTarget = qualityTargets.some(value => value != null)
+                    ? qualityTargets.reduce((sum, value) => sum + (value ?? 0), 0) : null;
+                const totalQualityActual = qualityActuals.some(value => value != null)
+                    ? qualityActuals.reduce((sum, value) => sum + (value ?? 0), 0) : null;
+                const qualityStatus = qualityTargets.length === 0
+                    || qualityTargets.some(value => value == null) || qualityActuals.some(value => value == null)
+                    ? 'Chưa có dữ liệu'
+                    : totalQualityActual <= totalQualityTarget ? 'Đạt' : 'Không đạt';
+                $('.summary-table tfoot').innerHTML = `<tr><td><strong>Tổng</strong></td><td><strong>${formatNumber(totalQualityTarget, 2)}</strong></td><td><strong>${formatNumber(totalQualityActual, 2)}</strong></td><td><span class="summary-status">${qualityStatus}</span></td></tr>`;
                 if (!items.length) {
                     $('#machineGrid').innerHTML = '<div class="empty-state">Không có dữ liệu sản xuất công đoạn Cắm.</div>';
                     return;
@@ -269,11 +317,12 @@
                     state.columns = data.columns ?? data.Columns ?? [];
                     state.totalRows = data.totalRows ?? data.TotalRows ?? state.rows.length;
                     state.truncated = data.isTruncated ?? data.IsTruncated ?? false;
+                    state.qualityRows = data.qualityRows ?? data.QualityRows ?? [];
                     render();
                     $('.live').dataset.status = 'connected';
                     $('#dataNote').textContent = state.truncated
-                        ? `Đang hiển thị tối đa ${formatNumber(state.rows.length)} / ${formatNumber(state.totalRows)} dòng · Ngày sản xuất mới nhất theo từng nhóm`
-                        : 'Nguồn dữ liệu: Control_ProgramPlug_Visualize · Ngày sản xuất mới nhất theo từng nhóm';
+                        ? `Đang hiển thị tối đa ${formatNumber(state.rows.length)} / ${formatNumber(state.totalRows)} dòng · Ngày sản xuất hiện tại`
+                        : 'Nguồn dữ liệu: Control_ProgramPlug_Visualize · Ngày sản xuất hiện tại';
                     $('#lastUpdated').textContent = `Cập nhật lúc ${new Date().toLocaleTimeString('vi-VN', { hour12: false })}`;
                     $('#liveText').textContent = 'Đang trực tiếp';
                 } catch (error) {
@@ -293,7 +342,13 @@
                 try { localStorage.setItem('stamping-wire-theme-v2', theme); } catch { }
             };
             applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
-            const updateClock = () => { $('#clock').textContent = new Date().toLocaleTimeString('vi-VN', { hour12: false }); };
+            const updateClock = () => {
+                const now = new Date();
+                $('#clock').textContent = now.toLocaleTimeString('vi-VN', { hour12: false });
+                $('#dailyTargetDate').textContent = now.toLocaleDateString('vi-VN', {
+                    day: '2-digit', month: '2-digit', year: 'numeric'
+                });
+            };
             $('#themeButton').addEventListener('click', () => applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
             $('#refreshButton').addEventListener('click', loadData);
             $('#fullscreenButton').addEventListener('click', async () => {

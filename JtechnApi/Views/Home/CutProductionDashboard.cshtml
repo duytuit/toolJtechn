@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="~/css/stamping-wire-production.css" asp-append-version="true" />
 </head>
 <body>
-    <div class="app">
+    <div class="app cut-production-dashboard">
         <header class="topbar">
             <div class="brand">
                 <div class="brand-mark" aria-hidden="true">
@@ -30,13 +30,13 @@
                     </svg>
                 </div>
                 <div>
-                    <h1>BẢNG GIÁM SÁT SẢN LƯỢNG CÔNG ĐOẠN CẮT</h1>
+                    <h1 class="bilingual-label"><span lang="ja">切断工程の生産実績管理表</span><span lang="vi">BẢNG GIÁM SÁT SẢN LƯỢNG CÔNG ĐOẠN CẮT</span></h1>
                 </div>
             </div>
             <div class="toolbar">
                 <nav class="area-tabs" aria-label="Loại máy cắt">
-                    <a class="area-tab @(machineType == "CA" ? "active" : "")" href="/cut-production/ca" aria-current="@(machineType == "CA" ? "page" : null)">Cắt nhỏ</a>
-                    <a class="area-tab @(machineType == "TD" ? "active" : "")" href="/cut-production/td" aria-current="@(machineType == "TD" ? "page" : null)">Tự động</a>
+                    <a class="area-tab @(machineType == "CA" ? "active" : "")" href="/cut-production/ca" aria-current="@(machineType == "CA" ? "page" : null)"><span class="bilingual-label"><span lang="ja">キャスティング機</span><span lang="vi">Cắt nhỏ</span></span></a>
+                    <a class="area-tab @(machineType == "TD" ? "active" : "")" href="/cut-production/td" aria-current="@(machineType == "TD" ? "page" : null)"><span class="bilingual-label"><span lang="ja">自動機</span><span lang="vi">Cắt tự động</span></span></a>
                 </nav>
                 <button class="icon-btn theme-button" id="themeButton" type="button" aria-label="Chuyển sang giao diện tối">◐ Dark</button>
                 <div class="clock" id="clock">--:--:--</div>
@@ -49,12 +49,12 @@
             </div>
         </header>
         <section class="kpis" aria-label="Tổng quan sản xuất công đoạn Cắt">
-            <article class="kpi"><div class="kpi-icon" aria-hidden="true">▦</div><div><div class="kpi-label">Tổng số máy</div><div class="kpi-value" id="kpiRows">—</div></div></article>
-            <article class="kpi"><div class="kpi-icon" aria-hidden="true">◎</div><div><div class="kpi-label">Tổng mục tiêu</div><div class="kpi-value" id="kpiTarget">—</div></div></article>
-            <article class="kpi"><div class="kpi-icon" aria-hidden="true">▥</div><div><div class="kpi-label">Tổng sản lượng</div><div class="kpi-value" id="kpiActual">—</div></div></article>
-            <article class="kpi"><div class="kpi-icon" aria-hidden="true">↗</div><div><div class="kpi-label">Tỷ lệ hoàn thành</div><div class="kpi-value" id="kpiRate">—</div></div></article>
-            <article class="kpi"><div class="kpi-icon" aria-hidden="true">✓</div><div><div class="kpi-label">Đạt mục tiêu</div><div class="kpi-value" id="kpiAchieved">—</div></div></article>
-            <article class="kpi"><div class="kpi-icon" aria-hidden="true">!</div><div><div class="kpi-label">Chưa đạt</div><div class="kpi-value" id="kpiBehind">—</div></div></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true">▦</div><div><div class="kpi-label bilingual-label"><span lang="ja">総台数</span><span lang="vi">Tổng số máy</span></div><div class="kpi-value" id="kpiRows">—</div></div></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true">◎</div><div><div class="kpi-label bilingual-label"><span lang="ja">総目標</span><span lang="vi">Tổng mục tiêu</span></div><div class="kpi-value" id="kpiTarget">—</div></div></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true">▥</div><div><div class="kpi-label bilingual-label"><span lang="ja">実績合計</span><span lang="vi">Tổng sản lượng thực tế</span></div><div class="kpi-value" id="kpiActual">—</div></div></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true">↗</div><div><div class="kpi-label bilingual-label"><span lang="ja">完成率</span><span lang="vi">Tỷ lệ hoàn thành</span></div><div class="kpi-value" id="kpiRate">—</div></div></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true">✓</div><div><div class="kpi-label bilingual-label"><span lang="ja">目標達成</span><span lang="vi">Đạt mục tiêu</span></div><div class="kpi-value" id="kpiAchieved">—</div></div></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true">!</div><div><div class="kpi-label bilingual-label"><span lang="ja">未達成</span><span lang="vi">Chưa đạt</span></div><div class="kpi-value" id="kpiBehind">—</div></div></article>
         </section>
         <main class="machines" id="machineGrid" aria-live="polite">
             <div class="empty-state">Đang tải dữ liệu sản xuất…</div>
@@ -124,9 +124,14 @@
                 });
                 return next < 0 ? checkpoints.length - 1 : next;
             };
-            const statusText = (status) => ({
-                running: 'Đang sản xuất', achieved: 'Đạt mục tiêu', delayed: 'Chậm tiến độ', paused: 'Tạm dừng'
-            }[status]);
+            const statusLabels = {
+                running: ['生産中', 'Đang sản xuất'],
+                achieved: ['目標達成', 'Đạt mục tiêu'],
+                delayed: ['遅れ', 'Chậm tiến độ'],
+                paused: ['一時停止', 'Tạm dừng']
+            };
+            const statusText = (status) => statusLabels[status].join(' ');
+            const renderStatus = (status) => `<span class="bilingual-label"><span lang="ja">${statusLabels[status][0]}</span>/<span lang="vi">${statusLabels[status][1]}</span></span>`;
             const pageSize = () => {
                 const styles = window.getComputedStyle($('#machineGrid'));
                 return Math.max(1, styles.gridTemplateColumns.split(' ').length * styles.gridTemplateRows.split(' ').length);
@@ -219,7 +224,9 @@
                 </div>`;
             };
             const renderCard = (machine) => {
-                const { actual, target, midDayTarget, name: title, status } = machine;
+                const { actual, target, midDayTarget, status } = machine;
+                const title = machine.name.replace(/^(?:MT-)?(CA|TD)-?(?:№)?0*(\d+)$/i,
+                    (_, type, number) => `${type.toUpperCase()}-№${number.padStart(2, '0')}`);
                 const now = new Date();
                 const activeTarget = now.getHours() * 60 + now.getMinutes() < 13 * 60 + 30
                     ? midDayTarget
@@ -229,13 +236,13 @@
                 return `<article class="machine-card ${status}${actual == null || actual <= 0 ? ' no-production' : ''}" aria-label="${escapeHtml(title)}, ${statusText(status)}">
                     <div class="card-head">
                         <div class="machine-title"><span class="machine-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V8l4 2V6l4 2V3h8v18H4Z"/><path d="M8 14h2m3 0h2m3 0h1"/></svg></span><span class="machine-name">${escapeHtml(title)}</span></div>
-                        <span class="badge">${statusText(status)}</span>
+                        <span class="badge">${renderStatus(status)}</span>
                     </div>
                     <div class="quantity-block">
                         <div class="quantity">
-                            <div class="quantity-stat quantity-actual"><span class="quantity-label">Thực tế</span><strong>${formatNumber(actual)}</strong></div>
+                            <div class="quantity-stat quantity-actual"><span class="quantity-label bilingual-label"><span lang="ja">実績</span>/<span lang="vi">Thực tế</span></span><strong>${formatNumber(actual)}</strong></div>
                             <div class="quantity-stat quantity-target">
-                                <span class="quantity-label">Mục tiêu</span>
+                                <span class="quantity-label bilingual-label"><span lang="ja">目標</span>/<span lang="vi">Mục tiêu</span></span>
                                 <div class="quantity-targets">
                                     <span><small>06:00–13:30</small><strong>${formatNumber(midDayTarget)}</strong></span>
                                     <span><small>06:00–21:30</small><strong>${formatNumber(target)}</strong></span>

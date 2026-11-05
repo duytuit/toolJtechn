@@ -30,41 +30,41 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="eyebrow">PRODUCTION MONITORING · PLUGGING</div>
-                    <h1>BẢNG THÀNH TÍCH CÔNG ĐOẠN CẮM</h1>
+                    <div class="eyebrow">挿入工程の生産管理 / THEO DÕI SẢN XUẤT CÔNG ĐOẠN CẮM</div>
+                    <h1>挿入工程の実績管理表 / BẢNG THÀNH TÍCH CÔNG ĐOẠN CẮM</h1>
                 </div>
             </div>
             <div class="toolbar">
-                <nav class="area-tabs" aria-label="Công đoạn sản xuất">
-                    <a class="area-tab active" href="/plug-production" aria-current="page">Cắm</a>
+                <nav class="area-tabs" aria-label="生産工程 / Công đoạn sản xuất">
+                    <a class="area-tab active" href="/plug-production" aria-current="page">挿入 / Cắm</a>
                 </nav>
-                <button class="icon-btn theme-button" id="themeButton" type="button" aria-label="Chuyển sang giao diện tối">◐ Dark</button>
+                <button class="icon-btn theme-button" id="themeButton" type="button" aria-label="ダークモードに切り替え / Chuyển sang giao diện tối">◐ Dark</button>
                 <div class="clock" id="clock">--:--:--</div>
-                <div class="live"><span class="live-dot"></span><span id="liveText">Đang kết nối</span></div>
-                <button class="icon-btn" id="refreshButton" type="button" title="Cập nhật ngay" aria-label="Cập nhật ngay">↻</button>
-                <button class="icon-btn" id="fullscreenButton" type="button" title="Toàn màn hình" aria-label="Toàn màn hình">⛶</button>
+                <div class="live"><span class="live-dot"></span><span id="liveText">接続中 / Đang kết nối</span></div>
+                <button class="icon-btn" id="refreshButton" type="button" title="今すぐ更新 / Cập nhật ngay" aria-label="今すぐ更新 / Cập nhật ngay">↻</button>
+                <button class="icon-btn" id="fullscreenButton" type="button" title="全画面表示 / Toàn màn hình" aria-label="全画面表示 / Toàn màn hình">⛶</button>
             </div>
         </header>
-        <section class="overview" aria-label="Tổng quan sản xuất">
-            <article class="daily-goal" aria-label="Mục tiêu tổng cả ngày" aria-live="polite">
-                <table><thead><tr><th scope="col">Tổng mục tiêu<br /><span id="dailyTargetDate">—</span></th><th scope="col">Đạt được</th></tr></thead><tbody><tr><td rowspan="2" id="dailyTarget">—</td><td id="dailyActual">—</td></tr><tr><td id="dailyRate">—</td></tr></tbody></table>
+        <section class="overview" aria-label="生産概要 / Tổng quan sản xuất">
+            <article class="daily-goal" aria-label="1日の総目標 / Mục tiêu tổng cả ngày" aria-live="polite">
+                <table><thead><tr><th scope="col">総目標 / Tổng mục tiêu<br /><span id="dailyTargetDate">—</span></th><th scope="col">実績 / Đạt được</th></tr></thead><tbody><tr><td rowspan="2" id="dailyTarget">—</td><td id="dailyActual">—</td></tr><tr><td id="dailyRate">—</td></tr></tbody></table>
             </article>
-            <article class="metric target"><div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="13" r="8"/><circle cx="11" cy="13" r="4"/><path d="m11 13 9-10m-5 0h5v5"/></svg></div><div><div class="metric-label">Tổng mục tiêu</div><strong id="kpiTarget">—</strong><p id="targetTimeFrame">Khung giờ: —</p></div></article>
-            <article class="metric actual"><div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20v-6h3v6m4 0V8h3v12m4 0V3h3v17"/></svg></div><div><div class="metric-label">Tổng thực tế</div><strong id="kpiActual">—</strong><p>Sản lượng đã ghi nhận</p></div></article>
-            <article class="metric rate"><div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10v6a5 5 0 0 1-10 0V3Zm0 2H3v3a4 4 0 0 0 4 4m10-7h4v3a4 4 0 0 1-4 4M12 14v6m-4 1h8"/></svg></div><div><div class="metric-label">Tỷ lệ hoàn thành</div><strong id="kpiRate">—</strong><div class="overview-progress" role="progressbar" aria-label="Tỷ lệ hoàn thành" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="totalProgress"></span></div></div></article>
-            <article class="metric missing"><div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 9-5 9 5-9 5-9-5Zm0 5 9 5 9-5M3 17l9 5 9-5"/></svg></div><div><div class="metric-label">Sản lượng còn thiếu</div><strong id="kpiMissing">—</strong><p>Số lượng cần hoàn thành</p></div></article>
+            <article class="metric target"><div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="13" r="8"/><circle cx="11" cy="13" r="4"/><path d="m11 13 9-10m-5 0h5v5"/></svg></div><div><div class="metric-label">総目標 / Tổng mục tiêu</div><strong id="kpiTarget">—</strong><p id="targetTimeFrame">時点: — / Khung giờ: —</p></div></article>
+            <article class="metric actual"><div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20v-6h3v6m4 0V8h3v12m4 0V3h3v17"/></svg></div><div><div class="metric-label">実績 / Tổng thực tế</div><strong id="kpiActual">—</strong><p>実績生産数量 / Sản lượng đã ghi nhận</p></div></article>
+            <article class="metric rate"><div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10v6a5 5 0 0 1-10 0V3Zm0 2H3v3a4 4 0 0 0 4 4m10-7h4v3a4 4 0 0 1-4 4M12 14v6m-4 1h8"/></svg></div><div><div class="metric-label">完成率 / Tỷ lệ hoàn thành</div><strong id="kpiRate">—</strong><div class="overview-progress" role="progressbar" aria-label="完成率 / Tỷ lệ hoàn thành" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="totalProgress"></span></div></div></article>
+            <article class="metric missing"><div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 9-5 9 5-9 5-9-5Zm0 5 9 5 9-5M3 17l9 5 9-5"/></svg></div><div><div class="metric-label">未達成 / Sản lượng còn thiếu</div><strong id="kpiMissing">—</strong><p>完了必要数 / Số lượng cần hoàn thành</p></div></article>
         </section>
         <main class="production-layout">
-            <section class="chart-panel" aria-label="Biểu đồ sản lượng các nhóm Cắm">
-                <div class="chart-header"><div class="chart-legend"><span><i class="target-key"></i>Mục tiêu</span><span><i class="actual-key"></i>Thực tế</span></div></div>
-                <div class="chart-scroll" id="machineGrid" aria-live="polite"><div class="empty-state">Đang tải dữ liệu sản xuất…</div></div>
+            <section class="chart-panel" aria-label="挿入工程のグループ別生産量 / Biểu đồ sản lượng các nhóm Cắm">
+                <div class="chart-header"><div class="chart-legend"><span><i class="target-key"></i>目標 / Mục tiêu</span><span><i class="actual-key"></i>実績 / Thực tế</span></div></div>
+                <div class="chart-scroll" id="machineGrid" aria-live="polite"><div class="empty-state">生産データを読み込み中… / Đang tải dữ liệu sản xuất…</div></div>
             </section>
             <aside class="summary-panel" aria-labelledby="summaryTitle">
-                <h2 id="summaryTitle"><span aria-hidden="true">▥</span> CHẤT LƯỢNG THÁNG <span id="summaryMonth"></span></h2>
-                <table class="summary-table"><thead><tr><th>Nhóm</th><th>Mục tiêu lỗi</th><th>Lỗi phát sinh</th><th>Đánh giá</th></tr></thead><tbody><tr><td>—</td><td class="summary-target">—</td><td class="summary-actual">—</td><td><span class="summary-status">Chưa có dữ liệu</span></td></tr></tbody><tfoot></tfoot></table>
+                <h2 id="summaryTitle"><span aria-hidden="true">▥</span> 月間品質実績 / CHẤT LƯỢNG THÁNG <span id="summaryMonth"></span></h2>
+                <table class="summary-table"><thead><tr><th>グループ / Nhóm</th><th>目標 / Mục tiêu lỗi</th><th>実績 / Lỗi phát sinh</th><th>評価 / Đánh giá</th></tr></thead><tbody><tr><td>—</td><td class="summary-target">—</td><td class="summary-actual">—</td><td><span class="summary-status">データなし / Chưa có dữ liệu</span></td></tr></tbody><tfoot></tfoot></table>
             </aside>
         </main>
-        <footer class="footer"><span id="dataNote">Nguồn dữ liệu: Control_ProgramPlug_Visualize</span><span id="lastUpdated">Chưa cập nhật</span></footer>
+        <footer class="footer"><span id="dataNote">データソース / Nguồn dữ liệu: Control_ProgramPlug_Visualize</span><span id="lastUpdated">未更新 / Chưa cập nhật</span></footer>
     </div>
     <script>
         (() => {
@@ -88,7 +88,7 @@
                 '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
             }[char]));
             const formatNumber = (value, digits = 0) => value != null && Number.isFinite(Number(value))
-                ? Number(value).toLocaleString('vi-VN', { maximumFractionDigits: digits })
+                ? Number(value).toLocaleString('vi-VN', { maximumFractionDigits: digits }).replace(/\./g, ',')
                 : '—';
             const findColumn = (names) => {
                 const normalized = names.map(normalize);
@@ -109,7 +109,8 @@
                 return actual >= target ? 'achieved' : 'delayed';
             };
             const statusText = (status) => ({
-                running: 'Đang sản xuất', achieved: 'Đạt mục tiêu', delayed: 'Chậm tiến độ', paused: 'Tạm dừng'
+                running: '稼働中 / Đang sản xuất', achieved: '目標達成 / Đạt mục tiêu',
+                delayed: '遅延 / Chậm tiến độ', paused: '一時停止 / Tạm dừng'
             }[status]);
             const productionMinuteOf = (row) => {
                 const value = valueOf(row, aliases.minute);
@@ -210,7 +211,7 @@
                         target,
                         targetMinute: targetRow ? productionMinuteOf(targetRow) : null,
                         points,
-                        title: item.group || item.name || item.code || 'Nhóm Cắm',
+                        title: item.group || item.name || item.code || '挿入工程 / Nhóm Cắm',
                         status: statusOf(actual, target)
                     };
                 })
@@ -243,7 +244,7 @@
                 const targetTimes = [...new Set(productionRecords.map(item => item.targetMinute)
                     .filter(minute => minute != null))].sort((a, b) => a - b)
                     .map(minute => `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`);
-                $('#targetTimeFrame').textContent = `Đến: ${targetTimes.length ? targetTimes.join(' / ') : '—'} giờ`;
+                $('#targetTimeFrame').textContent = `目標時刻: ${targetTimes.length ? targetTimes.join(' / ') : '—'} / Khung giờ: ${targetTimes.length ? `${targetTimes.join(' / ')} giờ` : '—'}`;
                 $('#kpiActual').textContent = formatNumber(totalActual);
                 $('#kpiRate').textContent = `${formatNumber(rate, 1)}%`;
                 $('#kpiMissing').textContent = formatNumber(Math.max(0, totalTarget - totalActual));
@@ -257,12 +258,12 @@
                         const target = numberOf(row.targetError ?? row.TargetError);
                         const actual = numberOf(row.inputError ?? row.InputError);
                         const status = target == null || actual == null
-                            ? 'Chưa có dữ liệu'
+                            ? 'データなし / Chưa có dữ liệu'
                             : actual <= target ? 'Đạt' : 'Không đạt';
                         const group = row.lastNameSub ?? row.LastNameSub ?? '—';
                         return `<tr><td>${escapeHtml(group)}</td><td class="summary-target">${formatNumber(target, 2)}</td><td class="summary-actual">${formatNumber(actual, 2)}</td><td><span class="summary-status">${status}</span></td></tr>`;
                     }).join('')
-                    : '<tr><td>—</td><td class="summary-target">—</td><td class="summary-actual">—</td><td><span class="summary-status">Chưa có dữ liệu</span></td></tr>';
+                    : '<tr><td>—</td><td class="summary-target">—</td><td class="summary-actual">—</td><td><span class="summary-status">データなし / Chưa có dữ liệu</span></td></tr>';
                 const qualityTargets = state.qualityRows.map(row => numberOf(row.targetError ?? row.TargetError));
                 const qualityActuals = state.qualityRows.map(row => numberOf(row.inputError ?? row.InputError));
                 const totalQualityTarget = qualityTargets.some(value => value != null)
@@ -271,11 +272,11 @@
                     ? qualityActuals.reduce((sum, value) => sum + (value ?? 0), 0) : null;
                 const qualityStatus = qualityTargets.length === 0
                     || qualityTargets.some(value => value == null) || qualityActuals.some(value => value == null)
-                    ? 'Chưa có dữ liệu'
+                    ? 'データなし / Chưa có dữ liệu'
                     : totalQualityActual <= totalQualityTarget ? 'Đạt' : 'Không đạt';
                 $('.summary-table tfoot').innerHTML = `<tr><td><strong>Tổng</strong></td><td><strong>${formatNumber(totalQualityTarget, 2)}</strong></td><td><strong>${formatNumber(totalQualityActual, 2)}</strong></td><td><span class="summary-status">${qualityStatus}</span></td></tr>`;
                 if (!items.length) {
-                    $('#machineGrid').innerHTML = '<div class="empty-state">Không có dữ liệu sản xuất công đoạn Cắm.</div>';
+                    $('#machineGrid').innerHTML = '<div class="empty-state">挿入工程の生産データがありません / Không có dữ liệu sản xuất công đoạn Cắm.</div>';
                     return;
                 }
                 const width = Math.max(850, items.length * 205 + 110);
@@ -299,19 +300,19 @@
                     const center = left + slot * (index + .5);
                     const percent = item.target > 0 ? `${formatNumber(item.actual / item.target * 100, 1)}%` : '—';
                     [[item.target, center - barWidth, 'targetBar'], [item.actual, center, 'actualBar']].forEach(([value, x, fill]) => {
-                        drawing += `<rect x="${x}" y="${y(value)}" width="${barWidth}" height="${bottom - y(value)}" rx="6" fill="url(#${fill})"><title>${escapeHtml(item.title)} · ${fill === 'targetBar' ? 'Target' : 'Actual'}: ${formatNumber(value)}</title></rect><text x="${x + barWidth / 2}" y="${y(value) - 10}" text-anchor="middle" class="bar-label">${formatNumber(value)}</text>`;
+                        drawing += `<rect x="${x}" y="${y(value)}" width="${barWidth}" height="${bottom - y(value)}" rx="6" fill="url(#${fill})"><title>${escapeHtml(item.title)} · ${fill === 'targetBar' ? '目標 / Mục tiêu' : '実績 / Thực tế'}: ${formatNumber(value)}</title></rect><text x="${x + barWidth / 2}" y="${y(value) - 10}" text-anchor="middle" class="bar-label">${formatNumber(value)}</text>`;
                     });
                     drawing += `<text x="${center}" y="${bottom + 28}" text-anchor="middle" class="group-label">${escapeHtml(item.title)}</text><rect x="${center - 52}" y="${bottom + 42}" width="104" height="30" rx="15" class="rate-pill"/><text x="${center}" y="${bottom + 63}" text-anchor="middle" class="rate-label">${percent}</text>`;
                 });
-                $('#machineGrid').innerHTML = `<svg class="production-chart" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="plotTitle plotDescription"><title id="plotTitle">Sản lượng các nhóm Cắm</title><desc id="plotDescription">${escapeHtml(items.map(item => `${item.title}: mục tiêu ${formatNumber(item.target)}, thực tế ${formatNumber(item.actual)}`).join('; '))}</desc><defs><linearGradient id="targetBar" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffa600"/><stop offset="1" stop-color="#ff9400"/></linearGradient><linearGradient id="actualBar" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#00c8ed"/><stop offset="1" stop-color="#00b6e4"/></linearGradient></defs>${drawing}</svg>`;
+                $('#machineGrid').innerHTML = `<svg class="production-chart" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="plotTitle plotDescription"><title id="plotTitle">挿入工程のグループ別生産量 / Sản lượng các nhóm Cắm</title><desc id="plotDescription">${escapeHtml(items.map(item => `${item.title}: 目標 / Mục tiêu ${formatNumber(item.target)}, 実績 / Thực tế ${formatNumber(item.actual)}`).join('; '))}</desc><defs><linearGradient id="targetBar" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffa600"/><stop offset="1" stop-color="#ff9400"/></linearGradient><linearGradient id="actualBar" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#00c8ed"/><stop offset="1" stop-color="#00b6e4"/></linearGradient></defs>${drawing}</svg>`;
             };
             const loadData = async () => {
-                $('#liveText').textContent = 'Đang cập nhật';
+                $('#liveText').textContent = '更新中 / Đang cập nhật';
                 $('#refreshButton').disabled = true;
                 $('.live').dataset.status = 'loading';
                 try {
                     const response = await fetch('/api/plug-production/data', { headers: { Accept: 'application/json' } });
-                    if (!response.ok) throw new Error(`Lỗi tải dữ liệu (${response.status})`);
+                    if (!response.ok) throw new Error(`データ取得エラー / Lỗi tải dữ liệu (${response.status})`);
                     const data = await response.json();
                     state.rows = data.rows ?? data.Rows ?? [];
                     state.columns = data.columns ?? data.Columns ?? [];
@@ -321,14 +322,14 @@
                     render();
                     $('.live').dataset.status = 'connected';
                     $('#dataNote').textContent = state.truncated
-                        ? `Đang hiển thị tối đa ${formatNumber(state.rows.length)} / ${formatNumber(state.totalRows)} dòng · Ngày sản xuất hiện tại`
-                        : 'Nguồn dữ liệu: Control_ProgramPlug_Visualize · Ngày sản xuất hiện tại';
-                    $('#lastUpdated').textContent = `Cập nhật lúc ${new Date().toLocaleTimeString('vi-VN', { hour12: false })}`;
-                    $('#liveText').textContent = 'Đang trực tiếp';
+                        ? `最大 ${formatNumber(state.rows.length)} / ${formatNumber(state.totalRows)} 行を表示 · 当日の生産 / Đang hiển thị tối đa ${formatNumber(state.rows.length)} / ${formatNumber(state.totalRows)} dòng · Ngày sản xuất hiện tại`
+                        : 'データソース / Nguồn dữ liệu: Control_ProgramPlug_Visualize · 当日の生産 / Ngày sản xuất hiện tại';
+                    $('#lastUpdated').textContent = `更新時刻 / Cập nhật lúc ${new Date().toLocaleTimeString('vi-VN', { hour12: false })}`;
+                    $('#liveText').textContent = 'リアルタイム稼働中 / Đang trực tiếp';
                 } catch (error) {
                     $('.live').dataset.status = 'error';
-                    $('#machineGrid').innerHTML = `<div class="error-state">${escapeHtml(error.message || 'Không thể tải dữ liệu sản xuất.')}</div>`;
-                    $('#liveText').textContent = 'Mất kết nối';
+                    $('#machineGrid').innerHTML = `<div class="error-state">${escapeHtml(error.message || '生産データを取得できません / Không thể tải dữ liệu sản xuất.')}</div>`;
+                    $('#liveText').textContent = '接続が切断されました / Mất kết nối';
                 } finally {
                     $('#refreshButton').disabled = false;
                 }
@@ -338,7 +339,9 @@
                 const dark = theme === 'dark';
                 $('#themeButton').textContent = '☀☾';
                 $('#themeButton').setAttribute('aria-pressed', String(dark));
-                $('#themeButton').setAttribute('aria-label', dark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối');
+                $('#themeButton').setAttribute('aria-label', dark
+                    ? 'ライトモードに切り替え / Chuyển sang giao diện sáng'
+                    : 'ダークモードに切り替え / Chuyển sang giao diện tối');
                 try { localStorage.setItem('stamping-wire-theme-v2', theme); } catch { }
             };
             applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');

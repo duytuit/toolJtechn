@@ -49,10 +49,10 @@
             </div>
         </header>
         <section class="kpis" aria-label="Tổng quan sản xuất công đoạn Cắt">
-            <article class="kpi"><div class="kpi-icon" aria-hidden="true">▦</div><div><div class="kpi-label bilingual-label"><span lang="ja">総台数</span><span lang="vi">Tổng số máy</span></div><div class="kpi-value" id="kpiRows">—</div></div></article>
             <article class="kpi"><div class="kpi-icon" aria-hidden="true">◎</div><div><div class="kpi-label bilingual-label"><span lang="ja">総目標</span><span lang="vi">Tổng mục tiêu</span></div><div class="kpi-value" id="kpiTarget">—</div></div></article>
-            <article class="kpi"><div class="kpi-icon" aria-hidden="true">▥</div><div><div class="kpi-label bilingual-label"><span lang="ja">実績合計</span><span lang="vi">Tổng sản lượng thực tế</span></div><div class="kpi-value" id="kpiActual">—</div></div></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true">▥</div><div><div class="kpi-label bilingual-label"><span lang="ja">総実績</span><span lang="vi">Tổng sản lượng thực tế</span></div><div class="kpi-value" id="kpiActual">—</div></div></article>
             <article class="kpi"><div class="kpi-icon" aria-hidden="true">↗</div><div><div class="kpi-label bilingual-label"><span lang="ja">完成率</span><span lang="vi">Tỷ lệ hoàn thành</span></div><div class="kpi-value" id="kpiRate">—</div></div></article>
+            <article class="kpi"><div class="kpi-icon" aria-hidden="true">▦</div><div><div class="kpi-label bilingual-label"><span lang="ja">総台数</span><span lang="vi">Tổng số máy</span></div><div class="kpi-value" id="kpiRows">—</div></div></article>
             <article class="kpi"><div class="kpi-icon" aria-hidden="true">✓</div><div><div class="kpi-label bilingual-label"><span lang="ja">目標達成</span><span lang="vi">Đạt mục tiêu</span></div><div class="kpi-value" id="kpiAchieved">—</div></div></article>
             <article class="kpi"><div class="kpi-icon" aria-hidden="true">!</div><div><div class="kpi-label bilingual-label"><span lang="ja">未達成</span><span lang="vi">Chưa đạt</span></div><div class="kpi-value" id="kpiBehind">—</div></div></article>
         </section>
@@ -63,7 +63,7 @@
     </div>
     <script>
         (() => {
-            const checkpoints = ['10:00', '12:00', '15:00', '17:00', '21:30'];
+            const checkpoints = ['10:00', '12:00', '14:00', '17:00', '21:30'];
             const productionStartMinute = 6 * 60;
             const state = { rows: [], columns: [], totalRows: 0, truncated: false, pageIndex: 0, machineType: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(machineType)), autoNextTimer: null, autoNextEnabled: true };
             const $ = (selector) => document.querySelector(selector);
@@ -81,7 +81,7 @@
                 '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
             }[char]));
             const formatNumber = (value, digits = 0) => value != null && Number.isFinite(Number(value))
-                ? Number(value).toLocaleString('vi-VN', { maximumFractionDigits: digits })
+                ? Number(value).toLocaleString('vi-VN', { maximumFractionDigits: digits }).replace(/\./g, ',')
                 : '—';
             const findColumn = (names) => {
                 const normalized = names.map(normalize);

@@ -47,6 +47,7 @@ body { overflow: auto; }
 .rate-label { fill: #087d25; font-size: 19px; font-weight: 800; }
 .summary-panel { padding: 20px 16px; }
 .summary-panel h2 { text-align: center; margin-bottom: 30px; }
+.summary-subtitle { font-size: .75em; font-weight: 700; }
 .summary-table { width: 100%; border: 1px solid #bed0ed; border-radius: 12px; border-spacing: 0; overflow: hidden; text-align: center; }
 .summary-table th { background: #e2efff; padding: 17px 8px; font-size: 14px; }
 .summary-table td { padding: 23px 8px; border-top: 1px solid #bed0ed; }

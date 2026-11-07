@@ -52,52 +52,55 @@ namespace Vudaco.Shares.Services
 
             Directory.CreateDirectory(backupFolder);
 
-            var sql = $@"
+            try
+            {
+                var sql = $@"
                     BACKUP DATABASE [{databaseName}]
                     TO DISK = N'{backupPath.Replace("'", "''")}'
                     WITH INIT,STATS = 10;";
 
-            await using var connection = new SqlConnection(connectionString);
+                await using var connection = new SqlConnection(connectionString);
 
-            await connection.OpenAsync();
+                await connection.OpenAsync();
 
-            await using var command = new SqlCommand(sql, connection);
+                await using var command = new SqlCommand(sql, connection);
 
-            // Không giới hạn timeout
-            command.CommandTimeout = 0;
+                // Không giới hạn timeout
+                command.CommandTimeout = 0;
 
-            await command.ExecuteNonQueryAsync();
+                await command.ExecuteNonQueryAsync();
 
-            if (!File.Exists(backupPath))
-            {
-                throw new FileNotFoundException(
-                    "Không tìm thấy file backup sau khi thực hiện backup.",
-                    backupPath);
+                if (!File.Exists(backupPath))
+                {
+                    throw new FileNotFoundException(
+                        "Không tìm thấy file backup sau khi thực hiện backup.",
+                        backupPath);
+                }
+
+                var archivePath = Path.ChangeExtension(backupPath, ".rar");
+                await CompressToRarAsync(backupPath, archivePath);
+
+                if (!File.Exists(archivePath) || new FileInfo(archivePath).Length == 0)
+                {
+                    throw new InvalidOperationException(
+                        $"File nén backup không tồn tại hoặc rỗng: {archivePath}");
+                }
+
+                Directory.CreateDirectory(localFolder);
+                var localArchivePath = Path.Combine(localFolder, Path.GetFileName(archivePath));
+                File.Copy(archivePath, localArchivePath, overwrite: true);
+
+                DeleteOldArchives(backupFolder);
+                DeleteOldArchives(localFolder);
+                return localArchivePath;
             }
-
-            var archivePath = Path.ChangeExtension(backupPath, ".rar");
-            await CompressToRarAsync(backupPath, archivePath);
-
-            if (!File.Exists(archivePath) || new FileInfo(archivePath).Length == 0)
+            finally
             {
-                throw new InvalidOperationException(
-                    $"File nén backup không tồn tại hoặc rỗng: {archivePath}");
+                if (File.Exists(backupPath))
+                {
+                    File.Delete(backupPath);
+                }
             }
-
-            File.Delete(backupPath);
-            if (File.Exists(backupPath))
-            {
-                throw new IOException($"Không thể xóa file backup sau khi nén thành công: {backupPath}");
-            }
-
-            Directory.CreateDirectory(localFolder);
-            var localArchivePath = Path.Combine(localFolder, Path.GetFileName(archivePath));
-            File.Copy(archivePath, localArchivePath, overwrite: true);
-
-            DeleteOldArchives(backupFolder);
-            DeleteOldArchives(localFolder);
-            return localArchivePath;
-
         }
 
         private async Task CompressToRarAsync(string sourcePath, string archivePath)

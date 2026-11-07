@@ -117,6 +117,7 @@
             const actualAliases = ['QtyActual', 'ActualQty', 'Actual', 'TotalActual', 'QtyOutput', 'OutputQty', 'ActualQuantity', 'ProductionQuantity', 'ProducedQty', 'SoLuongThucTe'];
             const targetAliases = ['QtyTarget', 'TargetQty', 'Target', 'TotalTarget', 'QtyPlan', 'PlanQty', 'QtyRequest', 'TargetQuantity', 'SoLuongMucTieu', 'KeHoach'];
             const statusAliases = ['ProductionStatus', 'MachineStatus', 'Status', 'StatusName', 'TrangThai'];
+            const productionDateAliases = ['DateProduction', 'ProductionDate'];
             const minuteProductionAliases = ['MinuteProduction'];
             const hourProductionAliases = ['HourProduction'];
             const machineName = (row) => String(valueOf(row, machineAliases) ?? '').trim();
@@ -150,8 +151,10 @@
                 const hour = numberOf(valueOf(row, hourProductionAliases));
                 return hour == null ? null : Math.round(hour * 60);
             };
-            const targetAtMinute = (history, minute) => [...history].reverse().find((row) =>
-                productionMinuteOf(row) === minute && numberOf(valueOf(row, targetAliases)) != null);
+            const productionDateOf = (row) => String(valueOf(row, productionDateAliases) ?? '').match(/\d{4}-\d{2}-\d{2}/)?.[0] ?? null;
+            const targetAtMinute = (history, minute) => history
+                .filter((row) => productionMinuteOf(row) === minute && numberOf(valueOf(row, targetAliases)) != null)
+                .sort((a, b) => (productionDateOf(b) ?? '').localeCompare(productionDateOf(a) ?? ''))[0];
             const currentCheckpoint = () => {
                 const hour = new Date().getHours();
                 const minute = new Date().getMinutes();
@@ -191,6 +194,7 @@
             const filteredRows = () => {
                 const now = new Date();
                 const currentMinute = now.getHours() * 60 + now.getMinutes();
+                const productionDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
                 const rowsByMachine = new Map();
                 state.rows.forEach((row) => {
                     const name = machineName(row);
@@ -200,18 +204,24 @@
                 });
                 return Array.from(rowsByMachine, ([name, history]) => {
                     history.sort((a, b) => (productionMinuteOf(a) ?? -1) - (productionMinuteOf(b) ?? -1));
-                    const productionRows = history.filter((row) => {
+                    const todayHistory = history.filter((row) => {
+                        const date = productionDateOf(row);
+                        return date == null || date === productionDate;
+                    });
+                    const productionRows = todayHistory.filter((row) => {
                         const minute = productionMinuteOf(row);
                         return minute != null && minute >= productionStartMinute;
                     });
-                    const current = productionRows[productionRows.length - 1] ?? history[history.length - 1];
+                    const current = [...productionRows].reverse().find((row) => productionMinuteOf(row) <= currentMinute)
+                        ?? productionRows[productionRows.length - 1]
+                        ?? todayHistory[todayHistory.length - 1];
                     const currentActualRows = productionRows.filter((row) => productionMinuteOf(row) <= currentMinute);
                     const actual = currentActualRows.reduce((sum, row) => sum + (numberOf(valueOf(row, actualAliases)) ?? 0), 0);
                     const points = checkpoints.map((label) => {
                         const [hour, minute] = label.split(':').map(Number);
                         const endMinute = hour * 60 + minute;
                         const targetRow = targetAtMinute(history, endMinute);
-                        const actualRows = history.filter((row) => {
+                        const actualRows = todayHistory.filter((row) => {
                             const productionMinute = productionMinuteOf(row);
                             return productionMinute != null
                                 && productionMinute >= productionStartMinute
@@ -225,7 +235,12 @@
                         };
                     });
                     points[activeCheckpoint()].actual = actual;
-                    const activePoint = points[activeCheckpoint()];
+                    const currentTargetRow = [...productionRows].reverse().find((row) =>
+                        productionMinuteOf(row) <= currentMinute
+                        && numberOf(valueOf(row, targetAliases)) != null);
+                    const currentTarget = currentTargetRow
+                        ? numberOf(valueOf(currentTargetRow, targetAliases))
+                        : null;
                     const midDayTarget = targetForMinute(
                         history,
                         state.midDayTargetRows,
@@ -243,7 +258,7 @@
                         target,
                         midDayTarget,
                         points,
-                        status: statusOf(current, activePoint.actual, activePoint.target)
+                        status: statusOf(current, actual, currentTarget)
                     };
                 }).filter((machine) => machine.actual > 0)
                     .sort((a, b) => a.name.localeCompare(b.name, 'vi'));
@@ -341,12 +356,7 @@
                 const totalTarget = totalEndOfDayTarget(records);
                 const now = new Date();
                 const isMidDayTarget = now.getHours() * 60 + now.getMinutes() < 13 * 60 + 30;
-                const achieved = records.filter((item) => {
-                    const currentPoint = item.points[activeCheckpoint()];
-                    return currentPoint.target != null
-                        && currentPoint.actual != null
-                        && currentPoint.actual >= currentPoint.target;
-                }).length;
+                const achieved = records.filter((item) => item.status === 'achieved').length;
                 $('#kpiMachines').innerHTML = `${formatNumber(records.length)}<span class="kpi-unit"><span lang="ja">台</span>/<span lang="vi">máy</span></span>`;
                 $('#kpiTarget').textContent = formatNumber(totalTarget);
                 $('#kpiActual').textContent = formatNumber(totalActual);
@@ -443,14 +453,14 @@
                 applyTheme(nextTheme);
             });
             $('#stopButton').addEventListener('click', stopAutoNext);
-            $('#refreshButton').addEventListener('click', loadData);
+            $('#refreshButton').addEventListener('click', () => window.location.reload());
             $('#fullscreenButton').addEventListener('click', async () => {
                 if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
                 else await document.exitFullscreen();
             });
             updateClock();
             window.setInterval(updateClock, 1000);
-            window.setInterval(loadData, 60000);
+            window.setTimeout(() => window.location.reload(), 60000);
             loadData();
         })();
     </script>

@@ -1160,7 +1160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $('#statusDrawerLayer .status-drawer-backdrop').addEventListener('click', closeStatusDetail);
     document.addEventListener('keydown', event => { if (event.key === 'Escape') closeStatusDetail(); });
     dateInput.addEventListener('change', loadData);
-    $('#refreshButton').addEventListener('click', loadData);
+    $('#refreshButton').addEventListener('click', () => window.location.reload());
     async function enterFullscreen(showError = false) {
         if (document.fullscreenElement) return;
         try {
@@ -1181,7 +1181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.addEventListener('fullscreenchange', () => $('#app').classList.toggle('tv-mode', document.fullscreenElement != null));
     setTimeout(enterFullscreen, 10000);
-    setInterval(loadData, 60000);
+    setTimeout(() => window.location.reload(), 60000);
     setInterval(() => {
         if (state.autoCyclePaused || state.screen === 'detail') return;
         autoTabIndex = (autoTabIndex + 1) % tabScreens.length;

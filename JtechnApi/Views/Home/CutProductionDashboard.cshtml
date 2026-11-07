@@ -326,7 +326,7 @@
             applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
             const updateClock = () => { $('#clock').textContent = new Date().toLocaleTimeString('vi-VN', { hour12: false }); };
             $('#themeButton').addEventListener('click', () => applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
-            $('#refreshButton').addEventListener('click', loadData);
+            $('#refreshButton').addEventListener('click', () => window.location.reload());
             $('#nextButton').addEventListener('click', nextPage);
             $('#stopButton').addEventListener('click', () => {
                 state.autoNextEnabled = false;
@@ -341,7 +341,7 @@
             window.addEventListener('resize', () => { state.pageIndex = 0; render(); });
             updateClock();
             window.setInterval(updateClock, 1000);
-            window.setInterval(loadData, 60000);
+            window.setTimeout(() => window.location.reload(), 60000);
             loadData();
         })();
     </script>

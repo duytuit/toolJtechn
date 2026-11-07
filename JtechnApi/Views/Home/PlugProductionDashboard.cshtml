@@ -353,7 +353,7 @@
                 });
             };
             $('#themeButton').addEventListener('click', () => applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
-            $('#refreshButton').addEventListener('click', loadData);
+            $('#refreshButton').addEventListener('click', () => window.location.reload());
             $('#fullscreenButton').addEventListener('click', async () => {
                 if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
                 else await document.exitFullscreen();
@@ -361,7 +361,7 @@
             window.addEventListener('resize', render);
             updateClock();
             window.setInterval(updateClock, 1000);
-            window.setInterval(loadData, 60000);
+            window.setTimeout(() => window.location.reload(), 60000);
             loadData();
         })();
     </script>

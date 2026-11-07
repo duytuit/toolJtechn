@@ -22,4 +22,14 @@ namespace Vudaco.Debits.Dtos
         public int CHCK { get; set; }
         public int CK { get; set; }
     }
+
+    public class CongNoTongHopKHDto : CongNoTongHopDto
+    {
+        public DateTime? OldestUnpaidDebtDate { get; set; }
+    }
+
+    public class CongNoTongHopNCCDto : CongNoTongHopDto
+    {
+        public DateTime? OldestUnpaidDebtDate { get; set; }
+    }
 }

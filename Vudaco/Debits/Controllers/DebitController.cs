@@ -193,6 +193,11 @@ namespace Vudaco.Debits.Controllers
                                 x.receipt_total,
                                 type = (int)x.type 
                             }).ToList();
+            var oldestUnpaidDebtDates = ((IEnumerable<dynamic>)result.Extra["oldest_unpaid_debt_kh"])
+                .ToDictionary(
+                    x => (int)x.customer_detail_id,
+                    x => (DateTime)x.oldest_unpaid_debt_date
+                );
             var data_dv_dk = data_dk.Where(x => new[] { 0, 1, 4, 5, 8 }.Contains(x.type))
                             .GroupBy(x => x.customer_detail_id)
                             .Select(g => new
@@ -225,7 +230,7 @@ namespace Vudaco.Debits.Controllers
                     }
                 )
                 .ToListAsync();
-            List<CongNoTongHopDto> cnth = new List<CongNoTongHopDto>();
+            List<CongNoTongHopKHDto> cnth = new List<CongNoTongHopKHDto>();
 
            foreach (var item in customers)
             {
@@ -251,7 +256,7 @@ namespace Vudaco.Debits.Controllers
                     TTDVTK == 0 && TTCHTK == 0
                 )
                     continue;
-                cnth.Add(new CongNoTongHopDto
+                cnth.Add(new CongNoTongHopKHDto
                 {
                     Id = item.Id,
                     Abbreviation = item.Abbreviation,
@@ -269,7 +274,10 @@ namespace Vudaco.Debits.Controllers
 
                     DVCK = (DVDK - TTDVDK) + (DVTK - TTDVTK),
                     CHCK = (CHDK - TTCHDK) + (CHTK - TTCHTK),
-                    CK = (DVDK - TTDVDK) + (DVTK - TTDVTK) + (CHDK - TTCHDK) + (CHTK - TTCHTK)
+                    CK = (DVDK - TTDVDK) + (DVTK - TTDVTK) + (CHDK - TTCHDK) + (CHTK - TTCHTK),
+                    OldestUnpaidDebtDate = oldestUnpaidDebtDates.TryGetValue(item.Id, out var oldestUnpaidDebtDate)
+                        ? oldestUnpaidDebtDate
+                        : (DateTime?)null
                 });
             }
             if (result == null)
@@ -315,7 +323,12 @@ namespace Vudaco.Debits.Controllers
                                 x.receipt_total,
                                 type = (int)x.type 
                             }).ToList();
-            var data_dv_dk = data_dk.Where(x => new[] { 0, 1, 4, 7, 10 ,12 }.Contains(x.type))
+             var oldestUnpaidDebtDates = ((IEnumerable<dynamic>)result.Extra["oldest_unpaid_debt_ncc"])
+                 .ToDictionary(
+                     x => (int)x.supplier_detail_id,
+                     x => (DateTime)x.oldest_unpaid_debt_date
+                 );
+             var data_dv_dk = data_dk.Where(x => new[] { 0, 1, 4, 7, 10 ,12 }.Contains(x.type))
                             .GroupBy(x => x.supplier_detail_id)
                             .Select(g => new
                             {
@@ -347,7 +360,7 @@ namespace Vudaco.Debits.Controllers
                     }
                 )
                 .ToListAsync();
-            List<CongNoTongHopDto> cnth = new List<CongNoTongHopDto>();
+            List<CongNoTongHopNCCDto> cnth = new List<CongNoTongHopNCCDto>();
 
            foreach (var item in customers)
             {
@@ -373,7 +386,7 @@ namespace Vudaco.Debits.Controllers
                     TTDVTK == 0 && TTCHTK == 0
                 )
                     continue;
-                cnth.Add(new CongNoTongHopDto
+                cnth.Add(new CongNoTongHopNCCDto
                 {
                     Id = item.Id,
                     Abbreviation = item.Abbreviation,
@@ -391,7 +404,10 @@ namespace Vudaco.Debits.Controllers
 
                     DVCK = (DVDK - TTDVDK) + (DVTK - TTDVTK),
                     CHCK = (CHDK - TTCHDK) + (CHTK - TTCHTK),
-                    CK = (DVDK - TTDVDK) + (DVTK - TTDVTK) + (CHDK - TTCHDK) + (CHTK - TTCHTK)
+                    CK = (DVDK - TTDVDK) + (DVTK - TTDVTK) + (CHDK - TTCHDK) + (CHTK - TTCHTK),
+                    OldestUnpaidDebtDate = oldestUnpaidDebtDates.TryGetValue(item.Id, out var oldestUnpaidDebtDate)
+                        ? oldestUnpaidDebtDate
+                        : (DateTime?)null
                 });
             }
             if (result == null)

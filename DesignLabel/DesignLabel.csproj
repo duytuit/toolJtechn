@@ -110,12 +110,6 @@
     <Compile Include="Conditional.Designer.cs">
       <DependentUpon>Conditional.cs</DependentUpon>
     </Compile>
-    <Compile Include="DesignForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="DesignForm.Designer.cs">
-      <DependentUpon>DesignForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="ExportEDP.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -189,6 +183,11 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="edp.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AutoUpdate.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

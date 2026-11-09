@@ -1,11 +1,9 @@
-﻿using ClosedXML.Excel;
-using Newtonsoft.Json;
+using ClosedXML.Excel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,10 +13,6 @@ namespace WindowsFormsApp5
 {
     public partial class ImportExcel : Form
     {
-        private readonly string listMachineCutFilePath = Path.Combine(
-            AppDomain.CurrentDomain.BaseDirectory,
-            "ListMachineCut.json");
-
         public ImportExcel()
         {
             InitializeComponent();
@@ -124,23 +118,8 @@ namespace WindowsFormsApp5
         {
             try
             {
-                if (!File.Exists(listMachineCutFilePath))
-                {
-                    return;
-                }
-
-                var machineCodes = JsonConvert.DeserializeObject<List<string>>(
-                    File.ReadAllText(listMachineCutFilePath));
-
-                if (machineCodes == null)
-                {
-                    return;
-                }
-
-                foreach (string machineCode in machineCodes
-                    .Where(code => !string.IsNullOrWhiteSpace(code))
-                    .Select(code => code.Trim())
-                    .Distinct())
+                var configuration = Conditional.LoadMachineGroupConfiguration(Conditional.ConfigurationDirectory);
+                foreach (string machineCode in configuration.Groups.SelectMany(group => group.Machines))
                 {
                     lboxmay.Items.Add(machineCode);
                 }
@@ -155,9 +134,26 @@ namespace WindowsFormsApp5
         {
             try
             {
+                var configuration = Conditional.LoadMachineGroupConfiguration(Conditional.ConfigurationDirectory);
                 var machineCodes = lboxmay.Items.Cast<string>().ToList();
-                string json = JsonConvert.SerializeObject(machineCodes, Formatting.Indented);
-                File.WriteAllText(listMachineCutFilePath, json);
+                var retainedCodes = new HashSet<string>(machineCodes, StringComparer.OrdinalIgnoreCase);
+                foreach (var group in configuration.Groups)
+                    group.Machines = group.Machines.Where(retainedCodes.Remove).ToList();
+
+                if (machineCodes.Any(code => configuration.Groups
+                    .All(group => !group.Machines.Contains(code, StringComparer.OrdinalIgnoreCase))))
+                {
+                    if (configuration.Groups.Count == 0)
+                        configuration.Groups.Add(new Conditional.MachineGroupData { Name = "Nhóm máy" });
+
+                    var existingCodes = new HashSet<string>(
+                        configuration.Groups.SelectMany(group => group.Machines),
+                        StringComparer.OrdinalIgnoreCase);
+                    configuration.Groups[0].Machines.AddRange(
+                        machineCodes.Where(existingCodes.Add));
+                }
+
+                Conditional.SaveMachineGroupConfiguration(Conditional.ConfigurationDirectory, configuration);
             }
             catch (Exception ex)
             {

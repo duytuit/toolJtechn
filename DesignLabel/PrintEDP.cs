@@ -5,9 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Drawing.Printing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using ZXing;
 using ZXing.Common;
@@ -21,12 +24,31 @@ namespace WindowsFormsApp5
         private readonly List<EdpRequest> _requests = new List<EdpRequest>();
         private readonly List<EdpLabel> _labels = new List<EdpLabel>();
         private List<EdpPrintPage> _printPages = new List<EdpPrintPage>();
+        private List<EdpPrintPage> _defaultPrintPages = new List<EdpPrintPage>();
+        private readonly HashSet<string> _prioritizedPrintGroups = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Bitmap> _barcodeImages = new Dictionary<string, Bitmap>();
+        private readonly Queue<string> _barcodeImageOrder = new Queue<string>();
+        private readonly CheckedListBox _printGroupSelector = new CheckedListBox();
+        private readonly CheckBox _groupByParentSelector = new CheckBox();
+        private readonly Label _loadingStatus = new Label();
+        private readonly ProgressBar _loadingProgress = new ProgressBar();
         private Form1.LayoutData _template;
+        private bool? _splitIntoTwoGroups;
         private int _printIndex;
+        private const int BarcodeImageCacheCapacity = 128;
 
         public PrintEDP()
         {
             InitializeComponent();
+            InitializeLoadingProgress();
+            InitializePrintGroupSelector();
+            FormClosed += (s, e) =>
+            {
+                foreach (var image in _barcodeImages.Values)
+                    image.Dispose();
+                _barcodeImages.Clear();
+                _barcodeImageOrder.Clear();
+            };
             _oracle = new OracleHelper("User Id=JTC_USER;Password=EX;Data Source=192.168.207.14:1521/ORCL;");
             plPriviewPageLotNo.AutoScroll = true;
             plPriviewPageLotNo.Resize += PreviewPanel_Resize;
@@ -34,9 +56,135 @@ namespace WindowsFormsApp5
             LoadTemplate();
         }
 
+        private void InitializeLoadingProgress()
+        {
+            _loadingStatus.AutoEllipsis = true;
+            _loadingStatus.Location = new Point(6, 155);
+            _loadingStatus.Size = new Size(165, 18);
+            _loadingStatus.Visible = false;
+            panel2.Controls.Add(_loadingStatus);
+
+            _loadingProgress.Location = new Point(6, 175);
+            _loadingProgress.Size = new Size(165, 14);
+            _loadingProgress.MarqueeAnimationSpeed = 30;
+            _loadingProgress.Style = ProgressBarStyle.Marquee;
+            _loadingProgress.Visible = false;
+            panel2.Controls.Add(_loadingProgress);
+
+            rtbLotNo.Location = new Point(rtbLotNo.Left, 196);
+            rtbLotNo.Height -= 37;
+        }
+
+        private void InitializePrintGroupSelector()
+        {
+            groupBox2.Text = "Nhóm in (tích để in trước)";
+            _printGroupSelector.CheckOnClick = true;
+            _printGroupSelector.Dock = DockStyle.Fill;
+            _printGroupSelector.FormattingEnabled = true;
+            _printGroupSelector.HorizontalScrollbar = true;
+            _printGroupSelector.IntegralHeight = false;
+            _printGroupSelector.ItemCheck += PrintGroupSelector_ItemCheck;
+            groupBox2.Controls.Add(_printGroupSelector);
+
+            _groupByParentSelector.AutoSize = true;
+            _groupByParentSelector.Dock = DockStyle.Top;
+            _groupByParentSelector.Text = "Tách nhóm cha + SENSYU";
+            _groupByParentSelector.Checked = true;
+            _groupByParentSelector.CheckedChanged += GroupByParentSelector_CheckedChanged;
+            groupBox2.Controls.Add(_groupByParentSelector);
+        }
+
+        private void GroupByParentSelector_CheckedChanged(object sender, EventArgs e)
+        {
+            if (_labels.Count == 0)
+                return;
+
+            try
+            {
+                RebuildPrintPages();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Không thể cập nhật cách gom nhóm EDP: " + ex.Message);
+            }
+        }
+
+        private void PrintGroupSelector_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            BeginInvoke((Action)ApplyPrintGroupPriority);
+        }
+
+        private void RefreshPrintGroupSelector()
+        {
+            var groups = _printPages
+                .GroupBy(page => GetPrintGroupName(page), StringComparer.OrdinalIgnoreCase)
+                .Select(group => new PrintGroupOption
+                {
+                    Name = group.Key,
+                    LabelCount = group.Where(page => !page.IsGroupCover).Sum(page => page.Labels.Count)
+                })
+                .ToList();
+            var availableGroups = new HashSet<string>(groups.Select(group => group.Name),
+                StringComparer.OrdinalIgnoreCase);
+            if (groups.Count > 0)
+                _prioritizedPrintGroups.IntersectWith(availableGroups);
+
+            _printGroupSelector.BeginUpdate();
+            try
+            {
+                _printGroupSelector.Items.Clear();
+                foreach (var group in groups)
+                    _printGroupSelector.Items.Add(group, _prioritizedPrintGroups.Contains(group.Name));
+            }
+            finally
+            {
+                _printGroupSelector.EndUpdate();
+            }
+
+            ApplyPrintGroupPriority();
+        }
+
+        private void ApplyPrintGroupPriority()
+        {
+            _prioritizedPrintGroups.Clear();
+            foreach (var item in _printGroupSelector.CheckedItems)
+                _prioritizedPrintGroups.Add(((PrintGroupOption)item).Name);
+
+            var groupedPages = _defaultPrintPages
+                .GroupBy(GetPrintGroupName, StringComparer.OrdinalIgnoreCase)
+                .Select(group => new
+                {
+                    Name = group.Key,
+                    Pages = group.ToList()
+                })
+                .OrderByDescending(group => _prioritizedPrintGroups.Contains(group.Name))
+                .ToList();
+
+            _printPages = groupedPages.SelectMany(group => group.Pages).ToList();
+            UpdatePreviewScrollSize();
+            plPriviewPageLotNo.Invalidate();
+        }
+
+        private static string GetPrintGroupName(EdpPrintPage page)
+        {
+            var groupName = page.PrintGroupName ?? page.GroupName;
+            return string.IsNullOrWhiteSpace(groupName) ? "Chưa phân nhóm" : groupName;
+        }
+
+        private void SetLoadingProgress(bool isLoading, string status)
+        {
+            _loadingStatus.Text = status;
+            _loadingStatus.Visible = isLoading;
+            _loadingProgress.Visible = isLoading;
+            btnLoadLotNo.Enabled = !isLoading;
+            btnPrintLotNo.Enabled = !isLoading;
+            btnExportExcel.Enabled = !isLoading;
+            btnOpenCondition.Enabled = !isLoading;
+        }
+
         private void LoadTemplate()
         {
-            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "edp.json");
+            var filePath = Path.Combine(Conditional.ConfigurationDirectory, "edp.json");
             if (!File.Exists(filePath))
             {
                 MessageBox.Show("Không tìm thấy mẫu edp.json: " + filePath);
@@ -56,7 +204,7 @@ namespace WindowsFormsApp5
             }
         }
 
-        private void btnLoadLotNo_Click(object sender, EventArgs e)
+        private async void btnLoadLotNo_Click(object sender, EventArgs e)
         {
             using (var dialog = new OpenFileDialog
             {
@@ -74,6 +222,8 @@ namespace WindowsFormsApp5
                     _requests.AddRange(requests);
                     _labels.Clear();
                     _printPages.Clear();
+                    _defaultPrintPages.Clear();
+                    RefreshPrintGroupSelector();
                     rtbLotNo.Lines = _requests
                         .Select(request => request.Sequence + "    " + request.EdpSymbol + "    " + request.SoDay)
                         .ToArray();
@@ -83,7 +233,7 @@ namespace WindowsFormsApp5
 
                     try
                     {
-                        LoadEdpData();
+                        await LoadEdpDataWithProgressAsync();
                     }
                     catch (Exception ex)
                     {
@@ -176,7 +326,22 @@ namespace WindowsFormsApp5
             return (value ?? string.Empty).Trim().Replace(" ", string.Empty).Replace("　", string.Empty).ToUpperInvariant();
         }
 
-        private void LoadEdpData()
+        private async Task LoadEdpDataWithProgressAsync()
+        {
+            SetLoadingProgress(true, "Đang tìm dữ liệu lot...");
+            var progress = new Progress<string>(status => _loadingStatus.Text = status);
+            try
+            {
+                await Task.Run(() => LoadEdpData(progress));
+                RebuildPrintPages();
+            }
+            finally
+            {
+                SetLoadingProgress(false, string.Empty);
+            }
+        }
+
+        private void LoadEdpData(IProgress<string> progress)
         {
             if (_template == null)
                 throw new InvalidOperationException("Mẫu edp.json chưa được tải.");
@@ -199,6 +364,7 @@ namespace WindowsFormsApp5
                 SELECT H10F.製番, H10F.品目C, H10F.発注SEQ, H10F.発注SEQ2, H10F.発注数, H10F.納期
                 FROM DFW_H10F H10F
                 WHERE H10F.発注SEQ IN (" + string.Join(",", sequenceNames) + ")";
+            progress.Report("Đang tra cứu thông tin lot...");
             var orderRows = _oracle.ExecuteDataTable(orderSql, sequenceParameters.ToArray());
             if (orderRows.Rows.Count == 0)
                 throw new InvalidOperationException("Không tìm thấy dữ liệu DFW_H10F theo 発注SEQ đã nhập.");
@@ -247,12 +413,35 @@ namespace WindowsFormsApp5
             }
 
             var structureSql = @"
-                WITH ShelfLocations AS (
-                    SELECT TRIM(品目K) || TRIM(品目C) AS PartCode,
-                           MAX(TRIM(棚番)) AS ShelfNumber
-                    FROM TAD_Z60M
-                    WHERE TRIM(場所C) = '1510'
-                    GROUP BY TRIM(品目K) || TRIM(品目C)
+                WITH RequestedComponents AS (
+                    SELECT C.HINCD, C.SENBAN, C.MARKNO, C.SENSYU, C.SENTYO, C.SURYO, C.TABA,
+                           C.TWIST1, C.TWIST2, C.TWIST3, C.TASCDA, C.TASMEIA, C.TASCDB, C.TASMEIB, C.BIKO,
+                           C.NOUKI, C.KAWAA, C.KAWAB, C.GUMCDA, C.GUMCDB, C.JOINTGA, C.JOINTGB,
+                           C.INFOMEIA1, C.INFOMEIA2, C.INFOMEIB1, C.INFOMEIB2
+                    FROM TDCJSIJI C
+                    WHERE " + string.Join(" OR ", structureConditions) + @"
+                ),
+                ComponentParts AS (
+                    SELECT DISTINCT TRIM(PartCode) AS PartCode
+                    FROM (
+                        SELECT TASCDA AS PartCode FROM RequestedComponents
+                        UNION ALL
+                        SELECT GUMCDA AS PartCode FROM RequestedComponents
+                        UNION ALL
+                        SELECT TASCDB AS PartCode FROM RequestedComponents
+                        UNION ALL
+                        SELECT GUMCDB AS PartCode FROM RequestedComponents
+                    )
+                    WHERE TRIM(PartCode) IS NOT NULL
+                ),
+                ShelfLocations AS (
+                    SELECT TRIM(Z.品目K) || TRIM(Z.品目C) AS PartCode,
+                           MAX(TRIM(Z.棚番)) AS ShelfNumber
+                    FROM TAD_Z60M Z
+                    INNER JOIN ComponentParts P
+                        ON P.PartCode = TRIM(Z.品目K) || TRIM(Z.品目C)
+                    WHERE TRIM(Z.場所C) = '1510'
+                    GROUP BY TRIM(Z.品目K) || TRIM(Z.品目C)
                 )
                 SELECT C.HINCD, C.SENBAN, C.MARKNO, C.SENSYU, C.SENTYO, C.SURYO, C.TABA,
                        C.TWIST1, C.TWIST2, C.TWIST3, C.TASCDA, C.TASMEIA, C.TASCDB, C.TASMEIB, C.BIKO,
@@ -260,18 +449,19 @@ namespace WindowsFormsApp5
                        C.INFOMEIA1, C.INFOMEIA2, C.INFOMEIB1, C.INFOMEIB2,
                        TA.ShelfNumber AS ShelfTerminalA, GA.ShelfNumber AS ShelfSleeveA,
                        TB.ShelfNumber AS ShelfTerminalB, GB.ShelfNumber AS ShelfSleeveB
-                FROM TDCJSIJI C
+                FROM RequestedComponents C
                 LEFT JOIN ShelfLocations TA ON TA.PartCode = TRIM(C.TASCDA)
                 LEFT JOIN ShelfLocations GA ON GA.PartCode = TRIM(C.GUMCDA)
                 LEFT JOIN ShelfLocations TB ON TB.PartCode = TRIM(C.TASCDB)
-                LEFT JOIN ShelfLocations GB ON GB.PartCode = TRIM(C.GUMCDB)
-                WHERE " + string.Join(" OR ", structureConditions);
+                LEFT JOIN ShelfLocations GB ON GB.PartCode = TRIM(C.GUMCDB)";
+            progress.Report("Đang tải cấu thành và vị trí kệ...");
             var structureRows = _oracle.ExecuteDataTable(structureSql, productParameters.ToArray());
             var structuresByProduct = structureRows.Rows.Cast<DataRow>()
                 .GroupBy(row => GetValue(row, "HINCD"), StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(group => group.Key, group => group.ToList(), StringComparer.OrdinalIgnoreCase);
 
             _labels.Clear();
+            progress.Report("Đang xử lý dữ liệu EDP...");
             foreach (DataRow orderRow in orderRows.Rows)
             {
                 var sequence = GetValue(orderRow, "発注SEQ");
@@ -300,55 +490,121 @@ namespace WindowsFormsApp5
 
             if (_labels.Count == 0)
                 throw new InvalidOperationException("Đã tìm thấy DFW_H10F nhưng không có cấu thành tương ứng trong TDCJSIJI.");
-
-            RebuildPrintPages();
         }
 
-        private void RebuildPrintPages()
+        private void RebuildPrintPages(bool? splitIntoTwoGroups = null)
         {
             _printPages.Clear();
-            var groups = Conditional.LoadPrintGroups(AppDomain.CurrentDomain.BaseDirectory);
-            var settings = Conditional.LoadAutomaticSettings(AppDomain.CurrentDomain.BaseDirectory);
-            _printPages = BuildPrintPages(_labels, groups, settings.MinimumOrderQuantity);
-            groupBox1.Text = "Thống kê kết quả: " + _labels.Count + " EDP / " + _printPages.Count + " trang";
+            var groups = Conditional.LoadPrintGroups(Conditional.ConfigurationDirectory);
+            var settings = Conditional.LoadAutomaticSettings(Conditional.ConfigurationDirectory);
+            var splitMode = splitIntoTwoGroups ?? _splitIntoTwoGroups ?? settings.SplitIntoTwoGroups;
+            _splitIntoTwoGroups = splitMode;
+            _printPages = BuildPrintPages(_labels, groups, settings.MinimumOrderQuantity, splitMode,
+                _groupByParentSelector.Checked);
+            _defaultPrintPages = new List<EdpPrintPage>(_printPages);
+            groupBox1.Text = splitMode
+                ? "Thống kê: Máy nhỏ " + _labels.Count(label => !MeetsAutomaticQuantity(label, settings.MinimumOrderQuantity)) +
+                    " / Tự động " + _labels.Count(label => MeetsAutomaticQuantity(label, settings.MinimumOrderQuantity)) +
+                    " EDP / " + _printPages.Count + " trang"
+                : "Thống kê kết quả: " + _labels.Count + " EDP / " + _printPages.Count + " trang";
+            RefreshPrintGroupSelector();
             UpdatePreviewScrollSize();
             plPriviewPageLotNo.Invalidate();
         }
 
         private static List<EdpPrintPage> BuildPrintPages(List<EdpLabel> labels, List<Conditional.ConditionData> groups,
-            decimal automaticMinimumQuantity = 7m)
+            decimal automaticMinimumQuantity = 7m, bool splitIntoTwoGroups = false, bool groupByParent = false)
         {
             var pages = new List<EdpPrintPage>();
-            var remaining = new List<EdpLabel>(labels);
             foreach (var label in labels)
                 label.MatchedCondition = string.Empty;
-            // Partition by quantity before matching; orders never cross between machine types.
-            foreach (var group in groups.OrderByDescending(condition => condition.IsAutomatic))
+
+            if (splitIntoTwoGroups)
             {
-                var matched = remaining.Where(label => group.IsAutomatic ==
-                    MeetsAutomaticQuantity(label, automaticMinimumQuantity)).Select(label => new
+                foreach (var isAutomatic in new[] { false, true })
                 {
-                    Label = label,
-                    Priority = group.GetLabelMatchPriority(label.Get("SENBAN"), label.Get("SENSYU"), label.Get("TASCDA"),
-                        label.Get("TASCDB"), label.Get("GUMCDA"), label.Get("GUMCDB"))
-                }).Where(match => match.Priority >= 0).OrderBy(match => match.Priority)
-                    .Select(match => match.Label).ToList();
-
-                foreach (var label in matched)
-                {
-                    var priority = group.GetLabelMatchPriority(label.Get("SENBAN"), label.Get("SENSYU"), label.Get("TASCDA"),
-                        label.Get("TASCDB"), label.Get("GUMCDA"), label.Get("GUMCDB"));
-                    label.MatchedCondition = new[] { "loai_day", "tanshi", "gom", "soday" }[priority];
-                    if (group.IsAutomatic)
-                        label.MatchedCondition = "発注数 >= " + automaticMinimumQuantity.ToString(
-                            System.Globalization.CultureInfo.InvariantCulture) + " + " + label.MatchedCondition;
+                    var categoryName = isAutomatic ? "Tự động" : "Máy nhỏ";
+                    var categoryLabels = labels.Where(label =>
+                        MeetsAutomaticQuantity(label, automaticMinimumQuantity) == isAutomatic).ToList();
+                    AddGroupPages(pages, categoryName, categoryLabels);
                 }
-                AddGroupPages(pages, group.Name, matched);
-                var assigned = new HashSet<EdpLabel>(matched);
-                remaining.RemoveAll(label => assigned.Contains(label));
             }
+            else
+            {
+                var remaining = new List<EdpLabel>(labels);
+                var labelsByParent = new Dictionary<string, List<EdpLabel>>(StringComparer.OrdinalIgnoreCase);
+                var labelsByMachine = new Dictionary<string, List<EdpLabel>>(StringComparer.OrdinalIgnoreCase);
+                var parentOrder = groups.Select(condition => condition.ParentName)
+                    .Where(name => !string.IsNullOrWhiteSpace(name))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+                // Partition by quantity before matching; orders never cross between machine types.
+                foreach (var group in groups.OrderByDescending(condition => condition.IsAutomatic))
+                {
+                    var matched = remaining.Where(label => group.IsAutomatic ==
+                        MeetsAutomaticQuantity(label, automaticMinimumQuantity)).Select(label => new
+                    {
+                        Label = label,
+                        Priority = group.GetLabelMatchPriority(label.Get("SENBAN"), label.Get("SENSYU"), label.Get("TASCDA"),
+                            label.Get("TASCDB"), label.Get("GUMCDA"), label.Get("GUMCDB"))
+                    }).Where(match => match.Priority >= 0).OrderBy(match => match.Priority)
+                        .Select(match => match.Label).ToList();
 
-            AddGroupPages(pages, groups.Count > 0 ? "Chưa phân nhóm" : null, remaining);
+                    foreach (var label in matched)
+                    {
+                        var priority = group.GetLabelMatchPriority(label.Get("SENBAN"), label.Get("SENSYU"), label.Get("TASCDA"),
+                            label.Get("TASCDB"), label.Get("GUMCDA"), label.Get("GUMCDB"));
+                        label.MatchedCondition = group.GetMatchCategory(priority);
+                        if (group.IsAutomatic)
+                            label.MatchedCondition = "発注数 >= " + automaticMinimumQuantity.ToString(
+                                System.Globalization.CultureInfo.InvariantCulture) + " + " + label.MatchedCondition;
+                    }
+                    List<EdpLabel> parentLabels;
+                    if (!labelsByParent.TryGetValue(group.ParentName, out parentLabels))
+                    {
+                        parentLabels = new List<EdpLabel>();
+                        labelsByParent.Add(group.ParentName, parentLabels);
+                    }
+                    parentLabels.AddRange(matched);
+                    List<EdpLabel> machineLabels;
+                    if (!labelsByMachine.TryGetValue(group.Name, out machineLabels))
+                    {
+                        machineLabels = new List<EdpLabel>();
+                        labelsByMachine.Add(group.Name, machineLabels);
+                    }
+                    machineLabels.AddRange(matched);
+                    var assigned = new HashSet<EdpLabel>(matched);
+                    remaining.RemoveAll(label => assigned.Contains(label));
+                }
+
+                if (groupByParent)
+                {
+                    foreach (var parentName in parentOrder)
+                    {
+                        List<EdpLabel> parentLabels;
+                        if (!labelsByParent.TryGetValue(parentName, out parentLabels))
+                            continue;
+
+                        AddGroupPagesByWireType(pages, parentName, parentLabels, parentName);
+                    }
+                }
+                else
+                {
+                    foreach (var group in groups)
+                    {
+                        List<EdpLabel> machineLabels;
+                        if (!labelsByMachine.TryGetValue(group.Name, out machineLabels))
+                            continue;
+
+                        if (group.GroupBySensyu)
+                            AddGroupPagesByWireType(pages, group.Name, machineLabels, group.Name);
+                        else
+                            AddGroupPages(pages, group.Name, machineLabels, group.Name);
+                    }
+                }
+
+                AddGroupPagesByWireType(pages, "Chưa phân nhóm", remaining);
+            }
             return pages;
         }
 
@@ -362,18 +618,43 @@ namespace WindowsFormsApp5
 
         private static void AddGroupPages(List<EdpPrintPage> pages, string groupName, List<EdpLabel> labels)
         {
+            AddGroupPages(pages, groupName, labels, groupName);
+        }
+
+        private static void AddGroupPages(List<EdpPrintPage> pages, string groupName, List<EdpLabel> labels,
+            string printGroupName)
+        {
             if (labels.Count == 0)
                 return;
 
             if (!string.IsNullOrEmpty(groupName))
-                pages.Add(new EdpPrintPage { GroupName = groupName, IsGroupCover = true });
+                pages.Add(new EdpPrintPage
+                {
+                    GroupName = groupName,
+                    PrintGroupName = printGroupName,
+                    IsGroupCover = true
+                });
 
             for (var first = 0; first < labels.Count; first += 5)
                 pages.Add(new EdpPrintPage
                 {
                     GroupName = groupName,
+                    PrintGroupName = printGroupName,
                     Labels = labels.Skip(first).Take(5).ToList()
                 });
+        }
+
+        private static void AddGroupPagesByWireType(List<EdpPrintPage> pages, string groupName, List<EdpLabel> labels,
+            string printGroupName = null)
+        {
+            foreach (var wireTypeGroup in labels
+                .GroupBy(label => label.Get("SENSYU"), StringComparer.OrdinalIgnoreCase)
+                .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase))
+            {
+                var wireType = string.IsNullOrWhiteSpace(wireTypeGroup.Key) ? "(trống)" : wireTypeGroup.Key;
+                AddGroupPages(pages, groupName + " / SENSYU: " + wireType,
+                    wireTypeGroup.ToList(), printGroupName ?? groupName);
+            }
         }
 
         private static EdpLabel CreateLabel(DataRow orderRow, DataRow component, string productCode, string edpSymbol)
@@ -482,12 +763,12 @@ namespace WindowsFormsApp5
                 : string.Empty;
         }
 
-        private void btnExportExcel_Click(object sender, EventArgs e)
+        private async void btnExportExcel_Click(object sender, EventArgs e)
         {
             try
             {
                 if (_labels.Count == 0)
-                    LoadEdpData();
+                    await LoadEdpDataWithProgressAsync();
                 else
                     RebuildPrintPages();
 
@@ -591,12 +872,12 @@ namespace WindowsFormsApp5
             }
         }
 
-        private void btnPrintLotNo_Click(object sender, EventArgs e)
+        private async void btnPrintLotNo_Click(object sender, EventArgs e)
         {
             try
             {
                 if (_labels.Count == 0)
-                    LoadEdpData();
+                    await LoadEdpDataWithProgressAsync();
                 else
                     RebuildPrintPages();
 
@@ -652,10 +933,21 @@ namespace WindowsFormsApp5
             var pageHeightPixels = pageHeightMm * scale;
             var left = (plPriviewPageLotNo.ClientSize.Width - pageWidthPixels) / 2f;
             var scrollPosition = plPriviewPageLotNo.AutoScrollPosition;
+            var pageStridePixels = pageHeightPixels + pageGapPixels;
+            var viewportTop = -scrollPosition.Y;
+            var viewportBottom = viewportTop + plPriviewPageLotNo.ClientSize.Height;
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
-            for (var pageIndex = 0; pageIndex < pageCount; pageIndex++)
+            var firstPage = Math.Max(0, (int)Math.Floor(
+                (viewportTop - pageMarginPixels - pageHeightPixels) / pageStridePixels) + 1);
+            var lastPage = Math.Min(pageCount - 1, (int)Math.Ceiling(
+                (viewportBottom - pageMarginPixels) / pageStridePixels) - 1);
+            for (var pageIndex = firstPage; pageIndex <= lastPage; pageIndex++)
             {
+                var pageTop = pageMarginPixels + scrollPosition.Y + pageIndex * pageStridePixels;
+                if (pageTop >= plPriviewPageLotNo.ClientSize.Height || pageTop + pageHeightPixels <= 0)
+                    continue;
+
                 var state = e.Graphics.Save();
                 using (var transform = new System.Drawing.Drawing2D.Matrix(
                     scale,
@@ -710,15 +1002,7 @@ namespace WindowsFormsApp5
             var page = _printPages[pageIndex];
             if (page.IsGroupCover)
             {
-                using (var font = new Font("Arial", 16f, FontStyle.Bold, GraphicsUnit.World))
-                using (var brush = new SolidBrush(Color.Black))
-                using (var format = new StringFormat
-                {
-                    Alignment = StringAlignment.Center,
-                    LineAlignment = StringAlignment.Center,
-                    Trimming = StringTrimming.EllipsisCharacter
-                })
-                    graphics.DrawString(page.GroupName, font, brush, new RectangleF(10, 10, 190, 277), format);
+                DrawGroupCoverTitle(graphics, page.GroupName);
                 return;
             }
 
@@ -738,6 +1022,60 @@ namespace WindowsFormsApp5
                 var x = (pageWidthMm - labelWidthMm) / 2f;
                 var y = index * (labelHeightMm + gapMm);
                 DrawLabel(graphics, x, y, page.Labels[index]);
+            }
+        }
+
+        private static void DrawGroupCoverTitle(Graphics graphics, string title)
+        {
+            const float horizontalMarginMm = 10f;
+            const float titleWidthMm = 190f;
+            const float titleHeightMm = 10f;
+            const float topMarginMm = 8f;
+            const float bottomMarginMm = 8f;
+            var titleText = title ?? string.Empty;
+            var fontSize = 12f;
+
+            using (var format = new StringFormat(StringFormat.GenericTypographic)
+            {
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Center,
+                Trimming = StringTrimming.EllipsisCharacter,
+                FormatFlags = StringFormatFlags.NoWrap
+            })
+            using (var brush = new SolidBrush(Color.Black))
+            {
+                Font font;
+                while (true)
+                {
+                    font = new Font("Arial", fontSize, FontStyle.Bold, GraphicsUnit.World);
+                    if (graphics.MeasureString(titleText, font, int.MaxValue, format).Width <= titleWidthMm ||
+                        fontSize <= 2f)
+                        break;
+
+                    font.Dispose();
+                    fontSize -= 0.25f;
+                }
+
+                using (font)
+                {
+                    var topBounds = new RectangleF(
+                        horizontalMarginMm, topMarginMm, titleWidthMm, titleHeightMm);
+                    var bottomBounds = new RectangleF(
+                        horizontalMarginMm, 297f - bottomMarginMm - titleHeightMm,
+                        titleWidthMm, titleHeightMm);
+                    graphics.DrawString(titleText, font, brush, topBounds, format);
+
+                    var state = graphics.Save();
+                    graphics.TranslateTransform(
+                        bottomBounds.Left + bottomBounds.Width / 2f,
+                        bottomBounds.Top + bottomBounds.Height / 2f);
+                    graphics.RotateTransform(180f);
+                    graphics.DrawString(titleText, font, brush,
+                        new RectangleF(-bottomBounds.Width / 2f, -bottomBounds.Height / 2f,
+                            bottomBounds.Width, bottomBounds.Height),
+                        format);
+                    graphics.Restore(state);
+                }
             }
         }
 
@@ -827,8 +1165,8 @@ namespace WindowsFormsApp5
                 var format = string.Equals(item.Type, "QRCode", StringComparison.OrdinalIgnoreCase)
                     ? BarcodeFormat.QR_CODE
                     : BarcodeFormat.CODE_128;
-                using (var image = CreateBarcodeImage(text, format, Math.Max(1, item.Width), Math.Max(1, item.Height)))
-                    graphics.DrawImage(image, x, y, width, height);
+                var image = GetBarcodeImage(text, format, Math.Max(1, item.Width), Math.Max(1, item.Height));
+                graphics.DrawImage(image, x, y, width, height);
                 return;
             }
 
@@ -892,15 +1230,42 @@ namespace WindowsFormsApp5
             return writer.Write(value);
         }
 
+        private Bitmap GetBarcodeImage(string value, BarcodeFormat format, int width, int height)
+        {
+            var key = format + "|" + width + "|" + height + "|" + value;
+            Bitmap image;
+            if (_barcodeImages.TryGetValue(key, out image))
+                return image;
+
+            image = CreateBarcodeImage(value, format, width, height);
+            _barcodeImages.Add(key, image);
+            _barcodeImageOrder.Enqueue(key);
+
+            if (_barcodeImageOrder.Count > BarcodeImageCacheCapacity)
+            {
+                var oldestKey = _barcodeImageOrder.Dequeue();
+                Bitmap oldestImage;
+                if (_barcodeImages.TryGetValue(oldestKey, out oldestImage))
+                {
+                    _barcodeImages.Remove(oldestKey);
+                    oldestImage.Dispose();
+                }
+            }
+
+            return image;
+        }
+
         private void btnOpenCondition_Click(object sender, EventArgs e)
         {
+            bool splitIntoTwoGroups;
             using (var form = new Conditional())
             {
                 form.ShowDialog(this);
+                splitIntoTwoGroups = form.SplitIntoTwoGroups;
             }
             try
             {
-                RebuildPrintPages();
+                RebuildPrintPages(splitIntoTwoGroups);
             }
             catch (Exception ex)
             {
@@ -913,8 +1278,20 @@ namespace WindowsFormsApp5
         private sealed class EdpPrintPage
         {
             public string GroupName { get; set; }
+            public string PrintGroupName { get; set; }
             public bool IsGroupCover { get; set; }
             public List<EdpLabel> Labels { get; set; } = new List<EdpLabel>();
+        }
+
+        private sealed class PrintGroupOption
+        {
+            public string Name { get; set; }
+            public int LabelCount { get; set; }
+
+            public override string ToString()
+            {
+                return Name + " (" + LabelCount + " EDP)";
+            }
         }
 
         private sealed class EdpRequest
@@ -955,11 +1332,22 @@ namespace WindowsFormsApp5
 
             private static Bitmap RenderMatrix(BitMatrix matrix)
             {
-                var bitmap = new Bitmap(matrix.Width, matrix.Height);
-                for (var y = 0; y < matrix.Height; y++)
+                var bitmap = new Bitmap(matrix.Width, matrix.Height, PixelFormat.Format32bppArgb);
+                var bounds = new Rectangle(0, 0, matrix.Width, matrix.Height);
+                var data = bitmap.LockBits(bounds, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+                try
                 {
-                    for (var x = 0; x < matrix.Width; x++)
-                        bitmap.SetPixel(x, y, matrix[x, y] ? Color.Black : Color.White);
+                    var row = new int[matrix.Width];
+                    for (var y = 0; y < matrix.Height; y++)
+                    {
+                        for (var x = 0; x < matrix.Width; x++)
+                            row[x] = matrix[x, y] ? unchecked((int)0xFF000000) : unchecked((int)0xFFFFFFFF);
+                        Marshal.Copy(row, 0, IntPtr.Add(data.Scan0, y * data.Stride), row.Length);
+                    }
+                }
+                finally
+                {
+                    bitmap.UnlockBits(data);
                 }
 
                 return bitmap;

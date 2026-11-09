@@ -48,21 +48,22 @@ namespace WindowsFormsApp5
             this.txtMaSP = new System.Windows.Forms.TextBox();
             this.lboxmay = new System.Windows.Forms.ListBox();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.richTextBox4 = new System.Windows.Forms.RichTextBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.richTextBox4 = new System.Windows.Forms.RichTextBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.label6 = new System.Windows.Forms.Label();
+            this.phantach2nhom = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel1.SuspendLayout();
-            this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -261,45 +262,6 @@ namespace WindowsFormsApp5
             this.panel1.Size = new System.Drawing.Size(480, 444);
             this.panel1.TabIndex = 0;
             // 
-            // richTextBox4
-            // 
-            this.richTextBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.richTextBox4.Location = new System.Drawing.Point(363, 67);
-            this.richTextBox4.Name = "richTextBox4";
-            this.richTextBox4.Size = new System.Drawing.Size(108, 287);
-            this.richTextBox4.TabIndex = 10;
-            this.richTextBox4.Text = "";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(407, 51);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(40, 13);
-            this.label5.TabIndex = 11;
-            this.label5.Text = "Số dây";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(22, 28);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(134, 13);
-            this.label6.TabIndex = 12;
-            this.label6.Text = "lấy EDP cho máy tự động: ";
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.numericUpDown1);
-            this.groupBox1.Controls.Add(this.label6);
-            this.groupBox1.Location = new System.Drawing.Point(3, 9);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(472, 67);
-            this.groupBox1.TabIndex = 13;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Thiết lập lọc số lượng EDP cho máy tự động";
-            // 
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.checkBox1);
@@ -331,6 +293,37 @@ namespace WindowsFormsApp5
             this.checkBox1.Text = "là máy tự động";
             this.checkBox1.UseVisualStyleBackColor = true;
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(407, 51);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(40, 13);
+            this.label5.TabIndex = 11;
+            this.label5.Text = "Số dây";
+            // 
+            // richTextBox4
+            // 
+            this.richTextBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.richTextBox4.Location = new System.Drawing.Point(363, 67);
+            this.richTextBox4.Name = "richTextBox4";
+            this.richTextBox4.Size = new System.Drawing.Size(108, 287);
+            this.richTextBox4.TabIndex = 10;
+            this.richTextBox4.Text = "";
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.phantach2nhom);
+            this.groupBox1.Controls.Add(this.numericUpDown1);
+            this.groupBox1.Controls.Add(this.label6);
+            this.groupBox1.Location = new System.Drawing.Point(3, 9);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(472, 67);
+            this.groupBox1.TabIndex = 13;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Thiết lập lọc số lượng EDP cho máy tự động";
+            // 
             // numericUpDown1
             // 
             this.numericUpDown1.Location = new System.Drawing.Point(162, 26);
@@ -342,6 +335,25 @@ namespace WindowsFormsApp5
             0,
             0,
             0});
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(22, 28);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(134, 13);
+            this.label6.TabIndex = 12;
+            this.label6.Text = "lấy EDP cho máy tự động: ";
+            // 
+            // phantach2nhom
+            // 
+            this.phantach2nhom.AutoSize = true;
+            this.phantach2nhom.Location = new System.Drawing.Point(323, 26);
+            this.phantach2nhom.Name = "phantach2nhom";
+            this.phantach2nhom.Size = new System.Drawing.Size(113, 17);
+            this.phantach2nhom.TabIndex = 14;
+            this.phantach2nhom.Text = "Phân tách 2 nhóm";
+            this.phantach2nhom.UseVisualStyleBackColor = true;
             // 
             // Conditional
             // 
@@ -358,10 +370,10 @@ namespace WindowsFormsApp5
             this.panel3.ResumeLayout(false);
             this.panel3.PerformLayout();
             this.panel1.ResumeLayout(false);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.ResumeLayout(false);
 
@@ -395,5 +407,6 @@ namespace WindowsFormsApp5
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.NumericUpDown numericUpDown1;
+        private System.Windows.Forms.CheckBox phantach2nhom;
     }
 }

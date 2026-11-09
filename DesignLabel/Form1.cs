@@ -725,14 +725,25 @@ namespace WindowsFormsApp5
 
         private void BtnSave_Click(object sender, EventArgs e)
         {
-            using (var sfd = new SaveFileDialog { Filter = "JSON files (*.json)|*.json", DefaultExt = "json" })
+            using (var sfd = new SaveFileDialog
+            {
+                Filter = "JSON files (*.json)|*.json",
+                DefaultExt = "json",
+                InitialDirectory = Conditional.ConfigurationDirectory,
+                FileName = "edp.json"
+            })
                 if (sfd.ShowDialog() == DialogResult.OK)
                     SaveLayout(sfd.FileName);
         }
 
         private void BtnLoad_Click(object sender, EventArgs e)
         {
-            using (var ofd = new OpenFileDialog { Filter = "JSON files (*.json)|*.json" })
+            using (var ofd = new OpenFileDialog
+            {
+                Filter = "JSON files (*.json)|*.json",
+                InitialDirectory = Conditional.ConfigurationDirectory,
+                FileName = "edp.json"
+            })
                 if (ofd.ShowDialog() == DialogResult.OK)
                     LoadLayout(ofd.FileName);
         }

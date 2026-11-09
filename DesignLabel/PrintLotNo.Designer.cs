@@ -32,24 +32,23 @@ namespace WindowsFormsApp5
             this.btnPrintLotNo = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.button1 = new System.Windows.Forms.Button();
-            this.btnOpenFormEdp = new System.Windows.Forms.Button();
-            this.btnMau = new System.Windows.Forms.Button();
-            this.btnLoadLotNo = new System.Windows.Forms.Button();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.rtbLotNo = new System.Windows.Forms.RichTextBox();
-            this.plPriviewPageLotNo = new System.Windows.Forms.Panel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.rtbWarning = new System.Windows.Forms.RichTextBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.btnMau = new System.Windows.Forms.Button();
+            this.btnLoadLotNo = new System.Windows.Forms.Button();
+            this.plPriviewPageLotNo = new System.Windows.Forms.Panel();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel2.SuspendLayout();
-            this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnPrintLotNo
             // 
-            this.btnPrintLotNo.Location = new System.Drawing.Point(8, 32);
+            this.btnPrintLotNo.Location = new System.Drawing.Point(9, 3);
             this.btnPrintLotNo.Name = "btnPrintLotNo";
             this.btnPrintLotNo.Size = new System.Drawing.Size(180, 23);
             this.btnPrintLotNo.TabIndex = 0;
@@ -76,7 +75,6 @@ namespace WindowsFormsApp5
             this.panel2.Controls.Add(this.groupBox2);
             this.panel2.Controls.Add(this.groupBox1);
             this.panel2.Controls.Add(this.button1);
-            this.panel2.Controls.Add(this.btnOpenFormEdp);
             this.panel2.Controls.Add(this.btnMau);
             this.panel2.Controls.Add(this.btnLoadLotNo);
             this.panel2.Controls.Add(this.btnPrintLotNo);
@@ -86,45 +84,17 @@ namespace WindowsFormsApp5
             this.panel2.Size = new System.Drawing.Size(365, 559);
             this.panel2.TabIndex = 2;
             // 
-            // button1
+            // groupBox2
             // 
-            this.button1.Location = new System.Drawing.Point(195, 3);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(165, 23);
-            this.button1.TabIndex = 5;
-            this.button1.Text = "Xuất dữ liệu EDP";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // btnOpenFormEdp
-            // 
-            this.btnOpenFormEdp.Location = new System.Drawing.Point(8, 3);
-            this.btnOpenFormEdp.Name = "btnOpenFormEdp";
-            this.btnOpenFormEdp.Size = new System.Drawing.Size(180, 23);
-            this.btnOpenFormEdp.TabIndex = 4;
-            this.btnOpenFormEdp.Text = "In EDP";
-            this.btnOpenFormEdp.UseVisualStyleBackColor = true;
-            this.btnOpenFormEdp.Click += new System.EventHandler(this.btnOpenFormEdp_Click);
-            // 
-            // btnMau
-            // 
-            this.btnMau.Location = new System.Drawing.Point(195, 32);
-            this.btnMau.Name = "btnMau";
-            this.btnMau.Size = new System.Drawing.Size(165, 23);
-            this.btnMau.TabIndex = 3;
-            this.btnMau.Text = "Chỉnh Mẫu";
-            this.btnMau.UseVisualStyleBackColor = true;
-            this.btnMau.Click += new System.EventHandler(this.btnMau_Click);
-            // 
-            // btnLoadLotNo
-            // 
-            this.btnLoadLotNo.Location = new System.Drawing.Point(8, 61);
-            this.btnLoadLotNo.Name = "btnLoadLotNo";
-            this.btnLoadLotNo.Size = new System.Drawing.Size(180, 23);
-            this.btnLoadLotNo.TabIndex = 2;
-            this.btnLoadLotNo.Text = "Tải dữ liệu";
-            this.btnLoadLotNo.UseVisualStyleBackColor = true;
-            this.btnLoadLotNo.Click += new System.EventHandler(this.btnLoadLotNo_Click);
+            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.groupBox2.Controls.Add(this.rtbLotNo);
+            this.groupBox2.Location = new System.Drawing.Point(4, 120);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(184, 442);
+            this.groupBox2.TabIndex = 7;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Mã Lot";
             // 
             // rtbLotNo
             // 
@@ -135,13 +105,6 @@ namespace WindowsFormsApp5
             this.rtbLotNo.Size = new System.Drawing.Size(174, 419);
             this.rtbLotNo.TabIndex = 1;
             this.rtbLotNo.Text = "";
-            // 
-            // plPriviewPageLotNo
-            // 
-            this.plPriviewPageLotNo.Location = new System.Drawing.Point(3, 3);
-            this.plPriviewPageLotNo.Name = "plPriviewPageLotNo";
-            this.plPriviewPageLotNo.Size = new System.Drawing.Size(610, 559);
-            this.plPriviewPageLotNo.TabIndex = 1;
             // 
             // groupBox1
             // 
@@ -165,17 +128,42 @@ namespace WindowsFormsApp5
             this.rtbWarning.TabIndex = 0;
             this.rtbWarning.Text = "";
             // 
-            // groupBox2
+            // button1
             // 
-            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.groupBox2.Controls.Add(this.rtbLotNo);
-            this.groupBox2.Location = new System.Drawing.Point(4, 120);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(184, 442);
-            this.groupBox2.TabIndex = 7;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Mã Lot";
+            this.button1.Location = new System.Drawing.Point(195, 3);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(165, 23);
+            this.button1.TabIndex = 5;
+            this.button1.Text = "Xuất dữ liệu EDP";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // btnMau
+            // 
+            this.btnMau.Location = new System.Drawing.Point(195, 32);
+            this.btnMau.Name = "btnMau";
+            this.btnMau.Size = new System.Drawing.Size(165, 23);
+            this.btnMau.TabIndex = 3;
+            this.btnMau.Text = "Chỉnh Mẫu";
+            this.btnMau.UseVisualStyleBackColor = true;
+            this.btnMau.Click += new System.EventHandler(this.btnMau_Click);
+            // 
+            // btnLoadLotNo
+            // 
+            this.btnLoadLotNo.Location = new System.Drawing.Point(9, 32);
+            this.btnLoadLotNo.Name = "btnLoadLotNo";
+            this.btnLoadLotNo.Size = new System.Drawing.Size(180, 23);
+            this.btnLoadLotNo.TabIndex = 2;
+            this.btnLoadLotNo.Text = "Tải dữ liệu";
+            this.btnLoadLotNo.UseVisualStyleBackColor = true;
+            this.btnLoadLotNo.Click += new System.EventHandler(this.btnLoadLotNo_Click);
+            // 
+            // plPriviewPageLotNo
+            // 
+            this.plPriviewPageLotNo.Location = new System.Drawing.Point(3, 3);
+            this.plPriviewPageLotNo.Name = "plPriviewPageLotNo";
+            this.plPriviewPageLotNo.Size = new System.Drawing.Size(610, 559);
+            this.plPriviewPageLotNo.TabIndex = 1;
             // 
             // PrintLotNo
             // 
@@ -187,8 +175,8 @@ namespace WindowsFormsApp5
             this.Text = "PrintLotNo";
             this.tableLayoutPanel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
-            this.groupBox1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
+            this.groupBox1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -202,7 +190,6 @@ namespace WindowsFormsApp5
         private System.Windows.Forms.Panel plPriviewPageLotNo;
         private System.Windows.Forms.Button btnLoadLotNo;
         private System.Windows.Forms.Button btnMau;
-        private System.Windows.Forms.Button btnOpenFormEdp;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.GroupBox groupBox1;

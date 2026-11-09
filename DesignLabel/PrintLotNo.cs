@@ -14,6 +14,8 @@ using System.Windows.Forms;
 using ZXing;
 using ZXing.Common;
 using ZXing.Rendering;
+using System.Net.NetworkInformation;
+using System.Diagnostics;
 
 namespace WindowsFormsApp5
 {
@@ -69,6 +71,7 @@ namespace WindowsFormsApp5
         public PrintLotNo()
         {
             InitializeComponent();
+             checkUpdate();
             AutoScroll = false;
             AutoScrollMinSize = Size.Empty;
 
@@ -175,7 +178,7 @@ namespace WindowsFormsApp5
             _pagedRows = result.Rows.Cast<DataRow>().ToList();
             _currentPageIndex = 0;
 
-            string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "form_chotlo.json");
+            string filePath = Path.Combine(Conditional.ConfigurationDirectory, "form_chotlo.json");
             if (!File.Exists(filePath))
             {
                 MessageBox.Show($"Không tìm thấy file form_chotlo.json tại đường dẫn: {filePath}");
@@ -667,7 +670,7 @@ namespace WindowsFormsApp5
                 return;
             }
 
-            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "form_chotlo.json");
+            var filePath = Path.Combine(Conditional.ConfigurationDirectory, "form_chotlo.json");
             if (!File.Exists(filePath))
             {
                 MessageBox.Show($"Không tìm thấy file form_chotlo.json tại: {filePath}", "Preview", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -964,7 +967,73 @@ namespace WindowsFormsApp5
             }
             label.Invalidate();
         }
+         public void checkUpdate()
+        {
+            try
+            {
+                #region Update chuong trinh moi (Neu co)
+                //Đọc đường dẫn cập nhật từ PathUpdate.txt cạnh file chạy chương trình
+                string pathFile = Path.Combine(Conditional.ConfigurationDirectory, "PathUpdate.txt");
+                string pathsource = File.Exists(pathFile)
+                    ? File.ReadAllText(pathFile).Trim()
+                    : null;
+                if (string.IsNullOrWhiteSpace(pathsource))
+                    return;
 
+                string[] getIp = pathsource.Split('\\');
+                if (getIp.Length <= 2 || !PingToAddress(getIp[2]))
+                    return;
+
+                string sourceExe = Path.Combine(pathsource, "JtecFactory.exe");
+                string localExe = Path.Combine(Conditional.ConfigurationDirectory, "JtecFactory.exe");
+                if (!File.Exists(sourceExe) || !File.Exists(localExe))
+                    return;
+
+                DateTime sourceLastWriteTime = File.GetLastWriteTimeUtc(sourceExe);
+                DateTime localLastWriteTime = File.GetLastWriteTimeUtc(localExe);
+                if (sourceLastWriteTime > localLastWriteTime)
+                {
+                    DialogResult dialogResult = MessageBox.Show("Đã có phiên bản mới, bạn có muốn cập nhật?", "Cập nhật", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                    if (dialogResult == DialogResult.Yes)
+                    {
+                        Process currentProcess = Process.GetCurrentProcess();
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = Path.Combine(Conditional.ConfigurationDirectory, "AutoUpdate.exe"),
+                            Arguments = "--wait-for-pid " + currentProcess.Id + " --target-exe JtecFactory.exe",
+                            UseShellExecute = true
+                        });
+                        Application.Exit();
+                        currentProcess.Kill();
+                    }
+                }
+                #endregion
+            }
+            catch
+            {
+
+            }
+        }
+        public static bool PingToAddress(string IP)
+        {
+            try
+            {
+                System.Net.NetworkInformation.Ping PingSender = new System.Net.NetworkInformation.Ping();
+                int TimeOut = 120;
+                string PingData = "aaaa";
+                byte[] Buffer = System.Text.Encoding.ASCII.GetBytes(PingData);
+                PingReply PingReply = PingSender.Send(IP, TimeOut, Buffer);
+                if (PingReply.Status == IPStatus.Success)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch { return false; }
+        }
         private void DesignPanel_Paint(object sender, PaintEventArgs e)
         {
             if (designPanel == null)

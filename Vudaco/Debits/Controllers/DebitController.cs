@@ -722,6 +722,9 @@ namespace Vudaco.Debits.Controllers
         {
               try
               {
+                if (DebitDto == null || !DebitDto.CustomerDetailId.HasValue || DebitDto.CustomerDetailId.Value <= 0)
+                    return ApiResponseResult<object>(false, "Vui lòng chọn khách hàng", null);
+
                 // ==== LẤY THÔNG TIN KHÁCH HÀNG ====
                
                 var kh = await _context.PartnerDetails.FirstOrDefaultAsync(x => x.Id == DebitDto.CustomerDetailId);
@@ -729,6 +732,11 @@ namespace Vudaco.Debits.Controllers
                
                 var info_kh = await _context.Partners.FirstOrDefaultAsync(x => x.Id == kh.PartnerId);
                 if (info_kh == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu khách hàng", null);
+
+                var storage = await _context.Storages
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Id == DebitDto.StorageId && x.DeletedAt == null, cancellationToken);
+                if (storage == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu đơn vị bán hàng", null);
 
                 var result = await _repoDebit.GetObjectDebitChiTietKHAsync(DebitDto, page, pageSize, cancellationToken);
                 if (result == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
@@ -796,9 +804,9 @@ namespace Vudaco.Debits.Controllers
                 cell_benban.Clear();
                 cell_benban.GetRichText().AddText("Đơn vị bán hàng: ")
                     .SetBold();
-                cell_benban.GetRichText().AddText("Công ty TNHH VUDACO");
-                ws.Cell("A6").Value = "Địa chỉ: Số 6C/195 Kiều Hạ, Phường Đông Hải, Thành Phố Hải Phòng, Việt Nam";
-                ws.Cell("A7").Value = "MST: 0201723721";
+                cell_benban.GetRichText().AddText("Công ty TNHH " + (storage.Name ?? ""));
+                ws.Cell("A6").Value = "Địa chỉ: " + (storage.Address ?? "");
+                ws.Cell("A7").Value = "MST: " + (storage.TaxCode ?? "");
 
                 var cell_benmua = ws.Cell("A9");
                 cell_benmua.Clear();
@@ -1097,12 +1105,20 @@ namespace Vudaco.Debits.Controllers
         {
               try
               {
+                if (DebitDto == null || !DebitDto.CustomerDetailId.HasValue || DebitDto.CustomerDetailId.Value <= 0)
+                    return ApiResponseResult<object>(false, "Vui lòng chọn khách hàng", null);
+
                 // ==== LẤY THÔNG TIN KHÁCH HÀNG ====
                 var kh = await _context.PartnerDetails.FirstOrDefaultAsync(x => x.Id == DebitDto.CustomerDetailId);
                 if (kh == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu khách hàng", null);
 
                 var info_kh = await _context.Partners.FirstOrDefaultAsync(x => x.Id == kh.PartnerId);
                 if (info_kh == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu khách hàng", null);
+
+                var storage = await _context.Storages
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Id == DebitDto.StorageId && x.DeletedAt == null, cancellationToken);
+                if (storage == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu đơn vị bán hàng", null);
 
                 var result = await _repoDebit.GetObjectDebitChiTietKHAsync(DebitDto, page, pageSize, cancellationToken);
                 if (result == null) return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
@@ -1184,9 +1200,9 @@ namespace Vudaco.Debits.Controllers
                 cell_benban.Clear();
                 cell_benban.GetRichText().AddText("Đơn vị bán hàng: ")
                     .SetBold();
-                cell_benban.GetRichText().AddText("Công ty TNHH VUDACO");
-                ws.Cell("A5").Value = "Địa chỉ: Số 6C/195 Kiều Hạ, Phường Đông Hải, Thành Phố Hải Phòng, Việt Nam";
-                ws.Cell("A6").Value = "MST: 0201723721";
+                cell_benban.GetRichText().AddText("Công ty TNHH " + (storage.Name ?? ""));
+                ws.Cell("A5").Value = "Địa chỉ: " + (storage.Address ?? "");
+                ws.Cell("A6").Value = "MST: " + (storage.TaxCode ?? "");
 
                 var cell_benmua = ws.Cell("A8");
                 cell_benmua.Clear();

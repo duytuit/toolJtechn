@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -568,6 +568,11 @@ namespace WindowsFormsApp5
             public List<string> ConditionOrder { get; set; }
             [JsonProperty("is_automatic")]
             public bool IsAutomatic { get; set; }
+            [JsonIgnore]
+            public bool HasPairedTerminalSleeveConditions
+            {
+                get { return HasCodes(tanshi) && HasCodes(gom); }
+            }
 
             public List<string> GetConditionOrder()
             {
@@ -593,6 +598,11 @@ namespace WindowsFormsApp5
             public int GetMatchPriority(string senban, string wire, string terminalA, string terminalB, string sleeveA, string sleeveB)
             {
                 var order = GetConditionOrder();
+                if (HasPairedTerminalSleeveConditions &&
+                    !((ContainsCode(tanshi, terminalA) && ContainsCode(gom, sleeveA)) ||
+                      (ContainsCode(tanshi, terminalB) && ContainsCode(gom, sleeveB))))
+                    return -1;
+
                 var hasCondition = false;
                 var matchesAllConditions = true;
                 for (int priority = 0; priority < order.Count; priority++)
@@ -667,6 +677,11 @@ namespace WindowsFormsApp5
                 }
 
                 return -1;
+            }
+
+            private static bool HasCodes(List<string> codes)
+            {
+                return codes != null && codes.Any(code => !string.IsNullOrWhiteSpace(code));
             }
 
             private static bool ContainsPartialCode(List<string> codes, string value)

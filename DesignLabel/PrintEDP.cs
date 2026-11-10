@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using Newtonsoft.Json;
 using Oracle.ManagedDataAccess.Client;
 using System;
@@ -539,7 +539,8 @@ namespace WindowsFormsApp5
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .ToList();
                 // Partition by quantity before matching; orders never cross between machine types.
-                foreach (var group in groups.OrderByDescending(condition => condition.IsAutomatic))
+                foreach (var group in groups.OrderByDescending(condition => condition.IsAutomatic)
+                    .ThenByDescending(condition => condition.HasPairedTerminalSleeveConditions))
                 {
                     var matched = remaining.Where(label => group.IsAutomatic ==
                         MeetsAutomaticQuantity(label, automaticMinimumQuantity)).Select(label => new
@@ -647,14 +648,12 @@ namespace WindowsFormsApp5
         private static void AddGroupPagesByWireType(List<EdpPrintPage> pages, string groupName, List<EdpLabel> labels,
             string printGroupName = null)
         {
-            foreach (var wireTypeGroup in labels
+            var orderedLabels = labels
                 .GroupBy(label => label.Get("SENSYU"), StringComparer.OrdinalIgnoreCase)
-                .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase))
-            {
-                var wireType = string.IsNullOrWhiteSpace(wireTypeGroup.Key) ? "(trống)" : wireTypeGroup.Key;
-                AddGroupPages(pages, groupName + " / SENSYU: " + wireType,
-                    wireTypeGroup.ToList(), printGroupName ?? groupName);
-            }
+                .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
+                .SelectMany(group => group)
+                .ToList();
+            AddGroupPages(pages, groupName, orderedLabels, printGroupName ?? groupName);
         }
 
         private static EdpLabel CreateLabel(DataRow orderRow, DataRow component, string productCode, string edpSymbol)

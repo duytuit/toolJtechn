@@ -587,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const parsed = Number(String(value ?? '').replace(',', '.'));
         return Number.isFinite(parsed) ? parsed : 0;
     };
-    const formatNumber = value => numberFormat.format(asNumber(value));
+    const formatNumber = value => numberFormat.format(asNumber(value)).replace(/\./g, ',');
     const get = (row, name) => {
         const key = Object.keys(row || {}).find(candidate => candidate.toLowerCase() === name.toLowerCase());
         return key ? row[key] : null;
@@ -828,7 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderGroupCards(employees) {
         const groups = groupAggregates(employees);
         const host = $('#groupGrid');
-        $('#groupSummary').textContent = `${groups.length.toLocaleString('vi-VN')} nhóm · ${employees.length.toLocaleString('vi-VN')} nhân viên`;
+        $('#groupSummary').textContent = `${formatNumber(groups.length)} nhóm · ${formatNumber(employees.length)} nhân viên`;
         if (!groups.length) {
             host.innerHTML = `<div class="empty">${bilingualLabel('条件に一致するグループデータがありません', 'Không có dữ liệu nhóm phù hợp với bộ lọc.')}</div>`;
             return;
@@ -845,7 +845,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>`;
             }).join('');
             return `<article class="group-card">
-                <div class="group-card-head"><div style="min-width:0"><div class="group-name" title="${safe(group.name)}">${safe(group.name)}</div><div class="group-count">${group.employees.length.toLocaleString('vi-VN')} nhân viên</div></div><div class="group-rate" style="color:${color}">${formatNumber(group.rate)}%</div></div>
+                <div class="group-card-head"><div style="min-width:0"><div class="group-name" title="${safe(group.name)}">${safe(group.name)}</div><div class="group-count">${formatNumber(group.employees.length)} nhân viên</div></div><div class="group-rate" style="color:${color}">${formatNumber(group.rate)}%</div></div>
                 <div class="group-values"><div>${bilingualText('Tổng Target')}<strong class="c-yellow">${formatNumber(group.target)}</strong></div><div>${bilingualText('Tổng Actual')}<strong class="c-cyan">${formatNumber(group.actual)}</strong></div></div>
                 <div class="progress-track"><div class="progress-fill" style="width:${Math.min(group.rate, 100)}%;background:${color}"></div></div>
                 <div class="mini-chart">${mini}</div>
@@ -1024,7 +1024,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ['Actual', formatNumber(employee.actual), 'c-cyan'],
             ['Tổng giờ', employee.totalHour == null ? '—' : formatNumber(employee.totalHour), ''],
             ['Hoàn thành', `${formatNumber(pct)}%`, pct >= 100 ? 'c-green' : 'c-cyan'],
-            ['Bản ghi giờ', employee.history.filter(row => timeOf(row)).length.toLocaleString('vi-VN'), '']
+            ['Bản ghi giờ', formatNumber(employee.history.filter(row => timeOf(row)).length), '']
         ].map(item => `<div class="detail-kpi">${bilingualText(item[0])}<strong class="${item[2]}">${item[1]}</strong></div>`).join('');
         const points = employee.checkpoints.map((_, index) => employeeProductionProgress(employee, index));
         renderBarChart($('#detailChart'), points, { width: 900, height: 290 });
@@ -1095,14 +1095,14 @@ document.addEventListener('DOMContentLoaded', () => {
         renderStatusMonitor();
         const visibleEmployeeCount = employees.filter(employee => employee.code !== '12345').length;
         $('#employeeSummary').innerHTML = bilingualLabel(
-            `従業員 ${visibleEmployeeCount.toLocaleString('ja-JP')}名 · 実績合計 ${formatNumber(summary.actual)}`,
-            `${visibleEmployeeCount.toLocaleString('vi-VN')} nhân viên hiển thị · Tổng Actual ${formatNumber(summary.actual)}`
+            `従業員 ${formatNumber(visibleEmployeeCount)}名 · 実績合計 ${formatNumber(summary.actual)}`,
+            `${formatNumber(visibleEmployeeCount)} nhân viên hiển thị · Tổng Actual ${formatNumber(summary.actual)}`
         );
         if (state.selected) {
             const updated = state.employees.find(employee => employee.key === state.selected.key);
             if (updated) { state.selected = updated; renderDetail(updated); }
         }
-        if (state.truncated || state.statusTruncated) $('#dataNote').textContent = 'Đang hiển thị tối đa 5.000 bản ghi mỗi bảng · Control_Assembled_Combine_Visualize_30 · Control_Assembled_Status';
+        if (state.truncated || state.statusTruncated) $('#dataNote').textContent = 'Đang hiển thị tối đa 5,000 bản ghi mỗi bảng · Control_Assembled_Combine_Visualize_30 · Control_Assembled_Status';
         else $('#dataNote').textContent = 'Dữ liệu từ Control_Assembled_Combine_Visualize_30 · Control_Assembled_Status · JtecDB_KhoaB';
     }
 

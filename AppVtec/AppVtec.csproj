@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <RootNamespace>AppVtec</RootNamespace>
+    <AssemblyName>AppVtec</AssemblyName>
+    <ProjectGuid>{2746CC3A-855F-4B67-B587-D86A2E5C7971}</ProjectGuid>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Security" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PathUpdate.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <ProjectReference Include="..\AutoUpdate\AutoUpdate.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
+    <PackageReference Include="MySql.Data" Version="9.4.0" />
+  </ItemGroup>
+
+  <Target Name="CopyAutoUpdateExecutable" AfterTargets="Build">
+    <Copy
+      SourceFiles="$(MSBuildProjectDirectory)\..\AutoUpdate\bin\$(Configuration)\AutoUpdate.exe"
+      DestinationFiles="$(TargetDir)AutoUpdate.exe" />
+  </Target>
+</Project>

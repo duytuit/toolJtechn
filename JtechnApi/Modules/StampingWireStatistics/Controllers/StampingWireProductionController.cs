@@ -50,7 +50,7 @@ namespace JtechnApi.Modules.StampingWireStatistics.Controllers
 
         private IActionResult Dashboard(string area, string areaName, string machinePrefix)
         {
-            ViewData["Title"] = $"Giám sát sản lượng máy dập dây - {areaName}";
+            ViewData["Title"] = $"Giám sát sản lượng máy dập dây - {areaName} - jtechn";
             ViewData["Area"] = area;
             ViewData["AreaName"] = areaName;
             ViewData["MachinePrefix"] = machinePrefix;

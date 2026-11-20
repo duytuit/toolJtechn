@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace asyncDataSoltec
 {
@@ -12,19 +8,42 @@ namespace asyncDataSoltec
     {
         public static String ConnectionString = "SERVER=192.168.207.6\\SQLEXPRESS; Uid=sa;Pwd=Jtechn@1234;Database=STOCKMANAGEMENT";
         public SqlConnection con = new SqlConnection(ConnectionString);
+
         public DataTable RunQuery(string str)
         {
-            OpenConnect();
-            SqlCommand cmd = new SqlCommand(str, con);
-            SqlDataAdapter da = new SqlDataAdapter();
-            DataTable dt = new DataTable();
-            cmd.CommandTimeout = 1800;
-            da.Dispose();
-            da = new SqlDataAdapter(cmd);
-            //dt.Dispose();
-            da.Fill(dt);
-            CloseConnect();
-            return dt;
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            using (SqlCommand command = new SqlCommand(str, connection))
+            using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+            {
+                command.CommandTimeout = 1800;
+                DataTable dataTable = new DataTable();
+                adapter.Fill(dataTable);
+                return dataTable;
+            }
+        }
+
+        public void ExecuteTransaction(Action<SqlConnection, SqlTransaction> operation)
+        {
+            if (operation == null)
+                throw new ArgumentNullException("operation");
+
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                using (SqlTransaction transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        operation(connection, transaction);
+                        transaction.Commit();
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
         }
 
         public void OpenConnect()
@@ -40,59 +59,60 @@ namespace asyncDataSoltec
             if (con.State != ConnectionState.Closed)
             {
                 con.Close();
-                SqlConnection.ClearPool(con);
             }
         }
 
         public void ExcuteQuery(string str)
         {
-            OpenConnect();
-            SqlCommand cmd = new SqlCommand(str, con);
-            CloseConnect();
+            ExecuteNonQuery(str);
         }
 
         public int ExecuteNonQuery(String sql, params Object[] parameters)
         {
-            OpenConnect();
-            SqlCommand command = new SqlCommand(sql);
-            command.Connection.Open();
-            for (int i = 0; i < parameters.Length; i = i + 2)
+            if (parameters == null || parameters.Length % 2 != 0)
+                throw new ArgumentException("Parameters must be supplied as name/value pairs.", "parameters");
+
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            using (SqlCommand command = new SqlCommand(sql, connection))
             {
-                command.Parameters.AddWithValue(parameters[i].ToString(), parameters[i + 1]);
+                command.CommandTimeout = 1800;
+                for (int i = 0; i < parameters.Length; i += 2)
+                {
+                    command.Parameters.AddWithValue(
+                        Convert.ToString(parameters[i]),
+                        parameters[i + 1] ?? DBNull.Value);
+                }
+
+                connection.Open();
+                return command.ExecuteNonQuery();
             }
-            int rows = command.ExecuteNonQuery();
-            CloseConnect();
-            return rows;
         }
 
         public object ExecuteScalar(string sql)
         {
-            SqlCommand command = new SqlCommand(sql);
-            command.Connection.Open();
-            object value = command.ExecuteScalar();
-            return value;
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                command.CommandTimeout = 1800;
+                connection.Open();
+                return command.ExecuteScalar();
+            }
         }
 
         public DataTable GetDataTabale(String sql)
         {
-            OpenConnect();
-            SqlCommand command = new SqlCommand();
-            command.CommandText = sql;
-            command.Connection = con;
-            SqlDataAdapter da = new SqlDataAdapter();
-            da.SelectCommand = command;
-            DataTable dt = new DataTable();
-            da.Fill(dt);
-            CloseConnect();
-            return dt;
+            return RunQuery(sql);
         }
 
         public void sqlBulkCopy(DataTable dataTable, string destination)
         {
-            SqlBulkCopy sqlBulkCopy = new SqlBulkCopy(con);
-            sqlBulkCopy.DestinationTableName = "[DatabaseRepairPart].[dbo].[Status]";
-            OpenConnect();
-            sqlBulkCopy.WriteToServer(dataTable);
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            using (SqlBulkCopy sqlBulkCopy = new SqlBulkCopy(connection))
+            {
+                sqlBulkCopy.DestinationTableName = destination;
+                connection.Open();
+                sqlBulkCopy.WriteToServer(dataTable);
+            }
         }
     }
 }

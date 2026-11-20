@@ -73,21 +73,39 @@ namespace AutoUpdate
             WaitForProcessExit(args);
 
                 string pathFile = Path.Combine(Application.StartupPath, "PathUpdate.txt");
-                string sourceFolder = File.Exists(pathFile)
+                string sourcePath = File.Exists(pathFile)
                     ? File.ReadAllText(pathFile).Trim()
                     : null;
                 string targetFolder = Application.StartupPath;
 
-                if (string.IsNullOrWhiteSpace(sourceFolder))
+                if (string.IsNullOrWhiteSpace(sourcePath))
                 {
                     message = "Không tìm thấy đường dẫn cập nhật trong PathUpdate.txt.";
                     icon = MessageBoxIcon.Warning;
                     return false;
                 }
 
-                if (!Directory.Exists(sourceFolder))
+                string sourceFolder;
+                if (Directory.Exists(sourcePath))
                 {
-                    message = "Thư mục cập nhật không tồn tại: " + sourceFolder;
+                    sourceFolder = sourcePath;
+                }
+                else if (File.Exists(sourcePath) &&
+                    Path.GetFileName(sourcePath).Equals(targetExecutable, StringComparison.OrdinalIgnoreCase))
+                {
+                    sourceFolder = Path.GetDirectoryName(Path.GetFullPath(sourcePath));
+                }
+                else
+                {
+                    message = "Không tìm thấy file hoặc thư mục cập nhật: " + sourcePath;
+                    icon = MessageBoxIcon.Warning;
+                    return false;
+                }
+
+                string sourceExecutable = Path.Combine(sourceFolder, targetExecutable);
+                if (!File.Exists(sourceExecutable))
+                {
+                    message = "Không tìm thấy " + targetExecutable + " trong thư mục cập nhật: " + sourceFolder;
                     icon = MessageBoxIcon.Warning;
                     return false;
                 }

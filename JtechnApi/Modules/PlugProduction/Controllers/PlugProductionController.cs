@@ -15,7 +15,7 @@ namespace JtechnApi.Modules.PlugProduction.Controllers
         [HttpGet("/plug-production")]
         public IActionResult Index()
         {
-            ViewData["Title"] = "Giám sát sản lượng công đoạn Cắm";
+            ViewData["Title"] = "Giám sát sản lượng công đoạn Cắm - jtechn";
             return View("~/Views/Home/PlugProductionDashboard.cshtml");
         }
 

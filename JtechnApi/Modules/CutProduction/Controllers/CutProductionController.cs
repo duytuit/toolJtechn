@@ -32,7 +32,7 @@ namespace JtechnApi.Modules.CutProduction.Controllers
 
         private IActionResult Dashboard(string machineType)
         {
-            ViewData["Title"] = "Giám sát sản lượng công đoạn Cắt";
+            ViewData["Title"] = "Giám sát sản lượng công đoạn Cắt - jtechn";
             ViewData["MachineType"] = machineType;
             return View("~/Views/Home/CutProductionDashboard.cshtml");
         }

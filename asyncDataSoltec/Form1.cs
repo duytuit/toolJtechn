@@ -1,17 +1,17 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Configuration;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Net.NetworkInformation;
 using System.Diagnostics;
+using System.Threading;
+using System.Data.SqlClient;
+using System.Globalization;
 
 namespace asyncDataSoltec
 {
@@ -20,6 +20,9 @@ namespace asyncDataSoltec
         string file_path = ConfigurationManager.AppSettings["path_soltec"];
 		string file_browse = ConfigurationManager.AppSettings["path_browse"];
 		static string Machine = System.Environment.MachineName;
+        private readonly SemaphoreSlim _syncGate = new SemaphoreSlim(1, 1);
+		private int _snapshotInProgress;
+
         public Form1()
         {
             InitializeComponent();
@@ -27,154 +30,178 @@ namespace asyncDataSoltec
             this.Location = new Point(workingArea.Right - Size.Width, workingArea.Bottom - Size.Height);
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
 			this.WindowState = FormWindowState.Minimized;
-			// xử lý convert lưu file.data về server
-			// xử lý convert lưu file.data về server
-			// xử lý convert lưu file.data về server
-			if (File.Exists(file_path))
-			{
-				FileInfo fileInfo = new FileInfo(file_path);
-				DateTime now = DateTime.Now;
-				if (fileInfo.LastWriteTime < now)
-                {
-					string __destinationPath = @"\\192.168.207.6\jtecdata\SYSTEM-JTECTOPICS\30. Data Transfer\10.Soltec Data\" + Machine; // Địa chỉ IP máy chủ + thư mục chia sẻ
-					if (!Directory.Exists(__destinationPath))
-					{
-						Directory.CreateDirectory(__destinationPath); // Tạo thư mục nếu chưa có
-					}	
-					string destinationPath = @"\\192.168.207.6\jtecdata\SYSTEM-JTECTOPICS\30. Data Transfer\10.Soltec Data\" + Machine + "/" + fileInfo.LastWriteTime.ToString("dd_MM_yyyy") + ".dat";
-					string destFilePath = Path.Combine(Directory.GetCurrentDirectory(), fileInfo.LastWriteTime.ToString("HH_mm_ss_dd_MM_yyyy") + "_temp.dat");
-					ConvertBinToDat(file_path, destFilePath);
-					File.Copy(destFilePath, destinationPath, true);
-					File.Delete(file_path);
-					File.Delete(destFilePath);
-				}
-			}
 		}
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private async void timer1_Tick(object sender, EventArgs e)
         {
-			if (File.Exists(file_path))
-			{
-				FileInfo fileInfo = new FileInfo(file_path);
-				string destFilePath = Path.Combine(Directory.GetCurrentDirectory(), fileInfo.LastWriteTime.ToString("HH_mm_dd_MM_yyyy") + "_temp.bin");
-				File.Copy(file_path, destFilePath, true);
-			}
+		    if (Interlocked.Exchange(ref _snapshotInProgress, 1) != 0)
+		        return;
+
+		    try
+		    {
+		        await Task.Run(() =>
+		        {
+		            CaptureDataSnapshot();
+		            UploadPendingFileToServer();
+		        });
+		    }
+		    catch (Exception ex)
+		    {
+		        MessageBox.Show("Lỗi sao lưu file dữ liệu: " + ex.Message, "Đồng bộ dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
+		    }
+		    finally
+		    {
+		        Interlocked.Exchange(ref _snapshotInProgress, 0);
+		    }
+        }
+
+        private void CaptureDataSnapshot()
+        {
+		    if (string.IsNullOrWhiteSpace(file_path) || !File.Exists(file_path))
+		        return;
+
+		    string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+		    string temporaryPath = Path.Combine(appDirectory, Guid.NewGuid().ToString("N") + ".tmp");
+		    try
+		    {
+		        DateTime sourceLastWriteTime;
+		        if (!CopyStableFile(file_path, temporaryPath, out sourceLastWriteTime))
+		            return;
+
+		        string baseName = sourceLastWriteTime.ToString("HH_mm_dd_MM_yyyy", CultureInfo.InvariantCulture) + "_temp";
+		        string destinationPath = Path.Combine(appDirectory, baseName + ".bin");
+		        if (File.Exists(destinationPath) && FilesAreEqual(temporaryPath, destinationPath))
+		            return;
+
+		        int suffix = 1;
+		        while (File.Exists(destinationPath))
+		        {
+		            destinationPath = Path.Combine(appDirectory, baseName + "_" + suffix + ".bin");
+		            suffix++;
+		        }
+
+		        File.Move(temporaryPath, destinationPath);
+		    }
+		    finally
+		    {
+		        if (File.Exists(temporaryPath))
+		            File.Delete(temporaryPath);
+		    }
 		}
 
-        private void timer2_Tick(object sender, EventArgs e)
+		private static bool FilesAreEqual(string firstPath, string secondPath)
+		{
+		    FileInfo firstInfo = new FileInfo(firstPath);
+		    FileInfo secondInfo = new FileInfo(secondPath);
+		    if (firstInfo.Length != secondInfo.Length)
+		        return false;
+
+		    using (FileStream first = File.OpenRead(firstPath))
+		    using (FileStream second = File.OpenRead(secondPath))
+		    {
+		        byte[] firstBuffer = new byte[81920];
+		        byte[] secondBuffer = new byte[81920];
+		        int firstRead;
+		        while ((firstRead = first.Read(firstBuffer, 0, firstBuffer.Length)) > 0)
+		        {
+		            int secondRead = second.Read(secondBuffer, 0, secondBuffer.Length);
+		            if (firstRead != secondRead || !firstBuffer.Take(firstRead).SequenceEqual(secondBuffer.Take(secondRead)))
+		                return false;
+		        }
+
+		        return second.ReadByte() == -1;
+		    }
+		}
+
+		private async void timer2_Tick(object sender, EventArgs e)
         {
 			DateTime currentDateTime = DateTime.Now;
-            if (currentDateTime.Hour == 7)
-            {
-				// nạp dữ liệu vào DB
-				asyncData();
+		    if (currentDateTime.Hour != 7 || !_syncGate.Wait(0))
+		        return;
 
-				DateTime cutoffDateTime = currentDateTime.AddDays(-7);
-				string folderPath = Path.Combine(Directory.GetCurrentDirectory(), "complete");
-				if (Directory.Exists(folderPath))
-				{
-					string[] files = Directory.GetFiles(folderPath, "*.bin");
-					foreach (string file in files)
-					{
-						FileInfo fileInfo = new FileInfo(file);
-						if (fileInfo.LastWriteTime < cutoffDateTime)
-						{
-							File.Delete(file);
-						}
-					}
-				}
-			}
+		    try
+            {
+		        await Task.Run(() => asyncData());
+
+		        DateTime cutoffDateTime = currentDateTime.AddDays(-7);
+		        string archiveDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "complete");
+		        if (Directory.Exists(archiveDirectory))
+		        {
+		            foreach (string file in Directory.GetFiles(archiveDirectory, "*.bin"))
+		            {
+		                if (File.GetLastWriteTime(file) < cutoffDateTime)
+		                    File.Delete(file);
+		            }
+		        }
+		    }
+		    catch (Exception ex)
+		    {
+		        MessageBox.Show("Lỗi đồng bộ dữ liệu: " + ex.Message, "Đồng bộ dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
+		    }
+		    finally
+		    {
+		        _syncGate.Release();
+		    }
 
 		}
 		private void asyncData()
 		{
 			// xử lý đồng bộ
-			string folderPath = Path.Combine(Directory.GetCurrentDirectory()); // Thư mục cần quét
-			string extension = "*.bin"; // Định dạng file cần lấy (vd: *.txt, *.jpg, *.csv)
-			string[] files = Directory.GetFiles(folderPath, extension);
+			string folderPath = AppDomain.CurrentDomain.BaseDirectory;
+			string[] files = Directory.GetFiles(folderPath, "*.bin", SearchOption.TopDirectoryOnly);
 			HashSet<Record_st> set = new HashSet<Record_st>();
+			List<string> parsedFiles = new List<string>();
+			List<string> failures = new List<string>();
+			string folderPath_bin_complete = Path.Combine(folderPath, "complete");
+			Directory.CreateDirectory(folderPath_bin_complete);
 			DataAccess ac = new DataAccess();
 			foreach (string file in files)
 			{
-				
-				string fileNameWithoutExt = Path.GetFileNameWithoutExtension(file);
-				string csvFilePath = fileNameWithoutExt + ".dat"; // Output CSV file
-				ConvertBinToDat(file, csvFilePath);
-				// di chuyển file .bin vào thư mục complete
-				string folderPath_bin_complete = Path.Combine(Directory.GetCurrentDirectory() + "/complete"); // Thư mục cần quét
-				if (!Directory.Exists(folderPath_bin_complete))
+				string csvFilePath = Path.Combine(folderPath, Guid.NewGuid().ToString("N") + ".dat");
+				if (File.Exists(file))
 				{
-					Directory.CreateDirectory(folderPath_bin_complete); // Tạo thư mục nếu chưa có
-				}
-				if (!File.Exists(folderPath_bin_complete + "/" + fileNameWithoutExt + ".bin"))
-				{
-					File.Move(file, folderPath_bin_complete + "/" + fileNameWithoutExt + ".bin");
+					HashSet<Record_st> fileRecords = new HashSet<Record_st>();
+					FileStream fileStream = null;
 					try
 					{
-
-						FileStream fileStream = new FileStream(csvFilePath, FileMode.Open, FileAccess.Read);
+						ConvertBinToDat(file, csvFilePath);
+						fileStream = new FileStream(csvFilePath, FileMode.Open, FileAccess.Read);
 						byte[] a = new byte[897];
-						if (fileStream.Read(a, 0, a.Length) < 64)
-						{
-							continue;
-						}
+						if (!ReadExactly(fileStream, a, 64))
+							throw new InvalidDataException("File không có header đầy đủ.");
 						byte[] b = Encoding.UTF8.GetBytes("CFMLHEAD");
 						if (!IsMemcmp(ref a, ref b, 8))
-						{
-							continue;
-						}
+							throw new InvalidDataException("Header file không hợp lệ.");
 						if (BitConverter.ToUInt16(a, 8) != 64)
-						{
-							continue;
-						}
-						if (!((a[10] == 0) & (a[11] == 3)))
-						{
-							continue;
-						}
+							throw new InvalidDataException("Kích thước header không hợp lệ.");
+						if (a[10] != 0 || a[11] != 3)
+							throw new InvalidDataException("Phiên bản file không được hỗ trợ.");
 						if (BitConverter.ToUInt16(a, 12) != 896)
-						{
-							continue;
-						}
+							throw new InvalidDataException("Kích thước record không hợp lệ.");
 						int num = BitConverter.ToUInt16(a, 14);
-						string fwVer = Encoding.ASCII.GetString(a, 16, 16).TrimEnd(default(char));
-						string swVer = Encoding.UTF8.GetString(a, 32, 24).TrimEnd(default(char));
+						if (num < 64 || num > fileStream.Length)
+							throw new InvalidDataException("Vị trí bắt đầu record không hợp lệ.");
 						fileStream.Seek(num, SeekOrigin.Begin);
 						CRC32B cRC32B = new CRC32B();
 						while (true)
 						{
 							Record_st record_st = new Record_st();
 							record_st._tolerance = new short[8];
-							if (fileStream.Read(a, 0, 896) < 896)
-							{
+							if (!ReadExactly(fileStream, a, 896))
 								break;
-							}
 							b = Encoding.UTF8.GetBytes("CFMLRCRD");
 							if (!IsMemcmp(ref a, ref b, 8))
-							{
-								continue;
-							}
+								throw new InvalidDataException("Record không hợp lệ.");
 							uint num2 = BitConverter.ToUInt32(a, 892);
 							if (cRC32B.Calc(a, 892) != num2)
-							{
-								continue;
-							}
+								throw new InvalidDataException("CRC record không hợp lệ.");
 							record_st._no = BitConverter.ToUInt16(a, 8);
 							record_st._date = new DateTime(2000 + a[10], a[11], a[12], a[13], a[14], a[15]);
-							if ((a[16] == 0) | (a[16] == 1))
+							if (a[16] != 0 && a[16] != 1)
+								throw new InvalidDataException("Loại record không được hỗ trợ.");
+							if (a[16] == 0 || a[16] == 1)
 							{
 								record_st._type = a[16];
-								int num3 = 0;
-								do
-								{
-									num3++;
-								}
-								while (num3 <= 199);
-								int num4 = 0;
-								do
-								{
-									num4++;
-								}
-								while (num4 <= 199);
 								record_st._result = a[817];
 								record_st._selTolerance = a[818];
 								record_st._tolerance[0] = BitConverter.ToInt16(a, 819);
@@ -227,20 +254,26 @@ namespace asyncDataSoltec
 									record_st._unit = a[884];
 									record_st._calibration = BitConverter.ToUInt16(a, 885);
 								}
-								set.Add(record_st);
+								fileRecords.Add(record_st);
 								continue;
 							}
-							continue;
 						}
 
-						fileStream.Close();
+						set.UnionWith(fileRecords);
+						parsedFiles.Add(file);
 					}
 					catch (Exception ex)
 					{
+						failures.Add(Path.GetFileName(file) + ": " + ex.Message);
 						continue;
 					}
-					File.Delete(file);
-					File.Delete(csvFilePath);
+					finally
+					{
+						if (fileStream != null)
+							fileStream.Dispose();
+						if (File.Exists(csvFilePath))
+							File.Delete(csvFilePath);
+					}
                 }
                 else
                 {
@@ -253,17 +286,210 @@ namespace asyncDataSoltec
 				set.GroupBy(r => new { r._no, r._date })
 				   .Select(g => g.Last())
 			);
-			foreach (Record_st item in distinctSet)
-            {
-				string jsonString = JsonConvert.SerializeObject(item, Formatting.Indented);
-				string InsertData = string.Format("INSERT INTO  [STOCKMANAGEMENT].[dbo].[ReportSeltec_DAP] ([data],[machine],[warning],[good],[bad],[peak],[meas],[T1],[T2],[T3],[TD],[shift],[data_date],[no],[created_at]) VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}','{11}','{12}','{13}','{14}');", jsonString, Machine, item._warning.ToString(), item._good.ToString(), item._bad.ToString(), item._peak.ToString(), item._meas.ToString(), item._T1.ToString(), item._T2.ToString(), item._T3.ToString(), item._TD.ToString(), item._shift.ToString(), now, item._no, item._date);
-				ac.RunQuery(InsertData);
+			if (distinctSet.Count > 0)
+			{
+				ac.ExecuteTransaction((connection, transaction) =>
+				{
+					foreach (Record_st item in distinctSet)
+						UpsertRecord(connection, transaction, "[STOCKMANAGEMENT].[dbo].[ReportSeltec_DAP]", item, now);
+				});
 			}
-			
-			// MessageBox.Show(_destFilePath.Length.ToString());
-			// MessageBox.Show(fileInfo.LastWriteTime.ToString("HH_mm_dd_MM_yyyy"));
-			// MessageBox.Show(fileInfo.Length.ToString());
+
+			foreach (string parsedFile in parsedFiles)
+				ArchiveFile(parsedFile, folderPath_bin_complete);
+
+			if (failures.Count > 0)
+				throw new IOException("Một số file chưa đồng bộ thành công:" + Environment.NewLine + string.Join(Environment.NewLine, failures));
 		}
+
+        private static void UpsertRecord(SqlConnection connection, SqlTransaction transaction, string tableName, Record_st record, DateTime syncDate)
+        {
+            string sql = @"
+IF EXISTS (
+    SELECT 1
+    FROM " + tableName + @" WITH (UPDLOCK, HOLDLOCK)
+    WHERE machine = @machine AND [no] = @no AND created_at = @recordDate
+)
+    UPDATE " + tableName + @"
+    SET [data] = @data, warning = @warning, good = @good, bad = @bad, peak = @peak,
+        meas = @meas, T1 = @T1, T2 = @T2, T3 = @T3, TD = @TD, shift = @shift, data_date = @syncDate
+    WHERE machine = @machine AND [no] = @no AND created_at = @recordDate;
+ELSE
+    INSERT INTO " + tableName + @" ([data], [machine], [warning], [good], [bad], [peak], [meas],
+        [T1], [T2], [T3], [TD], [shift], [data_date], [no], [created_at])
+    VALUES (@data, @machine, @warning, @good, @bad, @peak, @meas,
+        @T1, @T2, @T3, @TD, @shift, @syncDate, @no, @recordDate);";
+
+            using (SqlCommand command = new SqlCommand(sql, connection, transaction))
+            {
+                command.CommandTimeout = 1800;
+                command.Parameters.AddWithValue("@data", JsonConvert.SerializeObject(record, Formatting.Indented));
+                command.Parameters.AddWithValue("@machine", Machine);
+                command.Parameters.AddWithValue("@warning", record._warning);
+                command.Parameters.AddWithValue("@good", record._good);
+                command.Parameters.AddWithValue("@bad", record._bad);
+                command.Parameters.AddWithValue("@peak", record._peak);
+                command.Parameters.AddWithValue("@meas", record._meas);
+                command.Parameters.AddWithValue("@T1", record._T1);
+                command.Parameters.AddWithValue("@T2", record._T2);
+                command.Parameters.AddWithValue("@T3", record._T3);
+                command.Parameters.AddWithValue("@TD", record._TD);
+                command.Parameters.AddWithValue("@shift", record._shift);
+                command.Parameters.AddWithValue("@syncDate", syncDate);
+                command.Parameters.AddWithValue("@no", record._no);
+                command.Parameters.AddWithValue("@recordDate", record._date);
+                command.ExecuteNonQuery();
+            }
+        }
+
+        private static void InsertRecord(SqlConnection connection, SqlTransaction transaction, Record_st record, DateTime syncDate)
+        {
+            const string sql = @"
+INSERT INTO [STOCKMANAGEMENT].[dbo].[temp_report_seltec_dap]
+    ([data], [machine], [warning], [good], [bad], [peak], [meas], [T1], [T2], [T3], [TD], [shift], [data_date], [no], [created_at])
+VALUES
+    (@data, @machine, @warning, @good, @bad, @peak, @meas, @T1, @T2, @T3, @TD, @shift, @syncDate, @no, @recordDate);";
+
+            using (SqlCommand command = new SqlCommand(sql, connection, transaction))
+            {
+                command.CommandTimeout = 1800;
+                command.Parameters.AddWithValue("@data", JsonConvert.SerializeObject(record, Formatting.Indented));
+                command.Parameters.AddWithValue("@machine", Machine);
+                command.Parameters.AddWithValue("@warning", record._warning);
+                command.Parameters.AddWithValue("@good", record._good);
+                command.Parameters.AddWithValue("@bad", record._bad);
+                command.Parameters.AddWithValue("@peak", record._peak);
+                command.Parameters.AddWithValue("@meas", record._meas);
+                command.Parameters.AddWithValue("@T1", record._T1);
+                command.Parameters.AddWithValue("@T2", record._T2);
+                command.Parameters.AddWithValue("@T3", record._T3);
+                command.Parameters.AddWithValue("@TD", record._TD);
+                command.Parameters.AddWithValue("@shift", record._shift);
+                command.Parameters.AddWithValue("@syncDate", syncDate);
+                command.Parameters.AddWithValue("@no", record._no);
+                command.Parameters.AddWithValue("@recordDate", record._date);
+                command.ExecuteNonQuery();
+            }
+        }
+
+        private static bool ReadExactly(Stream stream, byte[] buffer, int count)
+        {
+            int totalRead = 0;
+            while (totalRead < count)
+            {
+                int bytesRead = stream.Read(buffer, totalRead, count - totalRead);
+                if (bytesRead == 0)
+                {
+                    if (totalRead == 0)
+                        return false;
+
+                    throw new EndOfStreamException("File kết thúc giữa một record.");
+                }
+
+                totalRead += bytesRead;
+            }
+
+            return true;
+        }
+
+        private static void ArchiveFile(string file, string archiveDirectory)
+        {
+            string fileName = Path.GetFileNameWithoutExtension(file);
+            string extension = Path.GetExtension(file);
+            string destination = Path.Combine(archiveDirectory, fileName + extension);
+            int suffix = 1;
+
+            while (File.Exists(destination))
+            {
+                destination = Path.Combine(archiveDirectory, fileName + "_" + suffix + extension);
+                suffix++;
+            }
+
+            File.Move(file, destination);
+        }
+
+        private static bool CopyStableFile(string sourcePath, string destinationPath, out DateTime sourceLastWriteTime)
+        {
+            FileInfo sourceInfo = new FileInfo(sourcePath);
+            sourceInfo.Refresh();
+            long originalLength = sourceInfo.Length;
+            DateTime originalWriteTimeUtc = sourceInfo.LastWriteTimeUtc;
+            sourceLastWriteTime = sourceInfo.LastWriteTime;
+
+            File.Copy(sourcePath, destinationPath, false);
+
+            sourceInfo.Refresh();
+            if (sourceInfo.Length != originalLength || sourceInfo.LastWriteTimeUtc != originalWriteTimeUtc)
+            {
+                File.Delete(destinationPath);
+                return false;
+            }
+
+            return true;
+        }
+
+        private void UploadPendingFileToServer()
+        {
+            UploadFileToServer(file_path, true);
+        }
+
+        private bool UploadFileToServer(string sourcePath, bool deleteSourceAfterUpload)
+        {
+            if (string.IsNullOrWhiteSpace(sourcePath) || !File.Exists(sourcePath))
+                return false;
+
+            string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string temporaryPath = Path.Combine(appDirectory, Guid.NewGuid().ToString("N") + ".dat");
+            try
+            {
+                DateTime sourceLastWriteTime;
+                if (!CopyStableFile(sourcePath, temporaryPath, out sourceLastWriteTime))
+                    return false;
+
+                string destinationDirectory = Path.Combine(
+                    @"\\192.168.207.6\jtecdata\SYSTEM-JTECTOPICS\30. Data Transfer\10.Soltec Data",
+                    Machine);
+                Directory.CreateDirectory(destinationDirectory);
+
+                string destinationPath = Path.Combine(
+                    destinationDirectory,
+                    sourceLastWriteTime.ToString("dd_MM_yyyy", CultureInfo.InvariantCulture) + ".dat");
+                string uploadPath = Path.Combine(destinationDirectory, Guid.NewGuid().ToString("N") + ".upload");
+                try
+                {
+                    File.Copy(temporaryPath, uploadPath, false);
+                    if (File.Exists(destinationPath))
+                        File.Replace(uploadPath, destinationPath, null);
+                    else
+                        File.Move(uploadPath, destinationPath);
+                }
+                finally
+                {
+                    if (File.Exists(uploadPath))
+                        File.Delete(uploadPath);
+                }
+
+                if (deleteSourceAfterUpload)
+                {
+                    FileInfo sourceInfo = new FileInfo(sourcePath);
+                    sourceInfo.Refresh();
+                    if (sourceInfo.Exists &&
+                        sourceInfo.Length == new FileInfo(temporaryPath).Length &&
+                        sourceInfo.LastWriteTime == sourceLastWriteTime)
+                    {
+                        File.Delete(sourcePath);
+                    }
+                }
+
+                return true;
+            }
+            finally
+            {
+                if (File.Exists(temporaryPath))
+                    File.Delete(temporaryPath);
+            }
+        }
+
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
@@ -280,14 +506,7 @@ namespace asyncDataSoltec
         }
 		public static void ConvertBinToDat(string binFilePath, string datFilePath)
 		{
-			// Read the binary data from the .bin file
-			byte[] binData = File.ReadAllBytes(binFilePath);
-
-			// Optionally, process or modify the binary data if needed
-			// For example, if you want to change the data structure or content, do it here
-
-			// Write the binary data to a new .dat file
-			File.WriteAllBytes(datFilePath, binData);
+			File.Copy(binFilePath, datFilePath, true);
 		}
 		private static bool IsMemcmp(ref byte[] a, ref byte[] b, int size)
 		{
@@ -500,40 +719,31 @@ namespace asyncDataSoltec
         }
 		public static void loadDat(string path)
 		{
-				DataAccess ac = new DataAccess();
-				FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
-				byte[] a = new byte[897];
-				if (fileStream.Read(a, 0, a.Length) < 64)
+				List<Record_st> records = new List<Record_st>();
+				using (FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
 				{
-					throw new Exception("ファイルサイズが規格より小さいです");
-				}
+				byte[] a = new byte[897];
+				if (!ReadExactly(fileStream, a, 64))
+					throw new InvalidDataException("File không có header đầy đủ.");
 				byte[] b = Encoding.UTF8.GetBytes("CFMLHEAD");
 				if (!IsMemcmp(ref a, ref b, 8))
-				{
-					throw new Exception("ファイルヘッダーが規格外です(識別子)");
-				}
+					throw new InvalidDataException("Header file không hợp lệ.");
 				if (BitConverter.ToUInt16(a, 8) != 64)
-				{
-					throw new Exception("ファイルヘッダーが規格外です(ファイルヘッダーサイズ)");
-				}
-				if (!((a[10] == 0) & (a[11] == 3)))
-				{
-					throw new Exception("サポート外のファイルです(ファイルバージョン)");
-				}
+					throw new InvalidDataException("Kích thước header không hợp lệ.");
+				if (a[10] != 0 || a[11] != 3)
+					throw new InvalidDataException("Phiên bản file không được hỗ trợ.");
 				if (BitConverter.ToUInt16(a, 12) != 896)
-				{
-					throw new Exception("ファイルヘッダーが規格外です(ファイルレコードサイズ)");
-				}
+					throw new InvalidDataException("Kích thước record không hợp lệ.");
 				int num = BitConverter.ToUInt16(a, 14);
-				string fwVer = Encoding.ASCII.GetString(a, 16, 16).TrimEnd(default(char));
-				string swVer = Encoding.UTF8.GetString(a, 32, 24).TrimEnd(default(char));
+				if (num < 64 || num > fileStream.Length)
+					throw new InvalidDataException("Vị trí bắt đầu record không hợp lệ.");
 				fileStream.Seek(num, SeekOrigin.Begin);
 				CRC32B cRC32B = new CRC32B();
 				while (true)
 				{
 					Record_st record_st = new Record_st();
 					record_st._tolerance = new short[8];
-					if (fileStream.Read(a, 0, 896) < 896)
+					if (!ReadExactly(fileStream, a, 896))
 					{
 						break;
 					}
@@ -552,18 +762,6 @@ namespace asyncDataSoltec
 					if ((a[16] == 0) | (a[16] == 1))
 					{
 						record_st._type = a[16];
-						int num3 = 0;
-						do
-						{
-							num3++;
-						}
-						while (num3 <= 199);
-						int num4 = 0;
-						do
-						{
-							num4++;
-						}
-						while (num4 <= 199);
 						record_st._result = a[817];
 						record_st._selTolerance = a[818];
 						record_st._tolerance[0] = BitConverter.ToInt16(a, 819);
@@ -616,42 +814,50 @@ namespace asyncDataSoltec
 							record_st._unit = a[884];
 							record_st._calibration = BitConverter.ToUInt16(a, 885);
 						}
-						//_list.Add(record_st);
-						string jsonString = JsonConvert.SerializeObject(record_st, Formatting.Indented);
-						DateTime now = DateTime.Now;
-						string InsertData = string.Format("INSERT INTO  [STOCKMANAGEMENT].[dbo].[temp_report_seltec_dap] ([data],[machine],[warning],[good],[bad],[peak],[meas],[T1],[T2],[T3],[TD],[shift],[data_date],[no],[created_at]) VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}','{11}','{12}','{13}','{14}');", jsonString, Machine, record_st._warning.ToString(), record_st._good.ToString(), record_st._bad.ToString(), record_st._peak.ToString(), record_st._meas.ToString(), record_st._T1.ToString(), record_st._T2.ToString(), record_st._T3.ToString(), record_st._TD.ToString(), record_st._shift.ToString(), now, record_st._no, record_st._date);
-						ac.RunQuery(InsertData);
+						records.Add(record_st);
 						continue;
 					}
 					throw new Exception("ファイルレコードが規格外です(判定種別)");
 				}
 
-				fileStream.Close();
-		}
-
-        private void timer3_Tick(object sender, EventArgs e)
-        {
-			
-			DataAccess _ac = new DataAccess();
-			string query = $"DELETE FROM [STOCKMANAGEMENT].[dbo].[temp_report_seltec_dap] WHERE machine = '{Machine}'";
-			string InsertData = string.Format(query);
-			_ac.RunQuery(InsertData);
-			if (File.Exists(file_path))
-			{
-				string destFilePath = Path.Combine(Directory.GetCurrentDirectory(), "/temp");
-				if (!Directory.Exists(destFilePath))
-				{
-					Directory.CreateDirectory(destFilePath); // Tạo thư mục nếu chưa có
 				}
-				destFilePath = Path.Combine(Directory.GetCurrentDirectory(), "temp/temp.bin");
-				File.Copy(file_path, destFilePath, true);
-				string csvFilePath = "/temp/output.dat"; // Output CSV file
-				ConvertBinToDat(destFilePath, csvFilePath);
-				loadDat(csvFilePath);
-				File.Delete(csvFilePath);
-			}
 
+				DateTime syncDate = DateTime.Now;
+				DataAccess dataAccess = new DataAccess();
+				dataAccess.ExecuteTransaction((connection, transaction) =>
+				{
+					using (SqlCommand command = new SqlCommand(
+						"DELETE FROM [STOCKMANAGEMENT].[dbo].[temp_report_seltec_dap] WHERE machine = @machine",
+						connection,
+						transaction))
+					{
+						command.Parameters.AddWithValue("@machine", Machine);
+						command.ExecuteNonQuery();
+					}
+
+					foreach (Record_st record in records)
+						InsertRecord(connection, transaction, record, syncDate);
+				});
 		}
+
+        private async void timer3_Tick(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(file_path) || !File.Exists(file_path) || !_syncGate.Wait(0))
+                return;
+
+            try
+            {
+                await Task.Run(() => loadDat(file_path));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi đồng bộ dữ liệu tạm: " + ex.Message, "Đồng bộ dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                _syncGate.Release();
+            }
+        }
 		private DateTime GetDateByFileName(string file_path)
 		{
 			string fileName = Path.GetFileName(file_path);
@@ -667,11 +873,11 @@ namespace asyncDataSoltec
 			return date.ToString("dd_MM_yyyy") + "_temp.bin";
 		}
 
-        private void button1_Click(object sender, EventArgs e)
+        private async void button1_Click(object sender, EventArgs e)
         {
 			OpenFileDialog openFileDialog1 = new OpenFileDialog
 			{
-				InitialDirectory = Environment.CurrentDirectory+ "\\complete",
+				InitialDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "complete"),
 				Title = "Browse Text Files",
 
 				CheckFileExists = true,
@@ -690,98 +896,82 @@ namespace asyncDataSoltec
 			{
 				txtFilePath.Text = openFileDialog1.FileName;
 				string file = openFileDialog1.FileName;
-				FileInfo fileInfo = new FileInfo(file);
-				string destinationPath = @"\\192.168.207.6\jtecdata\SYSTEM-JTECTOPICS\30. Data Transfer\10.Soltec Data\" + Machine + "/" + fileInfo.LastWriteTime.ToString("dd_MM_yyyy") + ".dat";
-				string destFilePath = Path.Combine(Directory.GetCurrentDirectory(), fileInfo.LastWriteTime.ToString("HH_mm_ss_dd_MM_yyyy") + "_temp.dat");
-				ConvertBinToDat(file, destFilePath);
-				File.Copy(destFilePath, destinationPath, true);
-				File.Delete(destFilePath);
-				MessageBox.Show("Đã lấy dữ liệu về server thành công. Đường dẫn: "+ destinationPath);
+				try
+				{
+					bool uploaded = await Task.Run(() => UploadFileToServer(file, false));
+					if (uploaded)
+						MessageBox.Show("Đã gửi dữ liệu lên server thành công.", "Đồng bộ dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Information);
+					else
+						MessageBox.Show("File đang được ghi hoặc không còn tồn tại; chưa gửi dữ liệu.", "Đồng bộ dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show("Lỗi gửi file dữ liệu lên server: " + ex.Message, "Đồng bộ dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
 			}
 		}
-		public void checkUpdate()
-		{
-			try
-			{
-				#region Update chuong trinh moi (Neu co)
-				//Đọc file PathUpdate.txt để lấy đường dẫn
-				StreamReader strReader = new StreamReader(File.OpenRead(Directory.GetCurrentDirectory() + @"\PathUpdate.txt"));
-				string pathsource = strReader.ReadLine();
-				strReader.Close();
-				string[] getIp = pathsource.Split('\\');
-				if (PingToAddress(getIp[2]))
-				{
-					string datemodifypathsource = "";
-					string datemodifypathdes = "";
-					//ktra datemodify chuong trinh tren server
-					DateTime modifysource = File.GetLastWriteTime(pathsource);
-					datemodifypathsource = modifysource.ToString();
-					//ktra chuong trinh tai may client
-					//Lay tên chuong trinh hien tai
-					string nameprogram = "";
-					DirectoryInfo diDirectoryInfo = new DirectoryInfo(Directory.GetCurrentDirectory());
-					FileInfo[] fileInfo = diDirectoryInfo.GetFiles("*.exe");
-					//Duyet cac file
-					for (int i = 0; i < fileInfo.Length; i++)
-					{
-						if (fileInfo[i].Name.ToString() != "AutoUpdate.exe")
-						{
-							nameprogram = fileInfo[i].Name.ToString();
-							break;
-						}
-					}
-					DateTime modifydes = File.GetLastWriteTime(Directory.GetCurrentDirectory() + @"\" + nameprogram);
-					datemodifypathdes = modifydes.ToString();
-					if (modifysource > modifydes)//Neu datemodify khác nhau thì chay chuong trình copy file lên và thoát chuong trình
-					{
-						DialogResult dialogResult = MessageBox.Show("Đã có phiên bản mới, bạn có muốn cập nhật?", "Cập nhật", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
-						if (dialogResult == DialogResult.Yes)
-						{
-							////chay chuong trình copy
-							System.Diagnostics.Process.Start(Directory.GetCurrentDirectory() + @"\" + "AutoUpdate.exe");
-							Application.Exit();
-							foreach (Process clsProcess in Process.GetProcesses())
-							{
-							    if (clsProcess.ProcessName.Equals("asyncDataSoltec"))
-							    {
-							        clsProcess.Kill();
-							        break;
-							    }
-							}
-						}
-					}
-				}
-				#endregion
-			}
-			catch
-			{
+		  public void checkUpdate()
+        {
+            try
+            {
+                #region Update chuong trinh moi (Neu co)
+                //Đọc đường dẫn cập nhật từ PathUpdate.txt cạnh file chạy chương trình
+                string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                string pathFile = Path.Combine(appDirectory, "PathUpdate.txt");
+                string pathsource = File.Exists(pathFile)
+                    ? File.ReadAllText(pathFile).Trim()
+                    : null;
+                if (string.IsNullOrWhiteSpace(pathsource))
+                    return;
 
-			}
-		}
-		public static bool PingToAddress(string IP)
-		{
-			try
-			{
-				System.Net.NetworkInformation.Ping PingSender = new System.Net.NetworkInformation.Ping();
-				int TimeOut = 120;
-				string PingData = "aaaa";
-				byte[] Buffer = System.Text.Encoding.ASCII.GetBytes(PingData);
-				PingReply PingReply = PingSender.Send(IP, TimeOut, Buffer);
-				if (PingReply.Status == IPStatus.Success)
-				{
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-			catch { return false; }
-		}
+                string localExe = Process.GetCurrentProcess().MainModule.FileName;
+                string targetExecutable = Path.GetFileName(localExe);
+                string sourceExe = Directory.Exists(pathsource)
+                    ? Path.Combine(pathsource, targetExecutable)
+                    : pathsource;
+                if (!Path.GetFileName(sourceExe).Equals(targetExecutable, StringComparison.OrdinalIgnoreCase))
+                    return;
 
-        private void Form1_Load(object sender, EventArgs e)
+                if (!File.Exists(sourceExe) || !File.Exists(localExe))
+                    return;
+
+                DateTime sourceLastWriteTime = File.GetLastWriteTimeUtc(sourceExe);
+                DateTime localLastWriteTime = File.GetLastWriteTimeUtc(localExe);
+                if (sourceLastWriteTime > localLastWriteTime)
+                {
+                    DialogResult dialogResult = MessageBox.Show("Đã có phiên bản mới, bạn có muốn cập nhật?", "Cập nhật", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                    if (dialogResult == DialogResult.Yes)
+                    {
+                        Process currentProcess = Process.GetCurrentProcess();
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = Path.Combine(appDirectory, "AutoUpdate.exe"),
+                            Arguments = "--wait-for-pid " + currentProcess.Id + " --target-exe " + targetExecutable,
+                            UseShellExecute = true
+                        });
+                        Application.Exit();
+                        currentProcess.Kill();
+                    }
+                }
+                #endregion
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi kiểm tra cập nhật: " + ex.Message, "Cập nhật", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async void Form1_Load(object sender, EventArgs e)
         {
 			checkUpdate();
+            try
+            {
+                await Task.Run(() => UploadPendingFileToServer());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi gửi file dữ liệu lên server: " + ex.Message, "Đồng bộ dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
 		}
     }
 }

@@ -61,10 +61,10 @@
             </section>
             <aside class="summary-panel" aria-labelledby="summaryTitle">
                 <h2 id="summaryTitle"><span aria-hidden="true">▥</span> 月間品質実績<br /><span class="summary-subtitle">CHẤT LƯỢNG THÁNG <span id="summaryMonth"></span></span></h2>
-                <table class="summary-table"><thead><tr><th>グループ / Nhóm</th><th>目標 / Mục tiêu lỗi</th><th>実績 / Lỗi phát sinh</th><th>評価 / Đánh giá</th></tr></thead><tbody><tr><td>—</td><td class="summary-target">—</td><td class="summary-actual">—</td><td><span class="summary-status">データなし / Chưa có dữ liệu</span></td></tr></tbody><tfoot></tfoot></table>
+                <table class="summary-table"><thead><tr><th>グループ <br /> Nhóm</th><th>目標 <br /> Mục tiêu lỗi</th><th>実績 <br /> Lỗi phát sinh</th><th>評価 <br /> Đánh giá</th></tr></thead><tbody><tr><td>—</td><td class="summary-target">—</td><td class="summary-actual">—</td><td><span class="summary-status">データなし <br /> Chưa có dữ liệu</span></td></tr></tbody><tfoot></tfoot></table>
             </aside>
         </main>
-        <footer class="footer"><span id="dataNote">データソース / Nguồn dữ liệu: Control_ProgramPlug_Visualize</span><span id="lastUpdated">未更新 / Chưa cập nhật</span></footer>
+        <footer class="footer"><span id="dataNote">データソース / Nguồn dữ liệu: Control_ProgramPlug_Visualize</span><span id="lastUpdated">未更新 <br /> Chưa cập nhật</span></footer>
     </div>
     <script>
         (() => {
@@ -361,7 +361,7 @@
             window.addEventListener('resize', render);
             updateClock();
             window.setInterval(updateClock, 1000);
-            window.setTimeout(() => window.location.reload(), 60000);
+            window.setTimeout(() => window.location.reload(), 300000);
             loadData();
         })();
     </script>

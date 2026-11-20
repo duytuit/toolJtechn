@@ -1181,7 +1181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.addEventListener('fullscreenchange', () => $('#app').classList.toggle('tv-mode', document.fullscreenElement != null));
     setTimeout(enterFullscreen, 10000);
-    setTimeout(() => window.location.reload(), 60000);
+    setTimeout(() => window.location.reload(), 300000);
     setInterval(() => {
         if (state.autoCyclePaused || state.screen === 'detail') return;
         autoTabIndex = (autoTabIndex + 1) % tabScreens.length;

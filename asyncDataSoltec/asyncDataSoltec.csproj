@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>asyncDataSoltec</RootNamespace>
     <AssemblyName>asyncDataSoltec</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -122,6 +122,11 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AutoUpdate\AutoUpdate.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.3</Version>
     </PackageReference>
@@ -137,4 +142,9 @@
     <Content Include="launch_rocket_space_astronomy_startup_boost_icon_258727.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="CopyAutoUpdateExecutable" AfterTargets="Build">
+    <Copy
+      SourceFiles="$(MSBuildProjectDirectory)\..\AutoUpdate\bin\$(Configuration)\AutoUpdate.exe"
+      DestinationFiles="$(TargetDir)AutoUpdate.exe" />
+  </Target>
 </Project>

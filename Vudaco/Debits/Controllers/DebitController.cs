@@ -286,6 +286,229 @@ namespace Vudaco.Debits.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", cnth);
         }
+
+        [HttpGet("excel/congnotonghopkh")]
+        public async Task<IActionResult> ExportCongNoTongHopKH(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            try
+            {
+                DebitDto = DebitDto ?? new DebitDto();
+                var data = await GetCongNoTongHopKHExportDataAsync(DebitDto, page, pageSize, cancellationToken);
+
+                using var workbook = new XLWorkbook();
+                var worksheet = workbook.Worksheets.Add("Công nợ tổng hợp KH");
+                const int columnCount = 15;
+
+                worksheet.Range(1, 1, 1, columnCount).Merge();
+                worksheet.Cell(1, 1).Value = "CÔNG NỢ TỔNG HỢP KHÁCH HÀNG";
+                worksheet.Cell(1, 1).Style
+                    .Font.SetBold()
+                    .Font.SetFontSize(16)
+                    .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+                worksheet.Range(2, 1, 2, columnCount).Merge();
+                worksheet.Cell(2, 1).Value = string.Format(
+                    "Kỳ báo cáo: {0} - {1}",
+                    DebitDto.FromDate?.ToString("dd/MM/yyyy") ?? "đầu kỳ",
+                    DebitDto.ToDate?.ToString("dd/MM/yyyy") ?? "hiện tại");
+                worksheet.Cell(2, 1).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+                string[] headers =
+                {
+                    "STT", "Mã khách hàng", "Tên khách hàng",
+                    "Đầu kỳ - Dịch vụ", "Đầu kỳ - Chi hộ",
+                    "Đã thu DV đầu kỳ", "Đã thu chi hộ đầu kỳ",
+                    "Phát sinh - Dịch vụ", "Phát sinh - Chi hộ",
+                    "Đã thu DV trong kỳ", "Đã thu chi hộ trong kỳ",
+                    "Cuối kỳ - Dịch vụ", "Cuối kỳ - Chi hộ", "Tổng cuối kỳ",
+                    "Ngày nợ lâu nhất"
+                };
+                for (int column = 0; column < headers.Length; column++)
+                    worksheet.Cell(4, column + 1).Value = headers[column];
+
+                var headerRange = worksheet.Range(4, 1, 4, columnCount);
+                headerRange.Style.Font.SetBold();
+                headerRange.Style.Fill.SetBackgroundColor(XLColor.LightBlue);
+                headerRange.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+                headerRange.Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
+                headerRange.Style.Alignment.WrapText = true;
+
+                int row = 5;
+                foreach (var item in data)
+                {
+                    worksheet.Cell(row, 1).Value = row - 4;
+                    worksheet.Cell(row, 2).Value = item.Abbreviation ?? "";
+                    worksheet.Cell(row, 3).Value = item.Name ?? "";
+                    worksheet.Cell(row, 4).Value = item.DVDK;
+                    worksheet.Cell(row, 5).Value = item.CHDK;
+                    worksheet.Cell(row, 6).Value = item.TTDVDK;
+                    worksheet.Cell(row, 7).Value = item.TTCHDK;
+                    worksheet.Cell(row, 8).Value = item.DVTK;
+                    worksheet.Cell(row, 9).Value = item.CHTK;
+                    worksheet.Cell(row, 10).Value = item.TTDVTK;
+                    worksheet.Cell(row, 11).Value = item.TTCHTK;
+                    worksheet.Cell(row, 12).Value = item.DVCK;
+                    worksheet.Cell(row, 13).Value = item.CHCK;
+                    worksheet.Cell(row, 14).Value = item.CK;
+                    if (item.OldestUnpaidDebtDate.HasValue)
+                    {
+                        worksheet.Cell(row, 15).Value = item.OldestUnpaidDebtDate.Value;
+                        worksheet.Cell(row, 15).Style.DateFormat.Format = "dd/MM/yyyy";
+                    }
+                    row++;
+                }
+
+                var tableRange = worksheet.Range(4, 1, Math.Max(4, row - 1), columnCount);
+                tableRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                tableRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                if (row > 5)
+                {
+                    worksheet.Range(5, 4, row - 1, 14).Style.NumberFormat.Format = "#,##0;[Red](#,##0);-";
+                    tableRange.SetAutoFilter();
+                }
+
+                worksheet.SheetView.FreezeRows(4);
+                worksheet.Columns(1, columnCount).AdjustToContents();
+                worksheet.Column(3).Width = Math.Min(worksheet.Column(3).Width, 40);
+                worksheet.Row(4).Height = 40;
+
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                return File(
+                    stream.ToArray(),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"CongNoTongHopKH_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi xuất Excel công nợ tổng hợp khách hàng");
+                return ApiResponseResult<object>(false, "Lỗi xuất Excel công nợ tổng hợp khách hàng: " + ex.Message, null);
+            }
+        }
+
+        private async Task<List<CongNoTongHopKHDto>> GetCongNoTongHopKHExportDataAsync(
+            DebitDto debitDto,
+            int page,
+            int pageSize,
+            CancellationToken cancellationToken)
+        {
+            var result = await _repoDebit.GetObjectDebitTongHopKHAsync(debitDto, page, pageSize, cancellationToken);
+            var data = ((IEnumerable<dynamic>)result.Extra["congnotonghop_kh"])
+                .Select(x => new
+                {
+                    x.customer_detail_id,
+                    x.debit_total,
+                    x.receipt_total,
+                    type = (int)x.type
+                }).ToList();
+            var dataDv = data.Where(x => new[] { 0, 1, 4, 5, 8 }.Contains(x.type))
+                .GroupBy(x => x.customer_detail_id)
+                .Select(g => new
+                {
+                    customer_detail_id = g.Key,
+                    debit_total = g.Sum(x => x.debit_total),
+                    receipt_total = g.Sum(x => x.receipt_total)
+                }).ToList();
+            var dataCh = data.Where(x => new[] { 2, 3, 6 }.Contains(x.type))
+                .GroupBy(x => x.customer_detail_id)
+                .Select(g => new
+                {
+                    customer_detail_id = g.Key,
+                    debit_total = g.Sum(x => x.debit_total),
+                    receipt_total = g.Sum(x => x.receipt_total)
+                }).ToList();
+            var dataDk = ((IEnumerable<dynamic>)result.Extra["congnotonghop_dk_kh"])
+                .Select(x => new
+                {
+                    x.customer_detail_id,
+                    x.debit_total,
+                    x.receipt_total,
+                    type = (int)x.type
+                }).ToList();
+            var oldestUnpaidDebtDates = ((IEnumerable<dynamic>)result.Extra["oldest_unpaid_debt_kh"])
+                .ToDictionary(
+                    x => (int)x.customer_detail_id,
+                    x => (DateTime)x.oldest_unpaid_debt_date);
+            var dataDvDk = dataDk.Where(x => new[] { 0, 1, 4, 5, 8 }.Contains(x.type))
+                .GroupBy(x => x.customer_detail_id)
+                .Select(g => new
+                {
+                    customer_detail_id = g.Key,
+                    debit_total = g.Sum(x => x.debit_total),
+                    receipt_total = g.Sum(x => x.receipt_total)
+                }).ToList();
+            var dataChDk = dataDk.Where(x => new[] { 2, 3, 6 }.Contains(x.type))
+                .GroupBy(x => x.customer_detail_id)
+                .Select(g => new
+                {
+                    customer_detail_id = g.Key,
+                    debit_total = g.Sum(x => x.debit_total),
+                    receipt_total = g.Sum(x => x.receipt_total)
+                }).ToList();
+
+            var customers = await _context.PartnerDetails
+                .Where(d => d.Status == 1 && d.StorageId == debitDto.StorageId)
+                .Join(
+                    _context.Partners,
+                    pd => pd.PartnerId,
+                    p => p.Id,
+                    (pd, p) => new
+                    {
+                        pd.Id,
+                        p.Abbreviation,
+                        p.Name
+                    })
+                .ToListAsync(cancellationToken);
+
+            var rows = new List<CongNoTongHopKHDto>();
+            foreach (var customer in customers)
+            {
+                var service = dataDv.FirstOrDefault(x => x.customer_detail_id == customer.Id);
+                var expense = dataCh.FirstOrDefault(x => x.customer_detail_id == customer.Id);
+                var serviceOpening = dataDvDk.FirstOrDefault(x => x.customer_detail_id == customer.Id);
+                var expenseOpening = dataChDk.FirstOrDefault(x => x.customer_detail_id == customer.Id);
+
+                var debitServiceOpening = serviceOpening?.debit_total ?? 0;
+                var debitExpenseOpening = expenseOpening?.debit_total ?? 0;
+                var receiptServiceOpening = serviceOpening?.receipt_total ?? 0;
+                var receiptExpenseOpening = expenseOpening?.receipt_total ?? 0;
+                var debitServicePeriod = service?.debit_total ?? 0;
+                var debitExpensePeriod = expense?.debit_total ?? 0;
+                var receiptServicePeriod = service?.receipt_total ?? 0;
+                var receiptExpensePeriod = expense?.receipt_total ?? 0;
+
+                if (debitServiceOpening == 0 && debitExpenseOpening == 0 &&
+                    receiptServiceOpening == 0 && receiptExpenseOpening == 0 &&
+                    debitServicePeriod == 0 && debitExpensePeriod == 0 &&
+                    receiptServicePeriod == 0 && receiptExpensePeriod == 0)
+                    continue;
+
+                rows.Add(new CongNoTongHopKHDto
+                {
+                    Id = customer.Id,
+                    Abbreviation = customer.Abbreviation,
+                    Name = customer.Name,
+                    DVDK = debitServiceOpening,
+                    CHDK = debitExpenseOpening,
+                    TTDVDK = receiptServiceOpening,
+                    TTCHDK = receiptExpenseOpening,
+                    DVTK = debitServicePeriod,
+                    CHTK = debitExpensePeriod,
+                    TTDVTK = receiptServicePeriod,
+                    TTCHTK = receiptExpensePeriod,
+                    DVCK = (debitServiceOpening - receiptServiceOpening) + (debitServicePeriod - receiptServicePeriod),
+                    CHCK = (debitExpenseOpening - receiptExpenseOpening) + (debitExpensePeriod - receiptExpensePeriod),
+                    CK = (debitServiceOpening - receiptServiceOpening) + (debitServicePeriod - receiptServicePeriod) +
+                         (debitExpenseOpening - receiptExpenseOpening) + (debitExpensePeriod - receiptExpensePeriod),
+                    OldestUnpaidDebtDate = oldestUnpaidDebtDates.TryGetValue(customer.Id, out var oldestUnpaidDebtDate)
+                        ? oldestUnpaidDebtDate
+                        : (DateTime?)null
+                });
+            }
+
+            return rows;
+        }
+
         [HttpGet("congnotonghopncc")]
         public async Task<IActionResult> GetObjectDebitTongHopNCCAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
         {
@@ -416,6 +639,229 @@ namespace Vudaco.Debits.Controllers
             }
             return ApiResponseResult(true, "Lấy dữ liệu thành công", cnth);
         }
+
+        [HttpGet("excel/congnotonghopncc")]
+        public async Task<IActionResult> ExportCongNoTongHopNCC(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
+        {
+            try
+            {
+                DebitDto = DebitDto ?? new DebitDto();
+                var data = await GetCongNoTongHopNCCExportDataAsync(DebitDto, page, pageSize, cancellationToken);
+
+                using var workbook = new XLWorkbook();
+                var worksheet = workbook.Worksheets.Add("Công nợ tổng hợp NCC");
+                const int columnCount = 15;
+
+                worksheet.Range(1, 1, 1, columnCount).Merge();
+                worksheet.Cell(1, 1).Value = "CÔNG NỢ TỔNG HỢP NHÀ CUNG CẤP";
+                worksheet.Cell(1, 1).Style
+                    .Font.SetBold()
+                    .Font.SetFontSize(16)
+                    .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+                worksheet.Range(2, 1, 2, columnCount).Merge();
+                worksheet.Cell(2, 1).Value = string.Format(
+                    "Kỳ báo cáo: {0} - {1}",
+                    DebitDto.FromDate?.ToString("dd/MM/yyyy") ?? "đầu kỳ",
+                    DebitDto.ToDate?.ToString("dd/MM/yyyy") ?? "hiện tại");
+                worksheet.Cell(2, 1).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+                string[] headers =
+                {
+                    "STT", "Mã nhà cung cấp", "Tên nhà cung cấp",
+                    "Đầu kỳ - Dịch vụ", "Đầu kỳ - Chi hộ",
+                    "Đã thu DV đầu kỳ", "Đã thu chi hộ đầu kỳ",
+                    "Phát sinh - Dịch vụ", "Phát sinh - Chi hộ",
+                    "Đã thu DV trong kỳ", "Đã thu chi hộ trong kỳ",
+                    "Cuối kỳ - Dịch vụ", "Cuối kỳ - Chi hộ", "Tổng cuối kỳ",
+                    "Ngày nợ lâu nhất"
+                };
+                for (int column = 0; column < headers.Length; column++)
+                    worksheet.Cell(4, column + 1).Value = headers[column];
+
+                var headerRange = worksheet.Range(4, 1, 4, columnCount);
+                headerRange.Style.Font.SetBold();
+                headerRange.Style.Fill.SetBackgroundColor(XLColor.LightBlue);
+                headerRange.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+                headerRange.Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
+                headerRange.Style.Alignment.WrapText = true;
+
+                int row = 5;
+                foreach (var item in data)
+                {
+                    worksheet.Cell(row, 1).Value = row - 4;
+                    worksheet.Cell(row, 2).Value = item.Abbreviation ?? "";
+                    worksheet.Cell(row, 3).Value = item.Name ?? "";
+                    worksheet.Cell(row, 4).Value = item.DVDK;
+                    worksheet.Cell(row, 5).Value = item.CHDK;
+                    worksheet.Cell(row, 6).Value = item.TTDVDK;
+                    worksheet.Cell(row, 7).Value = item.TTCHDK;
+                    worksheet.Cell(row, 8).Value = item.DVTK;
+                    worksheet.Cell(row, 9).Value = item.CHTK;
+                    worksheet.Cell(row, 10).Value = item.TTDVTK;
+                    worksheet.Cell(row, 11).Value = item.TTCHTK;
+                    worksheet.Cell(row, 12).Value = item.DVCK;
+                    worksheet.Cell(row, 13).Value = item.CHCK;
+                    worksheet.Cell(row, 14).Value = item.CK;
+                    if (item.OldestUnpaidDebtDate.HasValue)
+                    {
+                        worksheet.Cell(row, 15).Value = item.OldestUnpaidDebtDate.Value;
+                        worksheet.Cell(row, 15).Style.DateFormat.Format = "dd/MM/yyyy";
+                    }
+                    row++;
+                }
+
+                var tableRange = worksheet.Range(4, 1, Math.Max(4, row - 1), columnCount);
+                tableRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                tableRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                if (row > 5)
+                {
+                    worksheet.Range(5, 4, row - 1, 14).Style.NumberFormat.Format = "#,##0;[Red](#,##0);-";
+                    tableRange.SetAutoFilter();
+                }
+
+                worksheet.SheetView.FreezeRows(4);
+                worksheet.Columns(1, columnCount).AdjustToContents();
+                worksheet.Column(3).Width = Math.Min(worksheet.Column(3).Width, 40);
+                worksheet.Row(4).Height = 40;
+
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                return File(
+                    stream.ToArray(),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"CongNoTongHopNCC_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi xuất Excel công nợ tổng hợp nhà cung cấp");
+                return ApiResponseResult<object>(false, "Lỗi xuất Excel công nợ tổng hợp nhà cung cấp: " + ex.Message, null);
+            }
+        }
+
+        private async Task<List<CongNoTongHopNCCDto>> GetCongNoTongHopNCCExportDataAsync(
+            DebitDto debitDto,
+            int page,
+            int pageSize,
+            CancellationToken cancellationToken)
+        {
+            var result = await _repoDebit.GetObjectDebitTongHopNCCAsync(debitDto, page, pageSize, cancellationToken);
+            var data = ((IEnumerable<dynamic>)result.Extra["congnotonghop_ncc"])
+                .Select(x => new
+                {
+                    x.supplier_detail_id,
+                    x.debit_total,
+                    x.receipt_total,
+                    type = (int)x.type
+                }).ToList();
+            var dataDv = data.Where(x => new[] { 0, 1, 4, 7, 10, 12 }.Contains(x.type))
+                .GroupBy(x => x.supplier_detail_id)
+                .Select(g => new
+                {
+                    supplier_detail_id = g.Key,
+                    debit_total = g.Sum(x => x.debit_total),
+                    receipt_total = g.Sum(x => x.receipt_total)
+                }).ToList();
+            var dataCh = data.Where(x => new[] { 2, 3, 11 }.Contains(x.type))
+                .GroupBy(x => x.supplier_detail_id)
+                .Select(g => new
+                {
+                    supplier_detail_id = g.Key,
+                    debit_total = g.Sum(x => x.debit_total),
+                    receipt_total = g.Sum(x => x.receipt_total)
+                }).ToList();
+            var dataDk = ((IEnumerable<dynamic>)result.Extra["congnotonghop_dk_ncc"])
+                .Select(x => new
+                {
+                    x.supplier_detail_id,
+                    x.debit_total,
+                    x.receipt_total,
+                    type = (int)x.type
+                }).ToList();
+            var oldestUnpaidDebtDates = ((IEnumerable<dynamic>)result.Extra["oldest_unpaid_debt_ncc"])
+                .ToDictionary(
+                    x => (int)x.supplier_detail_id,
+                    x => (DateTime)x.oldest_unpaid_debt_date);
+            var dataDvDk = dataDk.Where(x => new[] { 0, 1, 4, 7, 10, 12 }.Contains(x.type))
+                .GroupBy(x => x.supplier_detail_id)
+                .Select(g => new
+                {
+                    supplier_detail_id = g.Key,
+                    debit_total = g.Sum(x => x.debit_total),
+                    receipt_total = g.Sum(x => x.receipt_total)
+                }).ToList();
+            var dataChDk = dataDk.Where(x => new[] { 2, 3, 11 }.Contains(x.type))
+                .GroupBy(x => x.supplier_detail_id)
+                .Select(g => new
+                {
+                    supplier_detail_id = g.Key,
+                    debit_total = g.Sum(x => x.debit_total),
+                    receipt_total = g.Sum(x => x.receipt_total)
+                }).ToList();
+
+            var suppliers = await _context.PartnerDetails
+                .Where(d => d.Status == 2 && d.StorageId == debitDto.StorageId)
+                .Join(
+                    _context.Partners,
+                    pd => pd.PartnerId,
+                    p => p.Id,
+                    (pd, p) => new
+                    {
+                        pd.Id,
+                        p.Abbreviation,
+                        p.Name
+                    })
+                .ToListAsync(cancellationToken);
+
+            var rows = new List<CongNoTongHopNCCDto>();
+            foreach (var supplier in suppliers)
+            {
+                var service = dataDv.FirstOrDefault(x => x.supplier_detail_id == supplier.Id);
+                var expense = dataCh.FirstOrDefault(x => x.supplier_detail_id == supplier.Id);
+                var serviceOpening = dataDvDk.FirstOrDefault(x => x.supplier_detail_id == supplier.Id);
+                var expenseOpening = dataChDk.FirstOrDefault(x => x.supplier_detail_id == supplier.Id);
+
+                var debitServiceOpening = serviceOpening?.debit_total ?? 0;
+                var debitExpenseOpening = expenseOpening?.debit_total ?? 0;
+                var receiptServiceOpening = serviceOpening?.receipt_total ?? 0;
+                var receiptExpenseOpening = expenseOpening?.receipt_total ?? 0;
+                var debitServicePeriod = service?.debit_total ?? 0;
+                var debitExpensePeriod = expense?.debit_total ?? 0;
+                var receiptServicePeriod = service?.receipt_total ?? 0;
+                var receiptExpensePeriod = expense?.receipt_total ?? 0;
+
+                if (debitServiceOpening == 0 && debitExpenseOpening == 0 &&
+                    receiptServiceOpening == 0 && receiptExpenseOpening == 0 &&
+                    debitServicePeriod == 0 && debitExpensePeriod == 0 &&
+                    receiptServicePeriod == 0 && receiptExpensePeriod == 0)
+                    continue;
+
+                rows.Add(new CongNoTongHopNCCDto
+                {
+                    Id = supplier.Id,
+                    Abbreviation = supplier.Abbreviation,
+                    Name = supplier.Name,
+                    DVDK = debitServiceOpening,
+                    CHDK = debitExpenseOpening,
+                    TTDVDK = receiptServiceOpening,
+                    TTCHDK = receiptExpenseOpening,
+                    DVTK = debitServicePeriod,
+                    CHTK = debitExpensePeriod,
+                    TTDVTK = receiptServicePeriod,
+                    TTCHTK = receiptExpensePeriod,
+                    DVCK = (debitServiceOpening - receiptServiceOpening) + (debitServicePeriod - receiptServicePeriod),
+                    CHCK = (debitExpenseOpening - receiptExpenseOpening) + (debitExpensePeriod - receiptExpensePeriod),
+                    CK = (debitServiceOpening - receiptServiceOpening) + (debitServicePeriod - receiptServicePeriod) +
+                         (debitExpenseOpening - receiptExpenseOpening) + (debitExpensePeriod - receiptExpensePeriod),
+                    OldestUnpaidDebtDate = oldestUnpaidDebtDates.TryGetValue(supplier.Id, out var oldestUnpaidDebtDate)
+                        ? oldestUnpaidDebtDate
+                        : (DateTime?)null
+                });
+            }
+
+            return rows;
+        }
+
         [HttpGet("GetObjectDebitChiTietNoBillKHAsync")]
         public async Task<IActionResult> GetObjectDebitChiTietNoBillKHAsync(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 50, [FromQuery] DebitDto DebitDto = null)
         {

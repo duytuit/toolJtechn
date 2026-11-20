@@ -1161,15 +1161,10 @@ namespace Vudaco.ContractFiles.Controllers
                 {
                     return ApiResponseResult<object>(false, "Không tìm thấy dữ liệu", null);
                 }
-                var totalPrice = await _context.FileInfoDetails
-                .Where(f =>
-                    f.FileId == FileInfo.Id &&
-                    f.StorageId == FileInfo.StorageId
-                )
-                .SumAsync(f => f.Price);
-                if (totalPrice > 0)
+                if(FileInfo.ReceiptId != null)
                 {
-                    return ApiResponseResult<object>(false, "Số file này. đã được duyệt ứng: " + totalPrice, null);
+                    var receipt = await _context.Receipts.FindAsync(FileInfo.ReceiptId);
+                    return ApiResponseResult<object>(false, "File này đã được duyệt ứng: " + receipt.CodeReceipt, null);
                 }
                 var FileInfoDetails = await _context.FileInfoDetails.Where(x => x.FileId == FileInfoDto.Id).ToListAsync();
               

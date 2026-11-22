@@ -1,4 +1,4 @@
-﻿
+
 namespace asyncDataSoltec
 {
     partial class Form1
@@ -54,7 +54,7 @@ namespace asyncDataSoltec
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(487, 25);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Chú ý: Hãy Thu Nhỏ, Không đượt tắt. Nếu tắt thì mở lại:";
+            this.label1.Text = "Chu y: Hay Thu Nh?, Khong ???t t?t. N?u t?t thi m? l?i:";
             // 
             // pictureBox1
             // 
@@ -68,12 +68,12 @@ namespace asyncDataSoltec
             // timer1
             // 
             this.timer1.Enabled = true;
-            this.timer1.Interval = 1800000;
+            this.timer1.Interval = 3600000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // timer2
             // 
-            this.timer2.Enabled = true;
+            this.timer2.Enabled = false;
             this.timer2.Interval = 900000;
             this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
             // 
@@ -93,7 +93,7 @@ namespace asyncDataSoltec
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(402, 25);
             this.label2.TabIndex = 3;
-            this.label2.Text = "Icon ở ngoài desktop giống hình bên cạnh =>";
+            this.label2.Text = "Icon ? ngoai desktop gi?ng hinh ben c?nh =>";
             // 
             // label3
             // 
@@ -104,7 +104,7 @@ namespace asyncDataSoltec
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(226, 25);
             this.label3.TabIndex = 4;
-            this.label3.Text = "Dữ liệu tự đồng bộ lúc 8h";
+            this.label3.Text = "D? li?u t? ??ng b? luc 7h";
             this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // timer3
@@ -170,4 +170,5 @@ namespace asyncDataSoltec
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
     }
 }
+
 

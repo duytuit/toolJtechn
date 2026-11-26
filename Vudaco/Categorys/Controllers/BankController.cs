@@ -47,7 +47,7 @@ namespace Vudaco.Categorys.Controllers
             // CHECK TRÙNG AccountNumber (trừ chính nó khi update)
             var existed = await _context.Banks
                 .FirstOrDefaultAsync(x => 
-                    x.AccountNumber == bankDto.AccountNumber 
+                    x.AccountNumber == bankDto.AccountNumber && x.StorageId == bankDto.StorageId
                     && x.Id != bankDto.Id);
 
             if (existed != null)

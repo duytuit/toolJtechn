@@ -598,13 +598,20 @@ namespace WindowsFormsApp5
             public int GetMatchPriority(string senban, string wire, string terminalA, string terminalB, string sleeveA, string sleeveB)
             {
                 var order = GetConditionOrder();
-                if (HasPairedTerminalSleeveConditions &&
-                    !((ContainsCode(tanshi, terminalA) && ContainsCode(gom, sleeveA)) ||
-                      (ContainsCode(tanshi, terminalB) && ContainsCode(gom, sleeveB))))
-                    return -1;
+                var hasPairedConditions = HasPairedTerminalSleeveConditions;
+                if (hasPairedConditions)
+                {
+                    var hasPairA = IsPartCode(NormalizeCode(terminalA)) && IsPartCode(NormalizeCode(sleeveA));
+                    if (!hasPairA)
+                    {
+                        terminalA = terminalB;
+                        sleeveA = sleeveB;
+                    }
+                    terminalB = null;
+                    sleeveB = null;
+                }
 
-                var hasCondition = false;
-                var matchesAllConditions = true;
+                var firstMatchPriority = -1;
                 for (int priority = 0; priority < order.Count; priority++)
                 {
                     List<string> codes;
@@ -639,44 +646,19 @@ namespace WindowsFormsApp5
                             continue;
                     }
 
-                    if (codes == null || !codes.Any(code => !string.IsNullOrWhiteSpace(code)))
+                    if (!HasCodes(codes))
                         continue;
 
-                    hasCondition = true;
                     var matched = partialMatch
                         ? ContainsPartialCode(codes, valueA)
                         : ContainsCode(codes, valueA) || ContainsCode(codes, valueB);
                     if (!matched)
-                        matchesAllConditions = false;
+                        return -1;
+                    if (firstMatchPriority < 0)
+                        firstMatchPriority = priority;
                 }
 
-                if (!hasCondition || !matchesAllConditions)
-                    return -1;
-
-                for (int priority = 0; priority < order.Count; priority++)
-                {
-                    switch (order[priority])
-                    {
-                        case "loai_day":
-                            if (ContainsPartialCode(loai_day, wire))
-                                return priority;
-                            break;
-                        case "tanshi":
-                            if (ContainsCode(tanshi, terminalA) || ContainsCode(tanshi, terminalB))
-                                return priority;
-                            break;
-                        case "gom":
-                            if (ContainsCode(gom, sleeveA) || ContainsCode(gom, sleeveB))
-                                return priority;
-                            break;
-                        case "soday":
-                            if (ContainsPartialCode(soday, senban))
-                                return priority;
-                            break;
-                    }
-                }
-
-                return -1;
+                return firstMatchPriority;
             }
 
             private static bool HasCodes(List<string> codes)
@@ -697,8 +679,13 @@ namespace WindowsFormsApp5
             private static bool ContainsCode(List<string> codes, string value)
             {
                 var normalized = NormalizeCode(value);
-                return normalized.Length > 0 && codes != null &&
+                return IsPartCode(normalized) && codes != null &&
                     codes.Any(code => NormalizeCode(code) == normalized);
+            }
+
+            private static bool IsPartCode(string normalized)
+            {
+                return normalized.Length > 0 && normalized != "-";
             }
 
             private static string NormalizeCode(string value)

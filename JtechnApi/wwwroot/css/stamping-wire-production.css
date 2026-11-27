@@ -473,43 +473,37 @@ h1 { font-size: clamp(16px,1.23vw,25px); letter-spacing: -.025em; }
 :root[data-theme="dark"] .cut-details { background: #163d59; }
 :root[data-theme="dark"] .cut-details strong { color: #edf5ff; }
 
-.cut-production-dashboard .machine-card { grid-template-rows: minmax(34px, auto) minmax(82px, 1fr) minmax(48px, .55fr); }
-.cut-production-dashboard .card-head { align-items: center; gap: 8px; padding-bottom: 4px; }
+:is(.cut-production-dashboard, .stamping-wire-dashboard) .machine-card { grid-template-rows: minmax(32px, auto) minmax(84px, 1fr) minmax(44px, .45fr); }
+:is(.cut-production-dashboard, .stamping-wire-dashboard) .card-head { align-items: center; gap: 6px; padding-bottom: 0; }
 .cut-production-dashboard .machine-title { flex: 1 1 0; gap: 8px; }
 .cut-production-dashboard .machine-name { min-width: 0; }
 .cut-production-dashboard .badge { flex: 0 1 auto; max-width: 46%; padding: 4px 8px; text-align: center; line-height: 1.1; white-space: nowrap; }
 .cut-production-dashboard .machine-card .bilingual-label { flex-direction: row; align-items: baseline; gap: 3px; white-space: nowrap; }
-.cut-production-dashboard .quantity-block { grid-template-rows: minmax(58px, 1fr) 23px; align-content: stretch; gap: 6px; }
-.cut-production-dashboard .quantity { align-items: stretch; gap: 7px; }
-.cut-production-dashboard .quantity-stat { min-height: 0; gap: 3px; padding: 4px 6px; }
-.cut-production-dashboard .quantity-actual { flex: 0 1 35%; }
-.cut-production-dashboard .quantity-target { flex: 1 1 65%; }
+:is(.cut-production-dashboard, .stamping-wire-dashboard) .quantity-block { grid-template-rows: minmax(58px, 1fr) 23px; align-content: stretch; gap: 4px; padding: 0; }
+:is(.cut-production-dashboard, .stamping-wire-dashboard) .quantity { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 7fr); align-self: stretch; align-items: stretch; gap: 5px; padding: 0; }
+:is(.cut-production-dashboard, .stamping-wire-dashboard) .quantity-stat { min-height: 0; gap: 2px; padding: 3px 4px; }
 .cut-production-dashboard .quantity-label { font-size: 10px; }
 .cut-production-dashboard .quantity-label [lang="ja"] { font-size: 11px; }
 .cut-production-dashboard .quantity-label [lang="vi"] { font-size: 9px; }
-.cut-production-dashboard .quantity-targets { flex: 1 1 auto; align-items: center; }
-.cut-production-dashboard .quantity-targets > span { gap: 2px; }
-
-@media (min-width: 1301px) and (max-height: 700px) {
-    .cut-production-dashboard .machine-card { grid-template-rows: minmax(30px, auto) minmax(74px, 1fr) minmax(44px, .5fr); }
-    .cut-production-dashboard .quantity-block { grid-template-rows: minmax(52px, 1fr) 18px; }
-    .cut-production-dashboard .quantity-progress { height: 18px; }
-}
+:is(.cut-production-dashboard, .stamping-wire-dashboard) .quantity-targets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+:is(.cut-production-dashboard, .stamping-wire-dashboard) .quantity-targets > span { gap: 1px; }
+:is(.cut-production-dashboard, .stamping-wire-dashboard) .quantity-targets > span + span { border-inline-start: 1px solid var(--line); }
+:is(.cut-production-dashboard, .stamping-wire-dashboard) .quantity-targets small { line-height: 1.15; }
+:is(.cut-production-dashboard, .stamping-wire-dashboard) .quantity-targets strong { font-size: clamp(20px, 1.5vw, 28px); line-height: 1.1; }
 
 @media (min-width: 1301px) and (max-height: 800px) {
-    .cut-production-dashboard .machine-card { grid-template-rows: minmax(28px, auto) minmax(76px, 1fr) minmax(42px, .6fr); gap: 3px; padding: 5px 7px; }
-    .cut-production-dashboard .machine-icon { width: 26px; height: 26px; flex-basis: 26px; }
-    .cut-production-dashboard .machine-icon .ui-icon { width: 22px; height: 22px; }
-    .cut-production-dashboard .quantity-block { grid-template-rows: minmax(52px, 1fr) 18px; gap: 4px; }
-    .cut-production-dashboard .quantity-progress { height: 18px; }
-    .cut-production-dashboard .quantity-targets { gap: 4px; }
-    .cut-production-dashboard .quantity-targets small { font-size: 8px; }
-    .cut-production-dashboard .quantity-targets strong { font-size: 16px; }
-    .cut-production-dashboard .quantity-actual strong { font-size: 19px; }
-    .cut-production-dashboard .checkpoints { gap: 2px; padding: 2px; }
-    .cut-production-dashboard .checkpoint { gap: 1px; padding: 2px 1px; }
-    .cut-production-dashboard .checkpoint-time,
-    .cut-production-dashboard .checkpoint-value { font-size: 10px; }
+    :is(.cut-production-dashboard, .stamping-wire-dashboard) .machine-card { grid-template-rows: minmax(28px, auto) minmax(76px, 1fr) minmax(42px, .6fr); gap: 3px; padding: 5px 7px; }
+    :is(.cut-production-dashboard, .stamping-wire-dashboard) .machine-icon { width: 26px; height: 26px; flex-basis: 26px; }
+    :is(.cut-production-dashboard, .stamping-wire-dashboard) .machine-icon .ui-icon { width: 22px; height: 22px; }
+    :is(.cut-production-dashboard, .stamping-wire-dashboard) .quantity-block { grid-template-rows: minmax(54px, 1fr) 18px; gap: 4px; }
+    :is(.cut-production-dashboard, .stamping-wire-dashboard) .quantity-progress { height: 18px; }
+    :is(.cut-production-dashboard, .stamping-wire-dashboard) .quantity-targets small { font-size: 8px; }
+    :is(.cut-production-dashboard, .stamping-wire-dashboard) .quantity-targets strong { font-size: clamp(20px, 1.4vw, 24px); }
+    :is(.cut-production-dashboard, .stamping-wire-dashboard) .quantity-actual strong { font-size: 19px; }
+    :is(.cut-production-dashboard, .stamping-wire-dashboard) .checkpoints { gap: 2px; padding: 2px; }
+    :is(.cut-production-dashboard, .stamping-wire-dashboard) .checkpoint { gap: 1px; padding: 2px 1px; }
+    :is(.cut-production-dashboard, .stamping-wire-dashboard) .checkpoint-time,
+    :is(.cut-production-dashboard, .stamping-wire-dashboard) .checkpoint-value { font-size: 10px; }
 }
 
 @media (min-width: 701px) and (max-width: 1300px) {
@@ -526,31 +520,11 @@ h1 { font-size: clamp(16px,1.23vw,25px); letter-spacing: -.025em; }
     .cut-production-dashboard .machine-card { grid-template-rows: 28px minmax(52px, 1fr) 42px; }
 }
 
-.stamping-wire-dashboard .machine-card { grid-template-rows: minmax(32px, auto) minmax(82px, 1fr) minmax(48px, .55fr); }
-.stamping-wire-dashboard .quantity-block { grid-template-rows: minmax(58px, 1fr) 23px; align-content: stretch; gap: 6px; }
-.stamping-wire-dashboard .quantity-stat { min-height: 0; gap: 3px; padding: 4px 6px; }
-
 @media (min-width: 701px) and (max-width: 1300px) {
     .stamping-wire-dashboard .machines { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, 190px); grid-auto-rows: 190px; }
     .stamping-wire-dashboard .machine-card { grid-template-rows: minmax(32px, auto) minmax(76px, 1fr) minmax(48px, .55fr); }
     .stamping-wire-dashboard .checkpoint { gap: 0; padding: 1px; }
     .stamping-wire-dashboard .checkpoint-value { font-size: 10px; line-height: 1.05; }
-}
-
-@media (min-width: 1301px) and (max-height: 800px) {
-    .stamping-wire-dashboard .machine-card { grid-template-rows: minmax(28px, auto) minmax(76px, 1fr) minmax(42px, .6fr); gap: 3px; padding: 5px 7px; }
-    .stamping-wire-dashboard .machine-icon { width: 26px; height: 26px; flex-basis: 26px; }
-    .stamping-wire-dashboard .machine-icon .ui-icon { width: 22px; height: 22px; }
-    .stamping-wire-dashboard .quantity-block { grid-template-rows: minmax(52px, 1fr) 18px; gap: 4px; }
-    .stamping-wire-dashboard .quantity-progress { height: 18px; }
-    .stamping-wire-dashboard .quantity-targets { gap: 4px; }
-    .stamping-wire-dashboard .quantity-targets small { font-size: 8px; }
-    .stamping-wire-dashboard .quantity-targets strong { font-size: 16px; }
-    .stamping-wire-dashboard .quantity-actual strong { font-size: 19px; }
-    .stamping-wire-dashboard .checkpoints { gap: 2px; padding: 2px; }
-    .stamping-wire-dashboard .checkpoint { gap: 1px; padding: 2px 1px; }
-    .stamping-wire-dashboard .checkpoint-time,
-    .stamping-wire-dashboard .checkpoint-value { font-size: 10px; }
 }
 
 @media (min-width: 1301px) and (max-height: 700px) {

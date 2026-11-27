@@ -60,6 +60,7 @@ body { overflow: auto; }
 .summary-target { color: var(--actual); }
 .summary-actual { color: var(--target); }
 .summary-status { display: inline-block; border-radius: 24px; padding: 7px 9px; background: var(--neutral-soft); color: var(--muted); font-size: 12px; font-weight: 700; }
+.summary-status-failed { background: #b91c1c; color: #fff; }
 .summary-note { margin-top: 28px; border: 1px solid #d2e2fb; border-radius: 13px; background: linear-gradient(120deg,#f8fbff,#ecf3ff); padding: 16px; font-size: 16px; line-height: 1.65; }
 .summary-note h3 { margin: 0; color: #006bd7; font-size: 18px; }
 .summary-note ul { margin: 2px 0 0; padding-left: 34px; }
